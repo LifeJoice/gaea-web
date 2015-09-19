@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<!--
+Iverson 2014-4-30 Create
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="../js/framework/jquery/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <!--        
+        <script src="../js/framework/jquery/jquery-ui-custom/js/jquery-ui-1.10.4.custom.min.js" type="text/javascript"></script>
+        <link href="../js/framework/jquery/jquery-ui-custom/css/custom-theme/jquery-ui-1.10.4.custom.min.css" rel="stylesheet" type="text/css"/>
+                -->
+        <script src="../easyui/jquery.easyui.min.js" type="text/javascript"></script>
+        <!--<link href="../easyui/themes/icon.css" rel="stylesheet" type="text/css"/>-->
+        <link href="../easyui/themes/metro/easyui.css" rel="stylesheet" type="text/css"/>
+        <script src="../js/jquery.serializeObject.js" type="text/javascript"></script>
+        <script src="../js/common_util.js" type="text/javascript"></script>
+        <script src="../js/common_manage.js" type="text/javascript"></script>
+        <script>
+            // 命名空间
+            var product = {};
+            product.common = {};
+            product.editingId = undefined;
+//            product.listAction = jxtech.pgcproject.WEBROOT + "/lcam/project/productListAction.do";
+//            product.editAction = jxtech.pgcproject.WEBROOT + "/lcam/project/productMultiOperateAction.do";
+//            product.queryAction = jxtech.pgcproject.WEBROOT + "/lcam/project/productQueryAction.do";
+            product.url = {
+                ajax: {
+                    list: "/product/list-all.do",
+                    save: "/product/save.do"
+                }
+            }
+//            product.WORKFLOW_ID = ""; // 值在jsp页面初始化
+            product.changeFlag = false;  // 标识页面是否有输入,以确定是否提醒用户保存等
+            product.idSelector = "input[name='productId']";
+            $(function() {
+                if ($("#tb-product").length > 0) {
+                    product.initTable();
+                }
+            });
+
+            product.initTable = function() {
+                var reqUrl = product.url.ajax.list;
+//    alert("initTable");
+                $('#tb-product').datagrid({
+                    url: reqUrl,
+                    rownumbers: "true",
+                    singleSelect: "true",
+                    idField: 'productId',
+//                    treeField: 'name',
+//        pagination:true,   // 分页。太复杂。待实现。
+                    columns: [
+                        [
+                            {field: 'name', title: '产品名称', width: 100},
+                            {field: 'description', title: '产品描述', width: 100},
+                            {field: 'status', title: '产品状态', width: 100},
+                            {field: 'lastPrice', title: '最新价格', width: 100}
+                        ]
+                    ],
+                    onBeforeLoad: function(row, param) { // 加载前处理子节点
+//                        if (row) {
+//                            $(this).treegrid('options').url = reqUrl + '&parentId=' + row.id;
+//                        }
+                    },
+                    onDblClickCell: function(index, field, value) { // 双击即编辑
+//                        product.edit();
+                    }
+                });
+            }
+//            product.edit = function() {
+//                // 如果有正在编辑未保存的，切换回正在编辑的
+//                if (product.editingId != undefined) {
+//                    $('#tb-product').treegrid('select', product.editingId);
+//                    return;
+//                }
+//                var row = $('#tb-product').treegrid('getSelected');
+//                if (row) {
+//                    product.editingId = row.id;
+//                    $('#tb-product').treegrid('beginEdit', product.editingId);
+//                }
+//            }
+//            /**
+//             * 行编辑保存。保存产品明细表
+//             */
+//            product.save = function() {
+//                if (product.editingId != undefined) {
+//                    var t = $('#tb-product');
+//                    t.treegrid('endEdit', product.editingId);
+//                    product.editingId = undefined;
+//                    var row = $('#tb-product').treegrid('getSelected');
+////        alert("id="+row.id+"\n计划开始时间： " + row.begin + "\n计划结束时间： " + row.end + "\n调整结束时间: " + row.adjustPlanFinishDate);
+////        alert(row.strAdjustStatus);
+////        row.strAdjustStatus = "已调整";
+//                    jxtech.util.ajax.post(product.url.ajax.save, {
+//                        id: row.id
+//                    }, function(data) {
+//                        if (data.success) {
+//                            // reload
+//                            $('#tb-product').treegrid({
+//                                url: product.url.ajax.list
+//                            });
+//                            alert("保存成功！");
+//                        }
+//                    });
+//                }
+//            }
+//            product.cancel = function() {
+//                if (product.editingId != undefined) {
+//                    $('#tb-product').treegrid('cancelEdit', product.editingId);
+//                    product.editingId = undefined;
+//                }
+//            }
+//----------------------------------------------------- JQuery UI -----------------------------------------------------
+            $(function() {
+                $("#div-add-form").dialog({
+                    title: '新增产品',
+                    width: 400,
+                    height: 200,
+                    closed: true,
+//                    cache: false,
+//                    href: 'get_content.php',
+                    modal: true,
+                    buttons: [{
+                            text: "保存",
+                            handler: function() {
+                                save();
+                            }
+                        }, {
+                            text: "取消",
+                            handler: function() {
+                                $("#div-add-form").dialog("close");
+                            }}]
+                });
+            });
+// ----------------------------------------------------- JQuery UI -----------------------------------------------------
+            $(function() {
+//                $("#div-add-form").dialog({
+//                    autoOpen: false,
+//                    resizable: false,
+//                    buttons: {
+//                        "保存": function() {
+//                            $(this).dialog("close");
+//                        },
+//                        "取消": function() {
+//                            $(this).dialog("close");
+//                        }
+//                    }
+//                });
+//                // test 2
+//                $("#div-add-form").dialog({
+//                    autoOpen: false,
+//                    resizable: false,
+////                    height: 140,
+//                    modal: true,
+//                    buttons: {
+//                        "保存": function() {
+//                            $(this).dialog("close");
+//                        },
+//                        "取消": function() {
+//                            $(this).dialog("close");
+//                        }
+//                    }
+//                });
+                $("#new_button").click(function() {
+                    ur.util.clearAll($("#add-form").get(0));
+                    $("#div-add-form").dialog({
+                        title: "新增产品",
+                        buttons: [{
+                                text: "保存",
+                                handler: function() {
+                                    save();
+                                }
+                            }, {
+                                text: "取消",
+                                handler: function() {
+                                    $("#div-add-form").dialog("close");
+                                }}]
+                    });
+                    $("#div-add-form").dialog("open");
+                });
+                // 更新
+                $("#update_button").click(function() {
+//                    $("#div-add-form").dialog("setTitle", "修改产品");
+                    $("#div-add-form").dialog({
+                        title: "修改产品",
+                        buttons: [{
+                                text: "保存",
+                                handler: function() {
+                                    update();
+                                }
+                            }, {
+                                text: "取消",
+                                handler: function() {
+                                    $("#div-add-form").dialog("close");
+                                }}]});
+                    var record = $('#tb-product').datagrid('getSelected');
+                    $("#productId").val(record.productId);
+                    $("#name").val(record.name);
+                    $("#description").val(record.description);
+                    $("#status").val(record.status);
+                    $("#lastPrice").val(record.lastPrice);
+                    $("#div-add-form").dialog("open");
+                });
+                // 删除
+                $("#del_button").click(function() {
+                    var record = $('#tb-product').datagrid('getSelected');
+                    del(record.productId);
+                });
+            });
+// ----------------------------------------------------- CRUD Function -----------------------------------------------------
+            function successCallback() {
+                $("#tb-product").datagrid("reload");
+                $("#div-add-form").dialog("close");
+            }
+            function failCallback() {
+                $("#div-add-form").dialog("close");
+            }
+        </script>
+    </head>
+    <body>
+        <div>
+            <div><h2>easyUI 产品管理</h2></div>
+            <div>
+                <input type="button" id="new_button" value="新增">
+                <input type="button" id="update_button" value="修改">
+                <input type="button" id="del_button" value="删除">
+            </div>
+            <div>
+                <table id="tb-product" title="产品明细表列表" style="height: 264px">
+                </table>
+            </div>
+            <div id="div-add-form">
+                <form name="add-form" id="add-form">
+                    <input type="hidden" id="productId" name="productId" value="">
+                    <table>
+                        <tr>
+                            <td>产品名称：</td><td><input type="text" id="name" name="name"></td>
+                        </tr>
+                        <tr>
+                            <td>产品描述：</td><td><input type="text" id="description" name="description"></td>
+                        </tr>
+                        <tr>
+                            <td>产品状态：</td>
+                            <td>
+                                <select id="status" name="status">
+                                    <option value="0">无效</option>
+                                    <option value="1" selected="selected">有效</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>价格：</td><td><input type="text" id="lastPrice" name="lastPrice"></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+
+    </body>
+</html>

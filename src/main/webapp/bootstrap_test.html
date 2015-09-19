@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Le styles -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link type="text/css" href="css/jquery-ui-1.10.0.custom.css" rel="stylesheet" />
+        <link type="text/css" href="css/font-awesome.min.css" rel="stylesheet" />
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="assets/css/font-awesome-ie7.min.css">
+        <![endif]-->
+        <!--[if lt IE 9]>
+        <link rel="stylesheet" type="text/css" href="css/custom-theme/jquery.ui.1.10.0.ie.css"/>
+        <![endif]-->
+        <link href="assets/css/docs.css" rel="stylesheet">
+        <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <!-- Le fav and touch icons -->
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+        <link rel="shortcut icon" href="assets/ico/favicon.png">
+        <script src="js/framework/jquery/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="js/framework/jquery/jquery-ui-custom/js/jquery-ui-1.10.4.custom.js" type="text/javascript"></script>
+        <script>
+            $(function() {
+                $(".button").button();
+                ////////// 弹出框 ////////////
+                $("#dialog").dialog({
+                    autoOpen: false,
+                    width: 600,
+                    buttons: {
+                        "确认": function() {
+                            $(this).dialog("close");
+                        },
+                        "取消": function() {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+                $("#open-dlg").click(function(){
+                    $("#dialog").dialog("open");
+                    return false;
+                })
+            });
+        </script>
+        <style>
+            div.chapter{
+                border-bottom: 1px solid #f6931f;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+                font:32px sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div><h2>JQuery UI Bootstrap测试</h2></div>
+        <div style="margin: 100px">
+            <div class="chapter">按钮</div>
+            <input type="button" class="button" value="提交" />
+            <input type="button" class="button ui-button-primary" value="Primary" />
+            <input type="button" class="button ui-button-success" value="Success" />
+        </div>
+        <div style="margin: 100px">
+            <div class="chapter">弹出框</div>
+            <input id="open-dlg" type="button" class="button ui-button-success" value="提示" />
+            <div id="dialog" title="提示框">这是个很重要的提示。</div>
+        </div>
+    </body>
+</html>

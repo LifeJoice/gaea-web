@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- was: <?xml version="1.0" encoding="UTF-8"?> -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+          p:location="/WEB-INF/jdbc.properties" />
+    <!-- 数据源，用的是Spring -->
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+          p:driverClassName="${jdbc.driverClassName}"
+          p:url="${jdbc.url}"
+          p:username="${jdbc.username}"
+          p:password="${jdbc.password}" />
+
+    <!-- 配置SessionFactory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="hibernateProperties">
+            <props>
+                <!--A dialect for Microsoft SQL Server 2008 with JDBC Driver 3.0 and above-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop>
+                <!-- A dialect for Microsoft SQL Server 2000 and 2005 -->
+                <!--<prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>-->
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+            </props>
+        </property>
+        <!--
+        <property name="annotatedClasses">：可以用于实体类加载，但必须一个个写清楚。
+        <property name=" annotatedPackages">：这个具有另外含义，不可以用于加载指定包下的所有实体类。
+        -->
+        <property name="packagesToScan">
+            <list>
+                <!--
+                这样的写法是错误的，无法搜寻和注册到实体类：
+                <value>iverson.test.*</value>
+                -->
+                <value>iverson.test</value>
+                <value>com.ur.qr.**.entity</value>
+            </list>
+        </property>
+    </bean>
+    <!-- ADD PERSISTENCE SUPPORT HERE (jpa, hibernate, etc) -->
+    <!-- 启动注入功能 -->
+    <context:annotation-config />
+    <!-- 注解扫描。扫描特定包下的注解。 -->
+    <context:component-scan base-package="iverson.test,com.ur" />
+    <!-- 启动注解实物配置功能 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <!-- 事务管理器 -->
+    <!--
+    因为要结合Hibernate，不可以这么用：
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    这估计是跟JDBC结合的使用方式。
+    -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <!-- Spring MVC的注解启用。诸如@RequestMapping之类的依赖于此。但在dispatcher-servlet.xml中的配置不影响。 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <!--
+        将StringHttpMessageConverter的默认编码设为UTF-8。
+        意义：
+        直接在web.xml中设置filter似乎解决不了Controller返回string的乱码。而这种配置可以解决以下这种的乱码：
+        return new ResponseEntity<String>("{\"RESULT_MSG\":\"更新成功。\"}",HttpStatus.OK);
+            -->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <!--以下objectMapper，修正：
+            在Controller层返回的对象有级联对象（通过OneToMany等，如子对象），
+            导致Jackson触发lazy加载但又获取不到session而出错。-->
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="com.ur.framework.jackson.databind.HibernateAwareObjectMapper" />
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--不需要配置jacksonMessageConverter。Spring4已经内置了。-->
+    <!--<mvc:annotation-driven >-->
+    <!--这种方式初步判断没什么作用。会出现“406 Not Acceptable”错误-->
+    <!--        <mvc:message-converters register-defaults="false">
+        <bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+    </mvc:message-converters>-->
+    <!--</mvc:annotation-driven>-->
+
+
+    <!--JSon Setting-->
+    <!--这个初步判断也没什么用-->
+    <!--Spring 3.1后需要用RequestMappingHandlerAdapter-->
+    <!--    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                最最重要的是这个“MappingJackson2HttpMessageConverter”。否则连返回字符串也得无法成功。
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>application/json;charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+                返回Spring 乱码 主要是默认的 String Converter 编码是 ISO-8859-1 (按需要修改这里面的配置)
+                                <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/plain;charset=UTF-8</value>
+                        </list>
+                    </property>
+                    <property name="writeAcceptCharset" value="true"/>
+                </bean>
+            </list>
+        </property>
+    </bean>-->
+    <!--<bean id="genericExceptionResolver" class="com.ur.framework.exception.GenericExceptionResolver"></bean>-->
+    <!--增加多AOP注解的扫描。例如，针对：@Aspect...-->
+    <aop:aspectj-autoproxy/>
+    <!--<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />-->
+</beans>

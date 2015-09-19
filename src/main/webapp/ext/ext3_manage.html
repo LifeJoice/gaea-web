@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="../js/framework/jquery/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="../extjs3/ext-base-debug.js" type="text/javascript"></script>
+        <script src="../extjs3/ext-all-debug.js" type="text/javascript"></script>
+        <link href="../extjs3/css/ext-all.css" rel="stylesheet" type="text/css"/>
+        <script src="../js/jquery.serializeObject.js" type="text/javascript"></script>
+        <script src="../js/ur/framework/ur-common.js" type="text/javascript"></script>
+        <script src="../js/ur/framework/ur-common-utils.js" type="text/javascript"></script>
+        <script src="../js/ur/framework/ur-component.js" type="text/javascript"></script>
+        <script src="../js/ur/framework/ur-ext3-bridge.js" type="text/javascript"></script>
+        <script src="ext3_manage.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div>
+            <div><h2>ExtJs 3 产品管理</h2></div>
+            <div>
+                <div id="tool-bar">
+                </div>
+                <div id="gridDemo"></div>
+            </div>
+            <div id="mypanel"></div>
+            <div id="div-add-form" class="x-hidden">
+                <form name="add-form" id="add-form">
+                    <input type="hidden" id="productId" name="productId" value="">
+                    <table>
+                        <tr>
+                            <td>产品名称：</td><td><input type="text" id="name" name="name"></td>
+                        </tr>
+                        <tr>
+                            <td>产品描述：</td><td><input type="text" id="description" name="description"></td>
+                        </tr>
+                        <tr>
+                            <td>产品状态：</td>
+                            <td>
+                                <select id="status" name="status">
+                                    <option value="0">无效</option>
+                                    <option value="1" selected="selected">有效</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>价格：</td><td><input type="text" id="lastPrice" name="lastPrice"></td>
+                        </tr>
+                        <tr>
+                            <td>创建日期：</td><td><div id="div-create-time"></div></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

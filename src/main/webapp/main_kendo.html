@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="js/framework/jquery/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="js/framework/jquery/jquery-ui-custom/js/jquery-ui-1.10.4.custom.min.js" type="text/javascript"></script>
+        <link href="js/framework/jquery/jquery-ui-custom/css/custom-theme/jquery-ui-1.10.4.custom.min.css" rel="stylesheet" type="text/css"/>
+        <script src="js/framework/jquery/plugins/jnotify/jquery.jnotify.js" type="text/javascript"></script>
+        <link href="js/framework/jquery/plugins/jnotify/jquery.jnotify.css" rel="stylesheet" type="text/css"/>
+        <!--kendo framework-->
+        <script src="kendo/kendo.all.min.js" type="text/javascript"></script>
+        <link href="kendo/style/kendo.common.min.css" rel="stylesheet" type="text/css"/>
+        <link href="kendo/style/kendo.bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="main_kendo.css" rel="stylesheet" type="text/css"/>
+        <script>
+            $(function() {
+                $("#menu").kendoMenu({
+                    select: function(e) {
+
+                    }
+                });
+                $("#menu span").click(function() {
+//                    console.log("in");
+                    var link = $(this).data("link");
+//                    console.log(link);
+                    $("#content_iframe").attr("src", link);
+                });
+                initNotification();
+            });
+
+            function initNotification() {
+                // For jNotify Inizialization
+                // Parameter:
+                // oneAtTime : true if you want show only one message for time
+                // appendType: 'prepend' if you want to add message on the top of stack, 'append' otherwise
+//    $('#StatusBar').jnotifyInizialize({
+//        oneAtTime: true
+//    })
+                $('#div_notification')
+                        .jnotifyInizialize({
+                            oneAtTime: false,
+                            appendType: 'append'
+                        })
+                        .css({'position': 'absolute',
+//                            'marginTop': '20px',
+                            'right': '20px',
+                            "bottom":"10px",
+                            'width': '250px',
+                            'z-index': '9999'
+                        });
+            }
+            
+            function warn(msg){
+                $('#div_notification').jnotifyAddMessage({
+                    text: msg,
+                    permanent: false
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="bd">
+            <div id="header">
+                <ul id="menu">
+                    <li><span data-link="ext_manage.html">ExtJS</span></li>
+                    <li><span data-link="ext/ext3_manage.html">ExtJS 3</span></li>
+                    <li>
+                        JQuery
+                        <ul>
+                            <li>
+                                Kendo UI
+                                <ul>
+                                    <li><span data-link="kendo_manage.html">产品管理</span></li>
+                                </ul>
+                            </li>
+                            <li>
+                                easyUI
+                                <ul>
+                                    <li><span data-link="easyui-manage/manage.html">产品管理</span></li>
+                                </ul>
+                            </li>
+                            <li>
+                                JQuery UI
+                                <ul>
+                                    <li><span data-link="jqgrid-manage/jq_manage.html">产品管理</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div id="content">
+                <iframe id="content_iframe" src=""></iframe>
+            </div>
+            <div id="div_notification"></div>
+        </div>
+    </body>
+</html>
