@@ -7,9 +7,11 @@
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+                http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/context
@@ -27,39 +29,39 @@
           p:password="${jdbc.password}" />
 
     <!-- 配置SessionFactory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-        <property name="hibernateProperties">
-            <props>
-                <!--A dialect for Microsoft SQL Server 2008 with JDBC Driver 3.0 and above-->
-                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop>
-                <!-- A dialect for Microsoft SQL Server 2000 and 2005 -->
-                <!--<prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>-->
-                <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.show_sql">true</prop>
-                <prop key="hibernate.format_sql">true</prop>
-            </props>
-        </property>
-        <!--
-        <property name="annotatedClasses">：可以用于实体类加载，但必须一个个写清楚。
-        <property name=" annotatedPackages">：这个具有另外含义，不可以用于加载指定包下的所有实体类。
-        -->
-        <property name="packagesToScan">
-            <list>
-                <!--
-                这样的写法是错误的，无法搜寻和注册到实体类：
-                <value>iverson.test.*</value>
-                -->
-                <value>iverson.test</value>
-                <value>com.ur.qr.**.entity</value>
-            </list>
-        </property>
-    </bean>
+    <!--<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">-->
+        <!--<property name="dataSource" ref="dataSource" />-->
+        <!--<property name="hibernateProperties">-->
+            <!--<props>-->
+                <!--&lt;!&ndash;A dialect for Microsoft SQL Server 2008 with JDBC Driver 3.0 and above&ndash;&gt;-->
+                <!--<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>-->
+                <!--&lt;!&ndash; A dialect for Microsoft SQL Server 2000 and 2005 &ndash;&gt;-->
+                <!--&lt;!&ndash;<prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>&ndash;&gt;-->
+                <!--<prop key="hibernate.hbm2ddl.auto">update</prop>-->
+                <!--<prop key="hibernate.show_sql">true</prop>-->
+                <!--<prop key="hibernate.format_sql">true</prop>-->
+            <!--</props>-->
+        <!--</property>-->
+        <!--&lt;!&ndash;-->
+        <!--<property name="annotatedClasses">：可以用于实体类加载，但必须一个个写清楚。-->
+        <!--<property name=" annotatedPackages">：这个具有另外含义，不可以用于加载指定包下的所有实体类。-->
+        <!--&ndash;&gt;-->
+        <!--<property name="packagesToScan">-->
+            <!--<list>-->
+                <!--&lt;!&ndash;-->
+                <!--这样的写法是错误的，无法搜寻和注册到实体类：-->
+                <!--<value>iverson.test.*</value>-->
+                <!--&ndash;&gt;-->
+                <!--<value>iverson.test</value>-->
+                <!--<value>com.ur.**.domain</value>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
     <!-- ADD PERSISTENCE SUPPORT HERE (jpa, hibernate, etc) -->
     <!-- 启动注入功能 -->
     <context:annotation-config />
     <!-- 注解扫描。扫描特定包下的注解。 -->
-    <context:component-scan base-package="iverson.test,com.ur" />
+    <context:component-scan base-package="iverson.test,org.gaea" />
     <!-- 启动注解实物配置功能 -->
     <tx:annotation-driven transaction-manager="transactionManager" />
     <!-- 事务管理器 -->
@@ -70,9 +72,9 @@
     </bean>
     这估计是跟JDBC结合的使用方式。
     -->
-    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory"/>
-    </bean>
+    <!--<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">-->
+        <!--<property name="sessionFactory" ref="sessionFactory"/>-->
+    <!--</bean>-->
     <!-- Spring MVC的注解启用。诸如@RequestMapping之类的依赖于此。但在dispatcher-servlet.xml中的配置不影响。 -->
     <mvc:annotation-driven>
         <mvc:message-converters register-defaults="true">
@@ -90,10 +92,13 @@
             导致Jackson触发lazy加载但又获取不到session而出错。-->
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <property name="objectMapper">
-                    <bean class="com.ur.framework.jackson.databind.HibernateAwareObjectMapper" />
+                    <bean class="org.gaea.framework.jackson.databind.HibernateAwareObjectMapper" />
                 </property>
             </bean>
         </mvc:message-converters>
+        <mvc:argument-resolvers>
+            <bean class="org.gaea.framework.web.method.annotation.GaeaRequestParamMethodArgumentResolver"/>
+        </mvc:argument-resolvers>
     </mvc:annotation-driven>
     <!--不需要配置jacksonMessageConverter。Spring4已经内置了。-->
     <!--<mvc:annotation-driven >-->
@@ -130,9 +135,82 @@
             </list>
         </property>
     </bean>-->
-    <!--<bean id="genericExceptionResolver" class="com.ur.framework.exception.GenericExceptionResolver"></bean>-->
+    <!--<bean id="genericExceptionResolver" class="GenericExceptionResolver"></bean>-->
     <!--增加多AOP注解的扫描。例如，针对：@Aspect...-->
     <aop:aspectj-autoproxy/>
     <!--<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />-->
+
+    <!--Spring Data相关的配置-->
+    <jpa:repositories base-package="org.gaea.**.repository" entity-manager-factory-ref="entityManagerFactory"
+                      transaction-manager-ref="transactionManager" factory-class="org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean" />
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="org.gaea.**.domain" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="persistenceExceptionTranslationPostProcessor"
+          class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+
+    <!--<bean id="abstractEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"-->
+          <!--abstract="true">-->
+        <!--<property name="jpaVendorAdapter">-->
+            <!--<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">-->
+                <!--<property name="database" value="MYSQL" />-->
+                <!--<property name="showSql" value="true" />-->
+                <!--<property name="generateDdl" value="true" />-->
+            <!--</bean>-->
+        <!--</property>-->
+        <!--<property name="jpaProperties">-->
+            <!--<props>-->
+                <!--<prop key="hibernate.ejb.event.post-update">-->
+                    <!--org.macula.core.hibernate.audit.AuditedEventListener-->
+                <!--</prop>-->
+                <!--<prop key="hibernate.dialect">-->
+                    <!--org.hibernate.dialect.SQLServer2008Dialect-->
+                <!--</prop>-->
+            <!--</props>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!-- Macula Entity Manager -->
+    <!--<bean id="entityManagerFactory" parent="abstractEntityManagerFactory">-->
+        <!--<property name="persistenceUnitManager">-->
+            <!--<bean class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">-->
+                <!--&lt;!&ndash;<property name="defaultPersistenceUnitName">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<value>macula</value>&ndash;&gt;-->
+                <!--&lt;!&ndash;</property>&ndash;&gt;-->
+                <!--<property name="defaultDataSource" ref="dataSource" />-->
+                <!--<property name="packagesToScan">-->
+                    <!--<array>-->
+                        <!--&lt;!&ndash; 系统需要的默认domain。 &ndash;&gt;-->
+                        <!--&lt;!&ndash;<value>org.macula.base.app.domain</value>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<value>org.macula.base.security.domain</value>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<value>org.macula.base.data.domain</value>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<value>org.macula.plugins.rule.domain</value>&ndash;&gt;-->
+                        <!--&lt;!&ndash; 自定义的业务domain。对com.ur.qr下的所有domain进行扫描。add by Iverson &ndash;&gt;-->
+                        <!--<value>com.ur.**.domain</value>-->
+                    <!--</array>-->
+                <!--</property>-->
+            <!--</bean>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!-- 导入外部的配置文件。一般是相关的service和repository配置。可以多个。 -->
+    <import resource="workflow-config.xml" />
 </beans>

@@ -13,10 +13,13 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class HibernateDAO {
-    @Autowired
+    @Autowired(required = false)
     private SessionFactory sessionFactory;
     
     public List<Users> query(){
+        if(sessionFactory==null){
+            System.out.println("-------->>>>数据源未配置好。需要用Hibernate的sessionFactory。");
+        }
 //        Session session = sessionFactory.openSession();
         // 必须处在事务中，getCurrentSession()才不会出错
         Query query  = sessionFactory.getCurrentSession().createQuery("from Users u");
@@ -25,6 +28,9 @@ public class HibernateDAO {
     }
     
     public void save(Users user){
+        if(sessionFactory==null){
+            System.out.println("-------->>>>数据源未配置好。需要用Hibernate的sessionFactory。");
+        }
         // 必须处在事务中，getCurrentSession()才不会出错
         sessionFactory.getCurrentSession().save(user);
     }

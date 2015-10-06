@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+                http://www.springframework.org/schema/security	http://www.springframework.org/schema/security/spring-security.xsd
+">
+    <!-- This Spring config file is NOT used in Alfresco, as the Activiti engine is wired in a different way there -->
+
+    <bean id="demoDataGenerator" class="org.activiti.explorer.demo.DemoDataGenerator" init-method="init">
+        <property name="processEngine" ref="processEngine" />
+
+        <!-- Set following properties to false if certain demo data is not wanted -->
+        <property name="createDemoUsersAndGroups" value="false" />
+        <property name="createDemoProcessDefinitions" value="false" />
+        <property name="createDemoModels" value="false" />
+        <property name="generateReportData" value="false" />
+    </bean>
+
+    <!--<bean id="propertyConfigurer"
+    class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+    p:location="/WEB-INF/activiti.db.properties" />-->
+
+    <!--  <bean id="dbProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="location" value="/WEB-INF/activiti.db.properties" />
+       Allow other PropertyPlaceholderConfigurer to run as well
+      <property name="ignoreUnresolvablePlaceholders" value="true" />
+    </bean>-->
+
+    <!-- **************** 不使用独立的dataSource和transactionManager。否则无法和系统的事务结合一并提交或回滚。 **************** -->
+    <!--<bean id="activitiDataSource" class="org.apache.commons.dbcp.BasicDataSource">-->
+        <!--<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />-->
+        <!--<property name="url" value="jdbc:sqlserver://192.168.13.30:1433;database=macula_demo;" />-->
+        <!--<property name="username" value="macula" />-->
+        <!--<property name="password" value="macula" />-->
+        <!--<property name="defaultAutoCommit" value="false" />-->
+    <!--</bean>-->
+
+    <!--<bean id="activitiTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+        <!--<property name="dataSource" ref="activitiDataSource" />-->
+    <!--</bean>-->
+
+    <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+        <!--<property name="dataSource" ref="activitiDataSource" />-->
+        <!--<property name="transactionManager" ref="activitiTransactionManager" />-->
+        <property name="dataSource" ref="dataSource" />
+        <property name="transactionManager" ref="transactionManager" />
+        <!--这个主要解决activiti 5.16后ProcessDiagramGenerator转移到image包后的乱码问题。如果以后activiti解决了该乱码问题，就可以不用自己的ProcessDiagramGenerator。-->
+        <property name="processDiagramGenerator" ref="urProcessDiagramGenerator" />
+        <property name="databaseSchemaUpdate" value="true" />
+        <property name="jobExecutorActivate" value="false" />
+        <property name="customFormTypes">
+            <list>
+                <bean class="org.activiti.explorer.form.UserFormType"/>
+                <bean class="org.activiti.explorer.form.ProcessDefinitionFormType"/>
+                <bean class="org.activiti.explorer.form.MonthFormType"/>
+            </list>
+        </property>
+        <!--
+            解决乱码问题。
+            还需要代码配合：Context.setProcessEngineConfiguration。。。
+        -->
+        <property name="activityFontName" value="宋体"/>
+        <property name="labelFontName" value="宋体"/>
+    </bean>
+    <bean id="urProcessDiagramGenerator" class="org.gaea.activiti.image.GaeaProcessDiagramGenerator"></bean>
+
+    <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean" destroy-method="destroy">
+        <property name="processEngineConfiguration" ref="processEngineConfiguration" />
+    </bean>
+
+    <bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService" />
+    <bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService" />
+    <bean id="taskService" factory-bean="processEngine" factory-method="getTaskService" />
+    <bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService" />
+    <bean id="managementService" factory-bean="processEngine" factory-method="getManagementService" />
+    <bean id="identityService" factory-bean="processEngine" factory-method="getIdentityService" />
+
+    <bean id="activitiLoginHandler" class="org.activiti.explorer.ui.login.DefaultLoginHandler">
+        <property name="identityService" ref="identityService" />
+    </bean>
+</beans>

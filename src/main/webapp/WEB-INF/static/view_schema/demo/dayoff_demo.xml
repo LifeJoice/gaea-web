@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SCHEMA id必须全局唯一。会进入系统的cache。-->
+<ur-schema id="UR_SCHEMA_DEMO_DAYOFF">
+<!--<ur-schema xmlns:views="http://www.ur.com.cn/schema/views">-->
+    <data>
+        <!--table标识这个ds的主要表，如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。-->
+        <dataset id="DS_DEMO_DAYOFF_FORM" table="DEMO_DAYOFF_FORM">
+            <!--bean-ref：即关联的数据源。用该数据源查询。-->
+            <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />
+            <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
+            <data-sql>
+                <![CDATA[SELECT * FROM DEMO_DAYOFF_FORM]]>
+            </data-sql>
+        </dataset>
+        <data-schema>
+            <table name="DEMO_DAYOFF_FORM">
+                <foreign-key name="" ref-table="">
+                    <fields></fields>
+                    <ref-fields></ref-fields>
+                </foreign-key>
+            </table>
+        </data-schema>
+    </data>
+    <views title="请假申请">
+        <field-set id="" table-name="DEMO_DAYOFF_FORM">
+            <field id="beginDatetime" name="beginDatetime" label="请假开始时间" db-column-name="BEGIN_DATETIME"
+                   visible="true" sortable="true" html-width="100" data-type="String" datetime-format="yyyy-MM-dd hh:mm" />
+            <!--... ... ...many many fields ... ... ...-->
+            <!--嵌套字表的field set-->
+            <!--<field-set id="" table-name="DEMO_DAYOFF_FORM_DETAIL"></field-set>-->
+        </field-set>
+        <!--<import-javascript src="" position="headfirst|headlast(default)|bodyend" />-->
+        <!--<import-css src="" /> css暂时是没有position属性的。默认都为headlast -->
+        <import-javascript src="/static/plugins/jquery/datetimepicker/jquery.datetimepicker.js" />
+        <import-css src="/static/plugins/jquery/datetimepicker/jquery.datetimepicker.css" />
+        <import-javascript src="/static/html/dayoff/dayoff.js" />
+        <!--<import-css src="/static/ur/framework/gaea-ui-views.css" />-->
+
+        <actions id="myActions">
+            <!--<button-list>-->
+            <!--macula中的setHref(admin/dis/shop/creat)，就是这里的href。也就是macula页面的<a submit="xxx"></a>-->
+            <!--name的存在，会自动填写html-id="" html-name=""-->
+            <!--type=submit应该是对应普通弹出框保存、修改的那种。这个需要重新想想-->
+            <!--type="submit|goto|deleteSelected|maculaAction"-->
+            <!--type设计变更一下。具体的动作很多时候是不同组件间交互的动作。因此不要用type去定义，改为用interface-action。定义动作名称，但具体实现放在各个模板页。-->
+            <!--interface-action(替换原来的type) :  接口action，只定义，后台框架无实现。定义的内容由具体模板页(例如公用列表页等）去实现，而不由XML SCHEMA解析框架处理。-->
+            <!-- type改为action合理一点 -->
+            <!--interface-action="submit|goto|deleteSelected|maculaAction"-->
+            <!--<button id="btnNew" name="btnNew" html-value="新增" type="maculaAction" href="admin/dis/shop/creat" />-->
+            <!--<button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="newDialog" />-->
+            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="editDialog" />
+            <button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="wfDialog" />
+            <button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />
+            <!--</button-list>-->
+        </actions>
+
+        <!--type=normal|workflow-approval|macula-dialog-->
+        <!-- 改一下：type改为描述dialog子类型的，而不是像workflow-dialog|macula-dialog这么大范围的。而是描述<wf-dialog>中，有哪几种。
+             default(approve-or-not)| -->
+        <!--button的type会关系到页面生成按钮的样式-->
+        <wf-dialog id="wfDialog" title="流程审批" html-width="500" html-height="500" submit-url="/admin/wf-demo/new-dayoff/complete.do" >
+            <button id="btnApproved" name="btnApproved" html-value="批准" type="approve" />
+            <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove" />
+            <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel" />
+        </wf-dialog>
+        <!-- 对于一般dialog而言，html-id就是要生成dialog的DIV ID。或者可以理解是JQuery.dialog(#htmlId) -->
+        <dialog id="editDialog" html-id="createOrEditDialog" content-url="/admin/wf-demo/new-dayoff/view.do" submit-url="/admin/wf-demo/new-dayoff/saveAndStartProcess.do" />
+        <!-- 这是新页面。一般意味着跳转。 -->
+        <view id="newView" title="" />
+
+        <link id="deleteLink" url="" params="" />
+
+        <!--如果一个grid没有primary-key=true的字段，是无法和工作流结合的-->
+        <!--display-undefined-column:如果dataset有的一个字段，但下面没有对应的column元素，是否以json传给页面。默认false-->
+        <!--dataset-id : 预留。待扩展。-->
+        <!--和dataset相关的东东，不应该带到前端。即所有ds-***-->
+        <!--ds-primary-table : 和grid删除操作（和诸如此类）的操作的1对1的主表。因为一个grid对应dataset，dataset可能是多表关联查询。但如果grid有删除功能，包括primary column，就需要对应到一张表。 -->
+        <grid id="dayoff-grid" title="Iverson测试表格" with-workflow="true" render-to="urgrid" display-undefined-column="true"
+              dataset-id="DS_DEMO_DAYOFF_FORM" ds-primary-table="DEMO_DAYOFF_FORM">
+        <!--<views:grid title="Iverson测试表格" dataset-id="" actions-id="">-->
+            <!-- 列头可以分组。可以无限分组。 -->
+            <!-- <column-group> --><!-- 老的设计，不要了 -->
+            <!-- <column-group> --><!-- 老的设计，不要了 -->
+            <!-- <column type="group"> -->
+            <!-- <column type="group"> -->
+            <!-- 如果name存在，则默认html-name和html-id（如果不设的话）和其一致 -->
+            <!-- name不可以省略。在对数据库结果集进行转换的时候，会把数据库字段名转换为name属性。 -->
+            <!--返回页面的model.fields[x].id为htmlId-->
+            <column id="id" name="id" label="ID" db-column-name="ID"
+                    visible="false" sortable="true" html-width="30" primary-key="true" data-type="String" />
+            <column id="beginDatetime" name="beginDatetime" label="请假开始时间" db-column-name="BEGIN_DATETIME"
+                    visible="true" sortable="true" html-width="100" data-type="String" datetime-format="yyyy-MM-dd hh:mm" />
+            <column id="endDatetime" name="endDatetime" label="请假结束时间" db-column-name="END_DATETIME"
+                    visible="true" sortable="true" html-width="100" data-type="String" datetime-format="yyyy-MM-dd hh:mm" />
+            <column id="reason" name="reason" label="理由" db-column-name="REASON"
+                    visible="true" sortable="true" html-width="100" data-type="String" />
+
+            <!--<column id="wfProcInstId" name="wfProcInstId" label="理由" db-column-name="WF_PROC_INST_ID"-->
+                    <!--visible="false" html-width="100" data-type="String" />-->
+
+            <!--<column id="creator" name="creator" label="创建人" db-column-name="CREATED_BY"  html-name="createdBy" html-id="createdBy"-->
+                    <!--visible="true" sortable="true" html-width="100" primary-key="false" data-type="String" />-->
+            <!--<column id="creator" name="createdTime" label="创建时间" db-column-name="CREATED_TIME"-->
+                    <!--visible="true" sortable="true" html-width="100" primary-key="false" data-type="String" />-->
+            <!--<column id="creator" name="lastUpdatedBy" label="最后修改人" db-column-name="LAST_UPDATED_BY"-->
+                    <!--visible="true" sortable="true" html-width="100" primary-key="false" data-type="String" />-->
+            <!--<column id="creator" name="lastUpdatedTime" label="最后修改时间" db-column-name="LAST_UPDATED_TIME"-->
+                    <!--visible="true" sortable="true" html-width="100" primary-key="false" data-type="String" />-->
+            <!-- </column> -->
+            <!-- </column> -->
+            <!-- </column-group> --><!-- 老的设计，不要了 -->
+            <!-- </column-group> --><!-- 老的设计，不要了 -->
+        </grid>
+    </views>
+</ur-schema>

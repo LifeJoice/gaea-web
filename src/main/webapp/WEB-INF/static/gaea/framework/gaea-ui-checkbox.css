@@ -1,0 +1,135 @@
+/**
+ * 列表页的行前复选框效果。
+ * row-check是行前第一列的div class.
+ * 2015年10月5日 星期一
+ * Iverson
+ */
+.row-check input[type=checkbox] {
+    display: none;
+}
+
+/* hide the checkbox */
+/*label, p {*/
+    /*padding-left: 50px;*/
+/*}*/
+
+#check-awesome {
+    position: relative;
+}
+
+/* checkbox css ------------------------------------ */
+
+/* show a cursor when we hover */
+.row-check label {
+    cursor: pointer;
+}
+
+/* style all of our span tags with position absolute and over to the left */
+.row-check label span {
+    display: block;
+    position: absolute;
+    margin:auto;
+    top: 0; left: 0; bottom: 0; right: 0;
+    /*left: 0;*/
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+}
+
+/* style our circle and position it */
+/*label .circle {*/
+    /*background: #FFF;*/
+    /*left: -30px;*/
+    /*top: -30px;*/
+    /*height: 30px;*/
+    /*width: 30px;*/
+    /*z-index: -1;*/
+    /*border-radius: 50%;*/
+    /*-moz-border-radius: 50%;*/
+    /*-webkit-border-radius: 50%;*/
+/*}*/
+
+/* 复选框的框（style our box） */
+.row-check label .box {
+    border: 2px solid #000;
+    height: 14px;
+    width: 14px;
+    z-index: 888;
+    -webkit-transition-delay: 0.2s;
+    -moz-transition-delay: 0.2s;
+    transition-delay: 0.2s;
+}
+
+/* 复选框的勾 */
+/* style the check. give it a border on the bottom and right only and then rotate */
+.row-check label .check {
+    top: -7px;
+    /*left: 0px;*/
+    width: 10px;
+    height: 20px;
+    border: 2px solid #0f9d58;
+    border-top: none;
+    border-left: none;
+    opacity: 0;
+    z-index: 888;
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    transform: rotate(180deg);
+    -webkit-transition-delay: 0.3s;
+    -moz-transition-delay: 0.3s;
+    transition-delay: 0.3s;
+}
+
+/*previous code up here ...*/
+
+/* rotate and then hide our box */
+.row-check input[type=checkbox]:checked ~ label .box {
+    opacity: 0;
+    -webkit-transform: scale(0) rotate(-180deg);
+    -moz-transform: scale(0) rotate(-180deg);
+    transform: scale(0) rotate(-180deg);
+}
+
+/* rotate and show our check */
+.row-check input[type=checkbox]:checked ~ label .check {
+    opacity: 1;
+    -webkit-transform: scale(1) rotate(45deg);
+    -moz-transform: scale(1) rotate(45deg);
+    transform: scale(1) rotate(45deg);
+}
+
+/*label .circle {*/
+    /*-webkit-animation: growCircle 0.3s ease;*/
+    /*-moz-animation: growCircle 0.3s ease;*/
+    /*animation: growCircle 0.3s ease;*/
+/*}*/
+
+@-webkit-keyframes growCircle {
+    0%, 100% {
+        -webkit-transform: scale(0);
+    }
+    70% {
+        background: #DDD;
+        -webkit-transform: scale(1.25);
+    }
+}
+
+@-moz-keyframes growCircle {
+    0%, 100% {
+        -moz-transform: scale(0);
+    }
+    70% {
+        background: #DDD;
+        -moz-transform: scale(1.25);
+    }
+}
+
+@keyframes growCircle {
+    0%, 100% {
+        transform: scale(0);
+    }
+    70% {
+        background: #DDD;
+        transform: scale(1.25);
+    }
+}

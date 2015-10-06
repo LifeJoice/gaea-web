@@ -1,0 +1,111 @@
+/*重写覆盖macula默认的样式。因为会影响到当前的样式。*/
+.finder-action-items a{
+    background:red;/* 这个影响按钮的背景 */
+    float: none;/* 这个会影响toolbar和tb-head-title重叠 */
+    height: auto;
+}
+/* ALL ------>> 所有的按钮class都必须加上"a."，否则会受macula样式影响。*/
+.ur-mars a.button {
+    cursor: pointer;
+    display: inline-block;
+    line-height: 1;
+    overflow: visible;
+    padding: 5px 15px 6px;
+    position: relative;
+    /*字体*/
+    color: white;
+    text-decoration: none;
+    letter-spacing: 2px;
+    font-size: 13px;
+    /*font-weight: bold;*/
+    /*text-shadow: 1px 1px 0 #FFFFFF;*/
+    width: auto;
+    /*边框*/
+    /*background: #222 url(alert-overlay.png) repeat-x;*/
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    /*border:1px solid;*/
+    /*border-color: #F2F2F2;*/
+    /*阴影*/
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -o-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    /*box-shadow: 3px 3px 5px #E4E4E4,-1px 3px 5px #E4E4E4;*/
+    /*圆角矩形*/
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+.ur-mars a.button:hover{
+    /*background-color: #111;*/
+    color: white;
+}
+.ur-mars a.button:active{
+    top: 1px;
+}
+/*按钮大小效果*/
+.ur-mars a.large.button {
+    /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
+    margin-right: 15px;
+    font-size: 20px;
+    padding: 8px 19px 9px;
+}
+.ur-mars a.medium.button {
+    /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
+    margin-right: 10px;
+    font-size: 14px;
+    padding: 6px 15px 7px;
+}
+/*小按钮效果.不作为主按钮效果使用.*/
+.ur-mars a.small.button {
+    font-size: 10px;
+    padding: 4px 10px 5px;
+}
+/** ****************************************************
+ *                  各种按钮颜色效果
+ *  ****************************************************/
+
+/*灰色效果*/
+.ur-mars a.grey.button{
+    color: black;
+    background-color: #E4E4E4;
+}
+.ur-mars a.grey.button:hover{
+    color: white;
+    background-color: #919191;
+    /* 按钮渐变 */
+    transition-property: background color;
+    transition-duration: .3s;
+    /* 垮浏览器兼容参数 */
+    -webkit-transition-property: background color;
+    -webkit-transition-duration: .3s;
+    -moz-transition-property: background color;
+    -moz-transition-duration: .3s;
+    -o-transition-property: background color;
+    -o-transition-duration: .3s;
+    -ms-transition-property: background color;
+    -ms-transition-duration: .3s;
+}
+
+/*深蓝灰色效果*/
+.ur-mars a.darkslategrey.button{
+    background-color: #5D6D7D;
+    /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 86%, 1));*/
+}
+.ur-mars a.darkslategrey.button:hover{
+    /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 82%, 1));*/
+    background-color: #2D3E50;
+    /* 按钮渐变 */
+    transition-property: background color;
+    transition-duration: .3s;
+    /* 垮浏览器兼容参数 */
+    -webkit-transition-property: background color;
+    -webkit-transition-duration: .3s;
+    -moz-transition-property: background color;
+    -moz-transition-duration: .3s;
+    -o-transition-property: background color;
+    -o-transition-duration: .3s;
+    -ms-transition-property: background color;
+    -ms-transition-duration: .3s;
+}
+

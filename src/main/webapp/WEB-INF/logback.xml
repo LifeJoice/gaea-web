@@ -7,7 +7,7 @@
     </layout>
   </appender>
 
-  <logger name="com.ur" level="TRACE"/>
+  <logger name="org.gaea" level="TRACE"/>
   <logger name="iverson" level="TRACE"/>
 
 

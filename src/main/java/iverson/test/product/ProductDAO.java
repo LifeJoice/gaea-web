@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ProductDAO {
-    @Autowired
+    @Autowired(required = false)
     private SessionFactory sessionFactory;
     
     public List<Product> query(){

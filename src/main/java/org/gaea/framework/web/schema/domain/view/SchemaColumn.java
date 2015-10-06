@@ -1,0 +1,154 @@
+package org.gaea.framework.web.schema.domain.view;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Column支持嵌套。只要把type设置为group即可以分组。（未实现）
+ * Created by Iverson on 2015/6/29.
+ */
+public class SchemaColumn {
+    private String id;
+    // group
+    private String type;
+    private String label;
+    private String name;
+    private String dbColumnName;
+    private String htmlName;
+    private String htmlId;
+    private Boolean visible = true;
+    private Boolean sortable = false;
+    private String htmlWidth;
+    private Boolean primaryKey = false;// 是否主键
+    private String dataType;
+    // yyyy-mm-dd
+    private String datetimeFormat;
+    private List<SchemaColumn> columns = new ArrayList<SchemaColumn>();
+
+    // 构造方法
+
+    public SchemaColumn() {
+    }
+
+    public SchemaColumn(String id, String name, String label, String dbColumnName, Boolean visible, String htmlWidth, String dataType) {
+        this.id = id;
+        this.name = name;
+        this.label = label;
+        this.dbColumnName = dbColumnName;
+        this.visible = visible;
+        this.htmlWidth = htmlWidth;
+        this.dataType = dataType;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDbColumnName() {
+        return dbColumnName;
+    }
+
+    public void setDbColumnName(String dbColumnName) {
+        this.dbColumnName = dbColumnName;
+    }
+
+    public String getHtmlName() {
+        return htmlName;
+    }
+
+    public void setHtmlName(String htmlName) {
+        this.htmlName = htmlName;
+    }
+
+    public String getHtmlId() {
+        return htmlId;
+    }
+
+    public void setHtmlId(String htmlId) {
+        this.htmlId = htmlId;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public void setVisible(Boolean visible) {
+        this.visible = visible;
+    }
+
+    public Boolean getSortable() {
+        return sortable;
+    }
+
+    public void setSortable(Boolean sortable) {
+        this.sortable = sortable;
+    }
+
+    public String getHtmlWidth() {
+        return htmlWidth;
+    }
+
+    public void setHtmlWidth(String htmlWidth) {
+        this.htmlWidth = htmlWidth;
+    }
+
+    public Boolean getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(Boolean primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    public String getDatetimeFormat() {
+        return datetimeFormat;
+    }
+
+    public void setDatetimeFormat(String datetimeFormat) {
+        this.datetimeFormat = datetimeFormat;
+    }
+
+    public List<SchemaColumn> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<SchemaColumn> columns) {
+        this.columns = columns;
+    }
+}

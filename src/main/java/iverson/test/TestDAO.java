@@ -19,10 +19,10 @@ public class TestDAO {
 
     private JdbcTemplate jdbcTemplate;
     
-    @Autowired
+    @Autowired(required = false)
     private SessionFactory sessionFactory;
 
-    @Autowired
+    @Autowired(required = false)
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
@@ -43,6 +43,9 @@ public class TestDAO {
     }
     
     public void save(Department dept){
+        if(sessionFactory==null){
+            System.out.println("-------->>>>数据源未配置好。需要用Hibernate的sessionFactory。");
+        }
         sessionFactory.getCurrentSession().save(dept);
     }
 }
