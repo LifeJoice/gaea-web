@@ -96,6 +96,7 @@
                 </property>
             </bean>
         </mvc:message-converters>
+        <!--配置自有的MethodArgumentResolver。针对@RequestBean注解的参数，用自定义注册类处理。-->
         <mvc:argument-resolvers>
             <bean class="org.gaea.framework.web.method.annotation.GaeaRequestParamMethodArgumentResolver"/>
         </mvc:argument-resolvers>
