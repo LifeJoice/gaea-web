@@ -1,6 +1,9 @@
 package iverson.test;
 
+import iverson.test.demo.Role;
+
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +36,15 @@ public class Users implements Serializable {
     @ManyToOne
     @JoinColumn(name = "dept_id")
     private Department department;
+    private List<Role> roles;
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
 
     public Users() {
     }

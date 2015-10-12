@@ -4,39 +4,81 @@
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            div.form{
+                border: 1px solid grey;
+                margin: 10px 10px;
+                padding: 10px 10px;
+            }
+            .form span{
+                display: block;
+                height: 40px;
+            }
+        </style>
     </head>
     <body>
         <div>TODO write content</div>
         <div>
             <form action="/test.do" method="post">
-                <table>
-                    <tr>
-                        <td>id</td>
-                        <td><input name="dept.id" value=""></td>
-                    </tr>
-                    <tr>
-                        <td>name</td>
-                        <td><input name="dept.name" value=""></td>
-                    </tr>
-                </table>
-                <table>
-                    <tr>
-                        <td>用户id</td>
-                        <td><input name="usr.id" value=""></td>
-                    </tr>
-                    <tr>
-                        <td>用户名</td>
-                        <td><input name="usr.name" value=""></td>
-                    </tr>
-                    <tr>
-                        <td>地址</td>
-                        <td><input name="usr.address" value=""></td>
-                    </tr>
-                    <tr>
-                        <td>部门id</td>
-                        <td><input name="usr.department.id" value=""></td>
-                    </tr>
-                </table>
+                <div class="form">
+                    <table>
+                        <tr>
+                            <td>id</td>
+                            <td><input name="dept.id" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td><input name="dept.name" value="IT"></td>
+                        </tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <td>用户id</td>
+                            <td><input name="usr.id" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>用户名</td>
+                            <td><input name="usr.name" value="Iverson"></td>
+                        </tr>
+                        <tr>
+                            <td>地址</td>
+                            <td><input name="usr.address" value="GuangZhou"></td>
+                        </tr>
+                        <tr>
+                            <td>部门id</td>
+                            <td><input name="usr.department.id" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>订单号</td>
+                            <td><input name="order" value="10001"></td>
+                        </tr>
+                        <tr>
+                            <td>订单号</td>
+                            <td><input name="order" value="10002"></td>
+                        </tr>
+                        <tr>
+                            <td>车辆二</td>
+                            <td><input name="cars[2]" value="Smart"></td>
+                        </tr>
+                        <tr>
+                            <td>车辆一</td>
+                            <td><input name="cars[1]" value="汉兰达"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="form">
+                    <span><label>用户A的名称：</label><input name="users[0].name" value="Bill"></span>
+                    <span><label>用户A的角色A的名称：</label><input name="users[0].roles[0].name" value="developer"></span>
+                    <span><label>用户A的角色B的名称：</label><input name="users[0].roles[1].name" value="manager"></span>
+                    <span><label>用户A的角色A的角色A名称：</label><input name="users[0].roles[0].roles[0].name" value="developer1"></span>
+                    <span><label>用户A的角色B的角色B名称：</label><input name="users[0].roles[0].roles[1].name" value="manager1"></span>
+                </div>
+                <div class="form">
+                    <span><label>Iverson的名称：</label><input name="userMap[iverson].name" value="Iverson Chan"></span>
+                    <span><label>Tony的名称：</label><input name="userMap[tony].name" value="Tony Liu"></span>
+                    <span><label>车的名称：</label><input name="carMap[name]" value="Smart"></span>
+                    <span><label>车的名称：</label><input name="carMap[name2]" value="Mini Cooper"></span>
+                </div>
                 <input type="submit" value="提交">
             </form>
         </div>

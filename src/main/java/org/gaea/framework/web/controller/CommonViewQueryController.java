@@ -3,7 +3,7 @@ package org.gaea.framework.web.controller;
 import org.gaea.db.QueryCondition;
 import org.gaea.framework.common.exception.SysLogicalException;
 import org.gaea.framework.common.exception.ValidationFailedException;
-import org.gaea.framework.web.bind.annotation.RequestToBean;
+import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public class CommonViewQueryController {
 
     @RequestMapping(value = "/admin/common/query.do", method = RequestMethod.POST)
     @ResponseBody
-    public List<Map<String, Object>> page(String urSchemaId, @RequestToBean("filters") List<QueryCondition> filters,
-//                        @RequestToBean("staticParams") List<FinderStaticParam> staticParams,
+    public List<Map<String, Object>> page(String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
+//                        @RequestBean("staticParams") List<FinderStaticParam> staticParams,
                                           Pageable pageable,HttpServletRequest request, HttpServletResponse response) {
         try {
             Pageable pageable1 = new PageRequest(1,20);
