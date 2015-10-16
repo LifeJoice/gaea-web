@@ -1,0 +1,27 @@
+/*分页的1-20部分的css*/
+.gaea-grid-footer .pagination .page-desc{
+    float: right;
+}
+/*分页的每个页码、按钮部分的css*/
+.gaea-grid-footer .pagination span.button{
+    display: block;
+    float: left;
+    cursor: pointer;
+    width: 20px;
+}
+/*分页的固定数字部分。1 2 3 4 ...*/
+.gaea-grid-footer .pagination .pages{
+    display: block;
+    float: left;
+}
+/*固定数字的每个样式*/
+.gaea-grid-footer .pagination .pages span{
+    display: block;
+    float: left;
+    width: 20px;
+}
+/*已选页码的css*/
+.gaea-grid-footer .pagination span.selected{
+    border: 1px solid black;
+}
+

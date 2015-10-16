@@ -3,12 +3,14 @@ package org.gaea.db;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
+import org.gaea.framework.web.schema.domain.PageResult;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -41,7 +43,8 @@ public class GaeaSqlProcessor {
 //        return query(sql,conditions,pageable);
 //    }
 
-    public Page<?> query(final String sql,List<QueryCondition> conditions,Pageable pageable){
+    public PageResult query(final String sql, List<QueryCondition> conditions, SchemaGridPage page){
+        PageResult pageResult = new PageResult();
         MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         String countSQL = new SQL(){{
             SELECT("count(*)");
@@ -52,9 +55,9 @@ public class GaeaSqlProcessor {
 
         List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
         // 如果给定的页码值是Integer.Max_VALUE，则认为是不需要查内容
-        if (pageable.getPageNumber() < Integer.MAX_VALUE) {
-            int startPos = (pageable.getPageNumber()-1) * pageable.getPageSize();
-            int pageSize = pageable.getPageSize();
+        if (page.getPage() < Integer.MAX_VALUE) {
+            int startPos = (page.getPage()-1) * page.getSize()+1;
+            int pageSize = page.getSize();
 //            Boolean autoFixPageNum = (Boolean) getExtractParams().get(AUTO_FIX_PAGE_NUM);
 //            if (autoFixPageNum != null && autoFixPageNum && startPos > total) {
 //                startPos = 0;
@@ -72,7 +75,7 @@ public class GaeaSqlProcessor {
                 content = namedParameterJdbcTemplate.queryForList(limitedSQL, paramMap);
 //            } else {
 //                content = new ArrayList<Map<String, Object>>();
-            }
+        }
 //        } else {
 //            content = new ArrayList<Map<String, Object>>();
         }
@@ -80,7 +83,10 @@ public class GaeaSqlProcessor {
         if (log.isDebugEnabled()) {
             log.debug("Count SQL:" + countSQL);
         }
-        return new PageImpl<Map<String, Object>>(content, pageable, total);
+        pageResult.setContent(content);
+        pageResult.setTotalElements(total);
+        return pageResult;
+//        return new PageImpl<Map<String, Object>>(content, new PageRequest(page.getPage(),page.getSize()), total);
     }
 
 //    List<Map<String, Object>> content = jdbcTemplate.queryForList(sql, getExtractParams());

@@ -1,6 +1,7 @@
 package org.gaea.framework.web.schema.domain.view;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class SchemaGridDTO {
     private List<SchemaColumnDTO> columns = new ArrayList<SchemaColumnDTO>();
     private List<Map<String,Object>> data;                  // sql查出的grid的数据
     private GridModelDTO model;
+    private SchemaGridPage page;                            // 分页信息
 
     public String getId() {
         return id;
@@ -93,5 +95,13 @@ public class SchemaGridDTO {
 
     public void setModel(GridModelDTO model) {
         this.model = model;
+    }
+
+    public SchemaGridPage getPage() {
+        return page;
+    }
+
+    public void setPage(SchemaGridPage page) {
+        this.page = page;
     }
 }

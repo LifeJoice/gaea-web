@@ -4,12 +4,12 @@ import org.gaea.db.QueryCondition;
 import org.gaea.framework.common.exception.SysLogicalException;
 import org.gaea.framework.common.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.schema.domain.PageResult;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,12 +33,12 @@ public class CommonViewQueryController {
 
     @RequestMapping(value = "/admin/common/query.do", method = RequestMethod.POST)
     @ResponseBody
-    public List<Map<String, Object>> page(String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
+    public PageResult page(@RequestBean SchemaGridPage page, String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
 //                        @RequestBean("staticParams") List<FinderStaticParam> staticParams,
-                                          Pageable pageable,HttpServletRequest request, HttpServletResponse response) {
+                           HttpServletRequest request, HttpServletResponse response) {
         try {
-            Pageable pageable1 = new PageRequest(1,20);
-            List<Map<String, Object>> result = commonViewQueryService.query(urSchemaId,filters, pageable, true);
+//            Pageable pageable1 = new PageRequest(page.getPage(),page.getSize());
+            PageResult result = commonViewQueryService.query(urSchemaId,filters, page, true);
             return result;
 //            return (List<Map<String, Object>>) result.getContent();
         } catch (ValidationFailedException e) {

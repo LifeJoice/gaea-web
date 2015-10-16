@@ -175,11 +175,17 @@ gaea.component.bridge = {
             listeners: {
                 cellclick: null,
                 select: null
+            },
+            page: {
+                page: 1,
+                size: 20,
+                rowCount: 0,
+                pageCount: 0
             }
         },
         cache: {
             selectedRow: null,
-            hasCreatedRowHeadActions:false,     // 是否已经为grid列头创建了行前操作区列
+            hasCreatedRowHeadActions: false,     // 是否已经为grid列头创建了行前操作区列
             rows: [
                 //{
                 //    index: null,                 // 行下标。第几行。
@@ -198,7 +204,7 @@ gaea.component.bridge = {
         default: {
             css: {
                 columnHeadWidthPadding: 5,
-                gridTdPadding:2
+                gridTdPadding: 2
             }
         },
         create: function (options) {
@@ -253,64 +259,28 @@ gaea.component.bridge = {
 //            }
 
             /* --------------------------------------------------------------------------------------------------------- 华丽的分割线 -------------------------- */
-            var urGridId = "#" + options.renderTo;
-            var urGrid = $(urGridId);
-            $(urGrid).append("<div>" +
-                "<div class='hd-div'><div id=\"mars-tb-head\" class=\"mars-tb-head\"></div></div>" +
-                "<div class='bd-div'><table class='ur-gridtable'></table></div>" +
+            //var urGridId = "#" + options.renderTo;
+            var grid = $("#" + options.renderTo);
+            grid.append("<div class='gaea-grid'>" +
+                "<div class='gaea-grid-header'><div id=\"mars-tb-head\" class=\"mars-tb-head\"></div></div>" +
+                "<div class='gaea-grid-body'><table class='ur-gridtable'></table></div>" +
+                "<div class='gaea-grid-footer'><div id=\"pagination\" class=\"pagination\"></div></div>" +
                 "<input type='hidden' id='gridId' name='gridId' value='" + options.id + "'>" +
                 "</div>");
-            var tableHeadCT = $(".hd-div");
+            var tableHeadCT = $(".gaea-grid-header");
             var tableHead = $("#mars-tb-head");
             var tableBody = $(".ur-gridtable");
             var autoGenClassNamePrefix = "autogen-col-";
             var tdDefaultClasses = "grid-td";
             var colCssArray = new Array();
             var selectedRow;                                    // 如果点击了数据表中某行，记录该行
-            // 创建列表的表头
+            /* 创建列表的表头 */
             this._createTableHead();
-            // 创建列表的数据部分
+            /* 创建列表的数据部分 */
             this._createTableData();
-            // 遍历每一行数据
-            //for (var i = 0; i < options.data.length; i++) {
-            //    var row = options.data[i];
-            //    //console.log("name= "+row.name);
-            //    tableBody.append("<tr data-rowindex='" + (i + 1) + "'>");
-            //    // 遍历每一列。遍历column等效于遍历field
-            //    for (var j = 0; j < options.columns.length; j++) {
-            //        var tmpCol = options.columns[j];
-            //        var field = options.model.fields[j];
-            //        var genClsName = autoGenClassNamePrefix + field.id;
-            //        var defaultClass = "column-header";
-            //        var columnHtmId = "gridcolumn-" + (j + 1); // column的序列化从1开始吧
-            //        // AI.TODO css列表待处理
-            //        colCssArray.push(genClsName);
-            //        // 如果是第一行，即第一次，生成列头
-            //        if (i == 0) {
-            //            // 第一列，生成复选框。
-            //            if (j == 0) {
-            //                tableHead.append("<div id='selectAll' class='selectAll column-header'><input type='checkbox' id='checkAll' class='checkAll' ></div>");
-            //            }
-            //            tableHead.append("<div id='" + columnHtmId + "' class='" + defaultClass + "' data-field-id='" + field.id + "'><p>" + tmpCol.text + "</p></div>");
-            //        }
-            //        // 遍历一行数据中每一个字段
-            //        $.each(row, function (key, val) {
-            //            // 如果数据中的key和field中的设置一致，则把值复制到表格中。
-            //            if (field.id == key) {
-            //                // 第一列，生成复选框。
-            //                if (j == 0) {
-            //                    $(".ur-gridtable tr:last").append("<td><input type='checkbox' id='urgrid-chb-" + i + "'></td>");
-            //                }
-            //                $(".ur-gridtable tr:last").append("<td class='" + tdDefaultClasses + "' data-columnid='" + columnHtmId + "'>" + val + "</td>");
-            //            }
-            //        });
-            //    }
-            //    if (i == 0) {
-            //        tableHead.append("</tr>");
-            //    }
-            //    tableBody.append("</tr>");
-            //}
-            // 设置Grid样式
+            /* 创建Grid的脚部分页部分 */
+            this._createFooter();
+            /* 设置Grid样式 */
             this._applyCSS();
             //// 遍历column数组，设置显示样式（CSS等）
             //$.each(options.columns, function (idx, obj) {
@@ -460,6 +430,7 @@ gaea.component.bridge = {
                 $("#mars-tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + "' data-field-id='" + field.id + "'><p>" + tmpCol.text + "</p></div>");
                 //}
             }
+            $("#mars-tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + " last' />");
             //if (i == 0) {
             $("#mars-tb-head").append("</tr>");
             //}
@@ -517,7 +488,7 @@ gaea.component.bridge = {
                                 $(".ur-gridtable tr:last").append("<td>" +
                                     "<div class=\"row-check\">" +
                                     "<input type='checkbox' id='urgrid-chb-" + i + "'>" +
-                                    // Label里面的都是复选框的效果元素。box是框。check是勾。
+                                        // Label里面的都是复选框的效果元素。box是框。check是勾。
                                     "<label id='urgrid-cb-label-" + i + "' for='urgrid-chb-" + i + "'>" +       // label的for和checkbox的id绑定
                                     "<span class=\"check\"></span>" +
                                     "<span class=\"box\"></span>" +
@@ -577,14 +548,19 @@ gaea.component.bridge = {
                         $("#" + gridColumnId).css("display", "none");
                     }
                 }
-            })
+            });
+            /* 设置数据区域的高度 */
+            var bodyHeight = document.body.scrollHeight;
+            // 页面高度 - 上方title、toolbar等占用高度 - 列头高度
+            bodyHeight = bodyHeight - 130 - 30;
+            $(".gaea-grid-body").css("height", bodyHeight); // grid行数据部分的高度
         },
         _bindingEvents: function () {
             var that = this;
             // 绑定事件。点击行选中复选框。
             $(".ur-gridtable").find("tr").click(function () {
                 var index = $(this).data("rowindex");
-                var i = index -1;
+                var i = index - 1;
                 $(":checkbox[id^='urgrid-chb']").prop("checked", false);
                 $(this).find("[id^='urgrid-chb']").prop("checked", "true");
                 //console.log("rowindex: "+$(this).data("rowindex"));
@@ -614,6 +590,63 @@ gaea.component.bridge = {
             });
         },
         /**
+         * 构造Grid的脚部元素。即Pagination分页部分。
+         * 本方法即用于创建，也用于刷新。
+         * @private
+         */
+        _createFooter: function () {
+            var pageDiv = $(".gaea-grid-footer .pagination");
+            var that = this;
+            var page = parseInt(this.options.page.page);
+            var size = parseInt(this.options.page.size);
+            var rowCount = parseInt(this.options.page.rowCount);
+            // 清空内容
+            pageDiv.html("");
+            // 第一页
+            pageDiv.append("<span class=\"button first\"><<<input type='hidden' value='" + 1 + "'></span>");
+            // 上一页
+            pageDiv.append("<span class=\"button previous\"><<input type='hidden' value='" + (page - 1) + "'></span>");
+            // 页码部分: 1 2 3 4 ...
+            pageDiv.append("<span class=\"pages\"></span>");
+            // 生成页码
+            var half = 3;   // 这个是要显示多少页的一半
+            var firstPage = page - half;
+            var p = firstPage > 0 ? firstPage : 1;
+            for (i = 1; i < 8; i++) {
+                if (i != page) {
+                    if (firstPage > 0) {
+                        pageDiv.find(".pages").append("<span class=\"button\">" + p + "<input type='hidden' value='" + p + "'></span>");
+                    } else {
+                        pageDiv.find(".pages").append("<span class=\"button\">" + i + "<input type='hidden' value='" + i + "'></span>");
+                    }
+                } else {
+                    pageDiv.find(".pages").append("<span class=\"selected\">" + p + "</span>");
+                }
+                p++;
+            }
+            // 下一页
+            pageDiv.append("<span class=\"button next\">\><input type='hidden' value='" + (page + 1) + "'></span>");     // p在循环最后自加了，这里就不用加了。
+            // 最后一页
+            pageDiv.append("<span class=\"button last\">\>\><input type='hidden' value='" + (Math.ceil(rowCount / size)) + "'></span>");
+            // 生成：显示第1条至第20条 当前第几页
+            var first = 1;
+            if (page > 1) {
+                first += (page - 1) * size;
+            }
+            var last = page * size;
+            pageDiv.append("<span class=\"page-desc\">" + first + " - " + last + " 共 " + rowCount + "</span>");
+            /* 【2】点击页码事件 */
+            pageDiv.find("span.button").click(function () {
+                var pageVal = $(this).children("input").val();
+                that.options.page.page = pageVal;     // 先赋值。待会查询完成后可用于刷新页码。
+                // 查询（下一页 etc……）
+                that._query({
+                    "page.page": pageVal
+                });
+            });
+            //return html;
+        },
+        /**
          * 高级查询
          * @private
          */
@@ -632,7 +665,7 @@ gaea.component.bridge = {
                 if (gaea.utils.validate.isNotNull(column.hidden) && !column.hidden) {
                     $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><input id='" + inputId + "' data-field-id='" + field.id + "' ></div>");
                     // +1是列头的列间边框宽度。
-                    $("#" + columnHtmId).css("width", (parseInt(column.width)+1));
+                    $("#" + columnHtmId).css("width", (parseInt(column.width) + 1));
                     $("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
                 }
             }
@@ -648,7 +681,7 @@ gaea.component.bridge = {
                 $("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
                 var queryConditions = new Object();         // 查询请求数据
                 var i = 0;      // 查询条件数组的下标
-                queryConditions.urSchemaId = $("#urSchemaId").val();
+                //queryConditions.urSchemaId = $("#urSchemaId").val();
                 $("#mars-headquery-inputs").find("input").each(function (index) {
                     console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
                     var inputVal = $(this).val();
@@ -662,19 +695,20 @@ gaea.component.bridge = {
                         queryConditions[valKey] = valValue;
                         i += 1;
                     }
-                })
-                gaea.utils.ajax.post({
-                    url: "/admin/common/query.do",
-                    data: queryConditions,
-                    success: function (data) {
-                        //alert("成功。id: " + data[0].id);
-                        // 用查询结果，刷新数据列表
-                        gaea.component.bridge.grid.refreshData(data);
-                    },
-                    fail: function (data) {
-                        alert("失败");
-                    }
-                })
+                });
+                that._query(queryConditions);
+                //gaea.utils.ajax.post({
+                //    url: "/admin/common/query.do",
+                //    data: queryConditions,
+                //    success: function (data) {
+                //        //alert("成功。id: " + data[0].id);
+                //        // 用查询结果，刷新数据列表
+                //        gaea.component.bridge.grid.refreshData(data);
+                //    },
+                //    fail: function (data) {
+                //        alert("失败");
+                //    }
+                //})
             });
             // 【3】 点击列头，展示查询区。
             $("#mars-tb-head").find(".column-header").click(function () {
@@ -682,6 +716,25 @@ gaea.component.bridge = {
                 //$("#mars-tb-head-query").css("display","block");
                 $("#mars-tb-head-query").slideDown("fast");    // cool一点的方式
             })
+        },
+        _query: function (queryConditions) {
+            var that = this;
+            // 获取SchemaId。对于Grid查询必须。
+            queryConditions.urSchemaId = $("#urSchemaId").val();
+            gaea.utils.ajax.post({
+                url: "/admin/common/query.do",
+                data: queryConditions,
+                success: function (data) {
+                    //var result = $.parseJSON(jqXHR.responseText);
+                    // 用查询结果，刷新数据列表
+                    that.refreshData(data.content);
+                    that.options.page.rowCount = data.totalElements;
+                    that._createFooter();
+                },
+                fail: function (data) {
+                    alert("失败");
+                }
+            });
         },
         /**
          * 创建行操作区，包括行前操作区（按钮区），行尾操作区（按钮区）
@@ -697,7 +750,7 @@ gaea.component.bridge = {
                     var actionsHtml = "";
                     var hasHeadActions = false;     // 行前操作区开关
                     // 遍历每行的行前操作区
-                    if(gaea.utils.validate.isNull(rowCache)){
+                    if (gaea.utils.validate.isNull(rowCache)) {
                         return;
                     }
                     $.each(rowCache.headActions, function (k, actionConfig) {

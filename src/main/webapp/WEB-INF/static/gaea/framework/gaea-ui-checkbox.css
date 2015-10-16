@@ -52,8 +52,8 @@
 /* 复选框的框（style our box） */
 .row-check label .box {
     border: 2px solid #000;
-    height: 14px;
-    width: 14px;
+    height: 11px;
+    width: 11px;
     z-index: 888;
     -webkit-transition-delay: 0.2s;
     -moz-transition-delay: 0.2s;
@@ -75,9 +75,9 @@
     -webkit-transform: rotate(180deg);
     -moz-transform: rotate(180deg);
     transform: rotate(180deg);
-    -webkit-transition-delay: 0.3s;
-    -moz-transition-delay: 0.3s;
-    transition-delay: 0.3s;
+    -webkit-transition-delay: 0.2s;
+    -moz-transition-delay: 0.2s;
+    transition-delay: 0.2s;
 }
 
 /*previous code up here ...*/

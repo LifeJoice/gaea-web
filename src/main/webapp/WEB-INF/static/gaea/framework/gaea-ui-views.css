@@ -29,7 +29,7 @@
 
 /* --------------- >>>> 列表内容部分 <<<< --------------- */
 /* grid的数据部分的容器 */
-.bd-div {
+.gaea-grid-body {
     margin-top: 3px;
     font-size: 14px;
 }
@@ -58,6 +58,13 @@
     /*文字垂直居中。line-height和div高度一致即可。*/
     line-height: 30px;
 }
+/*列头最后一列。空列。填充满行的剩余部分。*/
+.column-header.last{
+    float: none;
+    /*下面两个解决最后一列铺满的问题*/
+    width: auto;
+    overflow: hidden;
+}
 
 /* 列头的字体左右边距（高级查询也保持一致） */
 .column-header p, .mars-headquery-column {
@@ -68,7 +75,7 @@
 }
 
 /*列头下方的边线效果*/
-.column-header::after {
+.column-header::after,.column-header.last::after {
     content: '';
     /*position: absolute;*/
     display: block;

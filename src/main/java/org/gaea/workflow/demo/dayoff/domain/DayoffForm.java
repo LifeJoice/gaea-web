@@ -20,10 +20,10 @@ public class DayoffForm extends WorkflowDomain<Long> {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "BEGIN_DATETIME")
     private Date beginDatetime;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "END_DATETIME")
     private Date endDatetime;
     @Column(name = "REASON")

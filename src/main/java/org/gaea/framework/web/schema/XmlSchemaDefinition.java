@@ -9,6 +9,8 @@ package org.gaea.framework.web.schema;
  */
 public class XmlSchemaDefinition {
     public static String ROOT_NODE = "ur-schema";
+    public static String DATA_NAME = "data";
+    public static String VIEWS_NAME = "views";
     public static String GRID_NAME = "grid";
     public static String DIALOG_NAME = "dialog";
     public static String WF_DIALOG_NAME = "wf-dialog";

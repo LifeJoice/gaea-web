@@ -2,10 +2,9 @@ package org.gaea.framework.web.schema.convertor;
 
 import org.gaea.framework.common.utils.GaeaXmlUtils;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.SchemaViews;
-import org.gaea.framework.web.schema.domain.view.SchemaDialog;
-import org.gaea.framework.web.schema.domain.view.SchemaActions;
-import org.gaea.framework.web.schema.domain.view.SchemaGrid;
+import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,7 +42,11 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
                 SchemaGrid grid = urXmlGridViewSchemaConvertor.convert(viewNodes);
                 schemaViews.setGrid(grid);
                 // grid转为gridDTO
-                schemaViews.setGridDTO(urXmlGridViewSchemaConvertor.convert(grid));
+                SchemaGridDTO gridDTO = urXmlGridViewSchemaConvertor.convert(grid);
+                // 初始化分页
+                int pageSize = StringUtils.isNumeric(grid.getPageSize())?Integer.parseInt(grid.getPageSize()):0;
+                gridDTO.setPage(new SchemaGridPage(1,pageSize));
+                schemaViews.setGridDTO(gridDTO);
             }else if(XmlSchemaDefinition.DIALOG_NAME.equals(viewNodes.getNodeName())
                     || XmlSchemaDefinition.WF_DIALOG_NAME.equals(viewNodes.getNodeName())){
                 SchemaDialog dialog = dialogViewSchemaConvertor.convert(viewNodes);

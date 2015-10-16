@@ -3,7 +3,8 @@ package org.gaea.framework.web.service;
 import org.gaea.db.QueryCondition;
 import org.gaea.framework.common.exception.SysLogicalException;
 import org.gaea.framework.common.exception.ValidationFailedException;
-import org.springframework.data.domain.Pageable;
+import org.gaea.framework.web.schema.domain.PageResult;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,6 @@ import java.util.Map;
  * Created by Iverson on 2015/8/17.
  */
 public interface CommonViewQueryService {
-    List<Map<String, Object>> query(String urSchemaId, List<QueryCondition> filters,
-                                    Pageable pageable, boolean translate) throws ValidationFailedException, SysLogicalException;
+    PageResult query(String schemaId, List<QueryCondition> filters,
+                     SchemaGridPage page, boolean translate) throws ValidationFailedException, SysLogicalException;
 }

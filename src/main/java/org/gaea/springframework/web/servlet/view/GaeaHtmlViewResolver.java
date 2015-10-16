@@ -75,7 +75,7 @@ public class GaeaHtmlViewResolver extends AbstractCachingViewResolver implements
 //        logger.info("Requested file found: " + requestedFilePath + ",viewName:" + viewName);
 
         // 处理XML Schema
-            gaeaXmlSchemaProcessor = this.getApplicationContext().getBean(GaeaXmlSchemaProcessor.class);
+//            gaeaXmlSchemaProcessor = this.getApplicationContext().getBean(GaeaXmlSchemaProcessor.class);
         htmlView = gaeaXmlSchemaProcessor.process(getApplicationContext(),viewSchemaLocation,viewName);
     } catch (ValidationFailedException e) {
         // 返回 null, 以便被下一个 resolver 处理

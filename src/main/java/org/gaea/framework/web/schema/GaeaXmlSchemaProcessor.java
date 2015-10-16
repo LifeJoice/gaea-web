@@ -45,20 +45,12 @@ public class GaeaXmlSchemaProcessor {
 
     public String process(ApplicationContext springApplicationContext, String viewSchemaLocation, String schemaName) throws ValidationFailedException {
         String htmlPage = "";
-        StringBuilder result = new StringBuilder("");
-//        String gridviewTmplPath = "/WEB-INF/static/html/template/ur_gridview.html";
         String viewSchemaPath = viewSchemaLocation + schemaName;
-        String viewAllJsonData = "";
-//        Resource resource = null;
-//        Resource gridViewResource = null;
 
         try {
-//            htmlPage = readTemplate(springApplicationContext);
             logger.info(viewSchemaPath);
-//            resource = springApplicationContext.getResource(viewSchemaPath);
-//            gridViewResource = springApplicationContext.getResource(gridviewTmplPath);
+            // 获得HTML模板混合XML SCHEMA的页面。
             htmlPage = parseXml(viewSchemaPath, springApplicationContext);
-//            htmlPage = injectToView(viewAllJsonData, springApplicationContext);
         } catch (IOException e) {
             // 返回 null, 以便被下一个 resolver 处理
             logger.info("No file found for file: " + viewSchemaPath);
@@ -77,8 +69,6 @@ public class GaeaXmlSchemaProcessor {
             return null;
         }
         logger.info("Requested file found: " + viewSchemaPath + ", viewName:" + schemaName);
-
-
         return htmlPage;
     }
 
@@ -114,13 +104,13 @@ public class GaeaXmlSchemaProcessor {
                 if(!(node instanceof Element)){
                     continue;
                 }
-                if ("data".equals(node.getNodeName())) { // 生成数据
+                if (XmlSchemaDefinition.DATA_NAME.equals(node.getNodeName())) { // 生成数据
                     if (schemaData != null) {
                         throw new ValidationFailedException("一个schema中只能配置一个<data>元素！");
                     }
                     schemaData = xmlDataSchemaConvertor.convert(node);
                     gaeaXmlSchema.setSchemaData(schemaData);
-                } else if ("views".equals(node.getNodeName())) { // 生成视图各元素信息,例如列表、按钮等
+                } else if (XmlSchemaDefinition.VIEWS_NAME.equals(node.getNodeName())) { // 生成视图各元素信息,例如列表、按钮等
                     if (schemaViews != null) {
                         throw new ValidationFailedException("一个schema中只能配置一个<views>元素！");
                     }
@@ -238,7 +228,7 @@ public class GaeaXmlSchemaProcessor {
      * @return
      */
     private Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws IOException {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Map<String, Object> root = new HashMap<String, Object>();
         Map<String, Object> viewsMap = new HashMap<String, Object>();
 //        Map<String, Object> gridMap = null;
         SchemaViews schemaViews = gaeaXmlSchema.getSchemaViews();
@@ -254,10 +244,11 @@ public class GaeaXmlSchemaProcessor {
         viewsMap.put("dialogs", schemaViews.getDialogs());
         viewsMap.put("actions", schemaViews.getActions());
         viewsMap.put("title", schemaViews.getTitle());
-        resultMap.put("grid", schemaViews.getGridDTO());
-        resultMap.put("views",viewsMap);
-        resultMap.put("id", gaeaXmlSchema.getId());
-        return resultMap;
+        // 这些都是放在json数据根下的。
+        root.put("grid", schemaViews.getGridDTO());
+        root.put("views", viewsMap);
+        root.put("id", gaeaXmlSchema.getId());
+        return root;
     }
 
     /**

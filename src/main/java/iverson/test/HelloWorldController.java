@@ -36,7 +36,8 @@ public class HelloWorldController {
     }
 
     @RequestMapping("/test.do")
-    public void test( @RequestBean("carMap") Map carMap,
+    public void test( @RequestBean Map<String,Users> userMap,@RequestBean Map carMap,
+                      @RequestBean List<Users> users,@RequestBean List cars,@RequestBean("order") List orders,
                       @RequestBean("dept") Department department, @RequestBean("usr") Users user, HttpServletRequest request) {
         List<Users> usersList = new ArrayList<Users>();
         usersList.add(user);

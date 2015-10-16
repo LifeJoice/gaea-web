@@ -6,15 +6,15 @@ import org.gaea.framework.common.utils.GaeaStringUtils;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;
+import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaData;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;
@@ -162,8 +162,8 @@ public class XmlDataSchemaConvertor {
 //
 //            Page<?> handleResult = (Page<?>) dataHandleChain.handle(dataSet.getSql(), SecurityUtils.getUserContext(), DataSourceUtils.get(dataSource),
 //                    null);
-            Pageable pageable = new PageRequest(1,20);
-            Page<?> pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(),null,pageable);
+//            Pageable pageable = new PageRequest(1,20);
+            PageResult pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(),null,new SchemaGridPage(1,5));
 
             logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
             dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
