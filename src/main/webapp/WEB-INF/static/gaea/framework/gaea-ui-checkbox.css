@@ -27,6 +27,7 @@
 /* style all of our span tags with position absolute and over to the left */
 .row-check label span {
     display: block;
+    /*下面三个确保居中*/
     position: absolute;
     margin:auto;
     top: 0; left: 0; bottom: 0; right: 0;

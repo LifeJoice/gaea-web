@@ -603,11 +603,11 @@ gaea.component.bridge = {
             // 清空内容
             pageDiv.html("");
             // 第一页
-            pageDiv.append("<span class=\"button first\"><<<input type='hidden' value='" + 1 + "'></span>");
+            pageDiv.append("<div class='button'><span class=\"icon first\"><input type='hidden' value='" + 1 + "'></span></div>");
             // 上一页
-            pageDiv.append("<span class=\"button previous\"><<input type='hidden' value='" + (page - 1) + "'></span>");
+            pageDiv.append("<div class='button'><span class=\"icon previous\"><input type='hidden' value='" + (page - 1) + "'></span></div>");
             // 页码部分: 1 2 3 4 ...
-            pageDiv.append("<span class=\"pages\"></span>");
+            pageDiv.append("<div class='page-numbers'></div>");
             // 生成页码
             var half = 3;   // 这个是要显示多少页的一半
             var firstPage = page - half;
@@ -615,19 +615,19 @@ gaea.component.bridge = {
             for (i = 1; i < 8; i++) {
                 if (i != page) {
                     if (firstPage > 0) {
-                        pageDiv.find(".pages").append("<span class=\"button\">" + p + "<input type='hidden' value='" + p + "'></span>");
+                        pageDiv.find(".page-numbers").append("<span>" + p + "<input type='hidden' value='" + p + "'></span>");
                     } else {
-                        pageDiv.find(".pages").append("<span class=\"button\">" + i + "<input type='hidden' value='" + i + "'></span>");
+                        pageDiv.find(".page-numbers").append("<span>" + i + "<input type='hidden' value='" + i + "'></span>");
                     }
                 } else {
-                    pageDiv.find(".pages").append("<span class=\"selected\">" + p + "</span>");
+                    pageDiv.find(".page-numbers").append("<span class=\"selected\">" + p + "</span>");
                 }
                 p++;
             }
             // 下一页
-            pageDiv.append("<span class=\"button next\">\><input type='hidden' value='" + (page + 1) + "'></span>");     // p在循环最后自加了，这里就不用加了。
+            pageDiv.append("<div class='button'><span class=\"icon next\"><input type='hidden' value='" + (page + 1) + "'></span></div>");     // p在循环最后自加了，这里就不用加了。
             // 最后一页
-            pageDiv.append("<span class=\"button last\">\>\><input type='hidden' value='" + (Math.ceil(rowCount / size)) + "'></span>");
+            pageDiv.append("<div class='button'><span class=\"icon last\"><input type='hidden' value='" + (Math.ceil(rowCount / size)) + "'></span></div>");
             // 生成：显示第1条至第20条 当前第几页
             var first = 1;
             if (page > 1) {
@@ -636,7 +636,7 @@ gaea.component.bridge = {
             var last = page * size;
             pageDiv.append("<span class=\"page-desc\">" + first + " - " + last + " 共 " + rowCount + "</span>");
             /* 【2】点击页码事件 */
-            pageDiv.find("span.button").click(function () {
+            pageDiv.find("span:has(input)").click(function () {
                 var pageVal = $(this).children("input").val();
                 that.options.page.page = pageVal;     // 先赋值。待会查询完成后可用于刷新页码。
                 // 查询（下一页 etc……）

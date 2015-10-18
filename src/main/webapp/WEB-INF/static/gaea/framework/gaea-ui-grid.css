@@ -1,27 +1,166 @@
-/*分页的1-20部分的css*/
-.gaea-grid-footer .pagination .page-desc{
+/**
+ * 表格的各种CSS定义。包括列头、高级搜索、数据行的各种效果、分页等。
+ */
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*   分页   *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* */
+/*分页块的整体定义*/
+.gaea-grid-footer .pagination{
+    height: 30px;
+    margin-left: 5px;
+}
+/* 需要和整个块保持同样高度并居中的字体。单独设置 */
+.gaea-grid-footer .pagination .page-numbers span,.gaea-grid-footer .pagination .page-desc{
+    /*下面两个确保字体居中*/
+    text-align: center;
+    line-height: 30px; /* line-height设为和要居中的块一样高即可。 */
+}
+
+/*分页的1-20部分的css。放右下角*/
+.gaea-grid-footer .pagination .page-desc {
     float: right;
 }
+.gaea-grid-footer .pagination div{
+    position: relative;
+    float: left;
+    height: 100%;
+    /*width: 20px;*/
+}
+/*分页单个按钮宽度。*/
+.gaea-grid-footer .pagination div.button{
+    width: 30px;
+}
+/*分页，页码块的整体宽度。 分页的固定数字部分。1 2 3 4 ... */
+.gaea-grid-footer .pagination .page-numbers {
+    display: block;
+    float: left;
+    width: 220px;
+    margin-left: 10px;
+}
 /*分页的每个页码、按钮部分的css*/
-.gaea-grid-footer .pagination span.button{
-    display: block;
-    float: left;
+.gaea-grid-footer .pagination .page-numbers span:not(.selected),span.icon {
+    /*display: block;*/
+    /*float: left;*/
     cursor: pointer;
-    width: 20px;
 }
-/*分页的固定数字部分。1 2 3 4 ...*/
-.gaea-grid-footer .pagination .pages{
+/*按钮。这个以后可以抽取为通用按钮。*/
+span.icon{
+    width: 10px;
+    height: 10px;
+    border-style: solid;
+    border-color: black;
+    /*下面三个确保居中*/
+    position: absolute;
+    margin:auto;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+/*向左的按钮。上一页。*/
+span.icon.first{
+    border-width: 0 0 2px 2px;
+    /*旋转的方向。指向左。*/
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+/*第一页的竖线。和上面的配合。*/
+span.icon.first::after{
+    content: '';
     display: block;
-    float: left;
+    /*以下都是为了竖线和箭头对其。width,left,top是相关的几个定位参数。*/
+    position: absolute;
+    /*width: 12px;*/
+    height: 18px;
+    border-style: solid;
+    border-width: 0 0 0 2px;
+    /*border-color: #2D3E50;*/
+    left: -4px;
+    top: 4px;
+    /*抵消依附span的旋转方向。不跟着按钮旋转*/
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
 }
+/*向左的按钮。上一页。*/
+span.icon.previous{
+    border-width: 0 0 2px 2px;
+    /*旋转的方向。指向左。*/
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+/*向右的按钮。下一页。*/
+span.icon.next{
+    border-width: 2px 2px 0 0;
+    /*旋转的方向。指向右。*/
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+/*最后一页的按钮。 */
+span.icon.last{
+    border-width: 2px 2px 0 0;
+    /*旋转的方向。指向右。*/
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+/*最后一页的竖线。和上面的配合。*/
+span.icon.last::after{
+    content: '';
+    display: block;
+    /*以下都是为了竖线和箭头对其。width,left,top是相关的几个定位参数。*/
+    position: absolute;
+    width: 12px;
+    height: 18px;
+    border-style: solid;
+    border-width: 0 2px 0 0;
+    /*border-color: #2D3E50;*/
+    left: 2px;
+    top: -8px;
+    /*抵消依附span的旋转方向。不跟着按钮旋转*/
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
+/*/!*分页的固定数字部分。1 2 3 4 ...*!/*/
+/*.gaea-grid-footer .pagination .page-numbers {*/
+    /*display: block;*/
+    /*float: left;*/
+/*}*/
+
 /*固定数字的每个样式*/
-.gaea-grid-footer .pagination .pages span{
+.gaea-grid-footer .pagination .page-numbers span {
     display: block;
     float: left;
     width: 20px;
+    margin-right: 10px;
 }
-/*已选页码的css*/
-.gaea-grid-footer .pagination span.selected{
-    border: 1px solid black;
+
+.gaea-grid-footer .pagination .page-numbers span:not(.selected):hover {
+    font-weight: bold;
+    font-size: 16px;
+}
+/* 已选中的页码。深色底白字。 */
+.gaea-grid-footer .pagination span.selected {
+    border-color: #2D3E50;
+    background-color: #2D3E50;
+    color: white;
+    padding: 4px;
+    line-height: 20px;
+    /*是个圆形*/
+    -webkit-border-radius: 100%;
+    -moz-border-radius: 100%;
+    border-radius: 100%;
 }
 
