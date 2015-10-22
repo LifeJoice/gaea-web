@@ -186,6 +186,7 @@ gaea.component.bridge = {
         cache: {
             selectedRow: null,
             hasCreatedRowHeadActions: false,     // 是否已经为grid列头创建了行前操作区列
+            hasRowHeadActions:false,
             rows: [
                 //{
                 //    index: null,                 // 行下标。第几行。
@@ -218,9 +219,9 @@ gaea.component.bridge = {
                 console.log("fields与columns长度必须一致！");
                 return;
             }
-            var myColumns = new Array();
-            var myFields = new Array();         // 这个是字段id的列表
-            var pkColumnId;
+            //var myColumns = new Array();
+            //var myFields = new Array();         // 这个是字段id的列表
+            //var pkColumnId;
 //            for (var i = 0; i < options.columns.length; i++) {
 //                var column = options.columns[i];
 //                var field = options.model.fields[i];
@@ -262,26 +263,24 @@ gaea.component.bridge = {
             //var urGridId = "#" + options.renderTo;
             var grid = $("#" + options.renderTo);
             grid.append("<div class='gaea-grid'>" +
-                "<div class='gaea-grid-header'><div id=\"mars-tb-head\" class=\"mars-tb-head\"></div></div>" +
-                "<div class='gaea-grid-body'><table class='ur-gridtable'></table></div>" +
+                "<div class='gaea-grid-header'><div id=\"tb-head\" class=\"tb-head\"></div></div>" +
+                "<div class='gaea-grid-body'><table class='tb-body'></table></div>" +
                 "<div class='gaea-grid-footer'><div id=\"pagination\" class=\"pagination\"></div></div>" +
                 "<input type='hidden' id='gridId' name='gridId' value='" + options.id + "'>" +
                 "</div>");
             var tableHeadCT = $(".gaea-grid-header");
-            var tableHead = $("#mars-tb-head");
-            var tableBody = $(".ur-gridtable");
-            var autoGenClassNamePrefix = "autogen-col-";
-            var tdDefaultClasses = "grid-td";
-            var colCssArray = new Array();
-            var selectedRow;                                    // 如果点击了数据表中某行，记录该行
+            //var tableHead = $("#tb-head");
+            //var tableBody = $(".tb-body");
+            //var autoGenClassNamePrefix = "autogen-col-";
+            //var tdDefaultClasses = "grid-td";
+            //var colCssArray = new Array();
+            //var selectedRow;                                    // 如果点击了数据表中某行，记录该行
             /* 创建列表的表头 */
             this._createTableHead();
             /* 创建列表的数据部分 */
             this._createTableData();
             /* 创建Grid的脚部分页部分 */
             this._createFooter();
-            /* 设置Grid样式 */
-            this._applyCSS();
             //// 遍历column数组，设置显示样式（CSS等）
             //$.each(options.columns, function (idx, obj) {
             //    var col = this;
@@ -318,8 +317,8 @@ gaea.component.bridge = {
                 // TODO 这个应该可以放在上面一起初始化。
             tableHeadCT.append("<div id='mars-tb-head-query' class='mars-tb-head-query'>" +
                 "<div id=\"mars-headquery-inputs\" class=\"mars-headquery-inputs\">" +
-                "<div class='mars-headquery-column select-all'></div>" +                            // 占位块。为了和列头对上。
-                "<div class='mars-headquery-column row-headactions'></div></div>" +                 // 占位块。为了和列头对上。
+                "<div class='head-query-column select-all'></div>" +                            // 占位块。为了和列头对上。
+                "<div class='head-query-column row-headactions'></div></div>" +                 // 占位块。为了和列头对上。
                 "<div id=\"mars-headquery-actions\" class='mars-headquery-actions'></div>" +
                 "</div>");
             this._initAdvancedQuery();
@@ -327,6 +326,8 @@ gaea.component.bridge = {
              * 行操作区
              */
             this._createRowActions();
+            /* 设置Grid样式 */
+            this._applyCSS();
             /* --------------------------------------------------------------------------------------------------------- WEB_FRAMEWORK的extJS代码 -------------------------- */
 //            /* Model */
 //            var colModel = new Ext.grid.ColumnModel({
@@ -394,7 +395,7 @@ gaea.component.bridge = {
         },
         refreshData: function (data) {
             this.options.data = data;
-            $(".ur-gridtable").html("");
+            $(".tb-body").html("");
             this._createTableData();
             // 设置Grid样式
             this._applyCSS();
@@ -418,21 +419,22 @@ gaea.component.bridge = {
             for (var j = 0; j < columns.length; j++) {
                 var tmpCol = columns[j];
                 var field = fields[j];
-                var genClsName = autoGenClassNamePrefix + field.id;
+                //var genClsName = autoGenClassNamePrefix + field.id;
                 var defaultClass = "column-header";
                 var columnHtmId = "gridcolumn-" + (j + 1); // column的序列化从1开始吧
                 // 如果是第一行，即第一次，生成列头
                 //if (i == 0) {
                 // 第一列，生成复选框。
                 if (j == 0) {
-                    $("#mars-tb-head").append("<div id='selectAll' class='select-all column-header'><input type='checkbox' id='checkAll' class='checkAll' ></div>");
+                    $("#tb-head").append("<div id='selectAll' class='select-all column-header'><input type='checkbox' id='checkAll' class='checkAll' ></div>");
                 }
-                $("#mars-tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + "' data-field-id='" + field.id + "'><p>" + tmpCol.text + "</p></div>");
+                $("#tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + "' data-field-id='" + field.id + "'>" + tmpCol.text + "</div>");
                 //}
             }
-            $("#mars-tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + " last' />");
+            // 最后一个列头单元格。只是用于填充宽度。
+            $("#tb-head").append("<div class='" + defaultClass + " last' />");
             //if (i == 0) {
-            $("#mars-tb-head").append("</tr>");
+            $("#tb-head").append("</tr>");
             //}
             //}
         },
@@ -453,14 +455,14 @@ gaea.component.bridge = {
             var arrRowHeadActions = new Array();
             //var tdDefaultClasses = "grid-td";
             // 清空一下。如果是刷新数据的时候需要。
-            $(".ur-gridtable").html("");
+            $(".tb-body").html("");
             // 先清空缓存
             this.cache.rows = [];
             // 遍历每一行数据
             for (var i = 0; i < data.length; i++) {
                 var row = data[i];
                 //console.log("name= "+row.name);
-                $(".ur-gridtable").append("<tr data-rowindex='" + (i + 1) + "'>");
+                $(".tb-body").append("<tr data-rowindex='" + (i + 1) + "'>");
                 // 遍历每一列。遍历column等效于遍历field
                 for (var j = 0; j < columns.length; j++) {
                     //var tmpCol = columns[j];
@@ -485,7 +487,7 @@ gaea.component.bridge = {
                         if (field.id == key) {
                             // 第一列，生成复选框。
                             if (j == 0) {
-                                $(".ur-gridtable tr:last").append("<td>" +
+                                $(".tb-body tr:last").append("<td>" +
                                     "<div class=\"row-check\">" +
                                     "<input type='checkbox' id='urgrid-chb-" + i + "'>" +
                                         // Label里面的都是复选框的效果元素。box是框。check是勾。
@@ -500,7 +502,7 @@ gaea.component.bridge = {
                             if (gaea.utils.validate.isNotNull(column.datetimeFormat)) {
                                 nRowColVal = gaea.utils.date.parser.getDate(nRowColVal, {format: column.datetimeFormat});
                             }
-                            $(".ur-gridtable tr:last").append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
+                            $(".tb-body tr:last").append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
                                 "<div class=\"grid-td-div\">" + nRowColVal + "</div></td>");
                         }
                     });
@@ -515,6 +517,10 @@ gaea.component.bridge = {
                                 wfProcInstId: row.wfProcInstId
                             }]
                         });
+                        // 设置有行前操作区。关系到列头的排版。
+                        //if(!this.cache.hasRowHeadActions) {
+                        //    this.cache.hasRowHeadActions = true;
+                        //}
                     } else {
                         this.cache.rows.push(null);
                     }
@@ -522,12 +528,13 @@ gaea.component.bridge = {
                 //if (i == 0) {
                 //    $("#mars-tb-head").append("</tr>");
                 //}
-                $(".ur-gridtable").append("</tr>");
+                $(".tb-body").append("</tr>");
             }
         },
         _applyCSS: function () {
             var that = this;
-            var urGrid = $("#" + this.options.renderTo);
+            var grid = $("#" + this.options.renderTo);
+            var gridHead = $(".gaea-grid-header .tb-head");
             // 遍历column数组，设置显示样式（CSS等）
             $.each(this.options.columns, function (idx, obj) {
                 var col = this;
@@ -537,14 +544,14 @@ gaea.component.bridge = {
                     // 设置数据table的单元格的样式
                     // 单元格宽度，等于Schema设置的宽度 + 列头的左右padding - 单元格td自带的左右padding + 列头的列间边框（白缝）。因为左右一样，所以都是x2
                     var gridCellWidth = parseInt(col.width) + that.default.css.columnHeadWidthPadding * 2 - that.default.css.gridTdPadding * 2 + 1;
-                    urGrid.find(columnTDs).children(".grid-td-div").css("width", gridCellWidth);
+                    grid.find(columnTDs).children(".grid-td-div").css("width", gridCellWidth);
                     // 设置列头的样式
-                    urGrid.find("#" + gridColumnId).find("p").css("width", col.width);
+                    gridHead.children("#" + gridColumnId).css("width", col.width);
                 }
                 // 隐藏列
                 if (gaea.utils.validate.isNotNull(col.hidden)) {
                     if (col.hidden) {
-                        urGrid.find(columnTDs).css("display", "none");
+                        grid.find(columnTDs).css("display", "none");
                         $("#" + gridColumnId).css("display", "none");
                     }
                 }
@@ -554,11 +561,15 @@ gaea.component.bridge = {
             // 页面高度 - 上方title、toolbar等占用高度 - 列头高度
             bodyHeight = bodyHeight - 130 - 30;
             $(".gaea-grid-body").css("height", bodyHeight); // grid行数据部分的高度
+            /* 根据行数据，确定列头是否需要行前操作区留白 */
+            if(!this.cache.hasRowHeadActions){
+                $(".head-query-column.row-headactions").css("display","none");
+            }
         },
         _bindingEvents: function () {
             var that = this;
             // 绑定事件。点击行选中复选框。
-            $(".ur-gridtable").find("tr").click(function () {
+            $(".tb-body").find("tr").click(function () {
                 var index = $(this).data("rowindex");
                 var i = index - 1;
                 $(":checkbox[id^='urgrid-chb']").prop("checked", false);
@@ -648,6 +659,7 @@ gaea.component.bridge = {
         },
         /**
          * 高级查询
+         * 即点击列头，出现在列头下的查询行。
          * @private
          */
         _initAdvancedQuery: function () {
@@ -658,15 +670,15 @@ gaea.component.bridge = {
             for (var i = 0; i < fields.length; i++) {
                 var field = fields[i];
                 var column = columns[i];
-                var defaultClass = "mars-headquery-column";
+                var defaultClass = "head-query-column";
                 var columnHtmId = "mars-hq-column-" + (i + 1); // column的序列化从1开始吧
                 var inputId = "mars-hq-" + field.id;
                 // 拼凑各个字段的查询输入框
                 if (gaea.utils.validate.isNotNull(column.hidden) && !column.hidden) {
-                    $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><input id='" + inputId + "' data-field-id='" + field.id + "' ></div>");
+                    $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
                     // +1是列头的列间边框宽度。
-                    $("#" + columnHtmId).css("width", (parseInt(column.width) + 1));
-                    $("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
+                    $("#" + columnHtmId).css("width", (parseInt(column.width)));
+                    //$("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
                 }
             }
             // 组装按钮
@@ -711,7 +723,7 @@ gaea.component.bridge = {
                 //})
             });
             // 【3】 点击列头，展示查询区。
-            $("#mars-tb-head").find(".column-header").click(function () {
+            $("#tb-head").find(".column-header").click(function () {
                 //console.log(" 选中的column： " + $(this).data("field-id"));
                 //$("#mars-tb-head-query").css("display","block");
                 $("#mars-tb-head-query").slideDown("fast");    // cool一点的方式
@@ -761,6 +773,7 @@ gaea.component.bridge = {
                                 // 全局的，只赋值一次。
                                 if (!hasHeadActionAtAll) {
                                     hasHeadActionAtAll = true;
+                                    that.cache.hasRowHeadActions = true;
                                 }
                             }
                             // 根据headActions的配置项，处理不同的类型
@@ -777,14 +790,14 @@ gaea.component.bridge = {
                     });
                     // 生成行前操作区
                     if (hasHeadActions) {
-                        $(".ur-gridtable tr").eq(rowCache.index).children("td").eq(0).after("<td class=\"grid-td row-headactions\" data-columnid=\"headactions\">" + actionsHtml + "</td>");
+                        $(".tb-body tr").eq(rowCache.index).children("td").eq(0).after("<td class=\"grid-td row-headactions\" data-columnid=\"headactions\">" + actionsHtml + "</td>");
                     }
                     // 遍历处理行尾操作区。未完成。。。
                 });
                 // 如果任意一行有行前操作区，增加列头。
                 if (hasHeadActionAtAll && !that.cache.hasCreatedRowHeadActions) {
                     that.cache.hasCreatedRowHeadActions = true;
-                    $("#mars-tb-head .select-all").after("<div id='row-headactions' class='row-headactions column-header'><p>操作</p></div>");
+                    $("#tb-head .select-all").after("<div id='row-headactions' class='row-headactions column-header'><p>操作</p></div>");
                 }
                 // TODO 如果有查看流程图的按钮，生成弹框DIV。未完成。。。
                 //if (hasShowDiagramDialog) {

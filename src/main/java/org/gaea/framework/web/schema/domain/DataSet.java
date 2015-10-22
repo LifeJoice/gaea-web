@@ -18,6 +18,7 @@ public class DataSet {
     private String beanRef;
     private List<Map<String,Object>> sqlResult;
     private String jsonData;
+    private long totalElements;
 
     public String getId() {
         return id;
@@ -101,5 +102,13 @@ public class DataSet {
 
     public void setBeanRef(String beanRef) {
         this.beanRef = beanRef;
+    }
+
+    public long getTotalElements() {
+        return totalElements;
+    }
+
+    public void setTotalElements(long totalElements) {
+        this.totalElements = totalElements;
     }
 }

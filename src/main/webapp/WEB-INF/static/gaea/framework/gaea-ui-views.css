@@ -21,10 +21,13 @@
 
 /* 列头的容器 */
 /*.hd-div{*/
-.mars-tb-head {
-    height: 30px;
+.tb-head {
+    position: relative;
+    height: 40px;
     font-size: 14px;
     font-weight: bold;
+    /*表格列头字体为白色。*/
+    color: white;
 }
 
 /* --------------- >>>> 列表内容部分 <<<< --------------- */
@@ -35,7 +38,7 @@
 }
 
 /* 表格 */
-.ur-gridtable {
+.tb-body {
     width: inherit;     /* 解决样式受macula样式影响撑大的问题。 */
     table-layout: fixed;
     border-style: none;
@@ -46,17 +49,17 @@
 /* 列头 */
 .column-header {
     float: left;
-    height: 30px;
-    background-color: #EAEAEA;
+    height: 100%;
+    background-color: #607D8B;
     border-style: solid;
     border-collapse: collapse;
-    /* 列头上、左、右留下白色边框 */
-    border-width: 1px 1px 2px 0;
+    /* 列头上、下留下白色边框 */
+    border-width: 1px 0 2px 0;
     border-color: white;
     /*文字水平居中*/
     text-align: center;
     /*文字垂直居中。line-height和div高度一致即可。*/
-    line-height: 30px;
+    line-height: 40px;
 }
 /*列头最后一列。空列。填充满行的剩余部分。*/
 .column-header.last{
@@ -67,27 +70,27 @@
 }
 
 /* 列头的字体左右边距（高级查询也保持一致） */
-.column-header p, .mars-headquery-column {
-    margin: 0;
-    padding: 0 5px;
-    /* 高度用来撑开非字段列的样式 */
-    height: 30px;
-}
+/*.column-header p, .head-query-column {*/
+    /*margin: 0;*/
+    /*padding: 0 5px;*/
+    /*/!* 高度用来撑开非字段列的样式 *!/*/
+    /*height: 30px;*/
+/*}*/
 
 /*列头下方的边线效果*/
-.column-header::after,.column-header.last::after {
-    content: '';
-    /*position: absolute;*/
-    display: block;
-    width: 100%;
-    height: 2px;
-    background-color: #EDEDED;
-    border-style: solid;
-    border-width: 0 0 1px;
-    border-bottom-color: #D8D8D8;
-}
+/*.column-header::after,.column-header.last::after {*/
+    /*content: '';*/
+    /*/!*position: absolute;*!/*/
+    /*display: block;*/
+    /*width: 100%;*/
+    /*height: 2px;*/
+    /*background-color: #EDEDED;*/
+    /*border-style: solid;*/
+    /*border-width: 0 0 1px;*/
+    /*border-bottom-color: #D8D8D8;*/
+/*}*/
 /*行前复选框*/
-.mars-tb-head .select-all{
+.tb-head .select-all{
     width: 35px;
 }
 
@@ -108,7 +111,7 @@
     white-space: nowrap;
 }
 /*行前复选框*/
-.ur-gridtable .row-check{
+.tb-body .row-check{
     position: relative;
     width: 35px;
 }
@@ -122,35 +125,55 @@
     display: none; /* 默认不显示。点击才显示。 */
     width: 100%;
     /*height: 30px;*/
-    margin-top: 5px; /* 保持距离，不然会重叠 */
+    /*margin-top: 5px; /!* 保持距离，不然会重叠 *!/*/
     /*padding-left: 21px; /!* 留出复选框的距离 *!/*/
 }
-/*查询输入框前的占位容器。为了和列头对齐。*/
-.mars-headquery-column.select-all {
-    width: 21px;
+/*查询输入框前的占位容器。为了和列头对齐。这个宽度是写死的。怎么对齐怎么写。*/
+.head-query-column.select-all {
+    width: 35px;
+    height: 100%;
 }
-.mars-headquery-column.row-headactions {
+.head-query-column.row-headactions {
     width: 60px;
 }
 /*查询条件的输入框的容器，和按钮的容器*/
-.mars-headquery-inputs, .mars-headquery-actions {
+.mars-headquery-actions {
     width: 100%;
     height: 30px;
 }
+.mars-headquery-inputs{
+    position: relative;
+    width: 100%;
+    height: 35px;   /* 这个和( 列头高度 - padding) 一致。 */
+    padding-top: 5px;   /* 解决输入框撑变形无法靠左问题。 */
+    background-color: #90CAE2;
+}
 
 /*每个查询框的div*/
-.mars-headquery-column {
+.head-query-column {
     float: left;
     overflow: hidden;
-    /*background-color: #A7E2E7;*/
+    /*垂直居中*/
+    margin:auto;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+.head-query-column span{
+    display: block;
+    margin: 0 auto; /* 水平居中 */
+    width: 90%;
+}
+.head-query-column input{
+    height: 24px;
+    border-width: 0px;  /* 不要显示边框 */
+    width: 100%;    /* 不要留空。方便外面的span定位 */
 }
 
 /* --------------- >>>> 列表行的操作区，包括行前操作区，行尾操作区等 <<<< --------------- */
 /*针对列头的操作区和行操作区宽度有些微不一样。*/
-.mars-tb-head .row-headactions {
+.tb-head .row-headactions {
     width: 70px;
 }
-.ur-gridtable .row-headactions{
+.tb-body .row-headactions{
     width: 66px;
 }
 

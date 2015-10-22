@@ -16,7 +16,7 @@ public class SchemaGridPage {
 
     private int size = 20;          // 默认一页20条
     private int page = 1;           // 默认第一页。从1开始。
-    private int rowCount = 85;
+    private long rowCount = 0;
     private int pageCount = 0;
 
     public int getSize() {
@@ -35,11 +35,11 @@ public class SchemaGridPage {
         this.page = page;
     }
 
-    public int getRowCount() {
+    public long getRowCount() {
         return rowCount;
     }
 
-    public void setRowCount(int rowCount) {
+    public void setRowCount(long rowCount) {
         this.rowCount = rowCount;
     }
 

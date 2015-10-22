@@ -238,6 +238,7 @@ public class GaeaXmlSchemaProcessor {
         // 拼装数据，转换结果集中的数据库字段名。
         DataSet dataSet = changeDbColumnNameInData(schemaData.getDataSetList().get(0),schemaViews.getGrid());
         schemaViews.getGridDTO().setData(dataSet.getSqlResult());
+        schemaViews.getGridDTO().getPage().setRowCount(dataSet.getTotalElements());
 //        gridMap.put("data", dataSet.getSqlResult());
         // 指定放置在页面哪个DIV中
 //        gridMap.put("renderTo", schemaViews.getGrid().getRenderTo());

@@ -167,6 +167,7 @@ public class XmlDataSchemaConvertor {
 
             logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
             dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
+            dataSet.setTotalElements(pageResultSet.getTotalElements());
         }
         return dataSetList;
     }
