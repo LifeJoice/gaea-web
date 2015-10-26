@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body{
+            font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
+            background-image: url("/resources/images/system/sys_login_bg.jpg");
+        }
+        .main{
+            display: table;
+            position: absolute;
+            width: 99%;
+            height: 98%;
+        }
+        .login-panel{
+            width: 500px;
+            height: 350px;
+            position: absolute;
+            /*display: table-cell;*/
+            /*vertical-align: middle;*/
+            border: 1px solid #CBB7DB;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            /*垂直居中*/
+            margin:auto;
+            top: 0; left: 0; bottom: 0; right: 0;
+
+        }
+        .login-panel-bg{
+            width: 500px;
+            height: 350px;
+            background-color: white;
+            /*登录面板的透明背景*/
+            opacity: 0.4;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+        }
+        .login-title{
+            position: absolute;
+            z-index: 1;
+            opacity: 0.8;
+            color: #303545;
+            font-size: 30px;
+            padding: 20px 30px;
+            letter-spacing: 5px;
+        }
+        .login-form{
+            position: absolute;
+            margin-top: 50px;
+            margin-left: 30px;
+            width: 90%;
+            z-index: 10; /* 太小会被背景遮住 */
+        }
+        .login-form input{
+            width: 90%;
+            height: 40px;
+            padding: 5px 15px;
+            margin-top: 30px;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            border: 0px solid white;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+        }
+        /*登录按钮*/
+        .action{
+            width: 86%;
+            position: absolute;
+            bottom: 60px;
+            margin: auto;
+            left: 0;
+            right: 0;
+        }
+        .btn-submit{
+            display: block;
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            letter-spacing: 3px;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            font-size: 20px;
+            color: white;
+            /*font-weight: bold;*/
+            /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#52ee55+0,60abf8+100,52c6ee+100 */
+            background: #52ee55; /* Old browsers */
+            background: -moz-linear-gradient(left,  #52ee55 0%, #60abf8 100%, #52c6ee 100%); /* FF3.6+ */
+            background: -webkit-gradient(linear, left top, right top, color-stop(0%,#52ee55), color-stop(100%,#60abf8), color-stop(100%,#52c6ee)); /* Chrome,Safari4+ */
+            background: -webkit-linear-gradient(left,  #52ee55 0%,#60abf8 100%,#52c6ee 100%); /* Chrome10+,Safari5.1+ */
+            background: -o-linear-gradient(left,  #52ee55 0%,#60abf8 100%,#52c6ee 100%); /* Opera 11.10+ */
+            background: -ms-linear-gradient(left,  #52ee55 0%,#60abf8 100%,#52c6ee 100%); /* IE10+ */
+            background: linear-gradient(to right,  #52ee55 0%,#60abf8 100%,#52c6ee 100%); /* W3C */
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#52ee55', endColorstr='#52c6ee',GradientType=1 ); /* IE6-9 */
+        }
+        .btn-submit:hover{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <div class="login-panel">
+        <div class="login-title">登录</div>
+        <div class="login-form">
+            <div><input type="text" id="username" name="uesrname" value=""></div>
+            <div><input type="password" id="password" name="password" value=""></div>
+        </div>
+        <div class="action">
+            <span class="btn-submit">登录</span>
+        </div>
+        <div class="login-panel-bg"></div>
+    </div>
+</div>
+</body>
+</html>
