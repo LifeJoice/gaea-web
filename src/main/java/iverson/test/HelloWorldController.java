@@ -23,7 +23,7 @@ public class HelloWorldController {
 
     @RequestMapping("/department_users.do")
     public String showDepartmentUsers(HttpServletRequest request) {
-        return "/static/html/test/department_users.html";
+        return "/static/test/department_users.html";
     }
 
     @RequestMapping("/list-all-users.do")

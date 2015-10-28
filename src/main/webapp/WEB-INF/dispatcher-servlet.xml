@@ -28,7 +28,7 @@
     <!--add by Iverson 2015-9-25 -->
     <!--XML Schema的处理器-->
     <bean id="gaeaHtmlView" class="org.gaea.springframework.web.servlet.view.GaeaHtmlView">
-        <property name="contentType" value="text/html;charset=UTF-8" />
+        <property name="contentType" value="text/html;charset=UTF-8"/>
         <property name="url" value=""/>
     </bean>
 
@@ -37,13 +37,13 @@
         <property name="viewName" value="gaeaHtmlView"/>
         <property name="location" value="/WEB-INF/static/html/"/>
         <property name="viewSchemaLocation" value="/WEB-INF/static/view_schema/"/>
-        <property name="cache" value="false" />
+        <property name="cache" value="false"/>
         <!--顺序1，优先处理XML schema-->
         <property name="order" value="1"/>
     </bean>
     <!-- add by Iverson 2015-9-25 End -->
     <bean id="viewResolver"
-          class="org.springframework.web.servlet.view.InternalResourceViewResolver" >
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value=""/>
         <property name="suffix" value=""/>
         <property name="order" value="2"/>
@@ -54,9 +54,14 @@
     -->
     <bean name="indexController"
           class="org.springframework.web.servlet.mvc.ParameterizableViewController"
-          p:viewName="index" />
-
-    <mvc:resources mapping="/static/**" location="/WEB-INF/static/">
+          p:viewName="index"/>
+    <!-- *********************************     对静态资源的定义     ********************************* -->
+    <!--针对webapp根目录的资源。默认视为静态。-->
+    <mvc:resources mapping="/static/**" location="/WEB-INF/static/" order="1">
         <!--<mvc:cache-control max-age="3600" cache-public="true"/>-->
     </mvc:resources>
+    <mvc:resources mapping="/**" location="/" order="99"/>
+    <!-- *********************************     对特定路径的定义。例如登录……等     ********************************* -->
+    <!--对于整个应用的根路径。自动跳转到登录界面。如果已经登录，则跳转到主界面。-->
+    <mvc:view-controller path="/" view-name="redirect:/login"/>
 </beans>
