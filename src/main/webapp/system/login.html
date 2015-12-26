@@ -7,7 +7,19 @@
     <style>
         body{
             font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
-            background-image: url("/resources/images/system/sys_login_bg.jpg");
+            background-image: url("/resources/images/system/sys_login_bg2.jpg");
+            /*background-image: url("/resources/images/test/stock-photo-133081733.jpg");*/
+            /*-webkit-background-size: auto;*/
+            /* 背景图垂直、水平均居中 */
+            background-position: center center;
+            /* 背景图不平铺 */
+            background-repeat: no-repeat;
+            /* 当内容高度大于图片高度时，背景图像的位置相对于viewport固定 */
+            background-attachment: fixed;
+            /* 让背景图基于容器大小伸缩 */
+            background-size: cover;
+            /* 设置背景颜色，背景图加载过程中会显示背景色 */
+            background-color: #464646;
         }
         .main{
             display: table;
@@ -21,7 +33,7 @@
             position: absolute;
             /*display: table-cell;*/
             /*vertical-align: middle;*/
-            border: 1px solid #CBB7DB;
+            /*border: 1px solid #CBB7DB;*/
             -webkit-border-radius: 3px;
             -moz-border-radius: 3px;
             border-radius: 3px;
@@ -117,7 +129,7 @@
 <body>
 <div class="main">
     <div class="login-panel">
-        <form id="myform" action="/j_spring_security_check">
+        <form id="myform" action="/j_spring_security_check" method="post">
             <div class="login-title">登录</div>
             <div class="login-form">
                 <div><input type="text" id="username" name="username" value=""></div>

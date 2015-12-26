@@ -24,4 +24,10 @@ public class SystemLoginController {
 //        }
         return "/system/login.html";
     }
+
+    @RequestMapping("/test-spring-security-ok")
+    public String test(String username,String password){
+        System.out.println("\n=============================\n系统权限校验通过！Spring Security运行中……\n=============================\n");
+        return "/system/main.html";
+    }
 }

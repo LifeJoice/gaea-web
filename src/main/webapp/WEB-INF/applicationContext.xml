@@ -139,6 +139,9 @@
     <!--<bean id="genericExceptionResolver" class="GenericExceptionResolver"></bean>-->
     <!--增加多AOP注解的扫描。例如，针对：@Aspect...-->
     <aop:aspectj-autoproxy/>
+    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg type="javax.sql.DataSource" ref="dataSource"/>
+    </bean>
     <!--<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />-->
 
@@ -167,51 +170,7 @@
     <bean id="persistenceExceptionTranslationPostProcessor"
           class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 
-
-    <!--<bean id="abstractEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"-->
-          <!--abstract="true">-->
-        <!--<property name="jpaVendorAdapter">-->
-            <!--<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">-->
-                <!--<property name="database" value="MYSQL" />-->
-                <!--<property name="showSql" value="true" />-->
-                <!--<property name="generateDdl" value="true" />-->
-            <!--</bean>-->
-        <!--</property>-->
-        <!--<property name="jpaProperties">-->
-            <!--<props>-->
-                <!--<prop key="hibernate.ejb.event.post-update">-->
-                    <!--org.macula.core.hibernate.audit.AuditedEventListener-->
-                <!--</prop>-->
-                <!--<prop key="hibernate.dialect">-->
-                    <!--org.hibernate.dialect.SQLServer2008Dialect-->
-                <!--</prop>-->
-            <!--</props>-->
-        <!--</property>-->
-    <!--</bean>-->
-
-    <!-- Macula Entity Manager -->
-    <!--<bean id="entityManagerFactory" parent="abstractEntityManagerFactory">-->
-        <!--<property name="persistenceUnitManager">-->
-            <!--<bean class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">-->
-                <!--&lt;!&ndash;<property name="defaultPersistenceUnitName">&ndash;&gt;-->
-                    <!--&lt;!&ndash;<value>macula</value>&ndash;&gt;-->
-                <!--&lt;!&ndash;</property>&ndash;&gt;-->
-                <!--<property name="defaultDataSource" ref="dataSource" />-->
-                <!--<property name="packagesToScan">-->
-                    <!--<array>-->
-                        <!--&lt;!&ndash; 系统需要的默认domain。 &ndash;&gt;-->
-                        <!--&lt;!&ndash;<value>org.macula.base.app.domain</value>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<value>org.macula.base.security.domain</value>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<value>org.macula.base.data.domain</value>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<value>org.macula.plugins.rule.domain</value>&ndash;&gt;-->
-                        <!--&lt;!&ndash; 自定义的业务domain。对com.ur.qr下的所有domain进行扫描。add by Iverson &ndash;&gt;-->
-                        <!--<value>com.ur.**.domain</value>-->
-                    <!--</array>-->
-                <!--</property>-->
-            <!--</bean>-->
-        <!--</property>-->
-    <!--</bean>-->
-
     <!-- 导入外部的配置文件。一般是相关的service和repository配置。可以多个。 -->
     <import resource="workflow-config.xml" />
+    <import resource="spring-security.xml" />
 </beans>
