@@ -9,12 +9,13 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 /**
+ * TODO 这里得改一下兼容session factory
  * Created by Iverson on 2015/8/12.
  */
 @Component
 public class CommonCRUDRepositoryImpl implements CommonCRUDRepository {
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    @PersistenceContext
+//    @PersistenceContext
     private EntityManager em;
 
 //    public User findUsername(String userName) {
