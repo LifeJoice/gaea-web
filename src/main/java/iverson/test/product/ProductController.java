@@ -1,10 +1,10 @@
 package iverson.test.product;
 
-import com.ur.framework.exception.InvalidDataException;
-import com.ur.framework.util.ValidationUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import javax.validation.Valid;
+
+import org.gaea.exception.InvalidDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +38,10 @@ public class ProductController {
 
     /**
      * RequestBoby注释使得可以从http请求的request payload中读取数据。否则会导致读不出数据。
-     *
      * @param product
-     * @throws com.ur.framework.exception.InvalidDataException
+     * @param result
+     * @return
+     * @throws InvalidDataException
      */
     @RequestMapping("/product/save.do")
     public ResponseEntity<String> save(@Valid Product product, BindingResult result) throws InvalidDataException {

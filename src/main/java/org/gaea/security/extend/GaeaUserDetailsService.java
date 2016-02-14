@@ -3,6 +3,7 @@ package org.gaea.security.extend;
 import org.gaea.security.service.SystemUsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +19,12 @@ public class GaeaUserDetailsService implements UserDetailsService {
     @Autowired
     private SystemUsersService systemUsersService;
 
+    /**
+     * 供Spring Security调用。获取用户的角色权限信息。然后Spring Security会把相关的信息传递给AccessDecisionManager去判断。
+     * @param username
+     * @return
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Collection<GrantedAuthority> auths = new ArrayList<GrantedAuthority>();

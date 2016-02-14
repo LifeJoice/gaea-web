@@ -1,14 +1,15 @@
 package org.gaea.framework.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ur.framework.exception.DataIntegrityViolationException;
-import com.ur.framework.exception.InvalidDataException;
-import com.ur.framework.util.ValidationUtils;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.gaea.exception.DataIntegrityViolationException;
+import org.gaea.exception.InvalidDataException;
+import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

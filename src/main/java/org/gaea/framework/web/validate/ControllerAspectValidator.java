@@ -1,11 +1,11 @@
 package org.gaea.framework.web.validate;
 
-import com.ur.framework.exception.InvalidDataException;
-import com.ur.framework.util.ValidationUtils;
 import java.util.List;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.gaea.exception.InvalidDataException;
+import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
