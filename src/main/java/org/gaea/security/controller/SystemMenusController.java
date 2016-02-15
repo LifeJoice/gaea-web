@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 系统的菜单管理控制器。负责寻找用户所能操作的菜单等。
  * Created by iverson on 2016/1/31.
  */
 @Controller
@@ -29,6 +30,12 @@ public class SystemMenusController {
     @Autowired
     private SystemMenusService systemMenusService;
 
+    /**
+     * 查找用户所能操作的所有菜单功能。
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping("/find-all")
     @ResponseBody
     public List<MenuDTO> findAll(HttpServletRequest request, HttpServletResponse response) {
@@ -49,5 +56,10 @@ public class SystemMenusController {
             logger.debug("获取不到用户的登录名。可能是Spring Security的配置问题。");
         }
         return menus;
+    }
+
+    @RequestMapping("/test")
+    public String test(HttpServletRequest request, HttpServletResponse response) {
+        return "/system/error.html";
     }
 }

@@ -4,23 +4,26 @@
  * Iverson
  */
 require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate'], function($,gaeaAjax,gaeaValid) {
-
+    /**
+     * 【1】加载用户所能操作的菜单功能。阻塞加载，否则后面的菜单js会获取不到动态插入的菜单项。
+     *  当前支持1、2级菜单，未支持3级菜单。不过将来可以方便扩展。
+     */
     gaeaAjax.ajax({
-        url:"http://localhost:8080/menu/find-all",
+        url:"/menu/find-all",
         async: false,
         data:null,
         success: function (data, textStatus, jqXHR) {
             console.log("done!");
             var menuHtml = "";
+            // data即菜单列表对象。[{"name":"系统管理","level":2,"url":null,"subMenus"………………
             $.each(data, function(index) {
-                //if (index === 0) {
-                //    return;
-                //}
                 var lv2menuHtml = "<div><span class='menu lv2'>"+this.name+"</span>";
+                // 如果二级菜单的子菜单不为空,拼凑三级菜单
                 if(gaeaValid.isNotNullArray(this.subMenus)){
                     lv2menuHtml += "<div class='menu-container lv2'>";
+                    // 遍历三级菜单项,加入菜单中
                     $.each(this.subMenus, function (index) {
-                        var lv3menuHtml = "<span class='menu lv3'>"+this.name+"</span>";
+                        var lv3menuHtml = "<span class='menu lv3' data-href='"+this.url+"'>"+this.name+"</span>";
                         lv2menuHtml += lv3menuHtml;
                     });
                     lv2menuHtml += "</div>";
@@ -28,6 +31,7 @@ require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate'], fu
                 lv2menuHtml += "</div>";
                 menuHtml += lv2menuHtml;
             });
+            // 把组装完的菜单放入页面菜单DIV中.
             $(".gaea-menu-list").append(menuHtml);
         },
         fail: function () {
@@ -35,7 +39,9 @@ require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate'], fu
         }
     });
 
-
+    /**
+     * 【2】制造菜单动态切换的效果。
+     */
     //$(function () {
         var menulist = $(".gaea-menu-list"),
             $openMenuCT = $(".menu-container.lv2"),
@@ -80,7 +86,11 @@ require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate'], fu
             $openMenuCT = $(this).next(".menu-container.lv2");
         });
 
-
+    $(".menu.lv3").click(function () {
+        if(gaeaValid.isNotNull($(this).data("href"))) {
+            $(".gaea-sys-content").load($(this).data("href"));
+        }
+    });
     //})
 });
 
