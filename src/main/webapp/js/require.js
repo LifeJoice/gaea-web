@@ -2133,8 +2133,29 @@ require.config({
         jquery: '/js/thirdparty/jquery/jquery',
         underscore: '/js/thirdparty/underscore-1.8.3',
         //"gaeajs-common": '/js/ur/framework/ur-common',
+        /* Gaea tools */
         "gaeajs-common-utils-ajax": '/js/gaeajs/gaeajs-common-utils-ajax',
-        "gaeajs-common-utils-validate": '/js/gaeajs/gaeajs-common-utils-validate'
+        "gaeajs-common-utils-validate": '/js/gaeajs/gaeajs-common-utils-validate',
+        "gaeajs-common-utils-datetime": '/js/gaeajs/gaeajs-common-utils-datetime',
+        "gaeajs-common-utils-string": '/js/gaeajs/gaeajs-common-utils-string',
+        /* Gaea UI */
+        "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
+        "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',
+        "gaeajs-ui-button": '/js/gaeajs/ui/gaea.ui.button',
+        "gaeajs-ui-toolbar": '/js/gaeajs/ui/gaea.ui.toolbar',
+        "gaeajs-ui-workflow": '/js/gaeajs/ui/gaea.ui.workflow',
+        /* Jquery-UI */
+        "jquery-ui-core":'/js/thirdparty/jquery/ui/core',
+        "jquery-ui-widget":'/js/thirdparty/jquery/ui/widget',
+        "jquery-ui-mouse":'/js/thirdparty/jquery/ui/mouse',
+        "jquery-ui-button":'/js/thirdparty/jquery/ui/button',
+        "jquery-ui-dialog":'/js/thirdparty/jquery/ui/dialog',
+        "jquery-ui-draggable":'/js/thirdparty/jquery/ui/draggable',
+        "jquery-ui-position":'/js/thirdparty/jquery/ui/position',
+        "jquery-ui-resizable":'/js/thirdparty/jquery/ui/resizable',
+        /* JQuery-UI的gaea扩展 */
+        "gaea-jqui-dialog":'/js/gaeajs/ui/extends/gaea-jquery.ui.dialog.custom',
+        "jquery-serializeObject":'/js/thirdparty/jquery/plugins/jquery.serializeObject'
     },
     shim: {
         "underscore":{

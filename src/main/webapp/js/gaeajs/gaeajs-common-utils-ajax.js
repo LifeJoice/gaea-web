@@ -23,6 +23,9 @@ define(function () {
             async: this.options.async
         }).fail(this.options.fail);
     };
+    /**
+     * 返回（暴露）的接口
+     */
     return {
         post:post,
         ajax:ajax

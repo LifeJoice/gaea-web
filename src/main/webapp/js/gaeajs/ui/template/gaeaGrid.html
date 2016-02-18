@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <!--导入schema提供的js和css-->
+    <!UR_VIEW_SCHEMA IMPORT_HEADFIRST>
+    <script src="/js/require.js"></script>
+    <!--<script src="/static/plugins/jquery/jquery-1.10.2.js"></script>-->
+    <script>
+        var viewSchema = {};
+        // 导入schema提供的数据。
+        viewSchema.initData = <!UR_VIEW_SCHEMA VIEWS_GRID_JSON_DATA>;
+    </script>
+    <!--JQuery插件和JQuery UI-->
+    <!--<script src="/static/plugins/jquery/jquery.serializeObject.js"></script>-->
+    <link rel="stylesheet" href="/static/plugins/jquery/ui/css/jquery-ui-1.10.4.custom.css">
+    <link rel="stylesheet" href="/static/plugins/jquery/ui/css/gaea-jquery-ui-1.10.4.custom.css">
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.core.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.widget.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.mouse.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.button.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.draggable.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.position.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/jquery.ui.dialog.js"></script>-->
+    <!--<script src="/static/plugins/jquery/ui/gaea-jquery.ui.dialog.custom.js"></script>-->
+    <!--macula包-->
+    <!--<script src="/static/plugins/macula/jquery.loadmask.js"></script>-->
+    <!--<link rel="stylesheet" href="/static/plugins/macula/jquery.loadmask.css">-->
+    <!--第三方：DateJs-->
+    <script type="text/javascript" src="/static/plugins/datejs/core.js"></script>
+    <script type="text/javascript" src="/static/plugins/datejs/zh-CN.js"></script>
+    <!-- <script type="text/javascript" src="src/time.js"></script> -->
+    <script type="text/javascript" src="/static/plugins/datejs/parser.js"></script>
+    <script type="text/javascript" src="/static/plugins/datejs/extras.js"></script>
+    <!--UR的前端框架包-->
+    <!--<script src="/static/gaea/framework/gaea-common.js"></script>-->
+    <!--<script src="/static/gaea/framework/gaea-common-utils.js" type="text/javascript"></script>-->
+    <!--<script src="/static/gaea/framework/gaea-biz-macula-utils.js" type="text/javascript"></script>-->
+    <!--<script src="/static/gaea/framework/gaea-component.js" type="text/javascript"></script>-->
+    <!--<script src="/static/gaea/framework/gaea-macula-bridge.js" type="text/javascript"></script>-->
+    <!--<script src="/static/gaea/framework/gaea-macula-toolbar.js" type="text/javascript"></script>-->
+    <!--默认table、字体等的css-->
+    <link href="/static/gaea/framework/gaea-ui-views.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/gaea/framework/gaea-ui-grid.css" rel="stylesheet" type="text/css"/>
+    <!--按钮样式和效果。 -->
+    <link href="/static/gaea/framework/gaea-ui-buttons.css" rel="stylesheet" type="text/css"/>
+    <!-- Gaea UI效果js -->
+    <link href="/static/gaea/framework/gaea-ui-checkbox.css" rel="stylesheet" type="text/css"/>
+    <!--<script src="/static/gaea/framework/gaea-ui.js"></script>-->
+    <!--导入Schema提供的js和css-->
+    <!UR_VIEW_SCHEMA IMPORT_HEADLAST>
+    <!--下面的这两个js为了配合整个列表页框架的运作，所以放在最后。非列表页框架性的东西不要放在这里。-->
+    <script src="/js/gaeajs/ui/template/ur_gridview.js" type="text/javascript"></script>
+    <!UR_VIEW_SCHEMA IMPORT_CSS_HEADLAST>
+</head>
+<body>
+<div class="ur-mars">
+    <div id="view-title" class="view title"></div>
+    <div id='ur-toolbar' class='ur-toolbar'></div>
+    <div id="urgrid"></div>
+    <div id="workflow-approval-dialog">
+        <input type="hidden" id="wfProcInstId" name="wfProcInstId" value="">
+        <input type="hidden" id="wfActName" name="wfActName" value="">
+        <span><label>审批意见</label><textarea id="wfApprovalReason" name="wfApprovalReason" ></textarea></span>
+    </div>
+    <div id="createOrEditDialog"></div>
+    <input type="hidden" id="urSchemaId" name="urSchemaId" value="">
+</div>
+<!UR_VIEW_SCHEMA IMPORT_BODYEND>
+</body>
+</html>
