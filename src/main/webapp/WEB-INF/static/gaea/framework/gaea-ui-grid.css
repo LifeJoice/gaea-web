@@ -98,6 +98,7 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    /* 各种效果 */
     padding: 1px;
 }
 /*行前复选框*/
