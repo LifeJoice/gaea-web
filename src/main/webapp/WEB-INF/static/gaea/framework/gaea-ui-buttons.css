@@ -5,7 +5,7 @@
     height: auto;
 }
 /* ALL ------>> 所有的按钮class都必须加上"a."，否则会受macula样式影响。*/
-.ur-mars a.button {
+.gaea-ui-page a.button {
     cursor: pointer;
     display: inline-block;
     line-height: 1;
@@ -36,28 +36,28 @@
     -o-border-radius: 5px;
     border-radius: 5px;
 }
-.ur-mars a.button:hover{
+.gaea-ui-page a.button:hover{
     /*background-color: #111;*/
     color: white;
 }
-.ur-mars a.button:active{
+.gaea-ui-page a.button:active{
     top: 1px;
 }
 /*按钮大小效果*/
-.ur-mars a.large.button {
+.gaea-ui-page a.large.button {
     /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
     margin-right: 15px;
     font-size: 20px;
     padding: 8px 19px 9px;
 }
-.ur-mars a.medium.button {
+.gaea-ui-page a.medium.button {
     /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
     margin-right: 10px;
     font-size: 14px;
     padding: 6px 15px 7px;
 }
 /*小按钮效果.不作为主按钮效果使用.*/
-.ur-mars a.small.button {
+.gaea-ui-page a.small.button {
     font-size: 10px;
     padding: 4px 10px 5px;
 }
@@ -66,11 +66,11 @@
  *  ****************************************************/
 
 /*灰色效果*/
-.ur-mars a.grey.button{
+.gaea-ui-page a.grey.button{
     color: black;
     background-color: #E4E4E4;
 }
-.ur-mars a.grey.button:hover{
+.gaea-ui-page a.grey.button:hover{
     color: white;
     background-color: #919191;
     /* 按钮渐变 */
@@ -88,11 +88,11 @@
 }
 
 /*深蓝灰色效果*/
-.ur-mars a.darkslategrey.button{
+.gaea-ui-page a.darkslategrey.button{
     background-color: #5D6D7D;
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 86%, 1));*/
 }
-.ur-mars a.darkslategrey.button:hover{
+.gaea-ui-page a.darkslategrey.button:hover{
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 82%, 1));*/
     background-color: #2D3E50;
     /* 按钮渐变 */

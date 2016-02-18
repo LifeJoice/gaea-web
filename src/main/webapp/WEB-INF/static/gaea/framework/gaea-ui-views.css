@@ -3,8 +3,9 @@
  * Iverson
  */
 
-.ur-mars {
+.gaea-ui-page {
     font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
+    padding:10px;
 }
 
 /* ******************************************** >>> >> > TOOLBAR（工具条，按钮区） < << <<< ******************************************** */
