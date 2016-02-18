@@ -206,7 +206,7 @@ public class GaeaXmlSchemaProcessor {
 
     private String readTemplate(ApplicationContext springApplicationContext) throws IOException {
         String htmlPage = "";
-        String gridviewTmplPath = "/WEB-INF/static/html/template/ur_gridview.html";
+        String gridviewTmplPath = "/js/gaeajs/ui/template/gaeaGrid.html";// TODO 改为在配置文件里配置。
         Resource gridViewResource = springApplicationContext.getResource(gridviewTmplPath);
         htmlPage = StreamUtils.copyToString(gridViewResource.getInputStream(), Charset.forName("UTF-8"));
         return htmlPage;
