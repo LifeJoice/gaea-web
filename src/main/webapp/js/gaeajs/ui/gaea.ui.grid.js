@@ -420,7 +420,7 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                     var columnTDs = "td[data-columnid=" + gridColumnId + "]";
                     // 设置数据table的单元格的样式
                     // 单元格宽度，等于Schema设置的宽度 + 列头的左右padding - 单元格td自带的左右padding + 列头的列间边框（白缝）。因为左右一样，所以都是x2
-                    var gridCellWidth = parseInt(col.width) + that.default.css.columnHeadWidthPadding * 2 - that.default.css.gridTdPadding * 2 + 1;
+                    var gridCellWidth = parseInt(col.width);
                     grid.find(columnTDs).children(".grid-td-div").css("width", gridCellWidth);
                     // 设置列头的样式
                     gridHead.children("#" + gridColumnId).css("width", col.width);
