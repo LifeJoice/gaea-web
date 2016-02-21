@@ -32,7 +32,10 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             //dialog.contentEl = this.options.injectHtmlId;
             //dialog.show();
         },
-        open: function (jqSelector) {
+        open: function (jqSelector,position) {
+            if(gaeaValid.isNotNull(position)) {
+                $(jqSelector).gaeaDialog("option", "position", position);
+            }
             $(jqSelector).gaeaDialog("open");
         },
         close: function (jqSelector) {

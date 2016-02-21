@@ -435,8 +435,8 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             });
             /* 设置数据区域的高度 */
             var bodyHeight = document.body.scrollHeight;
-            // 页面高度 - 上方title、toolbar等占用高度 - 列头高度
-            bodyHeight = bodyHeight - 130 - 30;
+            // 页面高度 - 上方title、toolbar等占用高度 - 列头高度 - 调整值
+            bodyHeight = bodyHeight - 130 - 30 - 20;
             $(".gaea-grid-body").css("height", bodyHeight); // grid行数据部分的高度
             /* 根据行数据，确定列头是否需要行前操作区留白 */
             if(!this.cache.hasRowHeadActions){

@@ -78,7 +78,9 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                         var dlgSelector = "#" + dialogOption.id;
                         var dlgFormName = dialogOption.id + "-form";
                         // 初始化dialog选项
+                        var dialogPosition = {my: "left+310 top+95",at: "left top", of: window};// dialog默认弹出位置。
                         dialogOption.autoOpen = false;
+                        dialogOption.width = 940;// 默认弹出框的宽度
                         dialogOption.buttons = {
                             "确定": function () {
                                 $("#" + dlgFormName).submit();
@@ -113,11 +115,7 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                                     thisButton.listeners.afterLoadInClick();
                                 }
                             });
-                            //if (ur.utils.validate.isNotNull(thisButton.listeners)) {
-                            //    thisButton.listeners.afterLoadInClick();
-                            //}
-                            // AI.TODO 这里不应该直接调bridge
-                            gaeaDialog.open(dlgSelector);
+                            gaeaDialog.open(dlgSelector,dialogPosition);
                         })
                         // 创建弹出框
                         gaeaDialog.create(dialogOption);
