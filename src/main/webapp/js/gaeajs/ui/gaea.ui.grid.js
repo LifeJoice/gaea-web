@@ -4,7 +4,7 @@
  */
 define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-common-utils-datetime','gaeajs-common-utils-string','gaeajs-ui-button'],
     function ($,_,gaeaAjax,gaeaValid,gaeaDT,gaeaStringUtils,gaeaButton) {
-    var grid = {
+    var _grid = {
         options: {
             title: null,
             width: null,
@@ -309,7 +309,7 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             //}
         },
         /**
-         * 创建列表页（grid）的数据部分（table row)
+         * 创建列表页（grid）的数据部分（table row)，包括行前的复选框，
          * param need:
          * data
          * @private
@@ -322,6 +322,7 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             var autoGenClassNamePrefix = "autogen-col-";
             var fields = this.options.model.fields;
             var columns = this.options.columns;
+            var lastTRselector = ".gaea-grid-body table tr:last";
             var arrRowHeadActions = new Array();
             //var tdDefaultClasses = "grid-td";
             // 清空一下。如果是刷新数据的时候需要。
@@ -359,13 +360,11 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                             hasNotMatchedField = false; // 找到对应的列单元格数据
                             // 第一列，生成复选框。
                             if (j == 0) {
-                                $(".tb-body tr:last").append("<td>" +
+                                $(lastTRselector).append("<td class='checkbox'>" +
                                     "<div class=\"row-check\">" +
-                                    "<input type='checkbox' id='urgrid-chb-" + i + "'>" +
-                                        // Label里面的都是复选框的效果元素。box是框。check是勾。
+                                    "<input type='checkbox' id='urgrid-chb-" + i + "' class='dark'>" +
+                                        // Label里面的都是复选框的效果元素。
                                     "<label id='urgrid-cb-label-" + i + "' for='urgrid-chb-" + i + "'>" +       // label的for和checkbox的id绑定
-                                    "<span class=\"check\"></span>" +
-                                    "<span class=\"box\"></span>" +
                                     "</label>" +
                                     "</div>" +
                                     "</td>");
@@ -374,16 +373,18 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                             if (gaeaValid.isNotNull(column.datetimeFormat)) {
                                 nRowColVal = gaeaDT.getDate(nRowColVal, {format: column.datetimeFormat});
                             }
-                            $(".tb-body tr:last").append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
+                            $(lastTRselector).append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
                                 "<div class=\"grid-td-div\">" + nRowColVal + "</div></td>");
                         }
                     });
                     // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
                     if(hasNotMatchedField){
-                        $(".tb-body tr:last").append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
+                        $(lastTRselector).append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
                             "<div class=\"grid-td-div\"></div></td>");
                     }
                 }
+                // 给行末尾添加一个单元格，负责撑开剩余空间，让表格可以width 100%
+                $(lastTRselector).append("<td></td>");
                 // 生成行前操作区。判断是否有工作流。有的话生成'查看工作流'的按钮
                 if (this.options.withWorkflow == true) {
                     if (gaeaValid.isNotNull(row.wfProcInstId)) {
@@ -408,6 +409,11 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 $(".tb-body").append("</tr>");
             }
         },
+        /**
+         * 设置Grid的样式。
+         * 包括列头的宽度，行数据单元格的宽度，隐藏不要显示的列等。
+         * @private
+         */
         _applyCSS: function () {
             var that = this;
             var grid = $("#" + this.options.renderTo);
@@ -417,20 +423,12 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 var col = this;
                 var gridColumnId = "gridcolumn-" + (idx + 1);
                 if (gaeaValid.isNotNull(col.width) && $.isNumeric(col.width)) {
-                    var columnTDs = "td[data-columnid=" + gridColumnId + "]";
-                    // 设置数据table的单元格的样式
-                    // 单元格宽度，等于Schema设置的宽度 + 列头的左右padding - 单元格td自带的左右padding + 列头的列间边框（白缝）。因为左右一样，所以都是x2
-                    var gridCellWidth = parseInt(col.width);
-                    grid.find(columnTDs).children(".grid-td-div").css("width", gridCellWidth);
-                    // 设置列头的样式
-                    gridHead.children("#" + gridColumnId).css("width", col.width);
+                    // 设置单元格宽度
+                    that.column._setWidth(gridColumnId, col);
                 }
                 // 隐藏列
                 if (gaeaValid.isNotNull(col.hidden)) {
-                    if (col.hidden) {
-                        grid.find(columnTDs).css("display", "none");
-                        $("#" + gridColumnId).css("display", "none");
-                    }
+                    that.column._hidden(gridColumnId, col);
                 }
             });
             /* 设置数据区域的高度 */
@@ -439,8 +437,8 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             bodyHeight = bodyHeight - 130 - 30 - 20;
             $(".gaea-grid-body").css("height", bodyHeight); // grid行数据部分的高度
             /* 根据行数据，确定列头是否需要行前操作区留白 */
-            if(!this.cache.hasRowHeadActions){
-                $(".head-query-column.row-headactions").css("display","none");
+            if (!this.cache.hasRowHeadActions) {
+                $(".head-query-column.row-headactions").css("display", "none");
             }
         },
         _applyJsStyle: function () {
@@ -471,8 +469,12 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             $(".tb-body").find("tr").click(function () {
                 var index = $(this).data("rowindex");
                 var i = index - 1;
+                // 选中行前复选框
                 $(":checkbox[id^='urgrid-chb']").prop("checked", false);
                 $(this).find("[id^='urgrid-chb']").prop("checked", "true");
+                // 添加选中class
+                $(".tb-body tr").removeClass("selected");
+                $(this).addClass("selected");
                 //console.log("rowindex: "+$(this).data("rowindex"));
                 $(this).find("[id^='urgrid-chb']").val($(this).data("rowindex") - 1);
                 selectedRow = that.options.data[($(this).data("rowindex") - 1)];
@@ -714,10 +716,48 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 //    });
                 //}
             }
+        },
+        /**
+         * 和列相关的操作
+         */
+        column:{
+            root:this,
+            /**
+             * 隐藏列
+             * @param gridColumnId table的td的data-columnid属性，标识第几列
+             * @param columnConfig 列定义。在Schema中的定义。
+             * @private
+             */
+            _hidden: function (gridColumnId,columnConfig) {
+                var grid = $("#" + _grid.options.renderTo);
+                var columnTDs = "td[data-columnid=" + gridColumnId + "]";
+                if (columnConfig.hidden) {
+                    grid.find(columnTDs).css("display", "none");
+                    $("#" + gridColumnId).css("display", "none");
+                }
+            },
+            /**
+             * 设置列宽度
+             * @param gridColumnId table的td的data-columnid属性，标识第几列
+             * @param columnConfig 列定义。在Schema中的定义。
+             * @private
+             */
+            _setWidth: function (gridColumnId,columnConfig) {
+                var grid = $("#" + _grid.options.renderTo);
+                var gridHead = $(".gaea-grid-header .tb-head");
+                var columnTDs = "td[data-columnid=" + gridColumnId + "]";
+                // 设置数据table的单元格的样式
+                // 单元格宽度，等于Schema设置的宽度 + 列头的左右padding - 单元格td自带的左右padding + 列头的列间边框（白缝）。因为左右一样，所以都是x2
+                var gridCellWidth = parseInt(columnConfig.width);
+                // 宽度设置。只设置第一行单元格td。
+                grid.find(columnTDs+":first").css("width", gridCellWidth);
+                // 设置列头的样式
+                gridHead.children("#" + gridColumnId).css("width", columnConfig.width);
+            }
         }
     };
     /**
      * 返回（暴露）的接口
      */
-    return grid;
+    return _grid;
 })

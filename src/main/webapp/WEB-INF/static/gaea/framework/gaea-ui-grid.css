@@ -24,13 +24,20 @@
 
 /* 表格 */
 .tb-body {
-    width: inherit;     /* 解决样式受macula样式影响撑大的问题。 */
+    width: 100%;     /* 解决样式受macula样式影响撑大的问题。 */
     table-layout: fixed;
     border-style: none;
     border-collapse: collapse;
     /*border-width: 1px 0 0;*/
 }
-
+/*行*/
+.tb-body tr:hover{
+    background-color: #CCD7E3;
+    /*opacity: 0.5;*/
+}
+.tb-body tr.selected{
+    border-bottom:1px solid #2D3E50;
+}
 /* 列头 */
 .column-header {
     float: left;
@@ -102,6 +109,10 @@
     padding: 1px;
 }
 /*行前复选框*/
+.tb-body td.checkbox{
+    width: 35px;
+    padding: 0px;
+}
 .tb-body .row-check{
     position: relative;
     width: 35px;

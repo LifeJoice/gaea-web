@@ -1,0 +1,141 @@
+/**
+ * 列表页的行前复选框效果。
+ * row-check是行前第一列的div class.
+ * 2015年10月5日 星期一
+ * by Iverson
+ * 重构支持新的样式，原来的太炫效率不高 by Iverson 2016-2-22 11:28:32 copy from http://www.webdesigncrowd.com/custom-checkbox-borders/
+ */
+/*不显示原生的复选框*/
+.row-check input[type=checkbox] {
+    display: none;
+}
+/*居中*/
+.row-check label:before,.row-check label:after{
+    /*下面确保居中*/
+    margin:auto;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+
+[type="checkbox"]:not(:checked) + label,
+[type="checkbox"]:checked + label {
+    position: relative;
+    overflow: hidden;
+    padding-left: 35px;
+    cursor: pointer;
+    display: inline-block;
+    height: 25px;
+    line-height: 25px;
+
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}
+
+/* checkbox aspect */
+[type="checkbox"] + label:before,
+[type="checkbox"] + label:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    z-index: 1;
+
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-*   普通皮肤。灰边白底。   *-*-*-*-*-*-*-*-*-*-*-*-*-* */
+/* Unchecked styles（未选中，就一个框） */
+[type="checkbox"]:not(:checked) + label:before {
+    top: 0px;
+    width: 12px; height: 12px;
+    border: 3px solid #ddd;
+}
+[type="checkbox"]:not(:checked) + label:after {
+    top: 0px;
+    width: 12px; height: 12px;
+    border: 3px solid #eee;
+    z-index: 0;
+}
+/* Checked styles（选中的状态） */
+/*before其实就是选中的勾。*/
+[type="checkbox"]:checked + label:before {
+    /*top,left由于元素居中，所以产生一定的偏移（变负数了）。*/
+    top: -2px;
+    left:-9px;
+    width: 3px; height: 7px;
+    border-top: 3px solid transparent;
+    border-left: 3px solid transparent;
+    border-right: 3px solid #7fc900;
+    border-bottom: 3px solid #7fc900;
+    -webkit-transform: rotateZ(37deg);
+    transform: rotateZ(37deg);
+
+    -webkit-transform-origin: 20% 40%;
+    transform-origin: 100% 100%;
+}
+[type="checkbox"]:checked + label:after {
+    top: 0px;
+    width: 12px; height: 12px;
+    border: 3px solid #eee;
+    background-color: #eee;
+    z-index: 0;
+}
+/* disabled checkbox */
+[type="checkbox"]:disabled:not(:checked) + label:before,
+[type="checkbox"]:disabled:checked + label:before {
+    top: 0;
+    box-shadow: none;
+    background-color: #444;
+    width: 12px; height: 12px;
+    border: 3px solid #444;
+    -webkit-transform: rotateZ(0deg);
+    transform: rotateZ(0deg);
+}
+[type="checkbox"]:disabled + label {
+    color: #555;
+}
+[type="checkbox"]:disabled:not(:checked) + label:hover:before {
+    border-color: #444;
+}
+
+/* hover style just for information */
+[type="checkbox"]:not(:checked) + label:hover:before {
+    border-color: #fff;
+}
+
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-*   暗黑皮肤   *-*-*-*-*-*-*-*-*-*-*-*-*-* */
+/* Dark Version */
+/* Unchecked styles */
+input.dark[type="checkbox"] + label {
+    color: #555;
+}
+input.dark[type="checkbox"]:not(:checked) + label:before,
+input.dark[type="checkbox"]:not(:checked) + label:after {
+    border-color: #555;
+}
+/* Checked styles */
+input.dark[type="checkbox"]:checked + label:before {
+    border-right: 3px solid #7fc900;
+    border-bottom: 3px solid #7fc900;
+}
+input.dark[type="checkbox"]:checked + label:after {
+    border-color: #555;
+    background-color: #555;
+}
+/* disabled checkbox */
+input.dark[type="checkbox"]:disabled:not(:checked) + label:before,
+input.dark[type="checkbox"]:disabled:checked + label:before {
+    background-color: #999;
+    border-color: #999;
+}
+input.dark[type="checkbox"]:disabled + label {
+    color: #777;
+}
+input.dark[type="checkbox"]:disabled:not(:checked) + label:hover:before {
+    border-color: #999;
+}
+/* hover style just for information */
+input.dark[type="checkbox"]:not(:checked) + label:hover:before {
+    border-color: #777;
+}
+
