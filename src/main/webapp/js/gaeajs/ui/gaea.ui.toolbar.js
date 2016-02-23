@@ -2,8 +2,8 @@
  * 基于RequireJS的模块化重构。让依赖更清晰，更简单。
  * Created by iverson on 2016-2-17 11:48:52.
  */
-define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-dialog','gaeajs-ui-workflow'],
-    function ($,_,gaeaAjax,gaeaValid,gaeaGrid,gaeaDialog,gaeaWF) {
+define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-dialog','gaeajs-ui-workflow',"gaeajs-ui-form"],
+    function ($,_,gaeaAjax,gaeaValid,gaeaGrid,gaeaDialog,gaeaWF,gaeaForm) {
     var toolbar = {
         options: {
             renderTo: null,
@@ -114,6 +114,8 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                                 if (gaeaValid.isNotNull(thisButton.listeners)) {
                                     thisButton.listeners.afterLoadInClick();
                                 }
+                                // 初始化表单的样式（load过来的表单）
+                                gaeaForm.init("gaea-form");
                             });
                             gaeaDialog.open(dlgSelector,dialogPosition);
                         })

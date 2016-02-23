@@ -2144,6 +2144,7 @@ require.config({
         "gaeajs-ui-button": '/js/gaeajs/ui/gaea.ui.button',
         "gaeajs-ui-toolbar": '/js/gaeajs/ui/gaea.ui.toolbar',
         "gaeajs-ui-workflow": '/js/gaeajs/ui/gaea.ui.workflow',
+        "gaeajs-ui-form": '/js/gaeajs/ui/gaea.ui.form',
         /* Jquery-UI */
         "jquery-ui-core":'/js/thirdparty/jquery/ui/core',
         "jquery-ui-widget":'/js/thirdparty/jquery/ui/widget',
