@@ -1,10 +1,10 @@
 package org.gaea.framework.web.schema.convertor;
 
-import org.gaea.framework.common.utils.GaeaXmlUtils;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

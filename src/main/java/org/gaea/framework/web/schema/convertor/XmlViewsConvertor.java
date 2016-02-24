@@ -1,11 +1,11 @@
 package org.gaea.framework.web.schema.convertor;
 
-import org.gaea.framework.common.utils.GaeaXmlUtils;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.util.GaeaXmlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;

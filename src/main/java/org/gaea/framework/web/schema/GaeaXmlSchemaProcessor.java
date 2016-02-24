@@ -1,14 +1,14 @@
 package org.gaea.framework.web.schema;
 
 import org.gaea.framework.common.exception.ValidationFailedException;
-import org.gaea.framework.common.utils.GaeaJacksonUtils;
-import org.gaea.framework.common.utils.GaeaXmlUtils;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
 import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
 import org.gaea.framework.web.schema.convertor.list.ListSchemaHtmlConvertor;
 import org.gaea.framework.web.schema.domain.*;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.util.GaeaJacksonUtils;
+import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

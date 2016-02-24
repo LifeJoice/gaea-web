@@ -2,7 +2,6 @@ package org.gaea.framework.web.schema.convertor;
 
 import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.framework.common.exception.ValidationFailedException;
-import org.gaea.framework.common.utils.GaeaStringUtils;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;
@@ -10,6 +9,7 @@ import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaData;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.util.GaeaStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

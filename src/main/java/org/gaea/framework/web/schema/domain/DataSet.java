@@ -1,7 +1,7 @@
 package org.gaea.framework.web.schema.domain;
 
-import org.gaea.framework.common.utils.GaeaJacksonUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.util.GaeaJacksonUtils;
 
 import java.io.IOException;
 import java.util.HashMap;

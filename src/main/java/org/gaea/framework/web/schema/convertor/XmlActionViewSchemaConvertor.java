@@ -1,9 +1,9 @@
 package org.gaea.framework.web.schema.convertor;
 
-import org.gaea.framework.common.utils.GaeaXmlUtils;
 import org.gaea.framework.web.schema.domain.view.SchemaButton;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.util.GaeaXmlUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
