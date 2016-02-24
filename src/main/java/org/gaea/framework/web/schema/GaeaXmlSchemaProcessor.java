@@ -1,6 +1,6 @@
 package org.gaea.framework.web.schema;
 
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
 import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
 import org.gaea.framework.web.schema.convertor.list.ListSchemaHtmlConvertor;

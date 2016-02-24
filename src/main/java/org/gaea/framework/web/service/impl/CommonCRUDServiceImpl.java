@@ -1,7 +1,7 @@
 package org.gaea.framework.web.service.impl;
 
-import org.gaea.framework.common.exception.SysLogicalException;
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.SysLogicalException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.repository.CommonCRUDRepository;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;

@@ -1,7 +1,7 @@
 package org.gaea.framework.web.service;
 
-import org.gaea.framework.common.exception.SysLogicalException;
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.SysLogicalException;
+import org.gaea.exception.ValidationFailedException;
 
 /**
  * Created by Iverson on 2015/8/11.

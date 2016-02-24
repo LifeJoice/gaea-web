@@ -1,6 +1,6 @@
 package org.gaea.springframework.web.servlet.view;
 
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;

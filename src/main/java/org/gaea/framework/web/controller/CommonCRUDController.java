@@ -1,7 +1,7 @@
 package org.gaea.framework.web.controller;
 
-import org.gaea.framework.common.exception.SysLogicalException;
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.SysLogicalException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.service.CommonCRUDService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

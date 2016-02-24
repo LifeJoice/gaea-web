@@ -1,7 +1,7 @@
 package org.gaea.framework.web.schema.convertor;
 
 import org.gaea.db.GaeaSqlProcessor;
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;

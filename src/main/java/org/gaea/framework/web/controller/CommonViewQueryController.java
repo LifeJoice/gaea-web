@@ -1,8 +1,8 @@
 package org.gaea.framework.web.controller;
 
 import org.gaea.db.QueryCondition;
-import org.gaea.framework.common.exception.SysLogicalException;
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.SysLogicalException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;

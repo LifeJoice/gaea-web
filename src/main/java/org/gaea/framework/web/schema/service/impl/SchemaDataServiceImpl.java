@@ -1,6 +1,6 @@
 package org.gaea.framework.web.schema.service.impl;
 
-import org.gaea.framework.common.exception.SysLogicalException;
+import org.gaea.exception.SysLogicalException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;

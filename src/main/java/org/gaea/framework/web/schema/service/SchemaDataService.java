@@ -1,6 +1,6 @@
 package org.gaea.framework.web.schema.service;
 
-import org.gaea.framework.common.exception.SysLogicalException;
+import org.gaea.exception.SysLogicalException;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 

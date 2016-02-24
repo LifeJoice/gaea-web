@@ -2,7 +2,7 @@ package org.gaea.framework.web.method.annotation;
 
 import org.apache.commons.collections.comparators.ComparableComparator;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.framework.common.exception.ValidationFailedException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 
 import java.lang.annotation.Annotation;
