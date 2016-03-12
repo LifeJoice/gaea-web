@@ -175,4 +175,10 @@
     <!-- 导入外部的配置文件。一般是相关的service和repository配置。可以多个。 -->
     <import resource="workflow-config.xml" />
     <import resource="spring-security.xml" />
+    <!--和数据库相关的初始化-->
+    <import resource="applicationContext-db.xml" />
+    <!--系统框架的默认数据相关功能服务的初始化-->
+    <import resource="applicationContext-system-data.xml" />
+    <!--系统缓存架构的初始化（当前是Redis）-->
+    <import resource="applicationContext-cache.xml" />
 </beans>
