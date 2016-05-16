@@ -1,5 +1,7 @@
 package org.gaea.security.domain;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -12,7 +14,8 @@ import java.util.List;
 public class Resource implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
+    @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     @Column(name = "ID")
     private Long id;
     @Column(name = "NAME")
