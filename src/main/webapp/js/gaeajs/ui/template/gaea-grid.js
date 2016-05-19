@@ -3,9 +3,10 @@
  * 2016-2-17 11:09:22
  * Iverson
  */
-require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-toolbar',
-'jquery-ui-core','jquery-ui-widget','jquery-ui-mouse','jquery-ui-button','jquery-ui-draggable','jquery-ui-position','jquery-ui-dialog','gaea-jqui-dialog','jquery-serializeObject'],
-    function($,gaeaAjax,gaeaValid,gaeaGrid,gaeaToolbar) {
+require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-toolbar','gaeajs-ui-notify',
+'jquery-ui-core','jquery-ui-widget','jquery-ui-mouse','jquery-ui-button','jquery-ui-draggable','jquery-ui-position',
+    'jquery-ui-dialog','gaea-jqui-dialog','jquery-serializeObject'],
+    function($,gaeaAjax,gaeaValid,gaeaGrid,gaeaToolbar,gaeaNotify) {
 //$(function () {
     $("#urSchemaId").val(viewSchema.initData.id);
     // 初始化GRID
@@ -23,7 +24,7 @@ require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gae
         interface:{
             /* 和actions.buttons.interfaceAction对应。 */
             "deleteSelected": function (row) {      // 通用删除！
-                $.post("/admin/common-crud/delete.do",
+                $.post("/gaea/common/crud/delete",
                     {
                         id:row.id,
                         urSchemaId:$("#urSchemaId").val(),
@@ -31,9 +32,11 @@ require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gae
                         wfProcInstId:row.wfProcInstId
                     },
                     function () {
-                        alert("成功");
+                        gaeaNotify.message("删除成功！");
+                        //alert("成功");
                     }).fail(function () {
-                        alert("失败");
+                    gaeaNotify.warn("删除失败！");
+                        //alert("失败");
                     });
             }
         }

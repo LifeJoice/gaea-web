@@ -3,7 +3,9 @@
  * 2015年10月25日14:36:44
  * Iverson
  */
-require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate'], function ($, gaeaAjax, gaeaValid) {
+require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate','gaeajs-ui-notify'], function ($, gaeaAjax, gaeaValid,gaeaNotify ) {
+    // 初始化消息提示组件
+    gaeaNotify.init();
     /**
      * 【1】加载用户所能操作的菜单功能。阻塞加载，否则后面的菜单js会获取不到动态插入的菜单项。
      *  当前支持1、2级菜单，未支持3级菜单。不过将来可以方便扩展。

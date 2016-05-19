@@ -1,5 +1,7 @@
 package org.gaea.security.service.impl;
 
+import org.gaea.security.domain.Resource;
+import org.gaea.security.repository.SystemResourcesRepository;
 import org.gaea.security.service.SystemResourcesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -17,6 +19,14 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
 //    private SessionFactory sessionFactory;
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private SystemResourcesRepository resourcesRepository;
+
+    /**
+     * 根据权限编码（authority code）找对应的资源
+     * @param authority
+     * @return
+     */
     @Override
     public List<String> findByAuthorityCode(String authority) {
 //        String sql = "SELECT CODE FROM GAEA_SYS_AUTHORITIES";
@@ -34,5 +44,10 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
         params.addValue("AUTH_CODE",authority);
         List<String> codeList = namedParameterJdbcTemplate.queryForList(sql,params,String.class);
         return codeList;
+    }
+
+    @Override
+    public void save(Resource resource){
+        resourcesRepository.save(resource);
     }
 }

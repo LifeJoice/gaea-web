@@ -7,5 +7,5 @@ import org.gaea.exception.ValidationFailedException;
  * Created by Iverson on 2015/8/11.
  */
 public interface CommonCRUDService {
-    void deleteById(String urSchemaId, String gridId, Long recordId, String wfProcInstId, String deleteReason) throws ValidationFailedException, SysLogicalException;
+    void deleteById(String urSchemaId, String gridId, String recordId, String wfProcInstId, String deleteReason) throws ValidationFailedException, SysLogicalException;
 }

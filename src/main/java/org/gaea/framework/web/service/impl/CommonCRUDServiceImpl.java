@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,16 +21,19 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class CommonCRUDServiceImpl implements CommonCRUDService {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(CommonCRUDServiceImpl.class);
     @Autowired
     private CommonCRUDRepository commonCRUDRepository;
     @Autowired
     private GaeaSchemaCache gaeaSchemaCache;
     @Autowired
     private WorkflowRuntimeService workflowRuntimeService;
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     @Override
     @Transactional
-    public void deleteById(String urSchemaId, String gridId, Long recordId, String wfProcInstId,
+    public void deleteById(String urSchemaId, String gridId, String recordId, String wfProcInstId,
                            String deleteReason) throws ValidationFailedException, SysLogicalException {
         if(StringUtils.isBlank(urSchemaId)){
             throw new ValidationFailedException("未能获取Schema id.无法删除操作！");
@@ -45,7 +50,18 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
         String tableName = gaeaXmlSchema.getSchemaViews().getGrid().getDsPrimaryTable();
         if(!StringUtils.isBlank(tableName)) {
             logger.debug("系统通用删除操作. Delete table: "+tableName+" record id: "+recordId);
-            int result = commonCRUDRepository.deleteById(tableName, recordId);
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("ID",recordId);
+            //定义SQL
+            StringBuilder sql = new StringBuilder("DELETE FROM ");
+            sql.append(tableName)
+                    .append(" WHERE id=:ID");
+            //创建原生SQL查询QUERY实例,指定了返回的实体类型
+            int result = namedParameterJdbcTemplate.update(sql.toString(),params);
+//            query.setParameter("ID", id);
+            //执行查询，返回的是实体列表,
+//            int result = query.executeUpdate();
+//            int result = commonCRUDRepository.deleteById(tableName, recordId);
         }
         // 如果有工作流程ID，删除工作流的流程实例
         if(!StringUtils.isBlank(wfProcInstId)){

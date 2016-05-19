@@ -2145,6 +2145,7 @@ require.config({
         "gaeajs-ui-toolbar": '/js/gaeajs/ui/gaea.ui.toolbar',
         "gaeajs-ui-workflow": '/js/gaeajs/ui/gaea.ui.workflow',
         "gaeajs-ui-form": '/js/gaeajs/ui/gaea.ui.form',
+        "gaeajs-ui-notify": '/js/gaeajs/ui/gaea.ui.notify',
         /* Jquery-UI */
         "jquery-ui-core":'/js/thirdparty/jquery/ui/core',
         "jquery-ui-widget":'/js/thirdparty/jquery/ui/widget',
@@ -2156,7 +2157,9 @@ require.config({
         "jquery-ui-resizable":'/js/thirdparty/jquery/ui/resizable',
         /* JQuery-UI的gaea扩展 */
         "gaea-jqui-dialog":'/js/gaeajs/ui/extends/gaea-jquery.ui.dialog.custom',
-        "jquery-serializeObject":'/js/thirdparty/jquery/plugins/jquery.serializeObject'
+        /* JQuery插件扩展 */
+        "jquery-serializeObject":'/js/thirdparty/jquery/plugins/jquery.serializeObject',
+        "jquery-notify":'/js/thirdparty/jquery/plugins/jnotify/jquery.jnotify'
     },
     shim: {
         "underscore":{

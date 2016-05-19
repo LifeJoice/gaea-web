@@ -18,15 +18,16 @@ import javax.servlet.http.HttpServletResponse;
  * Created by Iverson on 2015/8/11.
  */
 @Controller
+@RequestMapping("/gaea/common/crud")
 public class CommonCRUDController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     CommonCRUDService commonCRUDService;
 
-    @RequestMapping(value = "/admin/common-crud/delete.do", produces = "plain/text; charset=UTF-8")
+    @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String deleteById(String urSchemaId,String gridId,Long id,String wfProcInstId,
+    public String deleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
                              String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException {
         logger.debug("-------->>>> into common delete. urSchemaId : " + urSchemaId+"  wfProcInstId : "+wfProcInstId);
         commonCRUDService.deleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);

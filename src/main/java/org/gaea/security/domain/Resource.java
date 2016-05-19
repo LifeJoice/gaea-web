@@ -17,7 +17,7 @@ public class Resource implements Serializable {
     @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     @Column(name = "ID")
-    private Long id;
+    private String id;
     @Column(name = "NAME")
     private String name;
     @Column(name = "RESOURCE")
@@ -40,11 +40,11 @@ public class Resource implements Serializable {
     })
     private List<Authority> authorities;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
