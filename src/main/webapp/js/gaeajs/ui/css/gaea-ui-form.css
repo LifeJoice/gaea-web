@@ -55,7 +55,7 @@
     /*top: 0; left: 0; bottom: 0; right: 0;*/
 }
 /* 输入框 */
-.gaea-form input,.gaea-form textarea{
+.gaea-form input,.gaea-form textarea,.gaea-form select{
     border-style:solid;
     border-radius: 2px;
     border-color: #D4D4D4;
@@ -65,7 +65,7 @@
     font-family: 微软雅黑 light;
     font-size: 13px;
 }
-.gaea-form input{
+.gaea-form input,.gaea-form select{
     height:30px;
     width:160px;
 }

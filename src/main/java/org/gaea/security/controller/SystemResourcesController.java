@@ -23,17 +23,10 @@ public class SystemResourcesController {
 
     private final Logger logger = LoggerFactory.getLogger(SystemResourcesController.class);
     @Autowired
-    private GaeaDataSetService gaeaDataSetService;
-    @Autowired
     private SystemResourcesService systemResourcesService;
 
     @RequestMapping("/management")
     public String list() {
-        try {
-            List<Map<String, String>> results =  gaeaDataSetService.getCommonResults("DS_RESOURCE_MANAGEMENT");
-        } catch (ValidationFailedException e) {
-            e.printStackTrace();
-        }
         return "system/security/resource_management.xml";
     }
 

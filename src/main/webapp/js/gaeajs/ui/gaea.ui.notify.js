@@ -38,6 +38,9 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
         warn: function (msg) {
             this.show(msg, msgDefaultType.WARN);
         },
+        error: function (msg) {
+            this.show(msg, msgDefaultType.ERROR);
+        },
         show: function (msg, msgType) {
             //options = $.extend({},options,opt);
             if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.DEFAULT, msgType)) {

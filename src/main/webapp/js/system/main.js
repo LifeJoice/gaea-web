@@ -37,7 +37,8 @@ require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate','g
             $(".gaea-menu-list").append(menuHtml);
         },
         fail: function () {
-            alert("shit!");
+            //console.log("load menu error!");
+            window.location.href="/";
         }
     });
 

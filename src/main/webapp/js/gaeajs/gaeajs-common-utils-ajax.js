@@ -5,9 +5,16 @@
  * DEPENDENCE:
  * RequireJS,JQuery,重写的Date.format
  */
-define(function () {
+define(["jquery","underscore",'underscore-string'],function ($,_,_s) {
+    var options = {
+        url:null,
+        data:null,
+        success:null,
+        fail:null
+    }
     var post = function(options) {
-        this.options = options;
+        this.options = _.extend(this.options,options);
+        //this.options = options;
         // 使用jquery的post方法.
         $.post(this.options.url, this.options.data, this.options.success).fail(this.options.fail);
     };

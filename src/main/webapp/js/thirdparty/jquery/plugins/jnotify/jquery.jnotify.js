@@ -27,7 +27,20 @@
 *	@version    1
 **/
 
-(function(jQuery) {
+/**
+ * 改一下支持RequireJS和AMD —— by Iverson 2016-5-31 10:11:59
+ */
+(function (factory) {
+    if (typeof define === "function" && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([
+            "jquery"
+        ], factory);
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function(jQuery) {
     jQuery.fn.jnotifyInizialize = function(options) {
         var element = this;
 
@@ -140,4 +153,5 @@
             });
         }
     };
-})(jQuery);
+//})(jQuery);
+}));

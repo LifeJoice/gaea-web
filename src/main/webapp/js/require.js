@@ -2132,12 +2132,18 @@ require.config({
     paths: {
         jquery: '/js/thirdparty/jquery/jquery',
         underscore: '/js/thirdparty/underscore-1.8.3',
+        "underscore-string": '/js/thirdparty/underscore/underscore.string.min',
+        /* knockoutJS。主要做前端的MVVM */
+        knockoutJS: '/js/thirdparty/knockoutJS/knockout-3.4.0.debug',
         //"gaeajs-common": '/js/ur/framework/ur-common',
+        /* Gaea Data.负责处理数据相关，例如：数据集等 */
+        "gaeajs-data": '/js/gaeajs/data/gaeajs-data',
         /* Gaea tools */
         "gaeajs-common-utils-ajax": '/js/gaeajs/gaeajs-common-utils-ajax',
         "gaeajs-common-utils-validate": '/js/gaeajs/gaeajs-common-utils-validate',
         "gaeajs-common-utils-datetime": '/js/gaeajs/gaeajs-common-utils-datetime',
         "gaeajs-common-utils-string": '/js/gaeajs/gaeajs-common-utils-string',
+        "gaea-system-url": '/js/gaeajs/gaea-system-url-definition',
         /* Gaea UI */
         "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
         "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',
@@ -2159,7 +2165,9 @@ require.config({
         "gaea-jqui-dialog":'/js/gaeajs/ui/extends/gaea-jquery.ui.dialog.custom',
         /* JQuery插件扩展 */
         "jquery-serializeObject":'/js/thirdparty/jquery/plugins/jquery.serializeObject',
-        "jquery-notify":'/js/thirdparty/jquery/plugins/jnotify/jquery.jnotify'
+        "jquery-notify":'/js/thirdparty/jquery/plugins/jnotify/jquery.jnotify',
+        /* 系统公用的URL */
+        "system-url":'/js/system-url-definition'
     },
     shim: {
         "underscore":{

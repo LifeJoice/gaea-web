@@ -1,5 +1,7 @@
 package org.gaea.security.domain;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -13,9 +15,9 @@ import java.util.List;
 public class Authority implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "ID")
-    private Long id;
+    @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
+    @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
+    private String id;
     @Column(name = "NAME")
     private String name;                // 一个方便记忆的权限的名字。例如：查看用户列表
     @Column(name = "CODE")
@@ -44,11 +46,11 @@ public class Authority implements Serializable {
     })
     private List<Role> roles;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
