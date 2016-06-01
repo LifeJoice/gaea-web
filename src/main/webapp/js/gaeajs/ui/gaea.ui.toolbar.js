@@ -76,14 +76,18 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                         // 用htmlId作为创建dialog的DIV ID。
                         dialogOption.id = linkObj.htmlId;
                         var dlgSelector = "#" + dialogOption.id;
+                        var $dialogDiv = $("#" + dialogOption.id);
                         var dlgFormName = dialogOption.id + "-form";
+                        // 给dialog中的表单，外包一层form
+                        $dialogDiv.html("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
+                        var $dialogForm = $("#"+dlgFormName);
                         // 初始化dialog选项
                         var dialogPosition = {my: "left+310 top+95",at: "left top", of: window};// dialog默认弹出位置。
                         dialogOption.autoOpen = false;
                         dialogOption.width = 940;// 默认弹出框的宽度
                         dialogOption.buttons = {
                             "确定": function () {
-                                $("#" + dlgFormName).submit();
+                                $dialogForm.submit();
                                 //var queryConditions = new Object();         // 查询请求数据
                                 //queryConditions.urSchemaId = $("#urSchemaId").val();
                                 //ur.utils.ajax.post({
@@ -103,14 +107,18 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                             },
                             "取消": function () {
                                 gaeaDialog.close(dlgSelector);
+                                // 取消数据绑定
+                                gaeaData.unbind(dialogOption.id);
+                                // 清空表单内容
+                                $dialogForm.html("");
                             }
-                        }
+                        };
                         // 为按钮添加事件（加载内容）
                         $("#" + this.htmlId).click(function () {
                             //console.log("Go. Open dialog.");
-                            $(dlgSelector).append("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
+                            //$dialogDiv.html("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
                             // afterLoadInClick，必须放在callback中，才能触发里面的一些初始化脚本（特别跟load的内容相关的）
-                            $("#" + dlgFormName).load(dialogOption.contentUrl, function () {
+                            $dialogForm.load(dialogOption.contentUrl, function () {
                                 if (gaeaValid.isNotNull(thisButton.listeners)) {
                                     thisButton.listeners.afterLoadInClick();
                                 }
@@ -119,10 +127,13 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                                 // 初始化数据相关的（数据集，MVVM等）
                                 gaeaData.scanAndInit(dialogOption.id);
                             });
+                            // 初始化Dialog参数
+                            gaeaDialog.create(dialogOption);
+                            // 打开dialog
                             gaeaDialog.open(dlgSelector,dialogPosition);
-                        })
+                        });
                         // 创建弹出框
-                        gaeaDialog.create(dialogOption);
+                        //gaeaDialog.create(dialogOption);
                     }
                 }
                 /**

@@ -53,8 +53,25 @@ define(["jquery", "underscore", 'underscore-string', "knockoutJS", 'gaeajs-commo
                 // 在所有的ajax请求后再绑定KO。否则多个DATASET的时候会导致重复绑定出错。
                 $(document).ajaxStop(function () {
                     // 应用于KnockoutJS
-                    ko.applyBindings(options._viewModel);
+                    if(!root._isBinded($formDiv)) {
+                        ko.applyBindings(options._viewModel, $formDiv[0]);
+                        //var $data = ko.dataFor($formDiv[0]);
+                        //$data.dsIsEnabled_options.push({"text":"永远OK","value":"2"});
+                        //$data.dsResourceManagement_options = ko.observableArray([{"text":"登录","description":"登录url","resource":"/login","value":"1","orderseq":"1"},{"text":"测试","description":"测试菜单","resource":"/menu/test","value":"2","orderseq":"2"}]);
+                    //}else{
+                        //ko.cleanNode($formDiv[0]);
+                        //var $data = ko.dataFor($formDiv[0]);
+                        //ko.applyBindings(options._viewModel, $formDiv[0]);
+                    }
                 });
+            },
+            /**
+             * 解除绑定。
+             * @param divId
+             */
+            unbind: function (divId) {
+                var $formDiv = $("#"+divId);
+                ko.cleanNode($formDiv[0]);
             },
             select: {
                 initData: function (config,data, $select, $formDiv) {
@@ -72,7 +89,7 @@ define(["jquery", "underscore", 'underscore-string', "knockoutJS", 'gaeajs-commo
                     var selectOptions = idPrefix + "options";
                     var selected = idPrefix + "selected";
                     var selectedObj = idPrefix + "Obj";
-                    viewModel[selectOptions] = data;
+                    viewModel[selectOptions] = ko.observableArray(data);
                     viewModel[selected] = ko.observable();// 这个就是中间变量
                     /**
                      * 计算对象，根据下拉框选中的值去json数据中找对应的对象。代表下拉选择的对象。例如user。
@@ -129,6 +146,14 @@ define(["jquery", "underscore", 'underscore-string', "knockoutJS", 'gaeajs-commo
             },
             _binding: function () {
 
+            },
+            /**
+             * 是否KO已经绑定过了。如果重复绑定，KO会抛出异常。
+             * @returns {boolean}
+             * @private
+             */
+            _isBinded: function ($bindingDiv) {
+                return !!ko.dataFor($bindingDiv[0]);
             }
         };
         return gaeaData;
