@@ -24,7 +24,7 @@ public class Menu {
     @Column(name = "LEVEL")
     private Integer level;          // 菜单树中的级别
     @Column(name = "STATUS")
-    private Integer status;         // -1 过期 0 禁用 1 可用
+    private Integer status;         // -1 删除 0 禁用 1 可用
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "PARENT_ID")
     private Menu parent;
