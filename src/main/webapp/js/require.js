@@ -2135,10 +2135,10 @@ require.config({
         "underscore-string": '/js/thirdparty/underscore/underscore.string.min',
         /* knockoutJS。主要做前端的MVVM */
         knockoutJS: '/js/thirdparty/knockoutJS/knockout-3.4.0.debug',
-        //"gaeajs-common": '/js/ur/framework/ur-common',
         /* Gaea Data.负责处理数据相关，例如：数据集等 */
         "gaeajs-data": '/js/gaeajs/data/gaeajs-data',
         /* Gaea tools */
+        "gaeajs-common": '/js/gaeajs/gaeajs-common',
         "gaeajs-common-utils-ajax": '/js/gaeajs/gaeajs-common-utils-ajax',
         "gaeajs-common-utils-validate": '/js/gaeajs/gaeajs-common-utils-validate',
         "gaeajs-common-utils-datetime": '/js/gaeajs/gaeajs-common-utils-datetime',
