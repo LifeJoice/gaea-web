@@ -1,5 +1,6 @@
 package org.gaea.db;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,13 +45,19 @@ public class GaeaSqlProcessor {
 //        return query(sql,conditions,pageable);
 //    }
 
-    public PageResult query(final String sql, List<QueryCondition> conditions, SchemaGridPage page){
+    public PageResult query(String sql, List<QueryCondition> conditions, SchemaGridPage page){
         PageResult pageResult = new PageResult();
         MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
-        String countSQL = new SQL(){{
-            SELECT("count(*)");
-            FROM("("+sql+") results");
-        }}.toString();
+        /* 拼凑【WHERE】条件语句 */
+        String whereCause = genWhereString(conditions);
+        if(StringUtils.isNotEmpty(whereCause)){
+            sql = sql + " WHERE " + whereCause;
+        }
+        /* 拼凑【COUNT】语句 */
+        String countSQL = new SQL().
+            SELECT("count(*)")
+                .FROM("("+sql+") results")
+        .toString();
         // 查询记录数
         int total = namedParameterJdbcTemplate.queryForObject(countSQL, new MapSqlParameterSource(), Integer.class);
 
@@ -87,6 +95,31 @@ public class GaeaSqlProcessor {
         pageResult.setTotalElements(total);
         return pageResult;
 //        return new PageImpl<Map<String, Object>>(content, new PageRequest(page.getPage(),page.getSize()), total);
+    }
+
+    /**
+     * 根据查询条件，拼凑SQL的WHERE语句（不包含WHERE关键字）。
+     * @param conditions
+     * @return
+     */
+    private String genWhereString(List<QueryCondition> conditions){
+        if(conditions==null || conditions.isEmpty()){
+            return "";
+        }
+        StringBuilder whereSql = new StringBuilder("");
+        for(QueryCondition cond:conditions){
+            String columnName = cond.getPropertyName();
+            String value = cond.getValue();
+            // 查询条件，变量名或值为空就略过
+            if(StringUtils.isEmpty(columnName)||StringUtils.isEmpty(value)){
+                continue;
+            }
+            if(StringUtils.isNotEmpty(whereSql.toString())){
+                whereSql.append(" AND ");
+            }
+            whereSql.append(MessageFormat.format("{0} = {1}",columnName.toUpperCase(),"'"+value+"'"));
+        }
+        return whereSql.toString();
     }
 
 //    List<Map<String, Object>> content = jdbcTemplate.queryForList(sql, getExtractParams());

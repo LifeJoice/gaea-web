@@ -26,12 +26,22 @@ import java.util.Map;
  * Created by Iverson on 2015/8/17.
  */
 @Controller
+@RequestMapping("/sys/query")
 public class CommonViewQueryController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private CommonViewQueryService commonViewQueryService;
 
-    @RequestMapping(value = "/admin/common/query.do", method = RequestMethod.POST)
+    /**
+     * 本类的默认查询方法。
+     * @param page
+     * @param urSchemaId
+     * @param filters
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public PageResult page(@RequestBean SchemaGridPage page, String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
 //                        @RequestBean("staticParams") List<FinderStaticParam> staticParams,

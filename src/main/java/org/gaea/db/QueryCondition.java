@@ -8,17 +8,20 @@ package org.gaea.db;
  */
 public class QueryCondition {
     private String propertyName;
-    private Object value;
+    private String value;
     private boolean ignoreCase;
     private String op;                // 操作符。例如：> , = , like 等
 
-    protected QueryCondition(String propertyName, Object value, String op) {
+    public QueryCondition() {
+    }
+
+    protected QueryCondition(String propertyName, String value, String op) {
         this.propertyName = propertyName;
         this.value = value;
         this.op = op;
     }
 
-    protected QueryCondition(String propertyName, Object value, String op, boolean ignoreCase) {
+    protected QueryCondition(String propertyName, String value, String op, boolean ignoreCase) {
         this.propertyName = propertyName;
         this.value = value;
         this.ignoreCase = ignoreCase;
@@ -33,7 +36,7 @@ public class QueryCondition {
         return propertyName;
     }
 
-    public Object getValue() {
+    public String getValue() {
         return value;
     }
 
@@ -41,7 +44,7 @@ public class QueryCondition {
         this.propertyName = propertyName;
     }
 
-    public void setValue(Object value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

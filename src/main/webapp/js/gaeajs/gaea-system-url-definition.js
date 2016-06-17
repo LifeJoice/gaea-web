@@ -11,6 +11,9 @@ define(function () {
             DATASET:{
                 GET:"/gaea/data/ds/get" // 获取数据集接口
             }
+        },
+        QUERY:{
+            COMMON:"/sys/query" // 通用查询的url
         }
     };
     return url;

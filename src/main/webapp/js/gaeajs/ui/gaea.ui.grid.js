@@ -2,8 +2,79 @@
  * 基于RequireJS的模块化重构。让依赖更清晰，更简单。
  * Created by iverson on 2016/2/17.
  */
-define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-common-utils-datetime','gaeajs-common-utils-string','gaeajs-ui-button'],
-    function ($,_,gaeaAjax,gaeaValid,gaeaDT,gaeaStringUtils,gaeaButton) {
+define(["jquery","underscore", 'underscore-string','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-common-utils-datetime',
+    'gaeajs-common-utils-string','gaeajs-ui-button','gaea-system-url'],
+    function ($,_,_s,gaeaAjax,gaeaValid,gaeaDT,
+              gaeaStringUtils,gaeaButton,SYS_URL) {
+        /**
+         * 定义模板
+         */
+        var TEMPLATE = {
+            QUERY:{
+                PARAM_NAME:"filters[<%= P_SEQ %>].propertyName", // 查询请求的变量名的模板
+                PARAM_VALUE:"filters[<%= P_SEQ %>].value" // 查询请求的值的名的模板
+            }
+        };
+        /**
+         * 查询相关的定义。高级查询的处理器。
+         * @type {{doQuery: _query.doQuery}}
+         * @private
+         */
+        var _query = {
+            doQuery: function (queryConditions) {
+                var that = this;
+                // 获取SchemaId。对于Grid查询必须。
+                queryConditions.urSchemaId = $("#urSchemaId").val();
+                gaeaAjax.post({
+                    url: SYS_URL.QUERY.COMMON,
+                    data: queryConditions,
+                    success: function (data) {
+                        //var result = $.parseJSON(jqXHR.responseText);
+                        // 用查询结果，刷新数据列表
+                        _grid.refreshData(data.content);
+                        _grid.options.page.rowCount = data.totalElements;
+                        _grid._createFooter();
+                    },
+                    fail: function (data) {
+                        alert("失败");
+                    }
+                });
+            }
+        };
+        /**
+         * 查询的转换器。
+         * @type {{getQueryConditions: _query.parser.getQueryConditions}}
+         */
+        _query.parser = {
+            getQueryConditions: function () {
+                var queryConditions = new Object();         // 查询请求数据
+                // 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
+                var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
+                var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
+                // 收起查询区
+                $("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
+                var i = 0;      // 查询条件数组的下标
+                //queryConditions.urSchemaId = $("#urSchemaId").val();
+                $("#mars-headquery-inputs").find("input").each(function (index) {
+                    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
+                    var inputVal = $(this).val();
+                    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
+                    if (gaeaValid.isNotNull(inputVal)) {
+                        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
+                        var nameKey = paramNameTemplate({P_SEQ:i});        // 不能用index。输入框为空的时候index也会递增。
+                        var nameValue = $(this).data("field-id");
+                        //var valKey = "filters[" + i + "].value";
+                        var valKey = paramValueTemplate({P_SEQ:i});
+                        var valValue = $(this).val();
+                        queryConditions[nameKey] = nameValue;
+                        queryConditions[valKey] = valValue;
+                        i += 1;
+                    }
+                });
+                return queryConditions;
+            }
+        };
+
     var _grid = {
         options: {
             title: null,
@@ -552,7 +623,10 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 var pageVal = $(this).children("input").val();
                 that.options.page.page = pageVal;     // 先赋值。待会查询完成后可用于刷新页码。
                 // 查询（下一页 etc……）
-                that._query({
+                //that._query({
+                //    "page.page": pageVal
+                //});
+                _query.doQuery({
                     "page.page": pageVal
                 });
             });
@@ -590,26 +664,34 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
             }));
             // 【2】 点击确定，开始查询。
             $("#headqueryOK").click(function () {
-                // 收起查询区
-                $("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
-                var queryConditions = new Object();         // 查询请求数据
-                var i = 0;      // 查询条件数组的下标
-                //queryConditions.urSchemaId = $("#urSchemaId").val();
-                $("#mars-headquery-inputs").find("input").each(function (index) {
-                    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
-                    var inputVal = $(this).val();
-                    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
-                    if (gaeaValid.isNotNull(inputVal)) {
-                        var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
-                        var nameValue = $(this).data("field-id");
-                        var valKey = "filters[" + i + "].value";
-                        var valValue = $(this).val();
-                        queryConditions[nameKey] = nameValue;
-                        queryConditions[valKey] = valValue;
-                        i += 1;
-                    }
-                });
-                that._query(queryConditions);
+                //// 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
+                //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
+                //var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
+                //// 收起查询区
+                //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
+                //var queryConditions = new Object();         // 查询请求数据
+                //var i = 0;      // 查询条件数组的下标
+                ////queryConditions.urSchemaId = $("#urSchemaId").val();
+                //$("#mars-headquery-inputs").find("input").each(function (index) {
+                //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
+                //    var inputVal = $(this).val();
+                //    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
+                //    if (gaeaValid.isNotNull(inputVal)) {
+                //        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
+                //        var nameKey = paramNameTemplate({P_SEQ:i});        // 不能用index。输入框为空的时候index也会递增。
+                //        var nameValue = $(this).data("field-id");
+                //        //var valKey = "filters[" + i + "].value";
+                //        var valKey = paramValueTemplate({P_SEQ:i});
+                //        var valValue = $(this).val();
+                //        queryConditions[nameKey] = nameValue;
+                //        queryConditions[valKey] = valValue;
+                //        i += 1;
+                //    }
+                //});
+                // ------------------>>>> 上面的都重构到getQueryConditions方法
+                var queryConditions = _query.parser.getQueryConditions();
+                _query.doQuery(queryConditions);
+                //that._query(queryConditions);
                 //gaea.utils.ajax.post({
                 //    url: "/admin/common/query.do",
                 //    data: queryConditions,
@@ -630,25 +712,26 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 $("#mars-tb-head-query").slideDown("fast");    // cool一点的方式
             })
         },
-        _query: function (queryConditions) {
-            var that = this;
-            // 获取SchemaId。对于Grid查询必须。
-            queryConditions.urSchemaId = $("#urSchemaId").val();
-            gaeaAjax.post({
-                url: "/admin/common/query.do",// TODO 这些URL得提取到统一定义
-                data: queryConditions,
-                success: function (data) {
-                    //var result = $.parseJSON(jqXHR.responseText);
-                    // 用查询结果，刷新数据列表
-                    that.refreshData(data.content);
-                    that.options.page.rowCount = data.totalElements;
-                    that._createFooter();
-                },
-                fail: function (data) {
-                    alert("失败");
-                }
-            });
-        },
+        // ------------------>>>> _query重构到_query.doQuery方法
+        //_query: function (queryConditions) {
+        //    var that = this;
+        //    // 获取SchemaId。对于Grid查询必须。
+        //    queryConditions.urSchemaId = $("#urSchemaId").val();
+        //    gaeaAjax.post({
+        //        url: SYS_URL.QUERY.COMMON,
+        //        data: queryConditions,
+        //        success: function (data) {
+        //            //var result = $.parseJSON(jqXHR.responseText);
+        //            // 用查询结果，刷新数据列表
+        //            that.refreshData(data.content);
+        //            that.options.page.rowCount = data.totalElements;
+        //            that._createFooter();
+        //        },
+        //        fail: function (data) {
+        //            alert("失败");
+        //        }
+        //    });
+        //},
         /**
          * 创建行操作区，包括行前操作区（按钮区），行尾操作区（按钮区）
          * @private
