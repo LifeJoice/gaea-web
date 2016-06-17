@@ -5,13 +5,23 @@
  * DEPENDENCE:
  * RequireJS,JQuery,重写的Date.format
  */
-define(["jquery","underscore"],function ($,_) {
+define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
+    /**
+     * 验证字符是否为空。
+     * @param inArg
+     * @returns {boolean}
+     */
     var isNotNull = function (inArg) {
         try {
             if (_.isNull(inArg)) {
                 return false;
             }
             if (_.isUndefined(inArg)) {
+                return false;
+            }
+            // 去掉前后空格
+            _s.trim(inArg);
+            if (inArg.length == 0) {
                 return false;
             }
         } catch (error) {
@@ -32,10 +42,10 @@ define(["jquery","underscore"],function ($,_) {
         return false;
     };
     var isNotNullArray = function (inArg) {
-        if(isNull(inArg)){
+        if (isNull(inArg)) {
             return false;
         }
-        if(_.isArray(inArg) && inArg.length>0){
+        if (_.isArray(inArg) && inArg.length > 0) {
             return true;
         }
         return false;
@@ -54,9 +64,9 @@ define(["jquery","underscore"],function ($,_) {
         var parent = this;
         var isNotNull = false;
         // 检查当前对象属性中是否有该对象
-        $.each(rootObj,function (key, val) {
-            if(parent.isNotNull(objLevelArray[0])){
-                if(key==objLevelArray[0]){
+        $.each(rootObj, function (key, val) {
+            if (parent.isNotNull(objLevelArray[0])) {
+                if (key == objLevelArray[0]) {
                     isNotNull = true;
                     rootObj = val;
                     // 跳出循环
@@ -65,10 +75,10 @@ define(["jquery","underscore"],function ($,_) {
             }
         })
         // 如果当前对象中有，继续检查子对象
-        if(isNotNull && objLevelArray.length>1){
+        if (isNotNull && objLevelArray.length > 1) {
             // 移除第一个。然后递归继续
             objLevelArray.shift();
-            isNotNull = parent.isNotNullMultiple(rootObj,objLevelArray);
+            isNotNull = parent.isNotNullMultiple(rootObj, objLevelArray);
         }
         return isNotNull;
     };
@@ -78,7 +88,7 @@ define(["jquery","underscore"],function ($,_) {
     return {
         isNull: isNull,
         isNotNull: isNotNull,
-        isNotNullArray:isNotNullArray,
-        isNotNullMultiple:isNotNullMultiple
+        isNotNullArray: isNotNullArray,
+        isNotNullMultiple: isNotNullMultiple
     }
 })
