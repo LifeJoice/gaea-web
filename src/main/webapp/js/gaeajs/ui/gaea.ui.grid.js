@@ -3,9 +3,20 @@
  * Created by iverson on 2016/2/17.
  */
 define(["jquery","underscore", 'underscore-string','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-common-utils-datetime',
-    'gaeajs-common-utils-string','gaeajs-ui-button','gaea-system-url'],
+    'gaeajs-common-utils-string','gaeajs-ui-button','gaea-system-url',"gaeajs-ui-commons"],
     function ($,_,_s,gaeaAjax,gaeaValid,gaeaDT,
-              gaeaStringUtils,gaeaButton,SYS_URL) {
+              gaeaStringUtils,gaeaButton,SYS_URL,gaeaUI) {
+        /**
+         *
+         * @type {{VIEW: {GRID: {COLUMN: {DATA_TYPE_DATE: string, DATA_TYPE_TIME: string, DATA_TYPE_DATETIME: string}}}}}
+         */
+        var GAEA_UI_GRID_DEFINE = {
+            COLUMN: {
+                DATA_TYPE_DATE: "date",
+                DATA_TYPE_TIME: "time",
+                DATA_TYPE_DATETIME: "datetime"
+            }
+        };
         /**
          * 定义模板
          */
@@ -39,6 +50,117 @@ define(["jquery","underscore", 'underscore-string','gaeajs-common-utils-ajax','g
                         alert("失败");
                     }
                 });
+            }
+        };
+        /**
+         * 查询的视图（页面元素、构造等） 2016-6-19 18:38:26
+         * @type {{}}
+         */
+        _query.view = {
+            /**
+             * 高级查询 2016-6-19 18:42:01
+             * 即点击列头，出现在列头下的查询行。
+             */
+            init: function () {
+                //var that = this;
+                var fields = _grid.options.model.fields;
+                var columns = _grid.options.columns;
+                var optionData = null;
+                for (var i = 0; i < fields.length; i++) {
+                    var field = fields[i];
+                    var column = columns[i];
+                    var defaultClass = "head-query-column";
+                    var columnHtmId = "mars-hq-column-" + (i + 1); // column的序列化从1开始吧
+                    var inputId = "mars-hq-" + field.id;
+                    // 拼凑各个字段的查询输入框
+                    if (gaeaValid.isNotNull(column.hidden) && !column.hidden) {
+                        $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
+                        // +1是列头的列间边框宽度。
+                        $("#" + columnHtmId).css("width", (parseInt(column.width)));
+                        //$("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
+                    }
+                    /**
+                     * 根据系统返回的各个字段的类型定义，做相应的转化和初始化。
+                     * 例如：
+                     * 日期类的字段，需要初始化日期控件。
+                     */
+                    if (gaeaValid.isNotNull(column.datetimeFormat)) {
+                        if(gaeaStringUtils.equalsIgnoreCase(column.dataType,GAEA_UI_GRID_DEFINE.COLUMN.DATA_TYPE_DATE)) {
+                            // 初始化日期控件
+                            gaeaUI.datePicker.init({
+                                renderTo: inputId
+                            });
+                        }else if(gaeaStringUtils.equalsIgnoreCase(column.dataType,GAEA_UI_GRID_DEFINE.COLUMN.DATA_TYPE_TIME)){
+                            // TODO
+                        }else if(gaeaStringUtils.equalsIgnoreCase(column.dataType,GAEA_UI_GRID_DEFINE.COLUMN.DATA_TYPE_DATETIME)){
+                            // 初始化日期时间控件
+                            gaeaUI.datetimePicker.init({
+                                renderTo: inputId
+                            });
+                        }
+                    }
+                }
+                // 组装按钮
+                $("#mars-headquery-actions").append(gaeaButton.create({
+                    "htmlId": "headqueryOK",
+                    "text": "确定",
+                    "size": "small"
+                }));
+                // 【2】 点击确定，开始查询。
+                $("#headqueryOK").click(function () {
+                    //// 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
+                    //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
+                    //var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
+                    //// 收起查询区
+                    //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
+                    //var queryConditions = new Object();         // 查询请求数据
+                    //var i = 0;      // 查询条件数组的下标
+                    ////queryConditions.urSchemaId = $("#urSchemaId").val();
+                    //$("#mars-headquery-inputs").find("input").each(function (index) {
+                    //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
+                    //    var inputVal = $(this).val();
+                    //    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
+                    //    if (gaeaValid.isNotNull(inputVal)) {
+                    //        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
+                    //        var nameKey = paramNameTemplate({P_SEQ:i});        // 不能用index。输入框为空的时候index也会递增。
+                    //        var nameValue = $(this).data("field-id");
+                    //        //var valKey = "filters[" + i + "].value";
+                    //        var valKey = paramValueTemplate({P_SEQ:i});
+                    //        var valValue = $(this).val();
+                    //        queryConditions[nameKey] = nameValue;
+                    //        queryConditions[valKey] = valValue;
+                    //        i += 1;
+                    //    }
+                    //});
+                    // ------------------>>>> 上面的都重构到getQueryConditions方法
+                    var queryConditions = _query.parser.getQueryConditions();
+                    _query.doQuery(queryConditions);
+                    //that._query(queryConditions);
+                    //gaea.utils.ajax.post({
+                    //    url: "/admin/common/query.do",
+                    //    data: queryConditions,
+                    //    success: function (data) {
+                    //        //alert("成功。id: " + data[0].id);
+                    //        // 用查询结果，刷新数据列表
+                    //        gaea.component.bridge.grid.refreshData(data);
+                    //    },
+                    //    fail: function (data) {
+                    //        alert("失败");
+                    //    }
+                    //})
+                });
+                // 【3】 点击列头，展示查询区。
+                $("#tb-head").find(".column-header").click(function () {
+                    var $queryDiv = $("#mars-tb-head-query");
+                    //console.log(" 选中的column： " + $(this).data("field-id"));
+                    //$("#mars-tb-head-query").css("display","block");
+                    // cool一点的方式
+                    if ($queryDiv.is(':visible')) {
+                        $queryDiv.slideUp("fast");
+                    }else {
+                        $queryDiv.slideDown("fast");
+                    }
+                })
             }
         };
         /**
@@ -260,7 +382,7 @@ define(["jquery","underscore", 'underscore-string','gaeajs-common-utils-ajax','g
                 "<div class='head-query-column row-headactions'></div></div>" +                 // 占位块。为了和列头对上。
                 "<div id=\"mars-headquery-actions\" class='mars-headquery-actions'></div>" +
                 "</div>");
-            this._initAdvancedQuery();
+            _query.view.init();
             /**
              * 行操作区
              */
@@ -441,7 +563,7 @@ define(["jquery","underscore", 'underscore-string','gaeajs-common-utils-ajax','g
                                     "</td>");
                             }
                             // 转换日期格式
-                            if (gaeaValid.isNotNull(column.datetimeFormat)) {
+                            if (gaeaValid.isNotNull(nRowColVal) && gaeaValid.isNotNull(column.datetimeFormat)) {
                                 nRowColVal = gaeaDT.getDate(nRowColVal, {format: column.datetimeFormat});
                             }
                             $(lastTRselector).append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
@@ -637,81 +759,84 @@ define(["jquery","underscore", 'underscore-string','gaeajs-common-utils-ajax','g
          * 即点击列头，出现在列头下的查询行。
          * @private
          */
-        _initAdvancedQuery: function () {
-            var that = this;
-            var fields = this.options.model.fields;
-            var columns = this.options.columns;
-            var optionData = null;
-            for (var i = 0; i < fields.length; i++) {
-                var field = fields[i];
-                var column = columns[i];
-                var defaultClass = "head-query-column";
-                var columnHtmId = "mars-hq-column-" + (i + 1); // column的序列化从1开始吧
-                var inputId = "mars-hq-" + field.id;
-                // 拼凑各个字段的查询输入框
-                if (gaeaValid.isNotNull(column.hidden) && !column.hidden) {
-                    $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
-                    // +1是列头的列间边框宽度。
-                    $("#" + columnHtmId).css("width", (parseInt(column.width)));
-                    //$("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
-                }
-            }
-            // 组装按钮
-            $("#mars-headquery-actions").append(gaeaButton.create({
-                "htmlId": "headqueryOK",
-                "text": "确定",
-                "size": "small"
-            }));
-            // 【2】 点击确定，开始查询。
-            $("#headqueryOK").click(function () {
-                //// 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
-                //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
-                //var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
-                //// 收起查询区
-                //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
-                //var queryConditions = new Object();         // 查询请求数据
-                //var i = 0;      // 查询条件数组的下标
-                ////queryConditions.urSchemaId = $("#urSchemaId").val();
-                //$("#mars-headquery-inputs").find("input").each(function (index) {
-                //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
-                //    var inputVal = $(this).val();
-                //    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
-                //    if (gaeaValid.isNotNull(inputVal)) {
-                //        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
-                //        var nameKey = paramNameTemplate({P_SEQ:i});        // 不能用index。输入框为空的时候index也会递增。
-                //        var nameValue = $(this).data("field-id");
-                //        //var valKey = "filters[" + i + "].value";
-                //        var valKey = paramValueTemplate({P_SEQ:i});
-                //        var valValue = $(this).val();
-                //        queryConditions[nameKey] = nameValue;
-                //        queryConditions[valKey] = valValue;
-                //        i += 1;
-                //    }
-                //});
-                // ------------------>>>> 上面的都重构到getQueryConditions方法
-                var queryConditions = _query.parser.getQueryConditions();
-                _query.doQuery(queryConditions);
-                //that._query(queryConditions);
-                //gaea.utils.ajax.post({
-                //    url: "/admin/common/query.do",
-                //    data: queryConditions,
-                //    success: function (data) {
-                //        //alert("成功。id: " + data[0].id);
-                //        // 用查询结果，刷新数据列表
-                //        gaea.component.bridge.grid.refreshData(data);
-                //    },
-                //    fail: function (data) {
-                //        alert("失败");
-                //    }
-                //})
-            });
-            // 【3】 点击列头，展示查询区。
-            $("#tb-head").find(".column-header").click(function () {
-                //console.log(" 选中的column： " + $(this).data("field-id"));
-                //$("#mars-tb-head-query").css("display","block");
-                $("#mars-tb-head-query").slideDown("fast");    // cool一点的方式
-            })
-        },
+        // ------------------>>>> _initAdvancedQuery重构到_query.view.init方法 2016-6-19 18:41:34
+        //_initAdvancedQuery: function () {
+        //    var that = this;
+        //    var fields = this.options.model.fields;
+        //    var columns = this.options.columns;
+        //    var optionData = null;
+        //    for (var i = 0; i < fields.length; i++) {
+        //        var field = fields[i];
+        //        var column = columns[i];
+        //        var defaultClass = "head-query-column";
+        //        var columnHtmId = "mars-hq-column-" + (i + 1); // column的序列化从1开始吧
+        //        var inputId = "mars-hq-" + field.id;
+        //        // 拼凑各个字段的查询输入框
+        //        if (gaeaValid.isNotNull(column.hidden) && !column.hidden) {
+        //            $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
+        //            // +1是列头的列间边框宽度。
+        //            $("#" + columnHtmId).css("width", (parseInt(column.width)));
+        //            //$("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
+        //        }
+        //    }
+        //    // 组装按钮
+        //    $("#mars-headquery-actions").append(gaeaButton.create({
+        //        "htmlId": "headqueryOK",
+        //        "text": "确定",
+        //        "size": "small"
+        //    }));
+        //    // 【2】 点击确定，开始查询。
+        //    $("#headqueryOK").click(function () {
+        //        //// 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
+        //        //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
+        //        //var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
+        //        //// 收起查询区
+        //        //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
+        //        //var queryConditions = new Object();         // 查询请求数据
+        //        //var i = 0;      // 查询条件数组的下标
+        //        ////queryConditions.urSchemaId = $("#urSchemaId").val();
+        //        //$("#mars-headquery-inputs").find("input").each(function (index) {
+        //        //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
+        //        //    var inputVal = $(this).val();
+        //        //    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
+        //        //    if (gaeaValid.isNotNull(inputVal)) {
+        //        //        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
+        //        //        var nameKey = paramNameTemplate({P_SEQ:i});        // 不能用index。输入框为空的时候index也会递增。
+        //        //        var nameValue = $(this).data("field-id");
+        //        //        //var valKey = "filters[" + i + "].value";
+        //        //        var valKey = paramValueTemplate({P_SEQ:i});
+        //        //        var valValue = $(this).val();
+        //        //        queryConditions[nameKey] = nameValue;
+        //        //        queryConditions[valKey] = valValue;
+        //        //        i += 1;
+        //        //    }
+        //        //});
+        //        // ------------------>>>> 上面的都重构到getQueryConditions方法
+        //        var queryConditions = _query.parser.getQueryConditions();
+        //        _query.doQuery(queryConditions);
+        //        //that._query(queryConditions);
+        //        //gaea.utils.ajax.post({
+        //        //    url: "/admin/common/query.do",
+        //        //    data: queryConditions,
+        //        //    success: function (data) {
+        //        //        //alert("成功。id: " + data[0].id);
+        //        //        // 用查询结果，刷新数据列表
+        //        //        gaea.component.bridge.grid.refreshData(data);
+        //        //    },
+        //        //    fail: function (data) {
+        //        //        alert("失败");
+        //        //    }
+        //        //})
+        //    });
+        //    // 【3】 点击列头，展示查询区。
+        //    $("#tb-head").find(".column-header").click(function () {
+        //        //console.log(" 选中的column： " + $(this).data("field-id"));
+        //        //$("#mars-tb-head-query").css("display","block");
+        //        $("#mars-tb-head-query").slideDown("fast");    // cool一点的方式
+        //    })
+        //},
+
+
         // ------------------>>>> _query重构到_query.doQuery方法
         //_query: function (queryConditions) {
         //    var that = this;

@@ -19,7 +19,7 @@
 
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
-          p:location="/WEB-INF/jdbc.properties" />
+          p:location="classpath:/config/sys/db/jdbc.properties" />
     <!-- 数据源，用的是Spring -->
     <bean id="dataSource"
           class="org.springframework.jdbc.datasource.DriverManagerDataSource"
@@ -148,10 +148,12 @@
     <!--Spring Data相关的配置-->
     <jpa:repositories base-package="org.gaea.**.repository" entity-manager-factory-ref="entityManagerFactory"
                       transaction-manager-ref="transactionManager" factory-class="org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean" />
+    <jpa:repositories base-package="iverson.test.**.repository" entity-manager-factory-ref="entityManagerFactory"
+                      transaction-manager-ref="transactionManager" factory-class="org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean" />
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="packagesToScan" value="org.gaea.**.domain" />
+        <property name="packagesToScan" value="org.gaea.**.domain,iverson.test.**.domain" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
         </property>
@@ -181,4 +183,7 @@
     <import resource="applicationContext-system-data.xml" />
     <!--系统缓存架构的初始化（当前是Redis）-->
     <import resource="applicationContext-cache.xml" />
+    <!-- 系统其他项初始化。例如：EXCEL通用导入…… -->
+    <import resource="applicationContext-commons.xml" />
+    <import resource="classpath:/config/**/applicationContext-*.xml" />
 </beans>

@@ -55,6 +55,14 @@
     <bean name="indexController"
           class="org.springframework.web.servlet.mvc.ParameterizableViewController"
           p:viewName="index"/>
+    <!--
+    文件上传
+     -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 最大200M大小 -->
+        <property name="maxUploadSize" value="200000000"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
     <!-- *********************************     对静态资源的定义     ********************************* -->
     <!--针对webapp根目录的资源。默认视为静态。-->
     <mvc:resources mapping="/static/**" location="/WEB-INF/static/" order="1">

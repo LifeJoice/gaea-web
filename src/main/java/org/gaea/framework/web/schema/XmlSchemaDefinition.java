@@ -13,7 +13,8 @@ public class XmlSchemaDefinition {
     public static String VIEWS_NAME = "views";
     public static String GRID_NAME = "grid";
     public static String DIALOG_NAME = "dialog";
-    public static String WF_DIALOG_NAME = "wf-dialog";
+    public static String WF_DIALOG_NAME = "wf-dialog";// 工作流组件的弹出框
+    public static String UPLOADER_DIALOG_NAME = "uploader-dialog";// 上传组件的弹出框
     public static String ACTIONS_NAME = "actions";
     public static String IMPORT_JAVASCRIPT_NAME = "import-javascript";
     public static String IMPORT_CSS_NAME = "import-css";

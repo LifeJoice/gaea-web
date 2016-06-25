@@ -11,6 +11,11 @@ public class QueryCondition {
     private String value;
     private boolean ignoreCase;
     private String op;                // 操作符。例如：> , = , like 等
+    /**
+     * 数据类型。这个和XML SCHEMA的data-type一样。
+     * 辅助字段。当查询都是字符串的时候可以无视。但如果是日期之类的，需要有dataType协助转换。
+     */
+    private String dataType;
 
     public QueryCondition() {
     }
@@ -50,6 +55,14 @@ public class QueryCondition {
 
     public void setOp(String op) {
         this.op = op;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 
     /**

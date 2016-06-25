@@ -2145,6 +2145,7 @@ require.config({
         "gaeajs-common-utils-string": '/js/gaeajs/gaeajs-common-utils-string',
         "gaea-system-url": '/js/gaeajs/gaea-system-url-definition',
         /* Gaea UI */
+        "gaeajs-ui-commons": '/js/gaeajs/ui/gaea.ui.commons',
         "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
         "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',
         "gaeajs-ui-button": '/js/gaeajs/ui/gaea.ui.button',
@@ -2166,6 +2167,11 @@ require.config({
         /* JQuery插件扩展 */
         "jquery-serializeObject":'/js/thirdparty/jquery/plugins/jquery.serializeObject',
         "jquery-notify":'/js/thirdparty/jquery/plugins/jnotify/jquery.jnotify',
+        "datetimepicker":"/js/thirdparty/jquery/plugins/datetimepicker/gaea-jquery.datetimepicker",
+        "jquery-mousewheel":"/js/thirdparty/jquery/plugins/jquery.mousewheel.min",
+        /* 上传组件 */
+        "webuploader":'/js/thirdparty/upload/webuploader',
+        "gaeajs-uploader":'/js/gaeajs/uploader/gaeajs-uploader',
         /* 系统公用的URL */
         "system-url":'/js/system-url-definition'
     },

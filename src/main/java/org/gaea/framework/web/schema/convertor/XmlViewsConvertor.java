@@ -47,8 +47,13 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
                 int pageSize = StringUtils.isNumeric(grid.getPageSize())?Integer.parseInt(grid.getPageSize()):0;
                 gridDTO.setPage(new SchemaGridPage(1,pageSize));
                 schemaViews.setGridDTO(gridDTO);
-            }else if(XmlSchemaDefinition.DIALOG_NAME.equals(viewNodes.getNodeName())
-                    || XmlSchemaDefinition.WF_DIALOG_NAME.equals(viewNodes.getNodeName())){
+            }
+            /**
+             * 如果是普通弹框、工作流组件的弹框、上传组件的弹框，则作为弹框解析。
+             */
+            else if(XmlSchemaDefinition.DIALOG_NAME.equals(viewNodes.getNodeName())
+                    || XmlSchemaDefinition.WF_DIALOG_NAME.equals(viewNodes.getNodeName())
+                    || XmlSchemaDefinition.UPLOADER_DIALOG_NAME.equals(viewNodes.getNodeName())){
                 SchemaDialog dialog = dialogViewSchemaConvertor.convert(viewNodes);
                 schemaViews.getDialogs().add(dialog);
             }else if(XmlSchemaDefinition.ACTIONS_NAME.equals(viewNodes.getNodeName())){

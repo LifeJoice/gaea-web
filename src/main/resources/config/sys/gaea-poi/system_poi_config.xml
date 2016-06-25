@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<poi-definition>
+    <!-- workbook表示一份excel文档 -->
+    <workbook id="attendance_workbook" >
+        <!-- block是excel中的一个块.一般一个块对应一张数据表.例如:excel的第1~10列对应块A.块中的field会自动填充进来。 -->
+        <block id="ATTENDANCE" table="demo_attendance" entity-class="iverson.test.attendance.domain.Attendance" >
+            <!--read-type: string(default) | date | time | datetime  -->
+            <field name="clockdate" read-type="date"></field>
+            <field name="clocktime" read-type="time"></field>
+        </block>
+    </workbook>
+    <!--可以定义多个workbook-->
+    <!--<workbook></workbook>-->
+</poi-definition>

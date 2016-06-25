@@ -295,11 +295,13 @@
 /**
  * modify by Iverson
  * 这个是单元格。去掉单元格边框和背景。
+ * 增加 position : relative 为了单元格内的背景对位。
  */
 .xdsoft_datetimepicker .xdsoft_calendar td, .xdsoft_datetimepicker .xdsoft_calendar th {
     width: 14.2857142%;
     /*background: #f5f5f5;*/
     /*border: 1px solid #ddd;*/
+    position: relative;
     color: #666;
     font-size: 12px;
     text-align: center;
@@ -335,14 +337,19 @@
     box-shadow: #00dd1c 0 1px 4px 0 inset;
     color: #000;
 }
-
+/**
+ * 选中的日期的样式
+ * modify by Iverson 2016-6-22 15:49:56
+ */
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box > div > div.xdsoft_current {
     background: #33aaff;
-    box-shadow: #178fe5 0 1px 3px 0 inset;
+    /* box-shadow: #178fe5 0 1px 3px 0 inset; */
     color: #fff;
     font-weight: 700;
+    border-radius: 50%;
+    padding-left: 1px;/* TODO 临时的调位，感觉字体不是居中！*/
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_other_month,
@@ -357,12 +364,12 @@
     opacity: 0.2;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
 }
-
+/* modify by Iverson 2016-6-22 15:06:58 */
 .xdsoft_datetimepicker .xdsoft_calendar td:hover,
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box > div > div:hover {
-    color: #fff !important;
-    background: #ff8000 !important;
-    box-shadow: none !important;
+    /*color: #fff !important;*/
+    /*background: #ff8000 !important;*/
+    /*box-shadow: none !important;*/
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current.xdsoft_disabled:hover,
@@ -588,4 +595,27 @@
     /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f4f8fa', endColorstr='#FFF', GradientType=0);
     /* IE6-9 */
+}
+/**
+ * add by Iverson
+ * 鼠标移过日期的效果。
+ */
+.xdsoft_datetimepicker .xdsoft_calendar .gaea-ui-datefield{
+    /*content: '';*/
+    /*background-color: blue;*/
+    border-radius: 50%;
+    height: 34px;
+    /*left: 4px;*/
+    opacity: 0;
+    position: absolute;
+    top: 0px;
+    transform: scale(0);
+    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    width: 34px;
+    background: rgb(0, 151, 167);
+}
+/* 鼠标经过日期单元格的效果，变半透明，并且圆从小变大。 */
+.xdsoft_datetimepicker .xdsoft_calendar td:hover .gaea-ui-datefield {
+    opacity: 0.6;
+    transform: scale(1);
 }

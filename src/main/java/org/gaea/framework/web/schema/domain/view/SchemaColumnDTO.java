@@ -25,7 +25,6 @@ public class SchemaColumnDTO {
     private Boolean sortable = false;
     private String width;                           // 对应htmlWidth
     private Boolean primaryKey = false;             // 是否主键
-    @JsonIgnore
     private String dataType;
     // yyyy-mm-dd
     private String datetimeFormat = "yyyy-mm-dd";

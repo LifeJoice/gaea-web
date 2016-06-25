@@ -27,6 +27,12 @@
     <link href="/static/gaea/framework/gaea-ui-buttons.css" rel="stylesheet" type="text/css"/>
     <link href="/js/gaeajs/ui/css/gaea-ui-checkbox.css" rel="stylesheet" type="text/css"/>
     <link href="/js/gaeajs/ui/css/gaea-ui-form.css" rel="stylesheet" type="text/css"/><!--通用表单样式-->
+    <!-- 上传组件 -->
+    <link rel="stylesheet" href="/js/thirdparty/upload/webuploader.css">
+    <!-- 时间日期组件 -->
+    <link rel="stylesheet" href="/js/thirdparty/jquery/plugins/datetimepicker/gaea-jquery.datetimepicker.css">
+    <!-- loading效果 -->
+    <link rel="stylesheet" href="/css/commons/loading-style.css">
     <!--导入Schema提供的js和css-->
     <!UR_VIEW_SCHEMA IMPORT_HEADLAST>
     <!--下面的这两个js为了配合整个列表页框架的运作，所以放在最后。非列表页框架性的东西不要放在这里。-->
@@ -44,6 +50,10 @@
         <span><label>审批意见</label><textarea id="wfApprovalReason" name="wfApprovalReason" ></textarea></span>
     </div>
     <div id="createOrEditDialog"></div>
+    <div id="uploaderDialog">
+        <div id="thelist" class="uploader-list"></div>
+        <div id="filePicker"></div>
+    </div>
     <input type="hidden" id="urSchemaId" name="urSchemaId" value="">
 </div>
 <!UR_VIEW_SCHEMA IMPORT_BODYEND>

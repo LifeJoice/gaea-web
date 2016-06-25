@@ -1,5 +1,6 @@
 package org.gaea.framework.web.service.impl;
 
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.SysLogicalException;
@@ -9,6 +10,7 @@ import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.PageResult;
+import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.service.SchemaDataService;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +31,7 @@ import java.util.Map;
  */
 @Service
 public class CommonViewQueryServiceImpl implements CommonViewQueryService {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(CommonViewQueryServiceImpl.class);
     @Autowired
     private GaeaSchemaCache gaeaSchemaCache;
     @Autowired
@@ -55,11 +58,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
             SchemaGrid grid = gaeaXmlSchema.getSchemaViews().getGrid();
             final String sql = dataSet.getSql();
-            // 转换页面传过来的name为db column name
-            for (QueryCondition fa: filters){
-                String dbName = GaeaSchemaUtils.getDbColumnName(grid, fa.getPropertyName());
-                fa.setPropertyName(dbName);
-            }
+            // 根据XML SCHEMA的定义，把页面传过来的查询条件做一定处理
+            rebuildQueryConditionBySchema(filters,grid);
             // 获取分页的信息
             int pageSize = StringUtils.isNumeric(grid.getPageSize())?Integer.parseInt(grid.getPageSize()):0;
             page.setSize(pageSize);
@@ -110,5 +110,25 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
         }
 
         return null;
+    }
+
+    /**
+     * 根据XML SCHEMA的定义，把页面传过来的查询条件做一定处理。
+     * 例如：
+     * 转换对应的数据库字段，设定查询字段对应的XML定义的类型等等。
+     * @param queryConditions
+     * @param grid
+     */
+    private void rebuildQueryConditionBySchema(List<QueryCondition> queryConditions, SchemaGrid grid){
+        for (QueryCondition condition: queryConditions){
+            SchemaColumn schemaColumn = GaeaSchemaUtils.getViewColumn(grid, condition.getPropertyName());
+//            String dbName = GaeaSchemaUtils.getDbColumnName(grid, fa.getPropertyName());
+            String dbName = schemaColumn.getDbColumnName();
+            condition.setPropertyName(dbName);
+            condition.setDataType(schemaColumn.getDataType());
+//            if(SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(schemaColumn.getDataType())){
+//                condition.setSqlType(Types.DATE);
+//            }
+        }
     }
 }

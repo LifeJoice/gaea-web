@@ -1,4 +1,5 @@
 /**
+ * modify by Iverson 2016-6-22 14:52:56
  * @preserve jQuery DateTimePicker plugin v2.4.3
  * @homepage http://xdsoft.net/jqplugins/datetimepicker/
  * (c) 2014, Chupurnov Valeriy.
@@ -1525,6 +1526,7 @@
 							}
 
 							table += '<td data-date="' + d + '" data-month="' + m + '" data-year="' + y + '"' + ' class="xdsoft_date xdsoft_day_of_week' + start.getDay() + ' ' + classes.join(' ') + '" title="' + description + '">' +
+										'<div class="gaea-ui-datefield"></div>' + // add by Iverson 2016-6-22 14:56:27
 										'<div>' + d + '</div>' +
 									'</td>';
 

@@ -2,8 +2,10 @@
  * 基于RequireJS的模块化重构。让依赖更清晰，更简单。
  * Created by iverson on 2016-2-17 11:48:52.
  */
-define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-dialog','gaeajs-ui-workflow',"gaeajs-ui-form","gaeajs-data"],
-    function ($,_,gaeaAjax,gaeaValid,gaeaGrid,gaeaDialog,gaeaWF,gaeaForm,gaeaData) {
+define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-dialog','gaeajs-ui-workflow',
+    "gaeajs-ui-form","gaeajs-data","gaeajs-common-utils-string","gaeajs-uploader"],
+    function ($,_,gaeaAjax,gaeaValid,gaeaGrid,gaeaDialog,gaeaWF,
+              gaeaForm,gaeaData,gaeaString,gaeaUploader) {
     var toolbar = {
         options: {
             renderTo: null,
@@ -68,7 +70,18 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                         //        alert("该记录还未启动流程，无法进行流程操作。");
                         //    }
                         //});
-                    } else if ("dialog" == linkObj.viewName) {
+                    }
+                    /**
+                     * 如果有上传组件的dialog，则初始化上传组件。
+                     */
+                    else if (gaeaString.equalsIgnoreCase("uploader-dialog",linkObj.viewName)) {
+                        console.log("初始化uploader-dialog");
+                        gaeaUploader.uploader(null,linkObj,this);
+                    }
+                    /**
+                     * 最后，处理普通dialog。
+                     */
+                    else if ("dialog" == linkObj.viewName) {
                         if (gaeaValid.isNull(linkObj.htmlId)) {
                             throw "没有htmlId(对于页面DIV ID)，无法创建Dialog。";
                         }
