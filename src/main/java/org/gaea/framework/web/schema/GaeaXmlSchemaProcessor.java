@@ -1,5 +1,6 @@
 package org.gaea.framework.web.schema;
 
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
 import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
@@ -140,7 +141,9 @@ public class GaeaXmlSchemaProcessor {
             logger.warn("把XML SCHEMA的属性等转换为bean对象出错。BeanUtils setProperty error.");
             throw e;
         } catch (ValidationFailedException e){
-            logger.warn("Ur System validate problem. "+e.getMessage());
+            logger.warn(e.getMessage());
+        } catch (InvalidDataException e) {
+            logger.warn(e.getMessage());
         }
         // 缓存XML SCHEMA。这里没有做真正的SCHEMA缓存，只是缓存了方便列表页生成后的删除等二次操作的查询而已。
         if(gaeaSchemaCache.get(gaeaXmlSchema.getId())==null) {

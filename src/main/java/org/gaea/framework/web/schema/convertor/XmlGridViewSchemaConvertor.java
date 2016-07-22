@@ -1,5 +1,6 @@
 package org.gaea.framework.web.schema.convertor;
 
+import org.gaea.exception.InvalidDataException;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.beanutils.BeanUtils;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public SchemaGrid convert(Node gridViewNode) throws InvocationTargetException, IllegalAccessException {
+    public SchemaGrid convert(Node gridViewNode) throws InvocationTargetException, IllegalAccessException, InvalidDataException {
         SchemaGrid grid = new SchemaGrid();
         grid = GaeaXmlUtils.copyAttributesToBean(gridViewNode, grid, SchemaGrid.class);
         NodeList nodes = gridViewNode.getChildNodes();
@@ -51,6 +52,7 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
 
     /**
      * 把Grid转换为GridDTO。方便前端处理。
+     *
      * @param origGrid
      * @return
      * @throws InvocationTargetException
@@ -62,12 +64,12 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
         // 复制DTO属性
         BeanUtils.copyProperties(gridDTO, origGrid);
         gridDTO.setColumns(new ArrayList<SchemaColumnDTO>());
-        for(int i = 0;i<origGrid.getColumns().size();i++){
+        for (int i = 0; i < origGrid.getColumns().size(); i++) {
 //        for (SchemaColumn column:origGrid.getColumns()){
             SchemaColumn column = origGrid.getColumns().get(i);
             SchemaColumnDTO columnDTO = new SchemaColumnDTO();
             // 复制column属性
-            BeanUtils.copyProperties(columnDTO,column);
+            BeanUtils.copyProperties(columnDTO, column);
             // 转换DTO里的别名字段等
             columnDTO.setText(column.getLabel());       // label即text
             columnDTO.setWidth(column.getHtmlWidth());  // htmlWidth即width
@@ -83,7 +85,7 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
         return gridDTO;
     }
 
-    private SchemaColumn covertToColumn(Node columnNode) throws InvocationTargetException, IllegalAccessException {
+    private SchemaColumn covertToColumn(Node columnNode) throws InvocationTargetException, IllegalAccessException, InvalidDataException {
         SchemaColumn column = new SchemaColumn();
         column = GaeaXmlUtils.copyAttributesToBean(columnNode, column, SchemaColumn.class);
         // 如果column.name有值，而htmlId为空，则默认使用column.name作为htmlId

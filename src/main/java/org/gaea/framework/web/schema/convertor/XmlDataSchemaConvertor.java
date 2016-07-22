@@ -1,14 +1,21 @@
 package org.gaea.framework.web.schema.convertor;
 
+import org.gaea.data.convertor.XmlDataSetConvertor;
+import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.dataset.domain.Where;
+import org.gaea.data.xml.DataSetSchemaDefinition;
 import org.gaea.db.GaeaSqlProcessor;
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
+import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaData;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.util.GaeaStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,26 +45,29 @@ public class XmlDataSchemaConvertor {
     private GaeaXmlSchemaProcessor gaeaXmlSchemaProcessor;
     @Autowired
     private GaeaSqlProcessor gaeaSqlProcessor;
+    @Autowired
+    private XmlDataSetConvertor xmlDataSetConvertor;
 
     /**
      * 转换XML SCHEMA的"data"标签。提取其中的SQL，并查询出SQL结果。
+     *
      * @param xmlDataNode
      * @return
      * @throws ValidationFailedException
      */
-    public SchemaData convert(Node xmlDataNode) throws ValidationFailedException {
+    public SchemaData convert(Node xmlDataNode) throws ValidationFailedException, InvalidDataException {
         SchemaData schemaData = new SchemaData();
         NodeList nodes = xmlDataNode.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {
             Node dataSetNode = nodes.item(i);
             // xml解析会把各种换行符等解析成元素。统统跳过。
-            if(!(dataSetNode instanceof Element)){
+            if (!(dataSetNode instanceof Element)) {
                 continue;
             }
-            if("dataset".equals(dataSetNode.getNodeName())){
+            if (XmlSchemaDefinition.DATA_DATASET_NAME.equals(dataSetNode.getNodeName())) {
                 DataSet dataSet = convertDataSet(dataSetNode);
                 schemaData.getDataSetList().add(dataSet);
-            }else{
+            } else {
                 loggerWarnNodeName(dataSetNode.getNodeName());
             }
         }
@@ -86,60 +96,67 @@ public class XmlDataSchemaConvertor {
 
     /**
      * 把Schema中的<data><dataset></dataset></data>中转换出来。
+     *
      * @param xmlDataSetNode
      * @return
      * @throws ValidationFailedException
      */
-    private DataSet convertDataSet(Node xmlDataSetNode) throws ValidationFailedException {
-        DataSet dataSet = new DataSet();
-        Element dataSetElement = (Element) xmlDataSetNode;
-        NodeList nodes = dataSetElement.getChildNodes();
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node n = nodes.item(i);
-            // xml解析会把各种换行符等解析成元素。统统跳过。
-            if(!(n instanceof Element)){
-                continue;
-            }
-            if("data-source".equals(n.getNodeName())){
-                Element dsElement = (Element) n;
-                String dsCode = dsElement.getAttribute("code");
-                dataSet.setCode(dsCode);
-            }else if ("data-sql".equals(n.getNodeName())){
-                NodeList list = n.getChildNodes();
-                for (int j = 0; j < list.getLength(); j++) {
-                    Node sqlNode = list.item(j);
-                    // xml解析会把各种换行符等解析成元素。统统跳过。
-                    if(StringUtils.isBlank(GaeaStringUtils.cleanFormatChar(sqlNode.getTextContent()))){
-                        continue;
-                    }
-                    if (!(sqlNode instanceof CharacterData)) {
-                        continue;
-//                        throw new ValidationFailedException("<data-sql>标签中的SQL必须包含在CDATA中!");
-                    }
-                    CharacterData sqlData = (CharacterData) sqlNode;
-                    String sql = sqlData.getData();
-                    dataSet.setSql(sql);
-                }
-            }else{
-                loggerWarnNodeName(n.getNodeName());
-            }
-        }
+    private DataSet convertDataSet(Node xmlDataSetNode) throws ValidationFailedException, InvalidDataException {
+        GaeaDataSet gaeaDataSet = xmlDataSetConvertor.convertDataSet(xmlDataSetNode);
+        DataSet dataSet = GaeaSchemaUtils.translateDataSet(gaeaDataSet);
+//        Element dataSetElement = (Element) xmlDataSetNode;
+//        NodeList nodes = dataSetElement.getChildNodes();
+//        for (int i = 0; i < nodes.getLength(); i++) {
+//            Node n = nodes.item(i);
+//            // xml解析会把各种换行符等解析成元素。统统跳过。
+//            if(!(n instanceof Element)){
+//                continue;
+//            }
+//            if("data-source".equals(n.getNodeName())){
+//                Element dsElement = (Element) n;
+//                String dsCode = dsElement.getAttribute("code");
+//                dataSet.setCode(dsCode);
+//            }else if ("data-sql".equals(n.getNodeName())){
+//                NodeList list = n.getChildNodes();
+//                for (int j = 0; j < list.getLength(); j++) {
+//                    Node sqlNode = list.item(j);
+//                    // xml解析会把各种换行符等解析成元素。统统跳过。
+//                    if(StringUtils.isBlank(GaeaStringUtils.cleanFormatChar(sqlNode.getTextContent()))){
+//                        continue;
+//                    }
+//                    if (!(sqlNode instanceof CharacterData)) {
+//                        continue;
+////                        throw new ValidationFailedException("<data-sql>标签中的SQL必须包含在CDATA中!");
+//                    }
+//                    CharacterData sqlData = (CharacterData) sqlNode;
+//                    String sql = sqlData.getData();
+//                    dataSet.setSql(sql);
+//                }
+//            }else if (DataSetSchemaDefinition.DS_DATASET_WHERE_NODE_NAME.equals(n.getNodeName())) {
+//                // <where>的解析
+//                Where whereCondition = convertWhere(n);
+//                dataSet.setWhere(whereCondition);
+//            }else{
+//                loggerWarnNodeName(n.getNodeName());
+//            }
+//        }
         return dataSet;
     }
 
-    private void loggerWarnNodeName(String nodeName){
-        logger.warn("Xml schema中包含错误数据。data中包含非dataset信息: <"+nodeName+">");
+    private void loggerWarnNodeName(String nodeName) {
+        logger.warn("Xml schema中包含错误数据。data中包含非dataset信息: <" + nodeName + ">");
     }
 
     /**
      * 根据dataSetList中dataset的配置信息（sql，数据源等），查询结果并回填。
+     *
      * @param dataSetList
-     * @return  回填了查询结果的dataSetList
+     * @return 回填了查询结果的dataSetList
      */
-    private List<DataSet> sqlQuery(List<DataSet> dataSetList){
+    private List<DataSet> sqlQuery(List<DataSet> dataSetList) {
 //        DataSource dataSource = dataSourceService.findByCode(dataSetList.get(0).getCode());
         // 遍历dataSet list，并为其中每个dataset查询结果，并把数据结果回填
-        for(DataSet dataSet:dataSetList) {
+        for (DataSet dataSet : dataSetList) {
             if (StringUtils.isBlank(dataSet.getSql())) {
                 continue;
             }
@@ -163,7 +180,7 @@ public class XmlDataSchemaConvertor {
 //            Page<?> handleResult = (Page<?>) dataHandleChain.handle(dataSet.getSql(), SecurityUtils.getUserContext(), DataSourceUtils.get(dataSource),
 //                    null);
 //            Pageable pageable = new PageRequest(1,20);
-            PageResult pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(),null,new SchemaGridPage(1,5));
+            PageResult pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(), null, new SchemaGridPage(1, 5));
 
             logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
             dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
