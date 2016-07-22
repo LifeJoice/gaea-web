@@ -3,7 +3,13 @@
  * 今天起，开始重构UR创建的一套前端js框架。重新以gaea命名。另外基于RequireJS的模块化。
  * 通用的UI组件的公用包。因为有些组件，只是做一个接口层的封装，本身并不会很复杂。例如：日期时间控件等。
  */
-define(["jquery",'gaeajs-common-utils-validate',"datetimepicker"], function ($,gaeaValid,jqDateTimePicker) {
+define([
+    "jquery", "underscore", 'underscore-string',
+    'gaeajs-common-utils-validate',"datetimepicker","gaeajs-common-utils-string",'gaeajs-ui-definition',
+    "gaeajs-ui-grid"
+],
+    function ($,_,_s,
+              gaeaValid,jqDateTimePicker,gaeaString,GAEA_UI_DEFINE,gaeaGrid) {
     /**
      * DateTime Picker
      * 2016-6-19 18:19:14
@@ -76,11 +82,33 @@ define(["jquery",'gaeajs-common-utils-validate',"datetimepicker"], function ($,g
         }
 
     };
+
+    //var initComponents = function (containerId) {
+    //        var $div = $("#" + containerId);
+    //        /* 遍历所有配置了data-gaea-ui的元素 */
+    //        $div.find("[data-gaea-ui]").each(function (index, element) {
+    //            var $this = $(this);// 默认是下拉选择框，其实可能不是。
+    //            var gaeaUIStr = $this.data("gaea-ui");
+    //            var dataConfig = gaeaString.parseJSON(gaeaUIStr);
+    //
+    //            /**
+    //             * 把数据转换为table显示
+    //             */
+    //                if (gaeaString.equalsIgnoreCase(dataConfig.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
+    //                        // 指定渲染（填充）表格的位置
+    //                        dataConfig.renderTo = $this.attr("id");
+    //                        // 创建表格
+    //                    var grid = require("gaeajs-ui-grid");
+    //                        grid.tableGrid.create(dataConfig);
+    //                }
+    //        });
+    //};
     /**
      * 返回接口定义。
      */
     return {
         datePicker:datePicker,
         datetimePicker: datetimePicker
+        //initComponents:initComponents
     }
 });

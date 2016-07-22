@@ -16,7 +16,11 @@ public class SchemaButton implements SchemaViewsComponent {
     private String linkViewId;
     private String linkComponent;       // 这个根据linkViewId，转换为关联的对象的类型说明。例如：wf-dialog
     private String viewName;
-    private String interfaceAction;     // 接口action，只定义，后台框架无实现。定义的内容由具体模板页(例如公用列表页等）去实现，而不由XML SCHEMA解析框架处理。
+    /**
+     * 接口action，只定义，后台框架无实现。定义的内容由具体模板页(例如公用列表页等）去实现，而不由XML SCHEMA解析框架处理。
+     * changed from interfaceAction by Iverson 2016-6-27 16:06:16
+     */
+    private String action;
 
     public String getId() {
         return id;
@@ -99,11 +103,11 @@ public class SchemaButton implements SchemaViewsComponent {
         this.viewName = viewName;
     }
 
-    public String getInterfaceAction() {
-        return interfaceAction;
+    public String getAction() {
+        return action;
     }
 
-    public void setInterfaceAction(String interfaceAction) {
-        this.interfaceAction = interfaceAction;
+    public void setAction(String action) {
+        this.action = action;
     }
 }

@@ -1,5 +1,6 @@
 package org.gaea.framework.web.service;
 
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
@@ -15,4 +16,6 @@ import java.util.Map;
 public interface CommonViewQueryService {
     PageResult query(String schemaId, List<QueryCondition> filters,
                      SchemaGridPage page, boolean translate) throws ValidationFailedException, SysLogicalException;
+
+    List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException;
 }

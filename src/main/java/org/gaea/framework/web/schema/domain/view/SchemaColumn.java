@@ -21,6 +21,7 @@ public class SchemaColumn {
     private String htmlWidth;
     private Boolean primaryKey = false;// 是否主键
     private String dataType;// 数据的类型。暂时主要是SQL查询时，要转换类型去查，例如日期类的，直接用字符串是查不出来的。 by Iverson 2016-6-21
+    public static final String DATA_TYPE_STRING = "string";
     public static final String DATA_TYPE_DATE = "date";
     public static final String DATA_TYPE_TIME = "time";
     public static final String DATA_TYPE_DATETIME = "datetime";

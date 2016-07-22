@@ -20,6 +20,7 @@ public class SchemaDialog implements SchemaViewsComponent {
     private String contentUrl;      // 准备加载内容到dialog的URL地址
     private String submitUrl;       // dialog中内容要提交到的URL。会在dialog内容外包裹一个form。
     private String viewName;
+    private String idField;         // id的html name。在update dialog有用。
     private List<SchemaButton> buttons = new ArrayList<SchemaButton>();
 
     public String getId() {
@@ -117,5 +118,13 @@ public class SchemaDialog implements SchemaViewsComponent {
 
     public void setButtons(List<SchemaButton> buttons) {
         this.buttons = buttons;
+    }
+
+    public String getIdField() {
+        return idField;
+    }
+
+    public void setIdField(String idField) {
+        this.idField = idField;
     }
 }

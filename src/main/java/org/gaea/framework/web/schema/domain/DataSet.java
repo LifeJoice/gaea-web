@@ -1,6 +1,7 @@
 package org.gaea.framework.web.schema.domain;
 
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.framework.web.schema.data.domain.SchemaWhere;
 import org.gaea.util.GaeaJacksonUtils;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ public class DataSet {
     private List<Map<String,Object>> sqlResult;
     private String jsonData;
     private long totalElements;
+    private SchemaWhere where;
 
     public String getId() {
         return id;
@@ -110,5 +112,13 @@ public class DataSet {
 
     public void setTotalElements(long totalElements) {
         this.totalElements = totalElements;
+    }
+
+    public SchemaWhere getWhere() {
+        return where;
+    }
+
+    public void setWhere(SchemaWhere where) {
+        this.where = where;
     }
 }

@@ -30,7 +30,7 @@
 .field-block,.one-field-block{
     position: relative;
     float: left;
-    height:30px;
+    min-height:30px;
 }
 /* field块里面的字段名或输入框部分 */
 .field-block .fieldname,.one-field-block .fieldname{

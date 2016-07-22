@@ -11,9 +11,6 @@ import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -23,7 +20,6 @@ import java.sql.Types;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,28 +45,28 @@ public class GaeaSqlProcessor {
 //        return query(sql,conditions,pageable);
 //    }
 
-    public PageResult query(String sql, List<QueryCondition> conditions, SchemaGridPage page){
+    public PageResult query(String sql, List<QueryCondition> conditions, SchemaGridPage page) {
         PageResult pageResult = new PageResult();
         MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         MapSqlParameterSource params = null;
         /* 拼凑【WHERE】条件语句 */
         String whereCause = genWhereString(conditions);
-        params = conditions==null?new MapSqlParameterSource():genWhereParams(conditions);
-        if(StringUtils.isNotEmpty(whereCause)){
+        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
+        if (StringUtils.isNotEmpty(whereCause)) {
             sql = sql + " WHERE " + whereCause;
         }
         /* 拼凑【COUNT】语句 */
         String countSQL = new SQL().
-            SELECT("count(*)")
-                .FROM("("+sql+") results")
-        .toString();
+                SELECT("count(*)")
+                .FROM("(" + sql + ") results")
+                .toString();
         // 查询记录数
         int total = namedParameterJdbcTemplate.queryForObject(countSQL, params, Integer.class);
 
         List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
         // 如果给定的页码值是Integer.Max_VALUE，则认为是不需要查内容
         if (page.getPage() < Integer.MAX_VALUE) {
-            int startPos = (page.getPage()-1) * page.getSize()+1;
+            int startPos = (page.getPage() - 1) * page.getSize() + 1;
             int pageSize = page.getSize();
 //            Boolean autoFixPageNum = (Boolean) getExtractParams().get(AUTO_FIX_PAGE_NUM);
 //            if (autoFixPageNum != null && autoFixPageNum && startPos > total) {
@@ -82,13 +78,13 @@ public class GaeaSqlProcessor {
                 if (log.isDebugEnabled()) {
                     log.debug("Page SQL:" + limitedSQL);
                 }
-                params.addValue("START_ROWNUM",startPos);
-                params.addValue("PAGE_SIZE",pageSize);
+                params.addValue("START_ROWNUM", startPos);
+                params.addValue("PAGE_SIZE", pageSize);
                 // 查询数据
                 content = namedParameterJdbcTemplate.queryForList(limitedSQL, params);
 //            } else {
 //                content = new ArrayList<Map<String, Object>>();
-        }
+            }
 //        } else {
 //            content = new ArrayList<Map<String, Object>>();
         }
@@ -103,33 +99,57 @@ public class GaeaSqlProcessor {
     }
 
     /**
-     * 根据查询条件，拼凑SQL的WHERE语句（不包含WHERE关键字）。
+     * 根据SQL，把conditions主动组装条件加到SQL上，然后查询出结果。
+     * @param sql
      * @param conditions
      * @return
      */
-    private String genWhereString(List<QueryCondition> conditions){
-        if(conditions==null || conditions.isEmpty()){
+    public List<Map<String, Object>> query(String sql, List<QueryCondition> conditions) {
+        MapSqlParameterSource params = null;
+        /* 拼凑【WHERE】条件语句 */
+        String whereCause = genWhereString(conditions);
+        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
+        if (StringUtils.isNotEmpty(whereCause)) {
+            sql = sql + " WHERE " + whereCause;
+        }
+        log.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
+
+        List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
+//                // 查询数据
+        content = namedParameterJdbcTemplate.queryForList(sql, params);
+        return content;
+    }
+
+    /**
+     * 根据查询条件，拼凑SQL的WHERE语句（不包含WHERE关键字）。
+     *
+     * @param conditions
+     * @return
+     */
+    private String genWhereString(List<QueryCondition> conditions) {
+        if (conditions == null || conditions.isEmpty()) {
             return "";
         }
         StringBuilder whereSql = new StringBuilder("");
-        for(QueryCondition cond:conditions){
+        for (QueryCondition cond : conditions) {
             String columnName = cond.getPropertyName();
 //            String value = cond.getValue();
             // 查询条件，变量名或值为空就略过
-            if(StringUtils.isEmpty(columnName)){
+            if (StringUtils.isEmpty(columnName)) {
                 continue;
             }
-            if(StringUtils.isNotEmpty(whereSql.toString())){
+            if (StringUtils.isNotEmpty(whereSql.toString())) {
                 whereSql.append(" AND ");
             }
             // 拼凑查询条件 username=:USER_NAME
-            whereSql.append(MessageFormat.format("{0} = :{1}",columnName.toUpperCase(),columnName.toUpperCase()));
+            whereSql.append(MessageFormat.format("{0} = :{1}", columnName.toUpperCase(), columnName.toUpperCase()));
         }
         return whereSql.toString();
     }
 
     /**
      * 组装where条件语句的值。使用占位符的方式。
+     *
      * @param conditions
      * @return
      */
@@ -147,7 +167,7 @@ public class GaeaSqlProcessor {
                 if (SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
                     FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd");
                     params.addValue(columnName.toUpperCase(), df.parse(value), Types.DATE);
-                }else if (SchemaColumn.DATA_TYPE_DATETIME.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
+                } else if (SchemaColumn.DATA_TYPE_DATETIME.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
                     FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
                     params.addValue(columnName.toUpperCase(), df.parse(value), Types.DATE);
                 } else {

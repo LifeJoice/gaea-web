@@ -13,7 +13,13 @@ define(function () {
             }
         },
         QUERY:{
-            COMMON:"/sys/query" // 通用查询的url
+            COMMON:"/sys/query", // 通用查询的url
+            BY_CONDITION:"/sys/query/byCondition"
+        },
+        CRUD:{
+            //PRE_UPDATE:"/sys/common/pre-update",
+            UPDATE:"/sys/common/update",
+            DELETE:"/sys/common/delete"
         }
     };
     return url;

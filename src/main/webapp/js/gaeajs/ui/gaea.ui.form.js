@@ -9,11 +9,14 @@
 define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate'], function ($, _, gaeaAjax, gaeaValid) {
     var _gaeaForm = {
         init: function (divClass) {
-            var gaeaForm = $("."+divClass);
+            var $gaeaForm = $("."+divClass);
+            if(gaeaValid.isNull($gaeaForm)){
+                return;
+            }
             /**
              * 对通用表单的样式处理
              */
-            gaeaForm.children(".row").each(function (key, value) {
+            $gaeaForm.children(".row").each(function (key, value) {
                 var fieldBlocks = $(this).children(".field-block");
                 var fieldsCount = fieldBlocks.length;
                 // 如果是一行就一个输入项，则自动把输入框延展到最后

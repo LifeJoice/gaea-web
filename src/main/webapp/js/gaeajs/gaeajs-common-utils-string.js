@@ -5,7 +5,10 @@
  * DEPENDENCE:
  * RequireJS,JQuery
  */
-define(["jquery","underscore",'gaeajs-common-utils-validate','underscore-string'],function ($,_,gaeaValid,_s) {
+define([
+    "jquery","underscore",'gaeajs-common-utils-validate','underscore-string',"json5"
+],function (
+    $,_,gaeaValid,_s) {
     var stringUtils = {
         /**
          * 判断两个字符是否相同
@@ -37,22 +40,29 @@ define(["jquery","underscore",'gaeajs-common-utils-validate','underscore-string'
             }
             // 如果进来的带有json的“{}”，去掉
             jsonStr = _s.trim(jsonStr);
-            jsonStr = _s.ltrim(jsonStr,"{");
-            jsonStr = _s.rtrim(jsonStr,"}");
-            $(jsonStr.split(",")).each(function (index, element) {
-                if(gaeaValid.isNotNull(element)){
-                    var itemArray = element.split(":");
-                    if(itemArray.length===2){
-                        var key = _s.trim(itemArray[0]);
-                        key = _s.trim(key,"'");// 去掉单引号
-                        var value = _s.trim(itemArray[1]);
-                        value = _s.trim(value,"'");// 去掉单引号
-                        // 设置为对象属性
-                        result[key] = value;
-                    }
-                }
-                console.log("element: "+this);
-            });
+            if(!_s.startsWith("{")){
+                jsonStr = "{"+jsonStr;
+            }
+            if(!_s.endsWith("}")){
+                jsonStr = jsonStr+"}";
+            }
+            result = JSON5.parse(jsonStr);
+            //jsonStr = _s.ltrim(jsonStr,"{");
+            //jsonStr = _s.rtrim(jsonStr,"}");
+            //$(jsonStr.split(",")).each(function (index, element) {
+            //    if(gaeaValid.isNotNull(element)){
+            //        var itemArray = element.split(":");
+            //        if(itemArray.length===2){
+            //            var key = _s.trim(itemArray[0]);
+            //            key = _s.trim(key,"'");// 去掉单引号
+            //            var value = _s.trim(itemArray[1]);
+            //            value = _s.trim(value,"'");// 去掉单引号
+            //            // 设置为对象属性
+            //            result[key] = value;
+            //        }
+            //    }
+            //    console.log("element: "+this);
+            //});
             return result;
         }
     };

@@ -2133,6 +2133,7 @@ require.config({
         jquery: '/js/thirdparty/jquery/jquery',
         underscore: '/js/thirdparty/underscore-1.8.3',
         "underscore-string": '/js/thirdparty/underscore/underscore.string.min',
+        "json5": '/js/thirdparty/json5',// 提供不严格的json格式字符串的转换
         /* knockoutJS。主要做前端的MVVM */
         knockoutJS: '/js/thirdparty/knockoutJS/knockout-3.4.0.debug',
         /* Gaea Data.负责处理数据相关，例如：数据集等 */
@@ -2145,6 +2146,9 @@ require.config({
         "gaeajs-common-utils-string": '/js/gaeajs/gaeajs-common-utils-string',
         "gaea-system-url": '/js/gaeajs/gaea-system-url-definition',
         /* Gaea UI */
+        "gaeajs-ui-view": '/js/gaeajs/ui/gaea.ui.view',/* Gaea UI View.View是组件的结合的表示（或者理解为page也可以）。 */
+        "gaeajs-ui-definition": '/js/gaeajs/ui/gaea.ui.definition',/* Gaea UI 的一般性定义，如ACTION、UI（和schema对应）的名字等 */
+        "gaeajs-ui-events": '/js/gaeajs/ui/gaea.ui.events',/* Gaea UI events.所有的事件的定义 */
         "gaeajs-ui-commons": '/js/gaeajs/ui/gaea.ui.commons',
         "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
         "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',

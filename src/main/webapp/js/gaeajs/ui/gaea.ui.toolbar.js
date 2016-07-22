@@ -5,10 +5,10 @@
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
-        "gaeajs-ui-events", "gaeajs-common-crud"],
+        "gaeajs-ui-events"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
-              GAEA_EVENTS, gaeaCommonCRUD) {
+              GAEA_EVENTS) {
         var toolbar = {
             options: {
                 renderTo: null,
