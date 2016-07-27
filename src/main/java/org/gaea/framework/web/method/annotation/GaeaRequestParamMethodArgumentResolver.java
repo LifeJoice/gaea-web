@@ -9,6 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 import java.util.*;
 
 import org.springframework.beans.BeanUtils;
@@ -31,6 +32,11 @@ import javax.servlet.ServletRequest;
  *     可以根据属性名，把同样的值注入不同的对象。例如：user.name就是进入user对象，product.name就是product对象。
  * </p>
  * <p>
+ *     cars=Ford,cars=TOYOTA... 这种多个同名的请求键值对，当成无序数组注入
+ *     cars[]=Ford,cars[]=TOYOTA... 这种没有下标的，当成无序数组注入
+ *     cars[0]=Ford,cars[1]=TOYOTA... 这种有下标的，当成有序数组注入，且会根据下标排序
+ * </p>
+ * <p>
  *     还支持List中对象的嵌套注入。
  * </p>
  * <p><b>未能实现对Map的注入。不知道为什么触发不了map类型。</b></p>
@@ -42,6 +48,10 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
     protected final String SEPARATOR = ".";
     protected final String PRE_SQUARE_BRACKETS = "[";       // 表示List的命名方式。不能把这个理解成左中括号！
     protected final String SFX_SQUARE_BRACKETS = "]";       // 表示List的命名方式。不能把这个理解成右中括号！
+    /* request parameter命名类型 */
+    private final int ISINDEXABLE_NONE = 0;
+    private final int ISINDEXABLE_EMPTY_SQUARE_BRACKETS = 1;
+    private final int ISINDEXABLE_YES = 2;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -97,13 +107,17 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                 binder.bind(pvs);
             }
         } catch (Exception e) {
-            throw new ValidationFailedException("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。", e);
+            throw new ValidationFailedException(MessageFormat.format("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。inject to param name: {0}",prefix).toString(), e);
         }
         return requestBean;
     }
 
     /**
      * 如果@RequestBean注解在List上，把请求的属性值注入List中。
+     * <p>
+     *     cars=Ford,cars=TOYOTA... 这种多个同名的请求键值对，当成无序数组注入
+     *     cars[]=Ford,cars[]=TOYOTA... 这种没有下标的，当成无序数组注入
+     * </p>
      * @param paramClass    要注入对象的类。如果该类带有泛型，例如：List<User>，这里就只会有List。
      * @param genericType   要注入对象的类，包含泛型信息。比上面的多了泛型信息。
      * @param webRequest
@@ -116,12 +130,23 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
         Iterator<String> parameterNames = webRequest.getParameterNames();
         ServletRequest servletRequest = (ServletRequest) webRequest.getNativeRequest();
         List result = new ArrayList();
-        // 获取是否有下标可循环。
-        boolean indexable = isIndexable(prefix, parameterNames);
-        if (!indexable) {
+        // 获取是否有下标可循环。暂时三种可能：没有下标，有下标格式但为空([]), 有下标([0],[1])
+        int indexable = isIndexable(prefix, parameterNames);
+        /**
+         * if 没有下标 或 下标为空
+         *      都当无下标逻辑处理.但getParameterValues需要把paramName补上[]
+         * else
+         *      有下标的处理
+         */
+        if (indexable==ISINDEXABLE_EMPTY_SQUARE_BRACKETS || indexable==ISINDEXABLE_NONE) {
             // 不可排序，也不用排序，等于所有变量名都一样。直接拿前缀把值转成List即可。
             // 对于自嵌套的类，可能会多循环一次导致这里获取不到值，则会返回null。例如：folder[0].folder[0]
-            String[] paramValues = webRequest.getParameterValues(prefix);
+            String paramName = prefix;
+            // 如果是空下标, paramName得加上[],例如: users[], 这样才能从request获取值.
+            if (indexable==ISINDEXABLE_EMPTY_SQUARE_BRACKETS) {
+                paramName = prefix+PRE_SQUARE_BRACKETS+SFX_SQUARE_BRACKETS;
+            }
+            String[] paramValues = webRequest.getParameterValues(paramName);
             if (paramValues != null) {
                 for (String val : paramValues) {
                     result.add(val);
@@ -300,20 +325,29 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
      *
      * @param prefix
      * @param parameterNames
-     * @return 如果没有对应的下标 (如user[0]中的[0]) 则返回null
+     * @return 暂时三种可能：没有下标，有下标格式但为空([]), 有下标([0],[1])
      */
-    private boolean isIndexable(String prefix, Iterator<String> parameterNames) {
+    private int isIndexable(String prefix, Iterator<String> parameterNames) {
         String mixPrefix = prefix + PRE_SQUARE_BRACKETS;
-        boolean isSortList = false;
-        List result = new ArrayList();
         while (parameterNames.hasNext()) {
-            String paramName = parameterNames.next();
+            String paramName = parameterNames.next();// request的parameter的name, 例如: user[0]
+            /**
+             * if request的参数名中, 和要注入的对象（假如users）有这种匹配：paramName contains 'users['
+             *      if 虽然包含users[ 但是 users[] (即里面没有下标)
+             *          那就当无序List了，返回false
+             *      else 有下标
+             *          返回true
+             */
             if (StringUtils.contains(paramName, mixPrefix)) {
-                isSortList = true;
+                // 获取第一个[]中间的值
+                String paramIndex = StringUtils.substringBetween(paramName,PRE_SQUARE_BRACKETS,SFX_SQUARE_BRACKETS);
+                if(StringUtils.isEmpty(paramIndex)){
+                    return ISINDEXABLE_EMPTY_SQUARE_BRACKETS;// 空下标
+                }
+                return ISINDEXABLE_YES;// 有下标
             }
-//            result.add(webRequest);
         }
-        return isSortList;
+        return ISINDEXABLE_NONE;// 没下标
     }
 
     /**
