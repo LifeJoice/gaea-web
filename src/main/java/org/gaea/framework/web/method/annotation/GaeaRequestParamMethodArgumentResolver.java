@@ -29,17 +29,18 @@ import javax.servlet.ServletRequest;
 /**
  * 自定义的Controller的参数转换类。配合@RequestBean。负责实现把页面请求属性值映射到Entity。
  * <p>
- *     可以根据属性名，把同样的值注入不同的对象。例如：user.name就是进入user对象，product.name就是product对象。
+ * 可以根据属性名，把同样的值注入不同的对象。例如：user.name就是进入user对象，product.name就是product对象。
  * </p>
  * <p>
- *     cars=Ford,cars=TOYOTA... 这种多个同名的请求键值对，当成无序数组注入
- *     cars[]=Ford,cars[]=TOYOTA... 这种没有下标的，当成无序数组注入
- *     cars[0]=Ford,cars[1]=TOYOTA... 这种有下标的，当成有序数组注入，且会根据下标排序
+ * cars=Ford,cars=TOYOTA... 这种多个同名的请求键值对，当成无序数组注入
+ * cars[]=Ford,cars[]=TOYOTA... 这种没有下标的，当成无序数组注入
+ * cars[0]=Ford,cars[1]=TOYOTA... 这种有下标的，当成有序数组注入，且会根据下标排序
  * </p>
  * <p>
- *     还支持List中对象的嵌套注入。
+ * 还支持List中对象的嵌套注入。
  * </p>
  * <p><b>未能实现对Map的注入。不知道为什么触发不了map类型。</b></p>
+ *
  * @author Iverson 2014-5-20 星期二
  */
 @Component
@@ -107,7 +108,7 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                 binder.bind(pvs);
             }
         } catch (Exception e) {
-            throw new ValidationFailedException(MessageFormat.format("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。inject to param name: {0}",prefix).toString(), e);
+            throw new ValidationFailedException(MessageFormat.format("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。inject to param name: {0}", prefix).toString(), e);
         }
         return requestBean;
     }
@@ -115,13 +116,14 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
     /**
      * 如果@RequestBean注解在List上，把请求的属性值注入List中。
      * <p>
-     *     cars=Ford,cars=TOYOTA... 这种多个同名的请求键值对，当成无序数组注入
-     *     cars[]=Ford,cars[]=TOYOTA... 这种没有下标的，当成无序数组注入
+     * cars=Ford,cars=TOYOTA... 这种多个同名的请求键值对，当成无序数组注入
+     * cars[]=Ford,cars[]=TOYOTA... 这种没有下标的，当成无序数组注入
      * </p>
-     * @param paramClass    要注入对象的类。如果该类带有泛型，例如：List<User>，这里就只会有List。
-     * @param genericType   要注入对象的类，包含泛型信息。比上面的多了泛型信息。
+     *
+     * @param paramClass  要注入对象的类。如果该类带有泛型，例如：List<User>，这里就只会有List。
+     * @param genericType 要注入对象的类，包含泛型信息。比上面的多了泛型信息。
      * @param webRequest
-     * @param prefix        要注入对象的对象名，或泛型中的value。这个是用于区分页面请求的不同对象。
+     * @param prefix      要注入对象的对象名，或泛型中的value。这个是用于区分页面请求的不同对象。
      * @return
      * @throws ValidationFailedException
      * @throws IllegalAccessException
@@ -138,13 +140,13 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
          * else
          *      有下标的处理
          */
-        if (indexable==ISINDEXABLE_EMPTY_SQUARE_BRACKETS || indexable==ISINDEXABLE_NONE) {
+        if (indexable == ISINDEXABLE_EMPTY_SQUARE_BRACKETS || indexable == ISINDEXABLE_NONE) {
             // 不可排序，也不用排序，等于所有变量名都一样。直接拿前缀把值转成List即可。
             // 对于自嵌套的类，可能会多循环一次导致这里获取不到值，则会返回null。例如：folder[0].folder[0]
             String paramName = prefix;
             // 如果是空下标, paramName得加上[],例如: users[], 这样才能从request获取值.
-            if (indexable==ISINDEXABLE_EMPTY_SQUARE_BRACKETS) {
-                paramName = prefix+PRE_SQUARE_BRACKETS+SFX_SQUARE_BRACKETS;
+            if (indexable == ISINDEXABLE_EMPTY_SQUARE_BRACKETS) {
+                paramName = prefix + PRE_SQUARE_BRACKETS + SFX_SQUARE_BRACKETS;
             }
             String[] paramValues = webRequest.getParameterValues(paramName);
             if (paramValues != null) {
@@ -340,8 +342,8 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
              */
             if (StringUtils.contains(paramName, mixPrefix)) {
                 // 获取第一个[]中间的值
-                String paramIndex = StringUtils.substringBetween(paramName,PRE_SQUARE_BRACKETS,SFX_SQUARE_BRACKETS);
-                if(StringUtils.isEmpty(paramIndex)){
+                String paramIndex = StringUtils.substringBetween(paramName, PRE_SQUARE_BRACKETS, SFX_SQUARE_BRACKETS);
+                if (StringUtils.isEmpty(paramIndex)) {
                     return ISINDEXABLE_EMPTY_SQUARE_BRACKETS;// 空下标
                 }
                 return ISINDEXABLE_YES;// 有下标
