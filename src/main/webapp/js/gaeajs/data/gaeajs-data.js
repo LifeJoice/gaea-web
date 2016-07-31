@@ -307,7 +307,7 @@ define([
             /**
              * 解析配置的查询条件。
              *
-             * @param configCondition 格式：condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}
+             * @param configCondition 对象。格式：condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}
              * @returns {{}}
              */
             parseCondition: function (configCondition) {
@@ -387,23 +387,50 @@ define([
                     }
                 });
             },
-            getData: function (containerId) {
+            getDataByDomId: function (containerId) {
                 var $container = $("#" + containerId);
                 var configStr = $container.data("gaea-data");
                 var configObj = gaeaString.parseJSON(configStr);
                 var queryCondition = {};// 查询条件。( gaea-data: ... condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]} ... )
+                var result = gaeaData.dataSet.getData({
+                    condition:configObj.condition,
+                    dsId:configObj.dataset
+                });
                 /**
                  * 解析gaea-data配置的查询条件。
                  */
-                if (gaeaValid.isNotNull(configObj.condition)) {
-                    queryCondition = gaeaData.parseCondition(configObj.condition);
+                //if (gaeaValid.isNotNull(configObj.condition)) {
+                //    queryCondition = gaeaData.parseCondition(configObj.condition);
+                //}
+                //var result = gaeaData.getData({
+                //    data: {
+                //        conditions: JSON.stringify(queryCondition),
+                //        dsId: configObj.dataset
+                //    }
+                //});
+                return result;
+            },
+            /**
+             *
+             * @param options
+             *              condition 对象。例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
+             *              dataset 数据集id
+             *              isAsync 是否异步调用。默认false，即同步调用。
+             * @returns {*}
+             */
+            getData: function (options) {
+                //var $container = $("#" + containerId);
+                //var configStr = $container.data("gaea-data");
+                //var configObj = gaeaString.parseJSON(configStr);
+                var queryCondition = {};// 查询条件。( gaea-data: ... condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]} ... )
+                /**
+                 * 解析gaea-data配置的查询条件。
+                 */
+                if (gaeaValid.isNotNull(options.condition)) {
+                    queryCondition = gaeaData.parseCondition(options.condition);
                 }
-                var result = gaeaData.getData({
-                    data: {
-                        conditions: JSON.stringify(queryCondition),
-                        dsId: configObj.dataset
-                    }
-                });
+                options.conditions = JSON.stringify(queryCondition);
+                var result = gaeaData.getData(options);
                 return result;
             }
         };
@@ -457,7 +484,7 @@ define([
                         var dataConfig = gaeaString.parseJSON(dataStr);
                         if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
                             // 获取数据
-                            var dsData = gaeaData.dataSet.getData(componentCtId);
+                            var dsData = gaeaData.dataSet.getDataByDomId(componentCtId);
                             // 初始化table
                             gaeaData.component.table.initData(componentCtId, dsData);
                         }
@@ -745,13 +772,26 @@ define([
 
             }
         };
+        /**
+         * 通过通用查询接口，查询数据。
+         * @param options
+         *              conditions 查询条件。格式为json字符串（非对象，切记！）
+         *              dsId 数据集id
+         *              isAsync 是否异步调用。默认false，即同步调用。
+         *              success 完成后的回调
+         * @returns {*}
+         */
         gaeaData.getData = function (options) {
             var result = null;
+            var isAsync = false;
+            if(gaeaValid.isNotNull(options.isAsync) && _.isBoolean(options.isAsync)){
+                isAsync = options.isAsync;
+            }
             // 数据加载要求同步
             gaeaAjax.ajax({
                 url: SYS_URL.QUERY.BY_CONDITION,
-                async: false,
-                data: options.data,
+                async: isAsync,
+                data: options,
                 success: function (data) {
 
                     if (_.isArray(data)) {
@@ -763,7 +803,12 @@ define([
                     } else {
                         result = data;
                     }
-
+                    /**
+                     * 成功后的回调
+                     */
+                    if(_.isFunction(options.success)){
+                        options.success(result);
+                    }
 
                     //result = data[0];
                     // 用查询结果，刷新数据列表

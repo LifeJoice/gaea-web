@@ -1,0 +1,49 @@
+/**
+ * multi-select组件的样式
+ *
+ * by Iverson 2016-7-25 10:03:16
+ */
+
+.gaea-multi-select{
+    height:200px;
+}
+.gaea-multi-select > div{
+    float: left;
+
+}
+.gaea-multi-select ul{
+    list-style-type: none;/* 不要显示点点 */
+    padding-left:10px;
+}
+/*选中的项的样式*/
+.gaea-multi-select li.select{
+    background-color: #70A0D0;
+    font-weight:bold;
+}
+/*列表中的项*/
+.gaea-multi-select li:hover{
+    background-color: #CDD3D9;
+    cursor: pointer;
+}
+/*两个选择列表的样式*/
+.gaea-multi-select .select-list{
+    min-width:150px;
+    height:100%;
+    border:solid 1px;
+    overflow: scroll;
+
+}
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-*   中间的命令选择区   *-*-*-*-*-*-*-*-*-*-*-*-*-* */
+.gaea-multi-select .choose-cmd{
+    padding:5px 15px;
+}
+/* 中间的操作按钮 */
+.gaea-multi-select .choose-cmd span{
+    cursor: pointer;
+}
+.gaea-multi-select .choose-cmd span{
+    display: block;
+}
+
+
+
