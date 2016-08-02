@@ -4,11 +4,11 @@
  */
 define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
-        'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url', "gaeajs-ui-commons",
-        "gaeajs-ui-events", 'gaeajs-common-utils-string'],
+        'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url',
+        "gaeajs-ui-events", 'gaeajs-common-utils-string',"gaeajs-ui-plugins"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
-              gaeaStringUtils, gaeaButton, SYS_URL, gaeaUI,
-              gaeaEvents, gaeaString) {
+              gaeaStringUtils, gaeaButton, SYS_URL,
+              gaeaEvents, gaeaString,gaeaPlugins) {
         /**
          *
          * @type {{VIEW: {GRID: {COLUMN: {DATA_TYPE_DATE: string, DATA_TYPE_TIME: string, DATA_TYPE_DATETIME: string}}}}}
@@ -90,14 +90,14 @@ define([
                     if (gaeaValid.isNotNull(column.datetimeFormat)) {
                         if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GAEA_UI_GRID_DEFINE.COLUMN.DATA_TYPE_DATE)) {
                             // 初始化日期控件
-                            gaeaUI.datePicker.init({
+                            gaeaPlugins.datePicker.init({
                                 renderTo: inputId
                             });
                         } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GAEA_UI_GRID_DEFINE.COLUMN.DATA_TYPE_TIME)) {
                             // TODO
                         } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GAEA_UI_GRID_DEFINE.COLUMN.DATA_TYPE_DATETIME)) {
                             // 初始化日期时间控件
-                            gaeaUI.datetimePicker.init({
+                            gaeaPlugins.datetimePicker.init({
                                 renderTo: inputId
                             });
                         }

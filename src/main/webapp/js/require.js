@@ -2140,6 +2140,7 @@ require.config({
         "gaeajs-data": '/js/gaeajs/data/gaeajs-data',
         /* Gaea tools */
         "gaeajs-common": '/js/gaeajs/gaeajs-common',
+        "gaeajs-common-utils": '/js/gaeajs/gaeajs.commons.utils',
         "gaeajs-common-utils-ajax": '/js/gaeajs/gaeajs-common-utils-ajax',
         "gaeajs-common-utils-validate": '/js/gaeajs/gaeajs-common-utils-validate',
         "gaeajs-common-utils-datetime": '/js/gaeajs/gaeajs-common-utils-datetime',
@@ -2150,6 +2151,7 @@ require.config({
         "gaeajs-ui-definition": '/js/gaeajs/ui/gaea.ui.definition',/* Gaea UI 的一般性定义，如ACTION、UI（和schema对应）的名字等 */
         "gaeajs-ui-events": '/js/gaeajs/ui/gaea.ui.events',/* Gaea UI events.所有的事件的定义 */
         "gaeajs-ui-commons": '/js/gaeajs/ui/gaea.ui.commons',
+        "gaeajs-ui-plugins": '/js/gaeajs/ui/gaea.ui.plugins',
         "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
         "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',
         "gaeajs-ui-button": '/js/gaeajs/ui/gaea.ui.button',
@@ -2157,6 +2159,7 @@ require.config({
         "gaeajs-ui-workflow": '/js/gaeajs/ui/gaea.ui.workflow',
         "gaeajs-ui-form": '/js/gaeajs/ui/gaea.ui.form',
         "gaeajs-ui-notify": '/js/gaeajs/ui/gaea.ui.notify',
+        "gaeajs-ui-multiselect": '/js/gaeajs/ui/gaea.ui.multiselect',
         /* Jquery-UI */
         "jquery-ui-core":'/js/thirdparty/jquery/ui/core',
         "jquery-ui-widget":'/js/thirdparty/jquery/ui/widget',

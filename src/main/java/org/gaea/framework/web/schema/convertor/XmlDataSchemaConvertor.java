@@ -180,11 +180,17 @@ public class XmlDataSchemaConvertor {
 //            Page<?> handleResult = (Page<?>) dataHandleChain.handle(dataSet.getSql(), SecurityUtils.getUserContext(), DataSourceUtils.get(dataSource),
 //                    null);
 //            Pageable pageable = new PageRequest(1,20);
-            PageResult pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(), null, new SchemaGridPage(1, 5));
+            PageResult pageResultSet = null;
+            try {
+                pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(), null, new SchemaGridPage(1, 5));
 
-            logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
-            dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
-            dataSet.setTotalElements(pageResultSet.getTotalElements());
+                logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
+                dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
+                dataSet.setTotalElements(pageResultSet.getTotalElements());
+            } catch (ValidationFailedException e) {
+                logger.info("系统动态查询失败。" + e.getMessage());
+                logger.debug("系统动态查询失败。" + e.getMessage(), e);
+            }
         }
         return dataSetList;
     }

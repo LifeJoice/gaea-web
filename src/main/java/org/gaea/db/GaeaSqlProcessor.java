@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.ibatis.jdbc.SQL;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
@@ -45,7 +46,7 @@ public class GaeaSqlProcessor {
 //        return query(sql,conditions,pageable);
 //    }
 
-    public PageResult query(String sql, List<QueryCondition> conditions, SchemaGridPage page) {
+    public PageResult query(String sql, List<QueryCondition> conditions, SchemaGridPage page) throws ValidationFailedException {
         PageResult pageResult = new PageResult();
         MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         MapSqlParameterSource params = null;
@@ -100,11 +101,12 @@ public class GaeaSqlProcessor {
 
     /**
      * 根据SQL，把conditions主动组装条件加到SQL上，然后查询出结果。
+     *
      * @param sql
      * @param conditions
      * @return
      */
-    public List<Map<String, Object>> query(String sql, List<QueryCondition> conditions) {
+    public List<Map<String, Object>> query(String sql, List<QueryCondition> conditions) throws ValidationFailedException {
         MapSqlParameterSource params = null;
         /* 拼凑【WHERE】条件语句 */
         String whereCause = genWhereString(conditions);
@@ -115,7 +117,7 @@ public class GaeaSqlProcessor {
         log.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
 
         List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
-//                // 查询数据
+        // 查询数据
         content = namedParameterJdbcTemplate.queryForList(sql, params);
         return content;
     }
@@ -126,14 +128,13 @@ public class GaeaSqlProcessor {
      * @param conditions
      * @return
      */
-    private String genWhereString(List<QueryCondition> conditions) {
+    private String genWhereString(List<QueryCondition> conditions) throws ValidationFailedException {
         if (conditions == null || conditions.isEmpty()) {
             return "";
         }
         StringBuilder whereSql = new StringBuilder("");
         for (QueryCondition cond : conditions) {
             String columnName = cond.getPropertyName();
-//            String value = cond.getValue();
             // 查询条件，变量名或值为空就略过
             if (StringUtils.isEmpty(columnName)) {
                 continue;
@@ -141,10 +142,45 @@ public class GaeaSqlProcessor {
             if (StringUtils.isNotEmpty(whereSql.toString())) {
                 whereSql.append(" AND ");
             }
-            // 拼凑查询条件 username=:USER_NAME
-            whereSql.append(MessageFormat.format("{0} = :{1}", columnName.toUpperCase(), columnName.toUpperCase()));
+            /**
+             * 拼凑查询条件.
+             * username = :USER_NAME
+             * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
+             */
+            whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond.getOp()), columnName.toUpperCase()));
         }
         return whereSql.toString();
+    }
+
+    /**
+     * 把页面传过来的(一般情况是)条件操作符(eq,ne,...)转换成sql的条件操作符(=,!=,...).
+     *
+     * @param op 页面传来的操作符
+     * @return
+     * @throws ValidationFailedException
+     */
+    public String parseFieldOp(String op) throws ValidationFailedException {
+        String sqlOp = "";// SQL关系操作符
+        if (QueryCondition.FIELD_OP_EQ.equalsIgnoreCase(op)) {
+            sqlOp = "=";
+        } else if (QueryCondition.FIELD_OP_NE.equalsIgnoreCase(op)) {
+            sqlOp = "!=";
+        } else if (QueryCondition.FIELD_OP_GE.equalsIgnoreCase(op)) {
+            sqlOp = ">=";
+        } else if (QueryCondition.FIELD_OP_GT.equalsIgnoreCase(op)) {
+            sqlOp = ">";
+        } else if (QueryCondition.FIELD_OP_LE.equalsIgnoreCase(op)) {
+            sqlOp = "<=";
+        } else if (QueryCondition.FIELD_OP_LT.equalsIgnoreCase(op)) {
+            sqlOp = "<";
+        } else if (QueryCondition.FIELD_OP_LK.equalsIgnoreCase(op)
+                || QueryCondition.FIELD_OP_LLK.equalsIgnoreCase(op)
+                || QueryCondition.FIELD_OP_RLK.equalsIgnoreCase(op)) {
+            sqlOp = "LIKE";
+        } else {
+            throw new ValidationFailedException(MessageFormat.format("配置的sql操作符无法解析！op={0}", op));
+        }
+        return sqlOp;
     }
 
     /**
@@ -171,13 +207,26 @@ public class GaeaSqlProcessor {
                     FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
                     params.addValue(columnName.toUpperCase(), df.parse(value), Types.DATE);
                 } else {
-                    params.addValue(columnName.toUpperCase(), value);
+                    // 普通的值，通过parseParamValue处理一下，比如有like的情况，需要把值加上%。
+                    params.addValue(columnName.toUpperCase(), parseParamValue(cond));
                 }
             }
         } catch (ParseException e) {
             throw new IllegalArgumentException("生成SQL的查询条件失败！值转换为日期类失败 : " + e.getMessage(), e);
         }
         return params;
+    }
+
+    private String parseParamValue(QueryCondition cond) {
+        String value = cond.getValue();
+        if (QueryCondition.FIELD_OP_LK.equalsIgnoreCase(cond.getOp())) {
+            value = "%" + value + "%";
+        } else if (QueryCondition.FIELD_OP_LLK.equalsIgnoreCase(cond.getOp())) {
+            value = value + "%";
+        } else if (QueryCondition.FIELD_OP_RLK.equalsIgnoreCase(cond.getOp())) {
+            value = "%" + value;
+        }
+        return value;
     }
 
 //    List<Map<String, Object>> content = jdbcTemplate.queryForList(sql, getExtractParams());

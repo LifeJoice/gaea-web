@@ -202,6 +202,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                         cond.setPropertyName(schemaCondition.getField());// 查询字段为XML SCHEMA中的定义
                         cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
                         cond.setValue(valueDTO.getValue());// value为页面传过来的值
+                        cond.setOp(schemaCondition.getFieldOp());
                         newConditions.add(cond);
                     }
                 }
@@ -219,7 +220,9 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             }
 //            pageResult.setContent(dataSet.getSqlResult());
             return dataSet.getSqlResult();
-        } catch (Exception e) {
+        } catch (ValidationFailedException e){
+            logger.info("系统动态查询失败。"+e.getMessage());
+        }catch (Exception e) {
             logger.error(MessageFormat.format("根据页面条件查询数据失败。dataSet ID={0}", datasetId), e);
         }
 

@@ -32,6 +32,7 @@ public class SystemMenusController {
 
     /**
      * 查找用户所能操作的所有菜单功能。
+     *
      * @param request
      * @param response
      * @return
@@ -41,6 +42,9 @@ public class SystemMenusController {
     public List<MenuDTO> findAll(HttpServletRequest request, HttpServletResponse response) {
         Set<String> authSet = new HashSet<String>();
         SecurityContextImpl securityContextImpl = (SecurityContextImpl) request.getSession().getAttribute("SPRING_SECURITY_CONTEXT");
+        if (securityContextImpl == null || securityContextImpl.getAuthentication() == null) {
+            return null;
+        }
         //登录名
         String loginName = securityContextImpl.getAuthentication().getName();
         //获得当前用户所拥有的权限
@@ -50,9 +54,9 @@ public class SystemMenusController {
         }
         System.out.println("Username:" + loginName);
         List<MenuDTO> menus = null;
-        if(StringUtils.isNotEmpty(loginName)) {
+        if (StringUtils.isNotEmpty(loginName)) {
             menus = systemMenusService.findAll(authSet);
-        }else{
+        } else {
             logger.debug("获取不到用户的登录名。可能是Spring Security的配置问题。");
         }
         return menus;

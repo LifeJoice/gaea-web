@@ -6,12 +6,12 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
         "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string",
         "gaeajs-ui-definition", "gaeajs-ui-view", "gaea-system-url", 'gaeajs-ui-notify',
-        "gaeajs-ui-commons",
+        "gaeajs-ui-commons","gaeajs-ui-multiselect",
         'gaea-jqui-dialog', "jquery-serializeObject"],
     function ($, _, gaeaAjax, gaeaValid,
               gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
-              gaeaUI) {
+              gaeaUI,gaeaMultiSelect) {
         var _options = {
             id: null,
             title: null,
@@ -603,6 +603,8 @@ define([
                     // 初始化数据相关的（数据集，MVVM等）
                     gaeaData.dataSet.scanAndInit(options.dialogId);
                     //gaeaData.scanAndInit(dialogOption.id, afterBindingCallback);
+                    // 初始化页面的相关组件（multi-select等，但不包括可编辑table）
+                    gaeaUI.initComponents(options.dialogId);
                     // 初始化数据组件。例如：可编辑表格等 TODO 初始化UI的数据
                     gaeaData.component.init(options.dialogId);
                     if (gaeaValid.isNotNull(options.initComponentData) && options.initComponentData) {

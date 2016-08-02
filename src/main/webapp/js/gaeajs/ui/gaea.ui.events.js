@@ -25,6 +25,12 @@ define(function () {
             },
             GRID: {
                 SELECT: "gaeaUI_event_grid_select"
+            },
+            /**
+             * 复选框组件相关事件
+             */
+            MULTI_SELECT:{
+                SELECT:"gaeaUI_event_multiselect_select" // 点选中了某项
             }
         },
         CONTEXT: {
