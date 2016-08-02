@@ -25,7 +25,7 @@ define([
                 '<span id="disSelectAll" class="fa fa-angle-double-left fa-2x"></span>' +
                 '</div>' +
                 '<div id="selected" class="select-list"></div>',
-                LI_WITH_DATA: '<li data-gaea-data="value:<%=VALUE%>"><%=TEXT%></li>',
+                LI_WITH_DATA: '<li data-gaea-data="value:\'<%=VALUE%>\'"><%=TEXT%></li>',
                 HIDDEN_INPUT: '<input type="hidden" id="<%=ID%>" name="<%=NAME%>" value="<%=VALUE%>">'
             }
         };
