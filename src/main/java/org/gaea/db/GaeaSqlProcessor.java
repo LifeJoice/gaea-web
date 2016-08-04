@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.ibatis.jdbc.SQL;
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.PageResult;
@@ -46,7 +47,18 @@ public class GaeaSqlProcessor {
 //        return query(sql,conditions,pageable);
 //    }
 
-    public PageResult query(String sql, List<QueryCondition> conditions, SchemaGridPage page) throws ValidationFailedException {
+    /**
+     * 根据参数查询分页过的数据。
+     *
+     * @param sql          基础的查询sql
+     * @param primaryTable 分页id相关的主表。主要是MySQL分页用。
+     * @param conditions   查询条件
+     * @param page         分页对象
+     * @return
+     * @throws ValidationFailedException
+     * @throws InvalidDataException
+     */
+    public PageResult query(String sql, String primaryTable, List<QueryCondition> conditions, SchemaGridPage page) throws ValidationFailedException, InvalidDataException {
         PageResult pageResult = new PageResult();
         MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         MapSqlParameterSource params = null;
@@ -67,15 +79,11 @@ public class GaeaSqlProcessor {
         List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
         // 如果给定的页码值是Integer.Max_VALUE，则认为是不需要查内容
         if (page.getPage() < Integer.MAX_VALUE) {
-            int startPos = (page.getPage() - 1) * page.getSize() + 1;
+            int startPos = (page.getPage() - 1) * page.getSize();
             int pageSize = page.getSize();
-//            Boolean autoFixPageNum = (Boolean) getExtractParams().get(AUTO_FIX_PAGE_NUM);
-//            if (autoFixPageNum != null && autoFixPageNum && startPos > total) {
-//                startPos = 0;
-//                setPageable(new PageRequest(0, pageSize));
-//            }
             if (total > 0) {
-                String limitedSQL = dialect.getPageSql(sql, startPos, pageSize);
+                // 获取分页sql
+                String limitedSQL = dialect.getPageSql(sql, primaryTable, startPos, pageSize);
                 if (log.isDebugEnabled()) {
                     log.debug("Page SQL:" + limitedSQL);
                 }
@@ -83,11 +91,7 @@ public class GaeaSqlProcessor {
                 params.addValue("PAGE_SIZE", pageSize);
                 // 查询数据
                 content = namedParameterJdbcTemplate.queryForList(limitedSQL, params);
-//            } else {
-//                content = new ArrayList<Map<String, Object>>();
             }
-//        } else {
-//            content = new ArrayList<Map<String, Object>>();
         }
 
         if (log.isDebugEnabled()) {

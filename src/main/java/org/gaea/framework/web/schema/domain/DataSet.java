@@ -21,6 +21,7 @@ public class DataSet {
     private String jsonData;
     private long totalElements;
     private SchemaWhere where;
+    private String primaryTable;
 
     public String getId() {
         return id;
@@ -120,5 +121,13 @@ public class DataSet {
 
     public void setWhere(SchemaWhere where) {
         this.where = where;
+    }
+
+    public String getPrimaryTable() {
+        return primaryTable;
+    }
+
+    public void setPrimaryTable(String primaryTable) {
+        this.primaryTable = primaryTable;
     }
 }

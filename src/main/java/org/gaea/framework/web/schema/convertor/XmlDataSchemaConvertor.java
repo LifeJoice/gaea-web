@@ -149,7 +149,7 @@ public class XmlDataSchemaConvertor {
 
     /**
      * 根据dataSetList中dataset的配置信息（sql，数据源等），查询结果并回填。
-     *
+     * // TODO 这个方法必须移到GaeaXmlSchemaProcessor去查询数据。不要在这里查询数据！！
      * @param dataSetList
      * @return 回填了查询结果的dataSetList
      */
@@ -182,14 +182,15 @@ public class XmlDataSchemaConvertor {
 //            Pageable pageable = new PageRequest(1,20);
             PageResult pageResultSet = null;
             try {
-                pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(), null, new SchemaGridPage(1, 5));
+                pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(),dataSet.getPrimaryTable(), null, new SchemaGridPage(1, 20));
 
                 logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
                 dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
                 dataSet.setTotalElements(pageResultSet.getTotalElements());
             } catch (ValidationFailedException e) {
                 logger.info("系统动态查询失败。" + e.getMessage());
-                logger.debug("系统动态查询失败。" + e.getMessage(), e);
+            } catch (InvalidDataException e) {
+                logger.info("系统动态查询失败。" + e.getMessage());
             }
         }
         return dataSetList;

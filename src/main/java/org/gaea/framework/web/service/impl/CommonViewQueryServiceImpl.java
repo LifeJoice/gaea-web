@@ -98,7 +98,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 
 //            Page<?> result = (Page<?>) dataHandleChain.handle(expressionText, userContext, DataSourceUtils.get(dataSource),
 //                    pageable);
-            pageResult = gaeaSqlProcessor.query(sql, filters, page);
+            pageResult = gaeaSqlProcessor.query(sql,dataSet.getPrimaryTable(), filters, page);
 
 //            while (result.getTotalElements() != 0 && result.getNumberOfElements() == 0) {
 //                int relocatePage = result.getTotalPages() - 1;

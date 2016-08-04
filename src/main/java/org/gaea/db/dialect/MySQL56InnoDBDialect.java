@@ -1,6 +1,8 @@
 package org.gaea.db.dialect;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.ibatis.jdbc.SQL;
+import org.gaea.exception.InvalidDataException;
 
 /**
  * <b>dialect是针对特定数据库的方言的翻译器。</b>
@@ -14,13 +16,29 @@ import org.gaea.db.ibatis.jdbc.SQL;
  * Created by Iverson on 2015/9/24.
  */
 public class MySQL56InnoDBDialect {
-    public String getPageSql(final String sql, int startPos, int pageSize) {
-        String newSql = new SQL(){{
-            SELECT("*");
-            FROM("("+sql+") rs1");
-            WHERE("id>:START_ROWNUM");
-            ORDER_BY("id asc limit :PAGE_SIZE");
-        }}.toString();
+    /**
+     * 获取分页的SQL。
+     * @param sql 基础的数据查询sql
+     * @param primaryTable 分页相关的id的主表。主要用于获取id来协助分页。
+     * @param startPos 开始位置。获取数据从startPos+1那条开始。
+     * @param pageSize
+     * @return
+     * @throws InvalidDataException
+     */
+    public String getPageSql(final String sql,String primaryTable, int startPos, int pageSize) throws InvalidDataException {
+        if(StringUtils.isEmpty(primaryTable)){
+            throw new InvalidDataException("主表为空，无法构造分页SQL。可能情况：数据集的配置缺失等。");
+        }
+        // MySQL的分页子查询，先获取id
+        SQL selectIdSql = new SQL();
+        selectIdSql.SELECT("id").FROM(primaryTable).ORDER_BY("id limit :START_ROWNUM,1");
+
+        String newSql = new SQL()
+            .SELECT("*")
+            .FROM("("+sql+") rs1")
+            .WHERE("id>=("+selectIdSql.toString()+")")
+            .ORDER_BY("id asc limit :PAGE_SIZE")
+        .toString();
         return newSql;
     }
 }
