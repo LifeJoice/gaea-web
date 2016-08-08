@@ -98,7 +98,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 
 //            Page<?> result = (Page<?>) dataHandleChain.handle(expressionText, userContext, DataSourceUtils.get(dataSource),
 //                    pageable);
-            pageResult = gaeaSqlProcessor.query(sql,dataSet.getPrimaryTable(), filters, page);
+            pageResult = gaeaSqlProcessor.query(sql, dataSet.getPrimaryTable(), filters, page);
 
 //            while (result.getTotalElements() != 0 && result.getNumberOfElements() == 0) {
 //                int relocatePage = result.getTotalPages() - 1;
@@ -220,9 +220,9 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             }
 //            pageResult.setContent(dataSet.getSqlResult());
             return dataSet.getSqlResult();
-        } catch (ValidationFailedException e){
-            logger.info("系统动态查询失败。"+e.getMessage());
-        }catch (Exception e) {
+        } catch (ValidationFailedException e) {
+            logger.info("系统动态查询失败。" + e.getMessage());
+        } catch (Exception e) {
             logger.error(MessageFormat.format("根据页面条件查询数据失败。dataSet ID={0}", datasetId), e);
         }
 
@@ -244,6 +244,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             String dbName = schemaColumn.getDbColumnName();
             condition.setPropertyName(dbName);
             condition.setDataType(schemaColumn.getDataType());
+            condition.setOp(QueryCondition.FIELD_OP_EQ);
 //            if(SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(schemaColumn.getDataType())){
 //                condition.setSqlType(Types.DATE);
 //            }
