@@ -8,8 +8,33 @@
         <!--<data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />-->
         <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
         <data-sql>
-            <![CDATA[SELECT NAME TEXT,ID VALUE,ORDER_SEQ orderSeq,RESOURCE resource,description description FROM GAEA_SYS_RESOURCES]]>
+            <![CDATA[SELECT NAME text,ID value,ORDER_SEQ orderSeq,RESOURCE resource,description description FROM GAEA_SYS_RESOURCES]]>
         </data-sql>
+    </dataset>
+    <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
+    <dataset id="DS_AUTH_RESOURCE" table="GAEA_SYS_AUTHORITIES_RESOURCES" cache-type="auto" expire-time="1ms|s|min|d">
+        <data-sql>
+            <![CDATA[SELECT res.id value, res.name text FROM gaea_sys_authorities auth LEFT JOIN gaea_sys_authorities_resources auRes ON auth.id=auRes.authority_id LEFT JOIN gaea_sys_resources res ON auRes.resource_id=res.id]]>
+        </data-sql>
+        <where>
+            <condition-set id="selectable">
+                <and field="auth.id" field-op="ne"></and>
+            </condition-set>
+            <condition-set id="selected">
+                <and field="auth.id" field-op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+    <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
+    <dataset id="DS_MENU" cache-type="auto" expire-time="1ms|s|min|d">
+        <data-sql>
+            <![CDATA[SELECT id value,name text FROM gaea_sys_menus]]>
+        </data-sql>
+        <!--<where>-->
+            <!--<condition-set id="byLevel">-->
+                <!--<and field="(LEVEL-1)" field-op="eq"></and>-->
+            <!--</condition-set>-->
+        <!--</where>-->
     </dataset>
     <!--cache-type ：是否缓存结果集。有个配置项是none。但当下全部的缓存。估计静态的数据量不多。-->
     <dataset id="DS_IS_ENABLED" cache-type="static">

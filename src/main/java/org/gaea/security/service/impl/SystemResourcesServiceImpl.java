@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Service
 public class SystemResourcesServiceImpl implements SystemResourcesService {
-//    @Autowired
+    //    @Autowired
 //    private SessionFactory sessionFactory;
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -24,6 +24,7 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
 
     /**
      * 根据权限编码（authority code）找对应的资源
+     *
      * @param authority
      * @return
      */
@@ -41,13 +42,13 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
                 "WHERE auth.`CODE` = :AUTH_CODE ";
 //        Session session = sessionFactory.openSession();
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("AUTH_CODE",authority);
-        List<String> codeList = namedParameterJdbcTemplate.queryForList(sql,params,String.class);
-        return codeList;
+        params.addValue("AUTH_CODE", authority);
+        List<String> resUrlList = namedParameterJdbcTemplate.queryForList(sql, params, String.class);
+        return resUrlList;
     }
 
     @Override
-    public void save(Resource resource){
+    public void save(Resource resource) {
         resourcesRepository.save(resource);
     }
 }

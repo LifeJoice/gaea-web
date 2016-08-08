@@ -1,7 +1,10 @@
 package org.gaea.security.service.impl;
 
 import org.gaea.security.domain.User;
+import org.gaea.security.repository.SystemUsersRepository;
 import org.gaea.security.service.SystemUsersService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -21,8 +24,17 @@ import java.util.List;
  */
 @Service
 public class SystemUsersServiceImpl implements SystemUsersService {
+    private final Logger logger = LoggerFactory.getLogger(SystemUsersRepository.class);
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private SystemUsersRepository systemUsersRepository;
+
+    @Override
+    public void save(User user) {
+        systemUsersRepository.save(user);
+    }
+
     @Override
     public Collection<GrantedAuthority> findUserAuthorities(String loginName) {
         String sql = "SELECT \n" +
@@ -37,8 +49,8 @@ public class SystemUsersServiceImpl implements SystemUsersService {
                 "    ON userrole.`USER_ID` = users.`id` \n" +
                 "WHERE users.`login_name` = :LOGIN_NAME";
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("LOGIN_NAME",loginName);
-        List<String> codeLists = namedParameterJdbcTemplate.queryForList(sql,params,String.class);
+        params.addValue("LOGIN_NAME", loginName);
+        List<String> codeLists = namedParameterJdbcTemplate.queryForList(sql, params, String.class);
 
         List<GrantedAuthority> auths = new ArrayList<GrantedAuthority>();
 
@@ -54,8 +66,8 @@ public class SystemUsersServiceImpl implements SystemUsersService {
     public String findPasswordByLoginName(String loginName) {
         String sql = "SELECT PASSWORD FROM GAEA_SYS_USERS WHERE LOGIN_NAME=:LOGIN_NAME";
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("LOGIN_NAME",loginName);
-        String password = namedParameterJdbcTemplate.queryForObject(sql,params,String.class);
+        params.addValue("LOGIN_NAME", loginName);
+        String password = namedParameterJdbcTemplate.queryForObject(sql, params, String.class);
         return password;
     }
 
@@ -64,10 +76,10 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         String sql = "SELECT ID,NAME,LOGIN_NAME loginName,PASSWORD FROM GAEA_SYS_USERS WHERE LOGIN_NAME=:LOGIN_NAME";
         MapSqlParameterSource params = new MapSqlParameterSource();
         try {
-            params.addValue("LOGIN_NAME",username);
+            params.addValue("LOGIN_NAME", username);
             User user = namedParameterJdbcTemplate.queryForObject(sql, params, new BeanPropertyRowMapper<User>(User.class));
             return user;
-        }catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }

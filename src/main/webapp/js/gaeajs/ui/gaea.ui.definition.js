@@ -20,6 +20,12 @@ define(function () {
                 WORKFLOW_DIALOG: "wf-dialog",
                 UPLOAD_DIALOG: "uploader-dialog"
             }
+        },
+        GRID:{
+            ID:"gridId"
+        },
+        SCHEMA:{
+            ID:"urSchemaId"
         }
     };
     var PAGE = {
@@ -31,7 +37,8 @@ define(function () {
     var ACTION = {
         CRUD: {
             ADD: "add",// 新增操作，跟服务端配置对应
-            DELETE: "delete",
+            DELETE_SELECTED: "deleteSelected",// 删除选择的行
+            PSEUDO_DELETE_SELECTED: "pseudoDeleteSelected",// 伪删除选择的行
             UPDATE: "update"// 新增操作，跟服务端配置对应
         }
     };

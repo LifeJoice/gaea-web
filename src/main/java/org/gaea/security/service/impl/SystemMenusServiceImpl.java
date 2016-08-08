@@ -23,32 +23,37 @@ public class SystemMenusServiceImpl implements SystemMenusService {
     private SystemMenusRepository systemMenusRepository;
 
     @Override
+    public void save(Menu menu) {
+        systemMenusRepository.save(menu);
+    }
+
+    @Override
     @Transactional
     public List<MenuDTO> findAll(Set<String> authSet) {
-        if(authSet!=null && authSet.size()>0){
+        if (authSet != null && authSet.size() > 0) {
             List<Menu> myMenus = systemMenusRepository.findByAuthorities(authSet);
-            if(myMenus!=null){
-                Map<String,MenuDTO> menuDTOMap = new HashMap<String, MenuDTO>();
-                for(Menu menu:myMenus) {
+            if (myMenus != null) {
+                Map<String, MenuDTO> menuDTOMap = new HashMap<String, MenuDTO>();
+                for (Menu menu : myMenus) {
 //                    MenuDTO menuDTO = new MenuDTO();
-                    if(menu.getLevel()==Menu.LEVEL_2){
+                    if (menu.getLevel() == Menu.LEVEL_2) {
                         MenuDTO lv2MenuDTO = menuDTOMap.get(menu.getName());
-                        if(lv2MenuDTO!=null){
+                        if (lv2MenuDTO != null) {
                             continue;
-                        }else{
+                        } else {
                             lv2MenuDTO = new MenuDTO();
                             lv2MenuDTO.setName(menu.getName());
                             lv2MenuDTO.setLevel(menu.getLevel());
                             lv2MenuDTO.setUrl(menu.getResource().getResource());
-                            menuDTOMap.put(menu.getName(),lv2MenuDTO);
+                            menuDTOMap.put(menu.getName(), lv2MenuDTO);
                         }
-                    }else if(menu.getLevel()==Menu.LEVEL_3){
+                    } else if (menu.getLevel() == Menu.LEVEL_3) {
                         String lv2MenuName = menu.getParent().getName();
                         MenuDTO parentMenu = menuDTOMap.get(lv2MenuName);
-                        if(parentMenu==null){
+                        if (parentMenu == null) {
                             parentMenu = new MenuDTO();
-                            BeanUtils.copyProperties(menu.getParent(),parentMenu);
-                            menuDTOMap.put(lv2MenuName,parentMenu);
+                            BeanUtils.copyProperties(menu.getParent(), parentMenu);
+                            menuDTOMap.put(lv2MenuName, parentMenu);
                         }
                         MenuDTO menuDTO = new MenuDTO();
                         menuDTO.setName(menu.getName());

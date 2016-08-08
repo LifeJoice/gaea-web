@@ -2146,6 +2146,7 @@ require.config({
         "gaeajs-common-utils-datetime": '/js/gaeajs/gaeajs-common-utils-datetime',
         "gaeajs-common-utils-string": '/js/gaeajs/gaeajs-common-utils-string',
         "gaea-system-url": '/js/gaeajs/gaea-system-url-definition',
+        "gaeajs-common-actions": '/js/gaeajs/gaeajs.commons.actions',
         /* Gaea UI */
         "gaeajs-ui-view": '/js/gaeajs/ui/gaea.ui.view',/* Gaea UI View.View是组件的结合的表示（或者理解为page也可以）。 */
         "gaeajs-ui-definition": '/js/gaeajs/ui/gaea.ui.definition',/* Gaea UI 的一般性定义，如ACTION、UI（和schema对应）的名字等 */

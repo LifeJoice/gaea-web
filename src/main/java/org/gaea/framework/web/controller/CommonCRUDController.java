@@ -1,6 +1,7 @@
 package org.gaea.framework.web.controller;
 
 import org.gaea.exception.SysLogicalException;
+import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.service.CommonCRUDService;
 import org.slf4j.Logger;
@@ -28,9 +29,30 @@ public class CommonCRUDController {
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public String deleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
-                             String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException {
+                             String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException {
         logger.debug("-------->>>> into common delete. urSchemaId : " + urSchemaId+"  wfProcInstId : "+wfProcInstId);
         commonCRUDService.deleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);
+        return "<h2>删除成功。</h2>";
+    }
+
+    /**
+     * 伪删除，非真删除。对数据库只有update。
+     * @param urSchemaId
+     * @param gridId
+     * @param id
+     * @param wfProcInstId
+     * @param deleteReason
+     * @param request
+     * @param response
+     * @return
+     * @throws ValidationFailedException
+     * @throws SysLogicalException
+     */
+    @RequestMapping(value = "/pseudo-delete", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String pseudoDeleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
+                             String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException {
+        commonCRUDService.pseudoDeleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);
         return "<h2>删除成功。</h2>";
     }
 }

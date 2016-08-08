@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SCHEMA id必须全局唯一。会进入系统的cache。-->
+<ur-schema id="GAEA_SCHEMA_ROLE_MANAGEMENT">
+    <data>
+        <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
+        <dataset id="DS_ROLE_MANAGEMENT" primary-table="GAEA_SYS_ROLES">
+            <!--bean-ref：即关联的数据源。用该数据源查询。-->
+            <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />
+            <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
+            <data-sql>
+                <![CDATA[SELECT * FROM GAEA_SYS_ROLES]]>
+            </data-sql>
+            <!--对应SchemaWhere-->
+            <where>
+                <!--编辑的数据筛选-->
+                <condition-set id="byId">
+                    <and field="id" field-op="eq"></and>
+                </condition-set>
+            </where>
+        </dataset>
+    </data>
+    <views title="角色管理">
+        <actions id="myActions">
+            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add" />
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update" />
+            <button id="btnEditRoleUsers" name="btnEditRoleUsers" html-value="编辑角色用户" link-view-id="editRoleUsersDialog" action="update" />
+            <button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />
+        </actions>
+
+        <!--viewName: 即dialog的元素名。-->
+        <!--type=normal|workflow-approval|macula-dialog-->
+        <!-- 改一下：type改为描述dialog子类型的，而不是像workflow-dialog|macula-dialog这么大范围的。而是描述<wf-dialog>中，有哪几种。
+             default(approve-or-not)| -->
+        <!--button的type会关系到页面生成按钮的样式-->
+        <wf-dialog id="wfDialog" title="流程审批" html-width="500" html-height="500" submit-url="/admin/wf-demo/new-dayoff/complete.do" >
+            <button id="btnApproved" name="btnApproved" html-value="批准" type="approve" />
+            <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove" />
+            <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel" />
+        </wf-dialog>
+        <!-- 对于一般dialog而言，html-id就是要生成dialog的DIV ID。或者可以理解是JQuery.dialog(#htmlId) -->
+        <!--crud-dialog，是特别针对增删改的dialog。会涉及数据集的加载，编辑数据填充等许多特有功能。-->
+        <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
+        <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/security/role/showCreateUpdateForm" submit-url="/gaea/security/role/add" />
+        <crud-dialog id="editDialog" html-id="editDialog" id-field="id" content-url="/gaea/security/role/showCreateUpdateForm" submit-url="/gaea/security/role/add" />
+        <crud-dialog id="editRoleUsersDialog" html-id="editRoleUsersDialog" id-field="id" content-url="/gaea/security/role/showRoleUsers" submit-url="/gaea/security/role/saveRoleUsers" />
+        <!--如果一个grid没有primary-key=true的字段，是无法和工作流结合的-->
+        <!--display-undefined-column:如果dataset有的一个字段，但下面没有对应的column元素，是否以json传给页面。默认false-->
+        <!--dataset-id : 预留。待扩展。-->
+        <!--和dataset相关的东东，不应该带到前端。即所有ds-***-->
+        <!--ds-primary-table : 和grid删除操作（和诸如此类）的操作的1对1的主表。因为一个grid对应dataset，dataset可能是多表关联查询。但如果grid有删除功能，包括primary column，就需要对应到一张表。 -->
+        <!--page-size : 定义每页显示多少条。这个放在SCHEMA定义吧。不要放在页面了。-->
+        <grid id="role-grid" title="角色管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
+              dataset-id="DS_ROLE_MANAGEMENT" ds-primary-table="GAEA_SYS_ROLES" page-size="20">
+            <column id="id" name="id" label="ID" db-column-name="ID"
+                    visible="false" sortable="true" html-width="30" primary-key="true" data-type="String" />
+            <column id="name" name="name" label="角色名称" db-column-name="name"
+                    visible="true" sortable="false" html-width="120" data-type="String" />
+            <!--<column id="level" name="level" label="层级" db-column-name="level"-->
+                    <!--visible="true" sortable="false" html-width="120" data-type="String" />-->
+            <column id="code" name="code" label="唯一编码" db-column-name="code"
+                    visible="true" sortable="false" html-width="300" data-type="String" />
+            <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->
+                    <!--visible="true" sortable="false" html-width="240" data-type="String" />-->
+            <column id="description" name="description" label="角色说明" db-column-name="DESCRIPTION"
+                    visible="true" sortable="false" html-width="120" data-type="String" />
+        </grid>
+    </views>
+</ur-schema>

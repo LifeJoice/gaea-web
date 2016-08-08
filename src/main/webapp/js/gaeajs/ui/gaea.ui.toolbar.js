@@ -5,10 +5,10 @@
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
-        "gaeajs-ui-events"],
+        "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
-              GAEA_EVENTS) {
+              GAEA_EVENTS, gaeaActions, URL) {
         var toolbar = {
             options: {
                 renderTo: null,
@@ -271,11 +271,31 @@ define([
                             $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options);
                         });
                     } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
-                        // 初始化绑定事件
-                        //gaeaCommonCRUD.init(options);
                         // 点击触发事件
                         $button.click(function () {
                             $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, options);
+                        });
+                    } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                        // 请求真删除
+                        options.url = URL.CRUD.DELETE;
+                        // 初始化通用删除功能（绑定点击事件等）
+                        gaeaActions.deleteSelected.init(options);
+                        // 点击触发事件
+                        $button.click(function () {
+                            var row = gaeaGrid.getSelected();
+                            $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                                selectedRow: row
+                            });
+                        });
+                    } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                        // 初始化通用删除功能（绑定点击事件等）
+                        gaeaActions.deleteSelected.init(options);// options默认伪删除
+                        // 点击触发事件
+                        $button.click(function () {
+                            var row = gaeaGrid.getSelected();
+                            $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                                selectedRow: row
+                            });
                         });
                     }
                 }

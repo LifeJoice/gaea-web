@@ -1,5 +1,7 @@
 package org.gaea.security.service;
 
+import org.gaea.security.domain.Authority;
+
 import java.util.List;
 
 /**
@@ -7,4 +9,6 @@ import java.util.List;
  */
 public interface SystemAuthoritiesService {
     public List<String> findCodeList();
+
+    void save(Authority authority);
 }

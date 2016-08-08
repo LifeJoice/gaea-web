@@ -3,14 +3,24 @@
 <ur-schema id="GAEA_SCHEMA_RESOURCE_MANAGEMENT">
 <!--<ur-schema xmlns:views="http://www.ur.com.cn/schema/views">-->
     <data>
-        <!--table标识这个ds的主要表，如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。-->
-        <dataset id="DS_RESOURCE_MANAGEMENT" table="GAEA_SYS_RESOURCES">
+        <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
+        <dataset id="DS_RESOURCE_MANAGEMENT" primary-table="GAEA_SYS_RESOURCES">
             <!--bean-ref：即关联的数据源。用该数据源查询。-->
             <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />
             <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
             <data-sql>
-                <![CDATA[SELECT * FROM GAEA_SYS_RESOURCES]]>
+                <![CDATA[SELECT r.* FROM gaea_sys_resources r]]>
             </data-sql>
+            <!--对应SchemaWhere-->
+            <where>
+                <condition-set id="byId">
+                    <!--对应SchemaCondition-->
+                    <!--这里不设value属性（或者要设置也可以）。value由页面传过来。-->
+                    <and field="id" field-op="eq"></and>
+                    <!--<or field="name" field-op="eq"></or>-->
+                </condition-set>
+
+            </where>
         </dataset>
         <data-schema>
             <table name="DEMO_DAYOFF_FORM">
@@ -47,12 +57,17 @@
             <!--interface-action="submit|goto|deleteSelected|maculaAction"-->
             <!--<button id="btnNew" name="btnNew" html-value="新增" type="maculaAction" href="admin/dis/shop/creat" />-->
             <!--<button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="newDialog" />-->
-            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="editDialog" />
+            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add" />
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update" />
             <button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="wfDialog" />
-            <button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />
+            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected" />
+            <!--<button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />--><!-- 老的方式，不要了。重构采用action。 -->
+            <button id="btnImport" name="btnImport" html-value="测试导入" />
+            <button id="btnUpload" name="btnUpload" html-value="测试上传文件" link-view-id="uploaderDialog" />
             <!--</button-list>-->
         </actions>
 
+        <!--viewName: 即dialog的元素名。-->
         <!--type=normal|workflow-approval|macula-dialog-->
         <!-- 改一下：type改为描述dialog子类型的，而不是像workflow-dialog|macula-dialog这么大范围的。而是描述<wf-dialog>中，有哪几种。
              default(approve-or-not)| -->
@@ -63,7 +78,11 @@
             <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel" />
         </wf-dialog>
         <!-- 对于一般dialog而言，html-id就是要生成dialog的DIV ID。或者可以理解是JQuery.dialog(#htmlId) -->
-        <dialog id="editDialog" html-id="createOrEditDialog" content-url="/gaea/security/resource/showCreateUpdateForm" submit-url="/gaea/security/resource/add" />
+        <!--crud-dialog，是特别针对增删改的dialog。会涉及数据集的加载，编辑数据填充等许多特有功能。-->
+        <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
+        <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/security/resource/showCreateUpdateForm" submit-url="/gaea/security/resource/add" />
+        <crud-dialog id="editDialog" html-id="createOrEditDialog" id-field="id" content-url="/gaea/security/resource/showCreateUpdateForm" submit-url="/gaea/security/resource/add" />
+        <uploader-dialog id="uploaderDialog" html-id="uploaderDialog" content-url="" submit-url="" />
         <!-- 这是新页面。一般意味着跳转。 -->
         <view id="newView" title="" />
 
@@ -98,6 +117,8 @@
                     visible="true" sortable="false" html-width="240" data-type="String" />
             <column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"
                     visible="true" sortable="false" html-width="120" data-type="String" />
+            <column id="date" name="date" label="测试时间" db-column-name="DATE"
+                    visible="true" sortable="true" html-width="180" data-type="date" datetime-format="yyyy-MM-dd HH:mm" />
         </grid>
     </views>
 </ur-schema>

@@ -19,7 +19,11 @@ define(function () {
         CRUD:{
             //PRE_UPDATE:"/sys/common/pre-update",
             UPDATE:"/sys/common/update",
-            DELETE:"/sys/common/delete"
+            DELETE:"/gaea/common/crud/delete",
+            PSEUDO_DELETE:"/gaea/common/crud/pseudo-delete"// 伪删除
+        },
+        MENU:{
+            FIND_ALL:"/gaea/security/menu/find-all"// 查找所有的菜单
         }
     };
     return url;

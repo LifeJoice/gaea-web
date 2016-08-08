@@ -33,6 +33,12 @@ define(function () {
                 SELECT:"gaeaUI_event_multiselect_select" // 点选中了某项
             }
         },
+        /**
+         * action操作。
+         */
+        ACTION:{
+            DELETE_SELECTED:"gaeaUI_event_action_delete_selected"
+        },
         CONTEXT: {
             PAGE: {
                 UPDATE: "gaeaEvent_page_context_update"

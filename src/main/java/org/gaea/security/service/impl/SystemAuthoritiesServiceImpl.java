@@ -1,5 +1,7 @@
 package org.gaea.security.service.impl;
 
+import org.gaea.security.domain.Authority;
+import org.gaea.security.repository.SystemAuthoritiesRepository;
 import org.gaea.security.service.SystemAuthoritiesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,17 +15,25 @@ import java.util.List;
  */
 @Service
 public class SystemAuthoritiesServiceImpl implements SystemAuthoritiesService {
-//    @Autowired
-//    private SessionFactory sessionFactory;
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private SystemAuthoritiesRepository authoritiesRepository;
+
+    /**
+     * 查找权限表的所有的code。不带条件。
+     *
+     * @return
+     */
     @Override
     public List<String> findCodeList() {
         String sql = "SELECT CODE FROM GAEA_SYS_AUTHORITIES";
-//        Session session = sessionFactory.openSession();
-//        List<String> codeList = session
-//                .createSQLQuery(sql).list();
-        List<String> codeList = namedParameterJdbcTemplate.queryForList(sql, new MapSqlParameterSource(),String.class);
+        List<String> codeList = namedParameterJdbcTemplate.queryForList(sql, new MapSqlParameterSource(), String.class);
         return codeList;
+    }
+
+    @Override
+    public void save(Authority authority) {
+        authoritiesRepository.save(authority);
     }
 }

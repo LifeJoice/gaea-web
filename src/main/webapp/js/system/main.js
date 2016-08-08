@@ -3,7 +3,11 @@
  * 2015年10月25日14:36:44
  * Iverson
  */
-require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate','gaeajs-ui-notify'], function ($, gaeaAjax, gaeaValid,gaeaNotify ) {
+require([
+    'jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-notify',
+    "gaea-system-url"
+], function ($, gaeaAjax, gaeaValid, gaeaNotify,
+             URL) {
     // 初始化消息提示组件
     gaeaNotify.init();
     /**
@@ -11,7 +15,7 @@ require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate','g
      *  当前支持1、2级菜单，未支持3级菜单。不过将来可以方便扩展。
      */
     gaeaAjax.ajax({
-        url: "/menu/find-all",
+        url: URL.MENU.FIND_ALL,
         async: false,
         data: null,
         success: function (data, textStatus, jqXHR) {
@@ -38,7 +42,7 @@ require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate','g
         },
         fail: function () {
             //console.log("load menu error!");
-            window.location.href="/";
+            window.location.href = "/";
         }
     });
 
