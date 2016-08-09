@@ -1,9 +1,10 @@
 /*重写覆盖macula默认的样式。因为会影响到当前的样式。*/
-.finder-action-items a{
-    background:red;/* 这个影响按钮的背景 */
-    float: none;/* 这个会影响toolbar和tb-head-title重叠 */
+.finder-action-items a {
+    background: red; /* 这个影响按钮的背景 */
+    float: none; /* 这个会影响toolbar和tb-head-title重叠 */
     height: auto;
 }
+
 /* ALL ------>> 所有的按钮class都必须加上"a."，否则会受macula样式影响。*/
 .gaea-ui-page a.button {
     cursor: pointer;
@@ -22,13 +23,13 @@
     width: auto;
     /*边框*/
     /*background: #222 url(alert-overlay.png) repeat-x;*/
-    border-bottom: 1px solid rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     /*border:1px solid;*/
     /*border-color: #F2F2F2;*/
     /*阴影*/
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -o-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     /*box-shadow: 3px 3px 5px #E4E4E4,-1px 3px 5px #E4E4E4;*/
     /*圆角矩形*/
     -webkit-border-radius: 5px;
@@ -36,13 +37,16 @@
     -o-border-radius: 5px;
     border-radius: 5px;
 }
-.gaea-ui-page a.button:hover{
+
+.gaea-ui-page a.button:hover {
     /*background-color: #111;*/
     color: white;
 }
-.gaea-ui-page a.button:active{
+
+.gaea-ui-page a.button:active {
     top: 1px;
 }
+
 /*按钮大小效果*/
 .gaea-ui-page a.large.button {
     /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
@@ -50,27 +54,79 @@
     font-size: 20px;
     padding: 8px 19px 9px;
 }
+
 .gaea-ui-page a.medium.button {
     /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
     margin-right: 10px;
     font-size: 14px;
     padding: 6px 15px 7px;
 }
+
 /*小按钮效果.不作为主按钮效果使用.*/
 .gaea-ui-page a.small.button {
     font-size: 10px;
     padding: 4px 10px 5px;
 }
+
+/** ****************************************************
+ *          一套新的按钮,更多针对图形按钮.
+ *
+ *  主要是原来的按钮更多是方形的,例如弹框的按钮等.
+ *  但现在需要一些图形按钮,例如:multiselect的选择按钮,就不能用原来的样式了.
+ *  by Iverson 2016-8-9 17:37:24
+ *  ****************************************************/
+
+/*这个是图标的集合区。例如：一个table最后的一个td。（里面放操作按钮。）*/
+.gaea-icon-set {
+    position: relative;
+    min-width: 30px;
+}
+
+.gaea-icon {
+    cursor: pointer;
+}
+
+/**
+ * 鼠标移过的效果，背景。
+ */
+.gaea-button-bg {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    left: 0px;
+    opacity: 0; /* 默认为透明，看不到. */
+    position: absolute;
+    top: 0px;
+    transform: scale(0); /* 收缩为0.看不到. */
+    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    background: rgb(0, 151, 167);
+}
+
+/* 鼠标经过的效果，变半透明，并且圆从小变大。注意是移过gaea-icon元素的时候，修改gaea-button-bg的样式... */
+.gaea-icon:hover .gaea-button-bg {
+    opacity: 0.6;
+    transform: scale(1);
+}
+
+/**
+ * 通用的图标大小定义。主要针对iconfont。
+ */
+.gaea-button-size.m {
+    font-size: 19px;
+    margin-left: 4px; /* 这个是配合font-size和gaea-button-bg的背景，确保两者都居中. */
+}
+
 /** ****************************************************
  *                  各种按钮颜色效果
  *  ****************************************************/
 
 /*灰色效果*/
-.gaea-ui-page a.grey.button{
+.gaea-ui-page a.grey.button {
     color: black;
     background-color: #E4E4E4;
 }
-.gaea-ui-page a.grey.button:hover{
+
+.gaea-ui-page a.grey.button:hover {
     color: white;
     background-color: #919191;
     /* 按钮渐变 */
@@ -88,11 +144,12 @@
 }
 
 /*深蓝灰色效果*/
-.gaea-ui-page a.darkslategrey.button{
+.gaea-ui-page a.darkslategrey.button {
     background-color: #5D6D7D;
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 86%, 1));*/
 }
-.gaea-ui-page a.darkslategrey.button:hover{
+
+.gaea-ui-page a.darkslategrey.button:hover {
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 82%, 1));*/
     background-color: #2D3E50;
     /* 按钮渐变 */

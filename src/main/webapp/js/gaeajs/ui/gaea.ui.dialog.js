@@ -518,7 +518,8 @@ define([
                     // 更新上下文的相关信息
                     $dialogDiv.trigger(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, {
                         PAGE_CONTEXT: {
-                            id: selectedRow.id
+                            id: selectedRow.id,
+                            selectedRow:selectedRow
                         }
                     });
                     // 因为是update弹出框，设置整个编辑的对象的id
@@ -605,7 +606,7 @@ define([
                     //gaeaData.scanAndInit(dialogOption.id, afterBindingCallback);
                     // 初始化页面的相关组件（multi-select等，但不包括可编辑table）
                     gaeaUI.initComponents(options.dialogId);
-                    // 初始化数据组件。例如：可编辑表格等 TODO 初始化UI的数据
+                    // 初始化数据组件。例如：可编辑表格等
                     gaeaData.component.init(options.dialogId);
                     if (gaeaValid.isNotNull(options.initComponentData) && options.initComponentData) {
                         // 初始化gaea-ui关联的gaea-data，即数据。例如：编辑页的子表

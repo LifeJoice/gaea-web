@@ -59,6 +59,13 @@ define([
                 TD: "<TD></TD>",
                 TD_WITH_DATABIND: "<TD data-bind='<%=DATA_BIND %>'></TD>",
                 TD_WITH_INPUT: '<TD><input id="<%=ID %>" name="<%=NAME %>" data-bind="<%=DATA_BIND %>"></TD>',
+                /**
+                 * 下面这个信息量很大:
+                 * 1. td的class,不可省略.
+                 * 2. < i >是图标.对应的class也不可以省略.关系到图标样式,和图标大小.
+                 * 3. < i >里面的span是背景效果.对应的class也不可省略.
+                 */
+                SPAN_REMOVE_BUTTON: '<td class="gaea-icon-set"><i class="iconfont icon-remove gaea-icon gaea-button-size m" data-bind="<%=DATA_BIND %>"><span id="delete" class="gaea-button-bg"></span></i></td>',
                 INPUT_WITH_DATABIND: '<input id="<%=ID %>" name="<%=NAME %>" data-bind="<%=DATA_BIND %>">'
             }
         };
@@ -530,6 +537,7 @@ define([
              */
             table: {
                 init: function (containerId) {
+                    var that = this;
                     var $this = $("#" + containerId);
                     var $tbody = $this.find("tbody");
                     var dataStr = $this.data("gaea-data");
@@ -603,7 +611,15 @@ define([
                     });
 
                     /* 创建定义行！！这一行只是定义用（各个列的data-bind），如果结合了KO，就会把这一行隐藏，然后push的新数据，就会以这一行的模板进行添加。 */
-                    this.appendTrWithBinding($tbody, tableDefine.columns);
+
+                    // 创建第一行，并添加相关列的KO binding
+                    that.appendTrWithBinding($tbody, tableDefine.columns);
+                    // 增加行编辑的删除方法。依赖KO。
+                    that.initRemoveFunction(name);
+                    // 初始化第一行（模板行）的序号列。（本来想用来做行删除，不过后来用了KO的方法就不用了）
+                    that.firstTR.initSequence(containerId);
+                    // 初始化第一行(模板行)的按钮区,并默认添加删除按钮.
+                    that.firstTR.initRowButtons(containerId,that.getRemoveFunctionName(name));
                     gaeaData.dataBind.bindForEach($tbody, name);
                     options._viewModel[name] = ko.observableArray(array);
                     /**
@@ -704,9 +720,68 @@ define([
                                 VALUE: column.id
                             })
                         }));
-                        //}
-
                     });
+                },
+                /**
+                 * 第一行（模板行）的相关方法
+                 */
+                firstTR: {
+                    /**
+                     * 1. 给table增加一个排序列
+                     * 2. 增加最后的命令操作区。增加删除行的按钮，点击删除一行。
+                     * @param containerId
+                     * @param removeFunctionName
+                     */
+                    initRowButtons: function (containerId, removeFunctionName) {
+                        var that = this;
+                        //var $thRow = $("#"+containerId).find("thead tr");
+                        //$thRow.prepend("<th>序号</th>");
+
+                        var $tbody = $("#" + containerId).find("tbody");
+                        //var tdTemplate = _.template(templates.HTML.TD_WITH_DATABIND);
+                        var removeButtonTemplate = _.template(templates.HTML.SPAN_REMOVE_BUTTON);
+                        // 给data-bind模板行的最前面，加一个排序列。主要是获取序号做删除。
+                        $tbody.children("tr").append(removeButtonTemplate({
+                            DATA_BIND: "click: $parent." + removeFunctionName   // 这是KO的方法。$parent 是ko的内置变量.
+                        }));
+                    },
+                    /**
+                     * 初始化序号的列
+                     * @param containerId
+                     */
+                    initSequence: function (containerId) {
+                        var $thRow = $("#" + containerId).find("thead tr");
+                        $thRow.prepend("<th>序号</th>");
+
+                        var $tbody = $("#" + containerId).find("tbody");
+                        var tdTemplate = _.template(templates.HTML.TD_WITH_DATABIND);
+                        // 给data-bind模板行的最前面，加一个序号列。主要是获取序号做删除。
+                        $tbody.children("tr").prepend(tdTemplate({
+                            DATA_BIND: "text: $index" // $index 是KO的内部变量
+                        }));
+                    }
+                },
+                /**
+                 * 定义行编辑的移除行的方法名。因为可能一个编辑页有多个行编辑table,不想相互的删除行方法混淆.
+                 * 因为如果名字不作区分,都是调用 $parent.remove()
+                 * 方法命名规则:
+                 * 用该行编辑table的name + "_remove"
+                 * @param name
+                 * @returns {string}
+                 */
+                getRemoveFunctionName: function (name) {
+                    return name+"_remove";
+                },
+                /**
+                 * 基于KO binding的移除一个列表的某行。列表应该是基于KO foreach生成。
+                 * @param name
+                 */
+                initRemoveFunction: function (name) {
+                    var that = this;
+                    var removeFunctionName = that.getRemoveFunctionName(name);
+                    options._viewModel[removeFunctionName] = function () {
+                        options._viewModel[name].remove(this);// 这个是利用了KO的特性。如果没有用ko binding应该是不行的。
+                    };
                 },
                 /**
                  * 把某对象（例如，一个input，或者div）的name属性改掉。

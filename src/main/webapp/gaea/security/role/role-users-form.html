@@ -1,0 +1,19 @@
+<div class="gaea-form gaea-ui-page">
+    <div class="row">
+        <div class="field-block"><span class="fieldname">名称</span><span class="fieldvalue"><input id="name" name="name" disabled="disabled"></span></div>
+        <!--<div class="field-block"><span class="fieldname">级别</span><span class="fieldvalue"><input id="level" name="level" disabled="disabled"></span></div>-->
+    </div>
+
+    <!-- ***********************************************  这个是multi-select组件  *********************************************** -->
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">描述</span>
+            <span class="fieldvalue">
+                <div id="userIds" class="gaea-multi-select"
+                data-gaea-data="name: 'userIds',
+                selectable:{dataset:'DS_AUTH_RESOURCE',condition:{id:'selectable',values:[{ type:'pageContext',value:'id' }]} },
+                selected:{dataset:'DS_AUTH_RESOURCE',condition:{id:'selected',values:[{ type:'pageContext',value:'id' }]} }"></div>
+            </span>
+        </div>
+    </div>
+</div>
