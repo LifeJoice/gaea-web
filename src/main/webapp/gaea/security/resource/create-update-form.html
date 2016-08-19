@@ -5,8 +5,18 @@
         <div class="field-block"><span class="fieldname">顺序号</span><span class="fieldvalue"><input id="orderSeq" name="orderSeq" value=""></span></div>
     </div>
     <div class="row">
-        <div class="field-block"><span class="fieldname">测试绑定数据集</span><span class="fieldvalue"><select id="test" name="test" data-gaea-data="dataset:'DS_RESOURCE_MANAGEMENT'"></select></span></div>
-        <div class="field-block"><span class="fieldname">测试：是否启用</span><span class="fieldvalue"><select id="test2" name="test2" data-gaea-data="dataset:'DS_IS_ENABLED'"></select></span></div>
+        <div class="field-block">
+            <span class="fieldname">测试绑定数据集</span>
+            <span class="fieldvalue">
+                <select id="test" name="test" data-gaea-data="dataset:'DS_RESOURCE_MANAGEMENT'"></select>
+            </span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">测试：依赖触发</span>
+            <span class="fieldvalue">
+                <select id="test2" name="test2" data-gaea-data="dataset:'DS_MENU', condition:{id:'testTrigger',values:[{ type:'dependTrigger',dependId:'test', triggerEvent:'change' }]}, initTiming :'onTrigger'"></select>
+            </span>
+        </div>
         <div class="field-block"><span class="fieldname">资源（URL）</span><span class="fieldvalue"><input id="resource" name="resource" value=""></span></div>
     </div>
     <div class="row">
@@ -18,7 +28,7 @@
             <span class="fieldname">子表数据</span>
             <span class="fieldvalue">
                 <div id="testList"
-                     data-gaea-data="name:'testList',dataset:'DS_TEST', condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}, initTiming :'onload'"
+                     data-gaea-data="name:'testList',dataset:'DS_TEST', condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}"
                      data-gaea-ui="component:'table',isbindGaeaData:true">
                     <!--<a id="testAdd" class="gaea-ui medium darkslategrey button"><span>添加</span></a>-->
                     <!--<input type="button" id="testAdd" value="添加">-->
@@ -43,15 +53,15 @@
     </div>
 
     <!-- ***********************************************  这个是multi-select组件  *********************************************** -->
-    <div class="row">
-        <div class="field-block">
-            <span class="fieldname">描述</span>
-            <span class="fieldvalue">
-                <div id="testSelectRole" class="gaea-multi-select"
-                data-gaea-data="name: 'testSelectRole',
-                selectable:{dataset:'DS_TEST_AUTH',condition:{id:'selectable',values:[{ type:'pageContext',value:'id' }]} },
-                selected:{dataset:'DS_TEST_AUTH',condition:{id:'selected',values:[{ type:'pageContext',value:'id' }]} }"></div>
-            </span>
-        </div>
-    </div>
+    <!--<div class="row">-->
+        <!--<div class="field-block">-->
+            <!--<span class="fieldname">描述</span>-->
+            <!--<span class="fieldvalue">-->
+                <!--<div id="testSelectRole" class="gaea-multi-select"-->
+                <!--data-gaea-data="name: 'testSelectRole',-->
+                <!--selectable:{dataset:'DS_TEST_AUTH',condition:{id:'selectable',values:[{ type:'pageContext',value:'id' }]} },-->
+                <!--selected:{dataset:'DS_TEST_AUTH',condition:{id:'selected',values:[{ type:'pageContext',value:'id' }]} }"></div>-->
+            <!--</span>-->
+        <!--</div>-->
+    <!--</div>-->
 </div>

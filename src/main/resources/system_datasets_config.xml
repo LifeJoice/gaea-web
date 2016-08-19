@@ -3,7 +3,7 @@
 <dataset-definition>
     <!--table标识这个ds的主要表，如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。-->
     <!--cache-type : auto | none | static-->
-    <dataset id="DS_RESOURCE_MANAGEMENT" table="GAEA_SYS_RESOURCES" cache-type="auto" expire-time="1ms|s|min|d">
+    <dataset id="DS_RESOURCE_MANAGEMENT" cache-type="auto" expire-time="1ms|s|min|d">
         <!--bean-ref：即关联的数据源。用该数据源查询。如果为空，即为用系统默认的数据源。-->
         <!--<data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />-->
         <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
@@ -25,16 +25,65 @@
             </condition-set>
         </where>
     </dataset>
+    <!-- ++++++++++++++++++++++++++++++++++++  TEST  ++++++++++++++++++++++++++++++++++++ -->
+    <dataset id="DS_TEST" table="TEST" cache-type="auto" expire-time="1ms|s|min|d">
+        <!--bean-ref：即关联的数据源。用该数据源查询。如果为空，即为用系统默认的数据源。-->
+        <!--<data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />-->
+        <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
+        <data-sql>
+            <![CDATA[SELECT resource_id as id,name,date FROM test]]>
+        </data-sql>
+        <!--对应SchemaWhere-->
+        <where>
+            <condition-set id="byId">
+                <!--对应SchemaCondition-->
+                <!--这里不设value属性（或者要设置也可以）。value由页面传过来。-->
+                <!--field-op : or and eq ne lt gt le ge-->
+                <and field="resource_id" field-op="eq"></and>
+                <!--<or field="name" op="eq"></or>-->
+            </condition-set>
+
+        </where>
+    </dataset>
+    <!--     测试multi select    -->
+    <dataset id="DS_TEST_AUTH" table="TEST" cache-type="auto" expire-time="1ms|s|min|d">
+        <data-sql>
+            <![CDATA[SELECT test.id value,test.name text FROM test test LEFT JOIN gaea_sys_resources r ON test.`resource_id`=r.`ID`]]>
+        </data-sql>
+        <where>
+            <condition-set id="selectable">
+                <and field="test.resource_id" field-op="eq"></and>
+            </condition-set>
+            <condition-set id="selected">
+                <and field="test.resource_id" field-op="ne"></and>
+            </condition-set>
+        </where>
+    </dataset>
+    <!-- ++++++++++++++++++++++++++++++++++++  TEST END  ++++++++++++++++++++++++++++++++++++ -->
+    <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
+    <dataset id="DS_ROLE_USERS" cache-type="auto" expire-time="1ms|s|min|d">
+        <data-sql>
+            <![CDATA[SELECT users.id VALUE, users.name TEXT FROM gaea_sys_users users LEFT JOIN gaea_sys_users_roles userRole ON users.id=userRole.user_id LEFT JOIN gaea_sys_roles role ON userRole.user_id=role.id]]>
+        </data-sql>
+        <where>
+            <condition-set id="selectable">
+                <and field="role.id" field-op="ne"></and>
+            </condition-set>
+            <condition-set id="selected">
+                <and field="role.id" field-op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
     <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
     <dataset id="DS_MENU" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
-            <![CDATA[SELECT id value,name text FROM gaea_sys_menus]]>
+            <![CDATA[SELECT id value,name text,resource_id resource_id FROM gaea_sys_menus]]>
         </data-sql>
-        <!--<where>-->
-            <!--<condition-set id="byLevel">-->
-                <!--<and field="(LEVEL-1)" field-op="eq"></and>-->
-            <!--</condition-set>-->
-        <!--</where>-->
+        <where>
+            <condition-set id="testTrigger">
+                <and field="resource_id" field-op="eq"></and>
+            </condition-set>
+        </where>
     </dataset>
     <!--cache-type ：是否缓存结果集。有个配置项是none。但当下全部的缓存。估计静态的数据量不多。-->
     <dataset id="DS_IS_ENABLED" cache-type="static">

@@ -29,15 +29,16 @@ define(function () {
             /**
              * 复选框组件相关事件
              */
-            MULTI_SELECT:{
-                SELECT:"gaeaUI_event_multiselect_select" // 点选中了某项
-            }
+            MULTI_SELECT: {
+                SELECT: "gaeaUI_event_multiselect_select" // 点选中了某项
+            },
+            INIT_COMPLETE: "gaeaUI_event_init_complete" // 针对UI任意组件。初始化完成后（包括UI、数据等等一切）触发。
         },
         /**
          * action操作。
          */
-        ACTION:{
-            DELETE_SELECTED:"gaeaUI_event_action_delete_selected"
+        ACTION: {
+            DELETE_SELECTED: "gaeaUI_event_action_delete_selected"
         },
         CONTEXT: {
             PAGE: {
