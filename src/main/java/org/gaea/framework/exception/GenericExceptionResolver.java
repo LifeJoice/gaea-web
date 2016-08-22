@@ -1,6 +1,7 @@
 package org.gaea.framework.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.gaea.exception.DataIntegrityViolationException;
+import org.gaea.exception.GaeaException;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
@@ -17,6 +19,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
+ * 统一的Controller的异常处理。
+ * <p>统一拦截后，做个区分</p>
  *
  * @author Iverson 2014-5-5 星期一
  */
@@ -41,7 +45,10 @@ public class GenericExceptionResolver implements HandlerExceptionResolver {
         logException(ex);
         try {
             /* 相应的状态码设置 */
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);// 默认错误 500
+            if (ex instanceof GaeaException) {
+                response.setStatus(GaeaException.DEFAULT_FAIL);// 自定义一般校验错误 600
+            }
             /* 解决返回json乱码的问题 */
             response.setContentType("text/xml;charset=utf-8");
             /* 使用Jackson2框架的工具类。转换JSON输出。 */
