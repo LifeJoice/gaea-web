@@ -282,9 +282,15 @@ define([
                         gaeaActions.deleteSelected.init(options);
                         // 点击触发事件
                         $button.click(function () {
-                            var row = gaeaGrid.getSelected();
-                            $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                                selectedRow: row
+                            // 弹框。确认删除？
+                            gaeaDialog.confirmDialog({
+                                title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
+                                content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
+                            }, function () {
+                                var row = gaeaGrid.getSelected();
+                                $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                                    selectedRow: row
+                                });
                             });
                         });
                     } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
@@ -292,32 +298,23 @@ define([
                         gaeaActions.deleteSelected.init(options);// options默认伪删除
                         // 点击触发事件
                         $button.click(function () {
-                            var row = gaeaGrid.getSelected();
-                            $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                                selectedRow: row
+                            // 弹框。确认删除？
+                            gaeaDialog.confirmDialog({
+                                title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
+                                content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
+                            }, function () {
+                                var row = gaeaGrid.getSelected();
+                                $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                                    selectedRow: row
+                                });
                             });
                         });
                     }
                 }
-                //},
-                //dialog:{
-                //    _init: function (buttonDef, dialogDef) {
-                //        var $button = $("#" + button.htmlId);
-                //        var options = {
-                //            button:buttonDef,
-                //            dialog:dialogDef
-                //        };
-                //        // 初始化绑定事件
-                //        gaeaDialog.init(options);
-                //        // 点击触发事件
-                //        $button.click(function () {
-                //            $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.INIT, options);
-                //        });
-                //    }
             }
         };
         /**
          * 返回（暴露）的接口
          */
         return toolbar;
-    })
+    });

@@ -320,7 +320,7 @@ define([
                  *              data 要推入的数据
                  */
                 resetData: function (options) {
-                    if(gaeaValid.isNull(options.bindSelectId)||gaeaValid.isNull(options.dataset)){
+                    if (gaeaValid.isNull(options.bindSelectId) || gaeaValid.isNull(options.dataset)) {
                         throw "绑定下拉框id 或 数据集名 为空，无法进行数据刷新（reset）！";
                     }
                     var data = options.data;
@@ -342,7 +342,7 @@ define([
                  *              data 要推入的数据
                  */
                 removeAllData: function (options) {
-                    if(gaeaValid.isNull(options.bindSelectId)||gaeaValid.isNull(options.dataset)){
+                    if (gaeaValid.isNull(options.bindSelectId) || gaeaValid.isNull(options.dataset)) {
                         throw "绑定下拉框id 或 数据集名 为空，无法进行数据刷新（reset）！";
                     }
                     var selectOptions = gaeaData.select.getOptionsName(options.bindSelectId, options.dataset);
@@ -764,7 +764,7 @@ define([
                                                 if (gaeaValid.isNotNull(opt.bindAsObject) && opt.bindAsObject) {
                                                     gaeaData.ko.createComputeObj(opt);
                                                 }
-                                            }else{
+                                            } else {
                                                 gaeaData.select.removeAllData(opt);
                                             }
                                         });
@@ -851,11 +851,11 @@ define([
              *              bindFieldContainerId
              * @param successCallback
              */
-            dependTriggerDataSetInit : function (options, successCallback) {
-                if(gaeaValid.isNull(options.id)){
+            dependTriggerDataSetInit: function (options, successCallback) {
+                if (gaeaValid.isNull(options.id)) {
                     throw "当前基于依赖的数据集的id（DOM ID）不允许为空！";
                 }
-                var $this = $("#"+opt.id);
+                var $this = $("#" + opt.id);
                 var dataSetId = options.dataset;
                 var queryCondition = {};
                 queryCondition.id = options.condition.id;
@@ -1076,7 +1076,8 @@ define([
                     var btnAddName = name + "_btn_add";
                     $this.append(_.template(gaeaUI.TEMPLATE.DIV.WITH_NAME)({
                         NAME: toolbarDivName,
-                        ID: toolbarDivName
+                        ID: toolbarDivName,
+                        CONTENT: "" // 这里不需要用到content。设个空即可。
                     }));
                     // 初始化 TOOLBAR
                     var gaeaToolbar = require("gaeajs-ui-toolbar");
@@ -1486,7 +1487,7 @@ define([
             getPageContextValue: function (name) {
                 var $pageContext = PAGE_CONTEXT;
                 var value = null;
-                if(gaeaValid.isNotNull(name)){
+                if (gaeaValid.isNotNull(name)) {
                     if (_s.startsWith(name, "$pageContext.")) {
                         value = eval(name);
                     }

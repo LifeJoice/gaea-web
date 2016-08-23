@@ -5,10 +5,10 @@
 define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url',
-        "gaeajs-ui-events", 'gaeajs-common-utils-string',"gaeajs-ui-plugins"],
+        "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaStringUtils, gaeaButton, SYS_URL,
-              gaeaEvents, gaeaString,gaeaPlugins) {
+              gaeaEvents, gaeaString, gaeaPlugins) {
         /**
          *
          * @type {{VIEW: {GRID: {COLUMN: {DATA_TYPE_DATE: string, DATA_TYPE_TIME: string, DATA_TYPE_DATETIME: string}}}}}
@@ -45,7 +45,7 @@ define([
                     success: function (data) {
                         //var result = $.parseJSON(jqXHR.responseText);
                         // 用查询结果，刷新数据列表
-                        _grid.refreshData(data.content);
+                        _grid._refreshData(data.content);
                         _grid.options.page.rowCount = data.totalElements;
                         _grid._createFooter();
                     },
@@ -363,7 +363,7 @@ define([
                 //        }
                 //    }
                 //})
-                this._bindingEvents();
+                this._bindingEvents(options);
                 //// 绑定事件。点击行选中复选框。
                 //tableBody.find("tr").click(function () {
                 //    $(":checkbox[id^='urgrid-chb']").prop("checked", false);
@@ -459,7 +459,7 @@ define([
             _setSelectRow: function (row) {
                 this.cache.selectedRow = row;
             },
-            refreshData: function (data) {
+            _refreshData: function (data) {
                 this.options.data = data;
                 $(".tb-body").html("");
                 this._createTableData();
@@ -659,53 +659,72 @@ define([
                     $("." + el.attr("class") + ":last").remove();
                 });
             },
-            _bindingEvents: function () {
+            _bindingEvents: function (options) {
                 var that = this;
-                // 绑定事件。点击行选中复选框。
-                $(".tb-body").on("click", "tr", function () {
-                    //$(".tb-body").find("tr").click(function () {
-                    var index = $(this).data("rowindex");
-                    var i = index - 1;
-                    // 选中行前复选框
-                    $(":checkbox[id^='urgrid-chb']").prop("checked", false);
-                    $(this).find("[id^='urgrid-chb']").prop("checked", "true");
-                    // 添加选中class
-                    $(".tb-body tr").removeClass("selected");
-                    $(this).addClass("selected");
-                    //console.log("rowindex: "+$(this).data("rowindex"));
-                    $(this).find("[id^='urgrid-chb']").val($(this).data("rowindex") - 1);
-                    selectedRow = that.options.data[($(this).data("rowindex") - 1)];
-                    selectedRow.index = $(this).data("rowindex");
-                    that._setSelectRow(selectedRow);
-                    that.options.listeners.select(selectedRow);
-                    /**
-                     * 触发选中事件。基于事件去影响相关的其他组件或元素。
-                     * 例如：
-                     * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
-                     */
-                        //console.log("grid renderTo: "+_grid.options.renderTo);
-                    $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
-                        selectedRow: selectedRow
-                    });
-                    // 复选框选中的效果
-                    // find the first span which is our circle/bubble
-                    //var jqLabel = $("#urgrid-cb-label-" + i);
-                    ////jqLabel.append("<span class=\"check\"></span>" +
-                    ////    "<span class=\"box\"></span>");
-                    //var el = jqLabel.children('span:first-child');
-                    //
-                    //// add the bubble class (we do this so it doesnt show on page load)
-                    //el.addClass('circle');
-                    //
-                    //// clone it
-                    //var newone = el.clone(true);
-                    //
-                    //// add the cloned version before our original
-                    //el.before(newone);
-                    //
-                    //// remove the original so that it is ready to run on next click
-                    //$("." + el.attr("class") + ":last").remove();
+                var gridId = options.renderTo;
+                var $grid = $("#"+gridId);
+                _grid.row.initSelect();
+
+                $grid.on(gaeaEvents.DEFINE.UI.GRID.RELOAD, function (event, data) {
+                    _query.doQuery({});
                 });
+
+
+
+
+
+
+
+
+
+
+
+
+                //// 绑定事件。点击行选中复选框。
+                //$(".tb-body").on("click", "tr", function () {
+                //    //$(".tb-body").find("tr").click(function () {
+                //    var index = $(this).data("rowindex");
+                //    var i = index - 1;
+                //    // 选中行前复选框
+                //    $(":checkbox[id^='urgrid-chb']").prop("checked", false);
+                //    $(this).find("[id^='urgrid-chb']").prop("checked", "true");
+                //    // 添加选中class
+                //    $(".tb-body tr").removeClass("selected");
+                //    $(this).addClass("selected");
+                //    //console.log("rowindex: "+$(this).data("rowindex"));
+                //    $(this).find("[id^='urgrid-chb']").val($(this).data("rowindex") - 1);
+                //    selectedRow = that.options.data[($(this).data("rowindex") - 1)];
+                //    selectedRow.index = $(this).data("rowindex");
+                //    that._setSelectRow(selectedRow);
+                //    that.options.listeners.select(selectedRow);
+                //    /**
+                //     * 触发选中事件。基于事件去影响相关的其他组件或元素。
+                //     * 例如：
+                //     * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
+                //     */
+                //        //console.log("grid renderTo: "+_grid.options.renderTo);
+                //    $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
+                //        selectedRow: selectedRow
+                //    });
+                //    // 复选框选中的效果
+                //    // find the first span which is our circle/bubble
+                //    //var jqLabel = $("#urgrid-cb-label-" + i);
+                //    ////jqLabel.append("<span class=\"check\"></span>" +
+                //    ////    "<span class=\"box\"></span>");
+                //    //var el = jqLabel.children('span:first-child');
+                //    //
+                //    //// add the bubble class (we do this so it doesnt show on page load)
+                //    //el.addClass('circle');
+                //    //
+                //    //// clone it
+                //    //var newone = el.clone(true);
+                //    //
+                //    //// add the cloned version before our original
+                //    //el.before(newone);
+                //    //
+                //    //// remove the original so that it is ready to run on next click
+                //    //$("." + el.attr("class") + ":last").remove();
+                //});
             },
             /**
              * 构造Grid的脚部元素。即Pagination分页部分。
@@ -975,6 +994,40 @@ define([
                     // 设置列头的样式
                     gridHead.children("#" + gridColumnId).css("width", columnConfig.width);
                 }
+            }
+        };
+        /**
+         * 和grid的行相关的一切
+         */
+        _grid.row = {
+            initSelect : function () {
+                // 绑定事件。点击行选中复选框。
+                $(".tb-body").on("click", "tr", function () {
+                    //$(".tb-body").find("tr").click(function () {
+                    var index = $(this).data("rowindex");
+                    var i = index - 1;
+                    // 选中行前复选框
+                    $(":checkbox[id^='urgrid-chb']").prop("checked", false);
+                    $(this).find("[id^='urgrid-chb']").prop("checked", "true");
+                    // 添加选中class
+                    $(".tb-body tr").removeClass("selected");
+                    $(this).addClass("selected");
+                    //console.log("rowindex: "+$(this).data("rowindex"));
+                    $(this).find("[id^='urgrid-chb']").val($(this).data("rowindex") - 1);
+                    var selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
+                    selectedRow.index = $(this).data("rowindex");
+                    _grid._setSelectRow(selectedRow);
+                    _grid.options.listeners.select(selectedRow);
+                    /**
+                     * 触发选中事件。基于事件去影响相关的其他组件或元素。
+                     * 例如：
+                     * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
+                     */
+                        //console.log("grid renderTo: "+_grid.options.renderTo);
+                    $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
+                        selectedRow: selectedRow
+                    });
+                });
             }
         };
         /**

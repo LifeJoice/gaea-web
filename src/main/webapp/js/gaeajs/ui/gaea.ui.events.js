@@ -24,6 +24,7 @@ define(function () {
                 CRUD_UPDATE_OPEN: "gaeaUI_event_crud_dialog_update_open"// 打开“编辑”dialog
             },
             GRID: {
+                RELOAD: "gaeaUI_event_grid_reload", // 刷新grid数据的事件。无需参数。
                 SELECT: "gaeaUI_event_grid_select"
             },
             /**

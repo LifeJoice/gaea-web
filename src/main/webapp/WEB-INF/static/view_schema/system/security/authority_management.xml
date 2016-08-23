@@ -24,7 +24,7 @@
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add" />
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update" />
             <button id="btnEditAuthRes" name="btnEditAuthRes" html-value="编辑权限资源" link-view-id="editAuthResDialog" action="update" />
-            <button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />
+            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected" />
         </actions>
 
         <!--viewName: 即dialog的元素名。-->

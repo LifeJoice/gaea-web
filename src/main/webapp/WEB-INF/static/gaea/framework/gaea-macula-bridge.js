@@ -393,7 +393,7 @@ gaea.component.bridge = {
         _setSelectRow: function (row) {
             this.cache.selectedRow = row;
         },
-        refreshData: function (data) {
+        _refreshData: function (data) {
             this.options.data = data;
             $(".tb-body").html("");
             this._createTableData();
@@ -739,7 +739,7 @@ gaea.component.bridge = {
                 success: function (data) {
                     //var result = $.parseJSON(jqXHR.responseText);
                     // 用查询结果，刷新数据列表
-                    that.refreshData(data.content);
+                    that._refreshData(data.content);
                     that.options.page.rowCount = data.totalElements;
                     that._createFooter();
                 },

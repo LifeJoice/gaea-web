@@ -29,7 +29,7 @@ define([
                 var $button = $("#" + buttonDef.htmlId);
                 // 默认伪删除
                 var deleteURL = URL.CRUD.PSEUDO_DELETE;
-                if(gaeaValid.isNotNull(options.url)){
+                if (gaeaValid.isNotNull(options.url)) {
                     deleteURL = options.url;
                 }
                 /**
@@ -50,9 +50,21 @@ define([
                         },
                         success: function () {
                             gaeaNotify.message("删除成功！");
+                            $("#urgrid").trigger(GAEA_EVENT.DEFINE.UI.GRID.RELOAD);
                         },
-                        fail: function () {
-                            gaeaNotify.warn("删除失败！");
+                        // 返回内容如果为空，则即使status=200，也会进入fail方法
+                        fail: function (jqXHR, textStatus, errorThrown) {
+                            // 如果返回status=200，则还是当做成功！
+                            if (jqXHR.status == 200) {
+                                gaeaNotify.message("删除成功！");
+                                $("#urgrid").trigger(GAEA_EVENT.DEFINE.UI.GRID.RELOAD);
+                            } else {
+                                var result = jqXHR.responseJSON;
+                                gaeaNotify.warn(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
+                                    SIMPLE_MSG: "删除失败！",
+                                    ERROR_MSG: result.RESULT_MSG
+                                }));
+                            }
                         }
                     });
                 });

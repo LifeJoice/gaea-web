@@ -27,12 +27,9 @@ public class CommonCRUDController {
     CommonCRUDService commonCRUDService;
 
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
-    @ResponseBody
-    public String deleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
+    public void deleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
                              String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException {
-        logger.debug("-------->>>> into common delete. urSchemaId : " + urSchemaId+"  wfProcInstId : "+wfProcInstId);
         commonCRUDService.deleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);
-        return "<h2>删除成功。</h2>";
     }
 
     /**
@@ -44,15 +41,12 @@ public class CommonCRUDController {
      * @param deleteReason
      * @param request
      * @param response
-     * @return
      * @throws ValidationFailedException
      * @throws SysLogicalException
      */
     @RequestMapping(value = "/pseudo-delete", produces = "plain/text; charset=UTF-8")
-    @ResponseBody
-    public String pseudoDeleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
+    public void pseudoDeleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
                              String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException {
         commonCRUDService.pseudoDeleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);
-        return "<h2>删除成功。</h2>";
     }
 }

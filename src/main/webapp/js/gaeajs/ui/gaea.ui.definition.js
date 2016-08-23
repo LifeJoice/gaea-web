@@ -19,13 +19,14 @@ define(function () {
                 COMMON_DIALOG: "dialog",
                 WORKFLOW_DIALOG: "wf-dialog",
                 UPLOAD_DIALOG: "uploader-dialog"
-            }
+            },
+            COMMON_CONFIG_DIALOG_ID: "gaeaUI_common_config_dialog" // 通用的确认弹框的默认id.因为很多地方用弹框但并不关系弹框是什么, 只是要用弹框显示点信息而已. 就共用这个就好了. 确保名字别重复就好.
         },
-        GRID:{
-            ID:"gridId"
+        GRID: {
+            ID: "gridId"
         },
-        SCHEMA:{
-            ID:"urSchemaId"
+        SCHEMA: {
+            ID: "urSchemaId"
         }
     };
     var PAGE = {
@@ -44,16 +45,25 @@ define(function () {
     };
     var TEMPLATE = {
         DIV: {
-            WITH_NAME: '<div id="<%=ID%>" name="<%=NAME%>"></div>'
+            WITH_NAME: '<div id="<%=ID%>" name="<%=NAME%>"><%=CONTENT%></div>'
         },
         INPUT: {
             HIDDEN: '<input type="hidden" id="<%=ID%>" name="<%=NAME%>" value="<%=VALUE%>" >'
+        }
+    };
+    var TEXT = {
+        UI: {
+            DIALOG: {
+                DELETE_CONFIRM_TITLE: "删除确认",
+                DELETE_CONFIRM_CONTENT: "确认删除当前记录？"
+            }
         }
     };
     return {
         UI: UI,
         PAGE: PAGE,
         ACTION: ACTION,
-        TEMPLATE: TEMPLATE
+        TEMPLATE: TEMPLATE,
+        TEXT: TEXT
     };
 });

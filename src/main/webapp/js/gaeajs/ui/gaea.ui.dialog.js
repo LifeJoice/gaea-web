@@ -6,12 +6,12 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
         "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string",
         "gaeajs-ui-definition", "gaeajs-ui-view", "gaea-system-url", 'gaeajs-ui-notify',
-        "gaeajs-ui-commons","gaeajs-ui-multiselect",
+        "gaeajs-ui-commons", "gaeajs-ui-multiselect",
         'gaea-jqui-dialog', "jquery-serializeObject"],
     function ($, _, gaeaAjax, gaeaValid,
               gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
-              gaeaUI,gaeaMultiSelect) {
+              gaeaUI, gaeaMultiSelect) {
         var _options = {
             id: null,
             title: null,
@@ -58,6 +58,40 @@ define([
                     dialog = this._find(inViews.dialogs, linkViewId);
                 }
                 return dialog;
+            },
+            /**
+             * 共用的确认弹框。
+             * 需求：弹个框，显示一句话，OK就callbak，不OK就取消。
+             * @param options
+             *              id dialog的div id.也可以为空, 就大家一起公用了. 其实也不影响.
+             *              title 弹框的标题
+             *              content 弹框的内容
+             * @param callback
+             */
+            confirmDialog: function (options, callback) {
+                var dialogId = options.id;// DOM的id
+                if (gaeaValid.isNull(dialogId)) {
+                    dialogId = GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID; // 共用
+                }
+                dialog.utils.createDialogDiv({
+                    id: dialogId,
+                    content: options.content
+                });
+                var $dialog = this.create({
+                    id: dialogId,
+                    title: options.title,
+                    buttons: {
+                        "确认": function () {
+                            callback();
+                            $(this).gaeaDialog("destroy");
+                            $(this).remove();
+                        },
+                        "取消": function () {
+                            $(this).gaeaDialog("destroy");
+                        }
+                    }
+                });
+                $dialog.gaeaDialog("open");
             },
             _createDialog: function () {
                 var that = this;
@@ -228,12 +262,9 @@ define([
                 dialogOption.id = linkObj.htmlId;
                 var dlgSelector = "#" + dialogOption.id;
                 // 检查当前页面有没有对应的DIV，没有创建一个。
-                if ($("#" + dialogOption.id).length < 1) {
-                    $("#" + GAEA_UI_DEFINE.PAGE.GAEA_GRID_HTML.DIALOG_AREA).append(_.template(GAEA_UI_DEFINE.TEMPLATE.DIV.WITH_NAME)({
-                        ID: dialogOption.id,
-                        NAME: dialogOption.id
-                    }));
-                }
+                dialog.utils.createDialogDiv({
+                    id: dialogOption.id
+                });
                 var $dialogDiv = $("#" + dialogOption.id);
                 var dlgFormName = dialogOption.id + "-form";
                 // 给dialog中的表单，外包一层form
@@ -301,7 +332,10 @@ define([
                 //        dialog.close(dlgSelector);
                 //    }
                 //};
+
+
                 // 监听grid的选中事件，以便进行CRUD操作
+                // 通过grid的选中事件，获取选中行的数据等
                 // TODO 'urgrid'这个必须改为XML配置ACTION，利用bindOptions属性获取
                 $("#urgrid").on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
                     console.log("trigger grid select event in gaeaUI dialog.");
@@ -519,7 +553,7 @@ define([
                     $dialogDiv.trigger(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, {
                         PAGE_CONTEXT: {
                             id: selectedRow.id,
-                            selectedRow:selectedRow
+                            selectedRow: selectedRow
                         }
                     });
                     // 因为是update弹出框，设置整个编辑的对象的id
@@ -727,6 +761,8 @@ define([
                             data: requestData,
                             success: function (data) {
                                 gaeaNotify.message("保存成功。");
+                                // 刷新grid数据
+                                $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                                 // 取消数据绑定
                                 gaeaData.unbind(options.dialogId);
                                 // 清空表单内容
@@ -789,9 +825,30 @@ define([
                 }
             }
         };
+
+        dialog.utils = {
+            /**
+             * 创建一个空的dialog要用的DIV（不是dialog！）。在系统统一定义的地方。不是乱放。
+             *
+             * @param options
+             */
+            createDialogDiv: function (options) {
+                if ($("#" + options.id).length < 1) {
+                    var content = options.content;
+                    if (gaeaValid.isNull(content)) {
+                        content = "";
+                    }
+                    $("#" + GAEA_UI_DEFINE.PAGE.GAEA_GRID_HTML.DIALOG_AREA).append(_.template(GAEA_UI_DEFINE.TEMPLATE.DIV.WITH_NAME)({
+                        ID: options.id,
+                        NAME: options.id,
+                        CONTENT: content
+                    }));
+                }
+            }
+        };
         /**
          * 返回（暴露）的接口
          */
         dialog.initCrudDialog = crudDialog.init;
         return dialog;
-    })
+    });
