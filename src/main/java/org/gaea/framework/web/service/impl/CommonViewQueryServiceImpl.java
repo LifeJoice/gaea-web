@@ -113,6 +113,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 //            pageResult.setContent(result.getContent());
 //            pageResult.setTotalElements(result.getTotalElements());
             return pageResult;
+        } catch (ValidationFailedException e) {
+            logger.warn(e.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -237,14 +239,19 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * @param queryConditions
      * @param grid
      */
-    private void rebuildQueryConditionBySchema(List<QueryCondition> queryConditions, SchemaGrid grid) {
+    private void rebuildQueryConditionBySchema(List<QueryCondition> queryConditions, SchemaGrid grid) throws ValidationFailedException {
         for (QueryCondition condition : queryConditions) {
+            if (StringUtils.isEmpty(condition.getPropertyName())) {
+                throw new ValidationFailedException(
+                        MessageFormat.format("快捷查询的propertyName为空，无法查询！op={0} value={1}",
+                                condition.getOp(), condition.getValue()).toString());
+            }
             SchemaColumn schemaColumn = GaeaSchemaUtils.getViewColumn(grid, condition.getPropertyName());
 //            String dbName = GaeaSchemaUtils.getDbColumnName(grid, fa.getPropertyName());
             String dbName = schemaColumn.getDbColumnName();
             condition.setPropertyName(dbName);
             condition.setDataType(schemaColumn.getDataType());
-            condition.setOp(QueryCondition.FIELD_OP_EQ);
+            condition.setOp(condition.getOp());
 //            if(SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(schemaColumn.getDataType())){
 //                condition.setSqlType(Types.DATE);
 //            }
