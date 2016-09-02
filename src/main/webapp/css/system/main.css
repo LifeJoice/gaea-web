@@ -5,7 +5,7 @@ body{
 .gaea-main{
     position: absolute;
     width: 99%;
-    height: 98%;
+    height: 100%;
 }
 /*左边基础区域定义*/
 .main-left{
@@ -27,6 +27,7 @@ body{
     height: 100%;
     margin-left:300px;/* 为左边菜单留出的空间 */
     min-width:980px;
+    min-height: 700px;
 }
 /* ********************************************        菜单的样式        ******************************************** */
 .menu{
