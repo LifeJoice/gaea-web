@@ -5,10 +5,12 @@
 define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url',
-        "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins"],
+        "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
+        "gaeajs-ui-definition"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaStringUtils, gaeaButton, SYS_URL,
-              gaeaEvents, gaeaString, gaeaPlugins) {
+              gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
+              GAEA_UI_DEFINE) {
         /**
          *
          * @type {{VIEW: {GRID: {COLUMN: {DATA_TYPE_DATE: string, DATA_TYPE_TIME: string, DATA_TYPE_DATETIME: string}}}}}
@@ -25,8 +27,11 @@ define([
          */
         var TEMPLATE = {
             QUERY: {
-                PARAM_NAME: "filters[<%= P_SEQ %>].propertyName", // 查询请求的变量名的模板
-                PARAM_VALUE: "filters[<%= P_SEQ %>].value" // 查询请求的值的名的模板
+                DIV_FIELD: '<div id="<%= ID %>" class="gaea-query-field <%= CLASS %>">' +
+                '</div>', // 查询字段块（包括下拉按钮）
+                PARAM_NAME: "filters[<%= P_SEQ %>].propertyName", // 单个请求的变量名
+                PARAM_VALUE: "filters[<%= P_SEQ %>].value", // 单个查询的key
+                PARAM_OP: "filters[<%= P_SEQ %>].op" // 查询的比较符
             }
         };
         /**
@@ -77,7 +82,32 @@ define([
                     var inputId = "mars-hq-" + field.id;
                     // 拼凑各个字段的查询输入框
                     if (gaeaValid.isNotNull(column.hidden) && !column.hidden) {
-                        $("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
+
+                        /**
+                         * 添加gaeaInput的容器
+                         */
+                        var queryFieldTemplate = _.template(TEMPLATE.QUERY.DIV_FIELD);
+                        $("#mars-headquery-inputs").append(queryFieldTemplate({
+                            ID: columnHtmId,
+                            CLASS: defaultClass,
+                            INPUT_ID: inputId,
+                            FIELD_ID: field.id
+                        }));
+                        /**
+                         * 初始化gaeaInput输入框（带按钮）
+                         */
+                        gaeaInput.init({
+                            containerId: columnHtmId,
+                            defaultClass: defaultClass,
+                            inputId: inputId,
+                            fieldId: field.id,
+                            change: function (data) {
+                                //alert("test\nop='"+data.op+"' value= "+data.value);
+                                var queryConditions = _query.parser.getQueryConditions();
+                                _query.doQuery(queryConditions);
+                            }
+                        });
+                        //$("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
                         // +1是列头的列间边框宽度。
                         $("#" + columnHtmId).css("width", (parseInt(column.width)));
                         //$("#" + inputId).css("width", (column.width - 10));        // 输入框的默认宽度为列宽-10.
@@ -171,32 +201,82 @@ define([
          * @type {{getQueryConditions: _query.parser.getQueryConditions}}
          */
         _query.parser = {
+            /**
+             * 把快速查询的所有条件，组成查询对象组。
+             * 这里有个要注意的：
+             * 查询对象不是 key = value这种。而是类似
+             * query[0].column=A
+             * query[0].op=eq
+             * query[0].value=1
+             * 这表示包括 query[0].column 和 A 等都得动态拼凑。
+             * @returns Object 查询对象列表
+             */
             getQueryConditions: function () {
                 var queryConditions = new Object();         // 查询请求数据
                 // 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
                 var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
                 var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
+                var paramOpTemplate = _.template(TEMPLATE.QUERY.PARAM_OP);
                 // 收起查询区
                 $("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
                 var i = 0;      // 查询条件数组的下标
                 //queryConditions.urSchemaId = $("#urSchemaId").val();
-                $("#mars-headquery-inputs").find("input").each(function (index) {
-                    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
-                    var inputVal = $(this).val();
-                    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
-                    if (gaeaValid.isNotNull(inputVal)) {
+                $("#mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
+                    var $gaeaInput = $(this);
+                    var $input = $gaeaInput.find("input:first");
+                    var inputValue = gaeaInput.getValue($gaeaInput.attr("id"));
+                    //$("#mars-headquery-inputs").find("input").each(function (index) {
+                    //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
+                    //console.log("input value: " + inputValue.value + " , op : " + inputValue.op);
+                    var inputVal = inputValue.value; // 值
+                    //console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
+                    /**
+                     * if
+                     *      value不为空 or
+                     *      value是空，但比较符是 等于|不等于，可能就是 is null之类的
+                     * then
+                     * 转换成查询对象
+                     */
+                    //console.log(gaeaValid.isNull(inputVal) + "\n" + _query.utils.isNull(inputValue.op));
+                    if (gaeaValid.isNotNull(inputVal) ||
+                        (gaeaValid.isNull(inputVal) && (_query.utils.isNull(inputValue.op) || _query.utils.isNotNull(inputValue.op)))) {
                         //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
-                        var nameKey = paramNameTemplate({P_SEQ: i});        // 不能用index。输入框为空的时候index也会递增。
-                        var nameValue = $(this).data("field-id");
+                        var fieldKey = paramNameTemplate({P_SEQ: i});        // 不能用index。输入框为空的时候index也会递增。
+                        var fieldOpKey = paramOpTemplate({P_SEQ: i});           // 不能用index。输入框为空的时候index也会递增。
+                        //var fieldNameValue = $(this).data("field-id"); // 哪个字段
+                        var fieldNameValue = $input.data("field-id"); // 哪个字段
                         //var valKey = "filters[" + i + "].value";
-                        var valKey = paramValueTemplate({P_SEQ: i});
-                        var valValue = $(this).val();
-                        queryConditions[nameKey] = nameValue;
-                        queryConditions[valKey] = valValue;
+                        var fieldValueKey = paramValueTemplate({P_SEQ: i}); // 哪个值
+                        //var valValue = $(this).val();
+                        queryConditions[fieldKey] = fieldNameValue; // 字段
+                        queryConditions[fieldOpKey] = inputValue.op; // 比较符
+                        queryConditions[fieldValueKey] = inputValue.value; // 值
                         i += 1;
                     }
                 });
                 return queryConditions;
+            }
+        };
+        /**
+         * 常用工具
+         */
+        _query.utils = {
+            /**
+             * 是否等于查询
+             * @param op 查询符
+             * @returns {*|boolean}
+             */
+            isNull: function (op) {
+                if (gaeaValid.isNull(op)) {
+                    return false;
+                }
+                return gaeaString.equalsIgnoreCase(op, "na");
+            },
+            isNotNull: function (op) {
+                if (gaeaValid.isNull(op)) {
+                    return false;
+                }
+                return gaeaString.equalsIgnoreCase(op, "nna");
             }
         };
 
@@ -466,7 +546,7 @@ define([
                 // 设置Grid样式
                 this._applyCSS();
                 // 绑定事件，例如：行前复选框
-                this._bindingEvents();
+                this._bindingEvents(this.options);
                 // 创建行操作区
                 this._createRowActions();
             },
@@ -662,22 +742,12 @@ define([
             _bindingEvents: function (options) {
                 var that = this;
                 var gridId = options.renderTo;
-                var $grid = $("#"+gridId);
+                var $grid = $("#" + gridId);
                 _grid.row.initSelect();
 
                 $grid.on(gaeaEvents.DEFINE.UI.GRID.RELOAD, function (event, data) {
                     _query.doQuery({});
                 });
-
-
-
-
-
-
-
-
-
-
 
 
                 //// 绑定事件。点击行选中复选框。
@@ -1000,7 +1070,7 @@ define([
          * 和grid的行相关的一切
          */
         _grid.row = {
-            initSelect : function () {
+            initSelect: function () {
                 // 绑定事件。点击行选中复选框。
                 $(".tb-body").on("click", "tr", function () {
                     //$(".tb-body").find("tr").click(function () {

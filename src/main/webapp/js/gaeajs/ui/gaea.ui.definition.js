@@ -27,6 +27,9 @@ define(function () {
         },
         SCHEMA: {
             ID: "urSchemaId"
+        },
+        INPUT: {
+            CLASS: "gaea-query-field"
         }
     };
     var PAGE = {
@@ -59,11 +62,19 @@ define(function () {
             }
         }
     };
+    /**
+     * gaea-data框架定义
+     * 针对< html data-gaea-data='' >
+     */
+    var GAEA_DATA = {
+        GAEA_DATA: "gaea-data"
+    };
     return {
         UI: UI,
         PAGE: PAGE,
         ACTION: ACTION,
         TEMPLATE: TEMPLATE,
-        TEXT: TEXT
+        TEXT: TEXT,
+        GAEA_DATA: GAEA_DATA
     };
 });

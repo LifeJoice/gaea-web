@@ -21,6 +21,8 @@ public class QueryCondition {
     public static final String FIELD_OP_LK = "lk";
     public static final String FIELD_OP_LLK = "llk";
     public static final String FIELD_OP_RLK = "rlk";
+    public static final String FIELD_OP_NULL = "na";
+    public static final String FIELD_OP_NOT_NULL = "nna";
     /**
      * 数据类型。这个和XML SCHEMA的data-type一样。
      * 辅助字段。当查询都是字符串的时候可以无视。但如果是日期之类的，需要有dataType协助转换。
@@ -43,7 +45,7 @@ public class QueryCondition {
         this.op = op;
     }
 
-    protected final String getOp() {
+    public String getOp() {
         return op;
     }
 

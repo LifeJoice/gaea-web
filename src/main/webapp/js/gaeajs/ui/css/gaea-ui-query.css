@@ -1,0 +1,37 @@
+/**
+ * 列表页的查询的样式。
+ *
+ * by Iverson 2016-8-25 16:48:10
+ */
+
+/* 单个查询的按钮区。下拉的那个。 */
+.gaea-query-buttons {
+    width: 25px;
+    height: 25px;
+    overflow: hidden;
+    float: left;
+    position: relative;
+}
+
+.gaea-query-buttons:hover {
+    height: 230px; /* 暂时写死. 100%会由于外面的整个查询框的高度而受限制. */
+    position: absolute;
+    overflow: visible;
+    background: white;
+    border: 1px solid;
+}
+
+/* 里面的按钮 */
+.gaea-query-buttons i {
+    float: left;
+    font-size: 24px;
+}
+
+/* 单个查询的输入框区 */
+.gaea-query-input-div {
+    /*float: none;*/
+    /* width: 120px; */
+    position: relative;
+    height: 25px;
+    margin-left: 25px;
+}

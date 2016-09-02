@@ -148,10 +148,18 @@ public class GaeaSqlProcessor {
             }
             /**
              * 拼凑查询条件.
-             * username = :USER_NAME
+             * if value不为空
+             *      username = :USER_NAME
+             * else value为空
+             *      直接用操作符。例如：
+             *      username is not null
              * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
              */
-            whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond.getOp()), columnName.toUpperCase()));
+            if (StringUtils.isNotEmpty(cond.getValue())) {
+                whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
+            } else {
+                whereSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
+            }
         }
         return whereSql.toString();
     }
@@ -159,11 +167,12 @@ public class GaeaSqlProcessor {
     /**
      * 把页面传过来的(一般情况是)条件操作符(eq,ne,...)转换成sql的条件操作符(=,!=,...).
      *
-     * @param op 页面传来的操作符
+     * @param queryCondition 页面传来的查询条件对象（单个）
      * @return
      * @throws ValidationFailedException
      */
-    public String parseFieldOp(String op) throws ValidationFailedException {
+    public String parseFieldOp(QueryCondition queryCondition) throws ValidationFailedException {
+        String op = queryCondition.getOp();
         String sqlOp = "";// SQL关系操作符
         if (QueryCondition.FIELD_OP_EQ.equalsIgnoreCase(op)) {
             sqlOp = "=";
@@ -181,6 +190,10 @@ public class GaeaSqlProcessor {
                 || QueryCondition.FIELD_OP_LLK.equalsIgnoreCase(op)
                 || QueryCondition.FIELD_OP_RLK.equalsIgnoreCase(op)) {
             sqlOp = "LIKE";
+        } else if (QueryCondition.FIELD_OP_NULL.equalsIgnoreCase(op)) {
+            sqlOp = " IS NULL ";
+        } else if (QueryCondition.FIELD_OP_NOT_NULL.equalsIgnoreCase(op)) {
+            sqlOp = " IS NOT NULL ";
         } else {
             throw new ValidationFailedException(MessageFormat.format("配置的sql操作符无法解析！op={0}", op));
         }

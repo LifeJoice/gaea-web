@@ -17,6 +17,12 @@ define(function () {
             COMMON_DELETE_CLICK: "gaeaUI_event_commonDelete_click" // 通用删除触发
         },
         UI: {
+            /**
+             * gaea的输入框。例如用在列表页的快捷查询。
+             */
+            INPUT: {
+                CHANGE: "gaeaUI_event_input_change" // 某些东西改变了。可能是值改变了，也可能是选择按钮改变了
+            },
             DIALOG: {
                 INIT: "gaeaUI_event_dialog_init",// 初始化dialog
                 OPEN: "gaeaUI_event_dialog_open",// 打开dialog
