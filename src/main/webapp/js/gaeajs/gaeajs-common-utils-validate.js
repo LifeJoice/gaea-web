@@ -33,13 +33,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
         return true;
     };
     var isNull = function (inArg) {
-        if (_.isNull(inArg)) {
-            return true;
-        }
-        if (_.isUndefined(inArg)) {
-            return true;
-        }
-        return false;
+        return !isNotNull(inArg);
     };
     var isNotNullArray = function (inArg) {
         if (isNull(inArg)) {
