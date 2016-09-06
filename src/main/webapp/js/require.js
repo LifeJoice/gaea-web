@@ -2178,6 +2178,7 @@ require.config({
         "jquery-notify":'/js/thirdparty/jquery/plugins/jnotify/jquery.jnotify',
         "datetimepicker":"/js/thirdparty/jquery/plugins/datetimepicker/gaea-jquery.datetimepicker",
         "jquery-mousewheel":"/js/thirdparty/jquery/plugins/jquery.mousewheel.min",
+        "jquery-validate":"/js/thirdparty/jquery/plugins/validate/jquery.validate",
         /* 上传组件 */
         "webuploader":'/js/thirdparty/upload/webuploader',
         "gaeajs-uploader":'/js/gaeajs/uploader/gaeajs-uploader',

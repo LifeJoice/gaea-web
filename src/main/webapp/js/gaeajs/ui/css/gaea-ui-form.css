@@ -1,90 +1,134 @@
 /**
- * 通用表单的样式
+ * 通用form表单的样式
  *
  * by Iverson 2016-2-19 19:10:02
  */
-.gaea-form{
+.gaea-form {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     /*padding:10px;*/
     font-family: 微软雅黑 light;
     min-width: 900px;
-    min-height:400px;/* 负责撑开弹出框后的高度。 */
+    min-height: 400px; /* 负责撑开弹出框后的高度。 */
 }
+
 /* 表单的一行*/
-.gaea-form .row{
-    width:100%;
+.gaea-form .row {
+    width: 100%;
     min-height: 40px;
 }
+
 /* 在后面清除float的效果，让里面div可以撑开外面div */
-.gaea-form .row::after{
+.gaea-form .row::after {
     /* 在后面清除float的效果，让里面div可以撑开外面div */
     content: ".";
     display: block;
-    height:0;
+    height: 0;
     clear: both;
     visibility: hidden;
 }
+
 /* 表单行下第一级DIV，都是field块（包括字段名和输入框） */
-.field-block,.one-field-block{
+.field-block, .one-field-block {
     position: relative;
     float: left;
-    min-height:30px;
+    min-height: 30px;
 }
+
 /* field块里面的字段名或输入框部分 */
-.field-block .fieldname,.one-field-block .fieldname{
+.field-block .fieldname, .field-block .fieldvalue,
+.one-field-block .fieldname, .one-field-block .fieldvalue {
     display: block;
     float: left;
+}
+
+.field-block .fieldname, .one-field-block .fieldname {
     box-sizing: border-box;
     padding-right: 10px;
 }
+
 /*字段名，label部分*/
-.gaea-form .row .fieldname{
+.gaea-form .row .fieldname {
     /*display: block;*/
-    min-width: 120px;/* 这个宽度是8个中文。 */
-    max-width:150px;
+    min-width: 120px; /* 这个宽度是8个中文。 */
+    max-width: 150px;
     text-align: right;
     line-height: 30px;
     font-size: 13px;
 }
+
 /* 字段输入部分 */
-.gaea-form .row .fieldvalue{
+.gaea-form .row .fieldvalue {
     /*position: absolute;*/
     /*margin:auto;*/
     /*top: 0; left: 0; bottom: 0; right: 0;*/
 }
+
 /* 输入框 */
-.gaea-form input,.gaea-form textarea,.gaea-form select{
-    border-style:solid;
+.gaea-form input, .gaea-form textarea, .gaea-form select {
+    border-style: solid;
     border-radius: 2px;
     border-color: #D4D4D4;
-    border-width:1px;
+    border-width: 1px;
     outline-color: #D4D4D4;
-    padding:0 5px;
+    padding: 0 5px;
     font-family: 微软雅黑 light;
     font-size: 13px;
 }
-.gaea-form input,.gaea-form select{
-    height:30px;
-    width:160px;
+
+.gaea-form input, .gaea-form select {
+    height: 30px;
+    /*width:160px;*/
 }
-.gaea-form textarea{
-    height:60px;
+
+.gaea-form input, .gaea-form select, .gaea-form label.error {
+    /*height:30px;*/
+    width: 172px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; /* 宽度应该是总体宽度。包括padding和border。否则像input和select的宽度就会不一样。 */
 }
+
+.gaea-form textarea {
+    height: 60px;
+}
+
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-*   错误提示的样式   *-*-*-*-*-*-*-*-*-*-*-*-*-* */
+/* 错误提示信息的字体,颜色等 */
+label.error {
+    font-size: 14px;
+    color: red;
+}
+
+/* 错误提示信息的label */
+.field-block .fieldvalue label.error {
+    display: block;
+    height: 24px;
+    line-height: 24px;
+    overflow: hidden;
+}
+
+/* 输入框出错的样式 */
+.gaea-form input.error, .gaea-form textarea.error, .gaea-form select.error {
+    border-color: red;
+}
+
 /* *-*-*-*-*-*-*-*-*-*-*-*-*-*   给js动态添加的   *-*-*-*-*-*-*-*-*-*-*-*-*-* */
 /*如果一行只有一个字段的块*/
-.one-field-block{
-    width:100%;
-    padding:0 10px 0 0;
+.one-field-block {
+    width: 100%;
+    padding: 0 10px 0 0;
 }
+
 /*一行只有一个字段的输入框，填充满*/
-.one-field-block .fieldvalue{
+.one-field-block .fieldvalue {
     float: none;
     position: relative;
     display: block;
     padding-right: 10px;
 }
-input.one-field,textarea.one-field{
-    width:100%;
+
+input.one-field, textarea.one-field {
+    width: 100%;
 }

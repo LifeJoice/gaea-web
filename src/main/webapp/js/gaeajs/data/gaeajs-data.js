@@ -494,6 +494,49 @@ define([
                 return obj;
             },
             /**
+             * 外部方法。解析配置的查询条件。
+             * <b>注意</b>
+             * 这个方法提供有限的转换！像级联类型的还无法提供转换！
+             * @param configCondition 对象。格式：condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}
+             *              id
+             *              values[]
+             *                  type
+             *                  value
+             * @returns {{}}
+             */
+            parseCondition: function (configCondition) {
+                var queryCondition = {};
+                //if(gaeaValid.isNotNull(configObj.condition)){
+                //    var configCondition = configObj.condition;
+                queryCondition.id = configCondition.id;
+                if (gaeaValid.isNotNull(configCondition.values) && _.isArray(configCondition.values)) {
+                    var queryValues = new Array();
+                    $.each(configCondition.values, function (key, condValue) {
+                        /**
+                         * 如果配置项要的是当前页面上下文的值，则需要从上下文取值。而不是页面配置的静态值。
+                         */
+                        if (gaeaString.equalsIgnoreCase(condValue.type, "pageContext")) {
+                            if (gaeaValid.isNotNull(condValue.value)) {
+                                var val = PAGE_CONTEXT[condValue.value];
+                                queryValues.push({
+                                    type: condValue.type,
+                                    value: val
+                                });
+                            }
+                        } else if (gaeaString.equalsIgnoreCase(value.type, "static")) {
+                            queryValues.push({
+                                type: condValue.type,
+                                value: condValue.value
+                            });
+                        }
+                    });
+                    queryCondition.values = queryValues;
+                }
+
+                //}
+                return queryCondition;
+            },
+            /**
              * 解析配置的查询条件。
              *
              * @param options 对应data-gaea-data。格式：

@@ -161,7 +161,9 @@ define([
                                         thisButton.listeners.afterLoadInClick();
                                     }
                                     // 初始化表单的样式（load过来的表单）
-                                    gaeaForm.init("gaea-form");
+                                    gaeaForm.init({
+                                        containerClass: "gaea-form"
+                                    });
                                     // 初始化数据相关的（数据集，MVVM等）
                                     gaeaData.scanAndInit(dialogOption.id);
                                 });
@@ -268,6 +270,8 @@ define([
                         //gaeaCommonCRUD.init(options);
                         // 点击触发事件
                         $button.click(function () {
+                            var row = gaeaGrid.getSelected();
+                            options.selectedRow = row;
                             $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options);
                         });
                     } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {

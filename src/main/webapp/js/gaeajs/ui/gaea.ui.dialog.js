@@ -6,12 +6,12 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
         "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string",
         "gaeajs-ui-definition", "gaeajs-ui-view", "gaea-system-url", 'gaeajs-ui-notify',
-        "gaeajs-ui-commons", "gaeajs-ui-multiselect",
+        "gaeajs-ui-commons", "gaeajs-ui-multiselect", "gaeajs-common",
         'gaea-jqui-dialog', "jquery-serializeObject"],
     function ($, _, gaeaAjax, gaeaValid,
               gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
-              gaeaUI, gaeaMultiSelect) {
+              gaeaUI, gaeaMultiSelect, gaeaCommon) {
         var _options = {
             id: null,
             title: null,
@@ -207,7 +207,9 @@ define([
                     //    atFirstAfterLoadCallback();
                     //}
                     // 初始化表单的样式（load过来的表单）
-                    gaeaForm.init("gaea-form");
+                    gaeaForm.init({
+                        containerClass: "gaea-form"
+                    });
                     //// 初始化HTML页声明的UI，例如生成table等
                     ////gaeaUI.initComponents(dialogOption.id);// TODO 取消看看。发现没调用！！！
                     //// 初始化数据相关的（数据集，MVVM等）
@@ -242,7 +244,8 @@ define([
             cache: {
                 update: {
                     submitData: {}
-                }
+                },
+                selectedRow: null // 缓存选中的grid的行数据。这个对crudDialog是必须的。
             },
             /**
              *
@@ -340,6 +343,7 @@ define([
                 $("#urgrid").on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
                     console.log("trigger grid select event in gaeaUI dialog.");
                     selectedRow = data.selectedRow;
+                    crudDialog.cache.selectedRow = selectedRow;
                 });
 
                 var $button = $("#" + buttonDef.htmlId);
@@ -545,6 +549,7 @@ define([
                  * 点击“编辑”事件触发。
                  */
                 $button.on(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, function (event, data) {
+                    var selectedRow = crudDialog.cache.selectedRow;
                     console.log("row id: " + selectedRow.id +
                         "\nschemaId: " + gaeaView.list.getSchemaId() +
                         "\nschemaId: " + $("#urSchemaId").val()
@@ -748,50 +753,37 @@ define([
                 var $dialogForm = $("#" + options.formId);
                 var buttons = {
                     "确定": function () {
-                        // 改为不用submit，用post。因为submit是把参数拼在url。
-                        //$dialogForm.submit();
-
-
-                        // 把extra的data合并（覆盖）form的data
-                        var formData = $("#" + options.formId).serializeObject();
-                        var requestData = _.extend(formData, crudDialog.cache.update.submitData);
-                        // 提交
-                        gaeaAjax.post({
-                            url: options.submitUrl,
-                            data: requestData,
-                            success: function (data) {
-                                gaeaNotify.message("保存成功。");
-                                // 刷新grid数据
-                                $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                                // 取消数据绑定
-                                gaeaData.unbind(options.dialogId);
-                                // 清空表单内容
-                                $dialogForm.html("");
-                                // 关闭弹出框
+                        // 调用校验框架，校验ok才提交。
+                        gaeaCommon.gaeaValidate.validate({
+                            containerId: options.formId,// 校验的范围（某表单）
+                            // 成功回调
+                            success: function () {
+                                // 把extra的data合并（覆盖）form的data
+                                var formData = $("#" + options.formId).serializeObject();
+                                var requestData = _.extend(formData, crudDialog.cache.update.submitData);
+                                // 提交
+                                gaeaAjax.post({
+                                    url: options.submitUrl,
+                                    data: requestData,
+                                    success: function (data) {
+                                        gaeaNotify.message("保存成功。");
+                                        // 刷新grid数据
+                                        $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                                        // 取消数据绑定
+                                        gaeaData.unbind(options.dialogId);
+                                        // 清空表单内容
+                                        $dialogForm.html("");
+                                        // 关闭弹出框
+                                        dialog.close("#" + options.dialogId);
+                                    },
+                                    fail: function (data) {
+                                        gaeaNotify.error("保存失败！");
+                                    }
+                                });
+                                //// 刷新数据，其实这里应该优化一下，不该不关三七二十一就刷新
                                 dialog.close("#" + options.dialogId);
-                            },
-                            fail: function (data) {
-                                gaeaNotify.error("保存失败！");
                             }
                         });
-
-
-                        //var queryConditions = new Object();         // 查询请求数据
-                        //queryConditions.urSchemaId = $("#urSchemaId").val();
-                        //ur.utils.ajax.post({
-                        //    url: "/admin/common/query.do",
-                        //    data: queryConditions,
-                        //    success: function (data) {
-                        //        //alert("成功。id: " + data[0].id);
-                        //        // 用查询结果，刷新数据列表
-                        //        ur.component.bridge.grid.refreshData(data);
-                        //    },
-                        //    fail: function (data) {
-                        //        alert("失败");
-                        //    }
-                        //})
-                        //// 刷新数据，其实这里应该优化一下，不该不关三七二十一就刷新
-                        dialog.close("#" + options.dialogId);
                     },
                     "取消": function () {
                         // 取消数据绑定
