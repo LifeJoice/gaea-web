@@ -9,14 +9,14 @@ gaea.utils = {
     form: {
         init: {
             options: [{
+                name: null,
+                propName: null,
+                type: {
                     name: null,
-                    propName: null,
-                    type: {
-                        name: null,
-                        datetimeFormat: null,
-                        datetimeType: null               // 日期类型有效。格式类型，例如：year-month
-                    }
-                }],
+                    datetimeFormat: null,
+                    datetimeType: null               // 日期类型有效。格式类型，例如：year-month
+                }
+            }],
             /**
              * 初始化表单的值。
              * @param {type} containerId 父元素id，一般即form id
@@ -24,12 +24,12 @@ gaea.utils = {
              * @param {type} configs 自定义设置。针对某些特殊元素自定义规则。例如：{name:"createTime",datatype:"date"}。指定该输入框转换为日期。
              * @returns {undefined}
              */
-            initValues: function(containerId, data, options) {
+            initValues: function (containerId, data, options) {
                 this.options = options;
                 var that = this;
                 var selector = "#" + containerId + " input,select";
 //        遍历argId下的各个元素,<input>、<select>...
-                $(selector).each(function() {
+                $(selector).each(function () {
                     var elmName = $(this).attr("name"); // 元素的name。例如：<input name="attrName"...
                     var elmValue = $(data).attr(elmName); // 元素的value。例如：<input value="attrValue"...
                     /* 遍历自定义设置。如果要初始化的值有自定义设置，比如日期，则需要转换； */
@@ -61,9 +61,9 @@ gaea.utils = {
      * @param {type} obj dom对象，非JQuery对象
      * @returns {undefined}
      */
-    clearForm: function(argId) {
+    clearForm: function (argId) {
         var selector = "#" + argId;
-        $(selector).find("input").each(function() {
+        $(selector).find("input").each(function () {
             $(this).val("");
         });
     },
@@ -73,18 +73,18 @@ gaea.utils = {
      */
     message: {
         /**
-         * 
+         *
          * @param {type} data Controller返回的json数据，带有处理结果信息的。
          * @returns {undefined}
          */
-        show: function(data) {
+        show: function (data) {
             parent.warn(data.RESULT_MSG);
         }
     }
 };
 
 gaea.utils.validate = {
-    isNotNull: function(arg1) {
+    isNotNull: function (arg1) {
         try {
             if (arg1 === null) {
                 return false;
@@ -103,7 +103,7 @@ gaea.utils.validate = {
         }
         return true;
     },
-    isNull: function(arg1) {
+    isNull: function (arg1) {
         if (arg1 === null) {
             return true;
         }
@@ -126,9 +126,9 @@ gaea.utils.validate = {
         var parent = this;
         var isNotNull = false;
         // 检查当前对象属性中是否有该对象
-        $.each(rootObj,function (key, val) {
-            if(parent.isNotNull(objLevelArray[0])){
-                if(key==objLevelArray[0]){
+        $.each(rootObj, function (key, val) {
+            if (parent.isNotNull(objLevelArray[0])) {
+                if (key == objLevelArray[0]) {
                     isNotNull = true;
                     rootObj = val;
                     // 跳出循环
@@ -137,10 +137,10 @@ gaea.utils.validate = {
             }
         })
         // 如果当前对象中有，继续检查子对象
-        if(isNotNull && objLevelArray.length>1){
+        if (isNotNull && objLevelArray.length > 1) {
             // 移除第一个。然后递归继续
             objLevelArray.shift();
-            isNotNull = parent.isNotNullMultiple(rootObj,objLevelArray);
+            isNotNull = parent.isNotNullMultiple(rootObj, objLevelArray);
         }
         return isNotNull;
     }
@@ -181,7 +181,7 @@ gaea.utils.date = {
          * @param options
          * @returns {*}
          */
-        getDate: function(unformatDateTime, options) {
+        getDate: function (unformatDateTime, options) {
             this.options = options;
             //var millisecond = parseInt(argMillisecond);
             //var d = new Date(millisecond);
@@ -205,7 +205,7 @@ gaea.utils.date = {
                     var replaceRegx = new RegExp("\.[0-9][0-9][0-9]Z");
                     var strDateTime = unformatDateTime.replace(replaceRegx, "Z");
                     result = Date.parse(strDateTime).toString(this.options.format);
-                }else{
+                } else {
                     result = Date.parse(unformatDateTime).toString(this.options.format);
                     //console.error("该内容无法转换日期格式。input = "+unformatDateTime);
                 }
@@ -217,7 +217,7 @@ gaea.utils.date = {
          * @param {type} datetimeType
          * @returns {String}
          */
-        parseType: function(datetimeType) {
+        parseType: function (datetimeType) {
             var datetimeFormat = "MM/dd/yyyy"; // 默认类型
             if (datetimeType === "year-month") {
                 datetimeFormat = "yyyy-MM";
@@ -239,15 +239,15 @@ gaea.utils.ajax = {
         success: null,
         fail: null
     },
-    post: function(options) {
+    post: function (options) {
         this.options = options;
         // 使用jquery的post方法.
         $.post(this.options.url, this.options.data, this.options.success).fail(this.options.fail);
     },
-    ajax: function(options) {
+    ajax: function (options) {
         this.options = options;
-        // 使用jquery的ajax方法。本质还是以post的方式。
-        $.ajax({
+        // 使用jquery的ajax方法。本质还是以post的方式。返回jqXHR同步对象
+        return $.ajax({
             type: "POST",
             url: this.options.url,
             data: this.options.data,

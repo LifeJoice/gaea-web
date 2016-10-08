@@ -42,6 +42,43 @@ define([
         };
 
         /**
+         * 和JQuery defer相关的，或者JS同步相关的方法。
+         */
+        utils.defer = {
+            /**
+             * 一般的defer function的数组，在push进数组的时候就会发生调用。这个会导致重复调用。
+             * 因为在用$.when.apply( functions...)的时候，又会调用一次。
+             * 而最糟糕的是，done方法在第一次push完成后就触发了。
+             * 所以，以下测试就是：
+             * functions数组，push进去的方式是：function, 而不是function()
+             * 这样不会在构造数组的时候就触发方法的调用。当然换来的，就是得多一个functionExecutor包装器，来做function的调用。
+             *
+             * @param funcArray
+             */
+            functionsExecutor: function (funcArray) {
+                if (gaeaValid.isNull(funcArray) || !_.isArray(funcArray)) {
+                    throw "不正确使用。输入参数非function数组。";
+                }
+                var dfd = $.Deferred();// JQuery同步对象
+                var deferreds = new Array();
+                // 遍历方法数组，逐一推到deferred数组中。是以function()的方式哦。会触发一次调用。
+                $.each(funcArray, function (idx, func) {
+                    deferreds.push(func());
+                });
+                /**
+                 * 当deferreds方法数组都执行完后，执行done函数。
+                 * 默认是把各个方法的回调结果放入一个对象后，返回给上下文。
+                 */
+                $.when.apply($, deferreds).done(function (arg1/* ... argN */) {
+                    var data = {};
+                    // 不确定有多少输入参数。when调用了多少方法，就有多少个输入参数
+                    data.gaeaArgs = Array.prototype.slice.call(arguments);
+                    dfd.resolveWith(data);
+                });
+                return dfd.promise();
+            }
+        };
+        /**
          * 返回接口定义。
          */
         return utils;

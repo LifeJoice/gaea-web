@@ -1,27 +1,37 @@
 /*create by Iverson 2015-5-18*/
 /*定制自己的样式，重写JQUERY-UI的部分样式*/
+/*
+ * 从jquery-ui-1.10.4.custom.css复制要重写的css，然后修改。
+ *
+ * 【log】
+ * 2016-9-7 17:02:45
+ * 修改tabs相关的UI
+ */
 .ui-widget {
-    font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
+    font-family: "Arial", "Microsoft YaHei", "黑体", "宋体", sans-serif;
 }
 
 .ui-dialog {
     padding: 0;
 }
+
 .ui-dialog .ui-dialog-titlebar {
     padding: .4em 10px;
 }
+
 .ui-dialog .ui-dialog-title {
     /*重新设计了关闭按钮，所以title可以长点。关闭按钮也可以靠右点。*/
     width: 92%;
 }
-.ui-widget-overlay{
-    width:100%;
-    height:100%;
+
+.ui-widget-overlay {
+    width: 100%;
+    height: 100%;
     /*position:fixed;*/
-    top:0;
-    left:0;
-    background: -moz-linear-gradient(rgba(11,11,11,0.1), rgba(11,11,11,0.6)) repeat-x rgba(11,11,11,0.2);
-    background:-webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(11,11,11,0.1)), to(rgba(11,11,11,0.6))) repeat-x rgba(11,11,11,0.2);
+    top: 0;
+    left: 0;
+    background: -moz-linear-gradient(rgba(11, 11, 11, 0.1), rgba(11, 11, 11, 0.6)) repeat-x rgba(11, 11, 11, 0.2);
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgba(11, 11, 11, 0.1)), to(rgba(11, 11, 11, 0.6))) repeat-x rgba(11, 11, 11, 0.2);
     /*z-index:100000;*/
 }
 
@@ -41,6 +51,7 @@
     background: white;
     color: #362b36;
 }
+
 /**
  *  ****************************************************
  *                  右上角的关闭按钮效果
@@ -53,11 +64,11 @@
     display: inline-block;
     margin-right: 5px;
     /*关闭按钮大小*/
-    width:25px;
-    height:25px;
+    width: 25px;
+    height: 25px;
     /*background-color: #FFFFFF;*/
     /* 画圆形 */
-    border-radius:50%;
+    border-radius: 50%;
     overflow: hidden;
     /* 背景隐现动画 */
     transition: background 0.2s;
@@ -65,19 +76,25 @@
     -webkit-transition: background 0.2s; /* Safari 和 Chrome */
     -o-transition: background 0.2s; /* Opera */
 }
+
 /*移上去关闭按钮的效果*/
-.ur-ui-dialog-close-icon:hover{
+.ur-ui-dialog-close-icon:hover {
     background: #2D3E50;
 }
+
 .ur-ui-dialog-close-icon:hover::before, .ur-ui-dialog-close-icon:hover::after {
     /*background: #1ebcc5;*/
     background: #FFFFFF;
 }
+
 /* CSS画出X的关闭形状 */
 /* X的本质是一条2px的线 */
 .ur-ui-dialog-close-icon::before, .ur-ui-dialog-close-icon::after {
     margin: auto;
-    top: 0;left: 0;right: 0;bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     /* after没有content是看不到的 */
     content: '';
     position: absolute;
@@ -93,6 +110,7 @@
     -webkit-transition: background 0.2s; /* Safari 和 Chrome */
     -o-transition: background 0.2s; /* Opera */
 }
+
 /* 把线旋转45度成为X一条 */
 .ur-ui-dialog-close-icon::before {
     -webkit-transform: rotate(45deg);
@@ -101,6 +119,7 @@
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
 /* 把线反向旋转45度成为X另一条 */
 .ur-ui-dialog-close-icon::after {
     -webkit-transform: rotate(-45deg);
@@ -109,6 +128,7 @@
     -o-transform: rotate(-45deg);
     transform: rotate(-45deg);
 }
+
 /**
  *  ****************************************************
  *                  按钮效果(dialog按钮等)
@@ -126,49 +146,52 @@
     vertical-align: middle;
     text-align: center;
     overflow: visible; /* removes extra width in IE */
-    /* -------------- UR的 -------------- */
+    /* -------------- gaeaUI的 -------------- */
     /*width: auto;*/
     /*颜色*/
     background-color: #5D6D7D;
     /*边框*/
     /*border-bottom: 1px solid rgba(0,0,0,0.25);*/
     /*阴影*/
-    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    -o-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
-/*调节按钮的边角弧度——UR独有的*/
-button.ui-corner-all{
+
+/*调节按钮的边角弧度——gaeaUI独有的*/
+button.ui-corner-all {
     /*圆角矩形*/
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     -o-border-radius: 5px;
     border-radius: 5px;
 }
-/*调节按钮的字体（在jQuery-UI所有字体是一致的）——UR独有的*/
-.ui-button.ui-widget{
+
+/*调节按钮的字体（在jQuery-UI所有字体是一致的）——gaeaUI独有的*/
+.ui-button.ui-widget {
     font-size: 14px;
 }
+
 .ui-widget button {
     /*原生的*/
     /*font-family: Lucida Grande,Lucida Sans,Arial,sans-serif;*/
     /*font-size: 1em;*/
-    /* -------------- UR的 -------------- */
+    /* -------------- gaeaUI的 -------------- */
     /*字体*/
     /*letter-spacing: 2px;*/
     /*font-size: 13px;*/
     font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
 
 }
+
 .ui-state-default,
-.ui-widget-content .ui-state-default
-{
+.ui-widget-content .ui-state-default {
     /*原生的*/
     /*border: 1px solid #aed0ea;*/
     /*background: #d7ebf9 url("images/ui-bg_glass_80_d7ebf9_1x400.png") 50% 50% repeat-x;*/
     /*font-weight: bold;*/
     /*color: #2779aa;*/
-    /* -------------- UR的 -------------- */
+    /* -------------- gaeaUI的 -------------- */
     /*字体*/
     font-weight: normal;
     /*颜色*/
@@ -176,7 +199,7 @@ button.ui-corner-all{
     background: #5D6D7D;
     /*边框*/
     border: 0;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 /*鼠标移上去的效果*/
@@ -185,16 +208,16 @@ button.ui-corner-all{
 .ui-state-hover,
 .ui-widget-content .ui-state-hover,
 .ui-state-default:hover,
-.ui-widget-content .ui-state-default:hover{
+.ui-widget-content .ui-state-default:hover {
     /*原生的*/
     /*border: 1px solid #74b2e2;*/
     /*background: #e4f1fb url("images/ui-bg_glass_100_e4f1fb_1x400.png") 50% 50% repeat-x;*/
     /*font-weight: bold;*/
     /*color: #0070a3;*/
-    /* -------------- UR的 -------------- */
+    /* -------------- gaeaUI的 -------------- */
     /*边框*/
     border: 0;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     /*color: white;*/
     background: #2D3E50;
     font-weight: normal;
@@ -212,6 +235,7 @@ button.ui-corner-all{
     -ms-transition-property: background color;
     -ms-transition-duration: .3s;
 }
+
 /*on focus的效果*/
 .ui-state-focus,
 .ui-widget-content .ui-state-focus {
@@ -220,27 +244,61 @@ button.ui-corner-all{
     /*background: none;*/
     /*font-weight: normal;*/
     /*color: #0070a3;*/
-    /* -------------- UR的 -------------- */
+    /* -------------- gaeaUI的 -------------- */
     /*去掉onfocus的时候的外面框! ( 因为外面框现在只有Firefox浏览器可以设置圆角，其他浏览器的效果和按钮的圆角不匹配。) */
     outline: none;
 }
+
 /* button text element */
 .ui-button .ui-button-text {
     display: block;
     line-height: normal;
 }
+
 /*按钮字体效果。也和按钮大小有关(padding)。*/
 .ui-button-text-only .ui-button-text {
     /*原生*/
     /*padding: .4em 1em;*/
-    /* -------------- UR的 -------------- */
+    /* -------------- gaeaUI的 -------------- */
     padding: 6px 15px 7px;
     /*字体*/
     letter-spacing: 2px;
 }
 
+/**
+ *  ****************************************************
+ *                          tabs
+ *  ****************************************************
+ */
+.ui-tabs {
+    /* -------------- gaeaUI的 -------------- */
+    border: none;
+}
 
+.ui-tabs .ui-tabs-nav {
+    margin: 0;
+    padding: .2em .2em 0;
+    /* -------------- gaeaUI的 -------------- */
+    font-size: 14px;
+    text-shadow: none;
+    border-bottom: 2px solid #5D6D7D;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
 
+/* 没有激活的tab的样式 */
+.ui-tabs .ui-tabs-nav li:not(.ui-tabs-active) {
+    /* -------------- gaeaUI的 -------------- */
+    background: none;
+}
 
+.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    margin-bottom: -1px;
+    padding-bottom: 1px;
+}
 
+.ui-tabs .ui-tabs-nav .ui-state-hover {
+    /* -------------- gaeaUI的 -------------- */
+    border: none;
+}
 

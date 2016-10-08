@@ -12,7 +12,8 @@ define(function () {
         COMPONENT: {
             GRID: "grid",
             TABLE: "table",
-            SELECT: "select"
+            SELECT: "select",
+            TABS: "tabs"
         },
         DIALOG: {
             TYPE: {

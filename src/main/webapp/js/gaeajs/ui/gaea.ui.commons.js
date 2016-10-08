@@ -90,7 +90,7 @@ define([
 
         var gaeaCommons = {
             initComponents: function (containerId) {
-                gaeaMultiSelect.init(containerId);
+                return gaeaMultiSelect.init(containerId);
             }
         };
 

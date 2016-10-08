@@ -6,12 +6,12 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
         "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string",
         "gaeajs-ui-definition", "gaeajs-ui-view", "gaea-system-url", 'gaeajs-ui-notify',
-        "gaeajs-ui-commons", "gaeajs-ui-multiselect", "gaeajs-common",
+        "gaeajs-ui-commons", "gaeajs-ui-multiselect", "gaeajs-common", "gaeajs-ui-components",
         'gaea-jqui-dialog', "jquery-serializeObject"],
     function ($, _, gaeaAjax, gaeaValid,
               gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
-              gaeaUI, gaeaMultiSelect, gaeaCommon) {
+              gaeaUI, gaeaMultiSelect, gaeaCommon, gaeaComponents) {
         var _options = {
             id: null,
             title: null,
@@ -201,7 +201,10 @@ define([
              */
             loadContent: function (options, callback) {
                 var $container = $("#" + options.containerId);
-                $container.load(options.contentUrl, function () {
+                // jquery.get才能返回一个jqXHR对象。作同步用。
+                return $.get(options.contentUrl, function (data) {
+                    // 加载内容
+                    $container.html(data);
                     // 一开始的回调
                     //if (gaeaValid.isNotNull(atFirstAfterLoadCallback)) {
                     //    atFirstAfterLoadCallback();
@@ -639,36 +642,106 @@ define([
              */
             loadContent: function (options, callback) {
 
-                dialog.loadContent(options, function () {
-                    // 初始化数据相关的（数据集，MVVM等）
-                    gaeaData.dataSet.scanAndInit(options.dialogId);
-                    //gaeaData.scanAndInit(dialogOption.id, afterBindingCallback);
-                    // 初始化页面的相关组件（multi-select等，但不包括可编辑table）
-                    gaeaUI.initComponents(options.dialogId);
-                    // 初始化数据组件。例如：可编辑表格等
-                    gaeaData.component.init(options.dialogId);
+                $.when(dialog.loadContent(options)).done(function () {
+
+                    //// 初始化数据相关的（数据集，MVVM等），未绑定
+                    //gaeaData.dataSet.scanAndInit(options.dialogId);
+                    ////gaeaData.scanAndInit(dialogOption.id, afterBindingCallback);
+                    //// 初始化页面的相关组件（multi-select等，但不包括可编辑table）
+                    //gaeaUI.initComponents(options.dialogId);
+                    //// 初始化数据组件。例如：可编辑表格等
+                    //gaeaData.component.init(options.dialogId);
+                    //if (gaeaValid.isNotNull(options.initComponentData) && options.initComponentData) {
+                    //    // 初始化gaea-ui关联的gaea-data，即数据。例如：编辑页的子表
+                    //    gaeaData.component.initData(options.dialogId);
+                    //}
+                    ////// 初始化编辑框的数据
+                    //if (gaeaValid.isNotNull(options.data)) {
+                    //    gaeaData.fieldData.init(options.dialogId, options.data);
+                    //}
+                    //// 最后，绑定整个页面
+                    //gaeaData.binding(options.containerId, function () {
+                    //    // 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
+                    //    gaeaData.component.initAfterBinding(options.dialogId);
+                    //    // 回调定制的函数
+                    //    if (_.isFunction(options.callback.afterBinding)) {
+                    //        options.callback.afterBinding();
+                    //    }
+                    //});
+
+
+                    var defferedFunctions = [
+                        gaeaData.dataSet.scanAndInit(options.dialogId), gaeaUI.initComponents(options.dialogId), gaeaData.component.init(options.dialogId)];
+                    //defferedFunctions.push(gaeaData.dataSet.scanAndInit(options.dialogId));
+                    //defferedFunctions.push(gaeaUI.initComponents(options.dialogId));
+                    //defferedFunctions.push(gaeaData.component.init(options.dialogId));
                     if (gaeaValid.isNotNull(options.initComponentData) && options.initComponentData) {
                         // 初始化gaea-ui关联的gaea-data，即数据。例如：编辑页的子表
-                        gaeaData.component.initData(options.dialogId);
+                        defferedFunctions.push(gaeaData.component.initData(options.dialogId));
                     }
-                    //// 初始化编辑框的数据
                     if (gaeaValid.isNotNull(options.data)) {
-                        gaeaData.fieldData.init(options.dialogId, options.data);
+                        defferedFunctions.push(gaeaData.fieldData.init(options.dialogId, options.data));
                     }
-                    // 最后，绑定整个页面
-                    gaeaData.binding(options.dialogId, function () {
-                        // 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
-                        gaeaData.component.initAfterBinding(options.dialogId);
-                        // 回调定制的函数
-                        if (_.isFunction(options.callback.afterBinding)) {
-                            options.callback.afterBinding();
-                        }
+
+                    $.when.apply($, defferedFunctions).done(function () {
+                        gaeaData.binding({
+                            containerId: options.containerId
+                        }, function () {
+                            // 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
+                            gaeaData.component.initAfterBinding(options.dialogId);
+                            // 回调定制的函数
+                            if (_.isFunction(options.callback.afterBinding)) {
+                                options.callback.afterBinding();
+                            }
+                        });
+                    });
+
+
+                    // 初始化gaeaUI
+                    gaeaComponents.init({
+                        containerId: options.dialogId
                     });
                     // 最后回调的定义
                     if (_.isFunction(callback)) {
                         callback();
                     }
                 });
+
+
+                //dialog.loadContent(options, function () {
+                //    // 初始化数据相关的（数据集，MVVM等），未绑定
+                //    gaeaData.dataSet.scanAndInit(options.dialogId);
+                //    //gaeaData.scanAndInit(dialogOption.id, afterBindingCallback);
+                //    // 初始化页面的相关组件（multi-select等，但不包括可编辑table）
+                //    gaeaUI.initComponents(options.dialogId);
+                //    // 初始化数据组件。例如：可编辑表格等
+                //    gaeaData.component.init(options.dialogId);
+                //    if (gaeaValid.isNotNull(options.initComponentData) && options.initComponentData) {
+                //        // 初始化gaea-ui关联的gaea-data，即数据。例如：编辑页的子表
+                //        gaeaData.component.initData(options.dialogId);
+                //    }
+                //    //// 初始化编辑框的数据
+                //    if (gaeaValid.isNotNull(options.data)) {
+                //        gaeaData.fieldData.init(options.dialogId, options.data);
+                //    }
+                //    // 最后，绑定整个页面
+                //    gaeaData.binding(options.containerId, function () {
+                //        // 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
+                //        gaeaData.component.initAfterBinding(options.dialogId);
+                //        // 回调定制的函数
+                //        if (_.isFunction(options.callback.afterBinding)) {
+                //            options.callback.afterBinding();
+                //        }
+                //    });
+                //    // 初始化gaeaUI
+                //    gaeaComponents.init({
+                //        containerId:options.dialogId
+                //    });
+                //    // 最后回调的定义
+                //    if (_.isFunction(callback)) {
+                //        callback();
+                //    }
+                //});
 
 
                 //var $container = $("#"+options.containerId);

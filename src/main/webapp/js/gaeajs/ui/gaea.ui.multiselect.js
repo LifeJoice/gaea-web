@@ -48,7 +48,12 @@ define([
          * @param options
          */
         multiSelect.init = function (containerId, options) {
+            var dfd = $.Deferred();// JQuery同步对象
             var that = this;
+            // 没有想过的组件，也是需要resolve的
+            if (gaeaValid.isNull($("#" + containerId).find(".gaea-multi-select"))) {
+                dfd.resolve();
+            }
             $("#" + containerId).find(".gaea-multi-select").each(function (idx, multiSelect) {
                 var $this = $(multiSelect);
                 var dataStr = $this.data("gaea-data");
@@ -77,8 +82,14 @@ define([
                     dataConfig: dataConfig
                 };
                 // 初始化两个列表框的数据
-                that.initSelectableList(initSelectOptions);
-                that.initSelectedList(initSelectOptions);
+                $.when(that.initSelectableList(initSelectOptions), that.initSelectedList(initSelectOptions)).done(function () {
+                    dfd.resolve();
+                }).fail(function () {
+                    console.warn("初始化复选框数据失败！");
+                    dfd.resolve();
+                });
+                //that.initSelectableList(initSelectOptions);
+                //that.initSelectedList(initSelectOptions);
                 /**
                  * 初始化选中某个。因为绑定是的具体项的点击事件，必须等数据加载后才能。
                  */
@@ -94,10 +105,13 @@ define([
                 that.initUnSelect(initCmdOptions);
                 that.initUnSelectAll(initCmdOptions);
             });
+            return dfd.promise();
         };
         /**
          * 初始化可选的列表框.
-         * @param dataConfig
+         *
+         * @param options
+         * @returns jqXHR 同步对象
          */
         multiSelect.initSelectableList = function (options) {
             var id = options.id;// multi-select的div id
@@ -106,7 +120,7 @@ define([
                 throw "gaea-data selectable配置项不允许为空！";
             }
             dataConfig.selectable.isAsync = true;// 异步调用。因为不需要KO binding，异步影响不大。
-            gaeaData.dataSet.getData({
+            return gaeaData.dataSet.getData({
                 dsId: dataConfig.selectable.dataset,
                 isAsync: dataConfig.selectable.isAsync,
                 condition: dataConfig.selectable.condition,
@@ -127,7 +141,10 @@ define([
          * 初始化已选列表。
          * 包括：
          * 查询数据，初始化列表元素，添加<input hidden>值，缓存（但暂时没用）
+         *
          * @param options
+         * @returns jqXHR
+         *              gaeaData ajax返回的data放在这个属性中
          */
         multiSelect.initSelectedList = function (options) {
             var id = options.id;// multi-select的div id
@@ -137,7 +154,7 @@ define([
             }
             var name = dataConfig.name;
             dataConfig.selected.isAsync = true;// 异步调用。因为不需要KO binding，异步影响不大。
-            gaeaData.dataSet.getData({
+            return gaeaData.dataSet.getData({
                 dsId: dataConfig.selected.dataset,
                 isAsync: dataConfig.selected.isAsync,
                 condition: dataConfig.selected.condition,

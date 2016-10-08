@@ -5,23 +5,23 @@
  * DEPENDENCE:
  * RequireJS,JQuery,重写的Date.format
  */
-define(["jquery","underscore",'underscore-string'],function ($,_,_s) {
+define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
     var options = {
-        url:null,
-        data:null,
-        success:null,
-        fail:null
-    }
-    var post = function(options) {
-        this.options = _.extend(this.options,options);
+        url: null,
+        data: null,
+        success: null,
+        fail: null
+    };
+    var post = function (options) {
+        this.options = _.extend(this.options, options);
         //this.options = options;
         // 使用jquery的post方法.
         $.post(this.options.url, this.options.data, this.options.success).fail(this.options.fail);
     };
-    var ajax = function(options) {
+    var ajax = function (options) {
         this.options = options;
         // 使用jquery的ajax方法。本质还是以post的方式。
-        $.ajax({
+        return $.ajax({
             type: "POST",
             url: this.options.url,
             data: this.options.data,
@@ -34,7 +34,7 @@ define(["jquery","underscore",'underscore-string'],function ($,_,_s) {
      * 返回（暴露）的接口
      */
     return {
-        post:post,
-        ajax:ajax
+        post: post,
+        ajax: ajax
     }
 })

@@ -7,6 +7,9 @@
  * http://jquery.org/license
  *
  * http://api.jqueryui.com/tabs/
+ *
+ * modify by Iverson 2016-9-7 16:38:22
+ * 对于依赖的core和widget命名方式不同
  */
 (function( factory ) {
 	if ( typeof define === "function" && define.amd ) {
@@ -14,8 +17,8 @@
 		// AMD. Register as an anonymous module.
 		define([
 			"jquery",
-			"./core",
-			"./widget"
+			"jquery-ui-core", // 本地命名方式不同 modify by Iverson 2016-9-7
+			"jquery-ui-widget" // 本地命名方式不同 modify by Iverson 2016-9-7
 		], factory );
 	} else {
 

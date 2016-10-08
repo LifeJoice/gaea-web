@@ -6,9 +6,8 @@
  * RequireJS,JQuery
  */
 define([
-    "jquery","underscore",'gaeajs-common-utils-validate','underscore-string',"json5"
-],function (
-    $,_,gaeaValid,_s) {
+    "jquery", "underscore", 'gaeajs-common-utils-validate', 'underscore-string', "json5"
+], function ($, _, gaeaValid, _s) {
     var stringUtils = {
         /**
          * 判断两个字符是否相同
@@ -16,13 +15,13 @@ define([
          * @param str2
          * @returns {boolean}
          */
-        equalsIgnoreCase: function (str1,str2) {
-            if(gaeaValid.isNull(str1)||gaeaValid.isNull(str2)){
+        equalsIgnoreCase: function (str1, str2) {
+            if (gaeaValid.isNull(str1) || gaeaValid.isNull(str2)) {
                 return false;
             }
             var compStr1 = new String(str1).valueOf().toUpperCase();
             var compStr2 = new String(str2).valueOf().toUpperCase();
-            if(compStr1 === compStr2){
+            if (compStr1 === compStr2) {
                 return true;
             }
             return false;
@@ -35,16 +34,16 @@ define([
         parseJSON: function (jsonStr) {
             //var _s = require('underscore-string');
             var result = {};
-            if(gaeaValid.isNull(jsonStr)){
+            if (gaeaValid.isNull(jsonStr)) {
                 return result;
             }
             // 如果进来的带有json的“{}”，去掉
             jsonStr = _s.trim(jsonStr);
-            if(!_s.startsWith("{")){
-                jsonStr = "{"+jsonStr;
+            if (!_s.startsWith("{")) {
+                jsonStr = "{" + jsonStr;
             }
-            if(!_s.endsWith("}")){
-                jsonStr = jsonStr+"}";
+            if (!_s.endsWith("}")) {
+                jsonStr = jsonStr + "}";
             }
             result = JSON5.parse(jsonStr);
             //jsonStr = _s.ltrim(jsonStr,"{");
@@ -64,6 +63,26 @@ define([
             //    console.log("element: "+this);
             //});
             return result;
+        }
+    };
+
+    /**
+     * 字符串格式化工具
+     */
+    stringUtils.format = {
+        /**
+         * 对代码的名字做简单格式化
+         * @param name
+         */
+        getValidName: function (name) {
+            if (gaeaValid.isNull(name)) {
+                return;
+            }
+            // 是否带有点号。做转义处理。一些html id、name之类的"."是没有转义的.在JQuery中使用会出错.
+            if (_s.include(name, ".")) {
+                name = name.split(".").join("\\.");
+            }
+            return name;
         }
     };
     return stringUtils;
