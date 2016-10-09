@@ -1,7 +1,8 @@
-package org.gaea.framework.web.schema.domain.view;
+package org.gaea.framework.web.view.jo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.schema.domain.view.GridModelDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Map;
 /**
  * Created by Iverson on 2015/8/15.
  */
-public class SchemaGridDTO {
+public class SchemaGridJO {
     private String id;
     @JsonIgnore
     private String datasetId;                               // 对应的数据集id。
@@ -20,7 +21,7 @@ public class SchemaGridDTO {
     @JsonIgnore
     private Boolean displayUndefinedColumn = false;         // 如果dataset有的一个字段，但下面没有对应的column元素，是否以json传给页面。
     private String renderTo;                                // grid渲染到页面哪个div中
-    private List<SchemaColumnDTO> columns = new ArrayList<SchemaColumnDTO>();
+    private List<SchemaColumnJO> columns = new ArrayList<SchemaColumnJO>();
     private List<Map<String,Object>> data;                  // sql查出的grid的数据
     private GridModelDTO model;
     private SchemaGridPage page;                            // 分页信息
@@ -73,11 +74,11 @@ public class SchemaGridDTO {
         this.renderTo = renderTo;
     }
 
-    public List<SchemaColumnDTO> getColumns() {
+    public List<SchemaColumnJO> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<SchemaColumnDTO> columns) {
+    public void setColumns(List<SchemaColumnJO> columns) {
         this.columns = columns;
     }
 

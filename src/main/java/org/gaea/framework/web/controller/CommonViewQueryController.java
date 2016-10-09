@@ -36,6 +36,8 @@ public class CommonViewQueryController {
     @Autowired
     private CommonViewQueryService commonViewQueryService;
 
+    private ObjectMapper mapper = new ObjectMapper();
+
     /**
      * 本类的默认查询方法。
      *
@@ -80,7 +82,6 @@ public class CommonViewQueryController {
     @ResponseBody
     public List<Map<String, Object>> queryByConditions(String schemaId, String conditions,
                                                        String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException {
-        ObjectMapper mapper = new ObjectMapper();
         DataSetCommonQueryConditionDTO queryConditionDTO = null;
         if (StringUtils.isNotEmpty(conditions)) {
             try {

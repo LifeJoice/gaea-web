@@ -6,6 +6,7 @@ import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.framework.web.view.jo.SchemaGridJO;
 import org.gaea.util.GaeaXmlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,11 +44,11 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
                 SchemaGrid grid = urXmlGridViewSchemaConvertor.convert(viewNodes);
                 schemaViews.setGrid(grid);
                 // grid转为gridDTO
-                SchemaGridDTO gridDTO = urXmlGridViewSchemaConvertor.convert(grid);
+                SchemaGridJO gridDTO = urXmlGridViewSchemaConvertor.convert(grid);
                 // 初始化分页
                 int pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : 0;
                 gridDTO.setPage(new SchemaGridPage(1, pageSize));
-                schemaViews.setGridDTO(gridDTO);
+                schemaViews.setGridJO(gridDTO);
             }
             /**
              * 如果是普通弹框、工作流组件的弹框、上传组件的弹框、增删改弹框，则作为弹框解析。

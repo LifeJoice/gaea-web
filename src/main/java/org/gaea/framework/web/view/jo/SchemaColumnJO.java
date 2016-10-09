@@ -1,6 +1,7 @@
-package org.gaea.framework.web.schema.domain.view;
+package org.gaea.framework.web.view.jo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 /**
  * Created by Iverson on 2015/8/15.
  */
-public class SchemaColumnDTO {
+public class SchemaColumnJO {
     private String id;
     // group
     private String type;
@@ -33,10 +34,10 @@ public class SchemaColumnDTO {
 
     // 构造方法
 
-    public SchemaColumnDTO() {
+    public SchemaColumnJO() {
     }
 
-    public SchemaColumnDTO(String id, String name, String text, String dbColumnName, Boolean hidden, String width, String dataType) {
+    public SchemaColumnJO(String id, String name, String text, String dbColumnName, Boolean hidden, String width, String dataType) {
         this.id = id;
         this.name = name;
         this.text = text;

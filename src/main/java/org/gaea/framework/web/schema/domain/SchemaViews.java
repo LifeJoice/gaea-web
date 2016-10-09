@@ -3,7 +3,7 @@ package org.gaea.framework.web.schema.domain;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
 import org.gaea.framework.web.schema.domain.view.SchemaDialog;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
-import org.gaea.framework.web.schema.domain.view.SchemaGridDTO;
+import org.gaea.framework.web.view.jo.SchemaGridJO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class SchemaViews {
     private SchemaGrid grid;
-    private SchemaGridDTO gridDTO;
+    private SchemaGridJO gridJO;
     private List<SchemaDialog> dialogs;
     private SchemaActions actions;
     private SchemaImport imports;
@@ -27,12 +27,12 @@ public class SchemaViews {
         this.grid = grid;
     }
 
-    public SchemaGridDTO getGridDTO() {
-        return gridDTO;
+    public SchemaGridJO getGridJO() {
+        return gridJO;
     }
 
-    public void setGridDTO(SchemaGridDTO gridDTO) {
-        this.gridDTO = gridDTO;
+    public void setGridJO(SchemaGridJO gridJO) {
+        this.gridJO = gridJO;
     }
 
     public List<SchemaDialog> getDialogs() {

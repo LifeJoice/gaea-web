@@ -5,6 +5,8 @@ import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.framework.web.view.jo.SchemaColumnJO;
+import org.gaea.framework.web.view.jo.SchemaGridJO;
 import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,16 +60,16 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    public SchemaGridDTO convert(SchemaGrid origGrid) throws InvocationTargetException, IllegalAccessException {
-        SchemaGridDTO gridDTO = new SchemaGridDTO();
+    public SchemaGridJO convert(SchemaGrid origGrid) throws InvocationTargetException, IllegalAccessException {
+        SchemaGridJO gridDTO = new SchemaGridJO();
         GridModelDTO model = new GridModelDTO();
         // 复制DTO属性
         BeanUtils.copyProperties(gridDTO, origGrid);
-        gridDTO.setColumns(new ArrayList<SchemaColumnDTO>());
+        gridDTO.setColumns(new ArrayList<SchemaColumnJO>());
         for (int i = 0; i < origGrid.getColumns().size(); i++) {
 //        for (SchemaColumn column:origGrid.getColumns()){
             SchemaColumn column = origGrid.getColumns().get(i);
-            SchemaColumnDTO columnDTO = new SchemaColumnDTO();
+            SchemaColumnJO columnDTO = new SchemaColumnJO();
             // 复制column属性
             BeanUtils.copyProperties(columnDTO, column);
             // 转换DTO里的别名字段等
