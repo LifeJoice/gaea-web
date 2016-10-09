@@ -940,7 +940,7 @@ define([
                                     url: SYS_URL.DATA.DATASET.GET,
                                     //condition: newCondition,
                                     dsId: dataSetId,
-                                    isAsync: false,// 异步调用
+                                    isAsync: true,// 异步调用
                                     success: function (data) {
                                         if (!_.isArray(data)) {
                                             data = [data];
