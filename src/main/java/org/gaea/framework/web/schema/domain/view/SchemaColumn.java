@@ -27,6 +27,7 @@ public class SchemaColumn {
     public static final String DATA_TYPE_DATETIME = "datetime";
     // yyyy-mm-dd
     private String datetimeFormat;
+    private String dataSetId; // 数据集id。一般没有。有的话，会把该列的值按数据集对应的text:value作转换。
     private List<SchemaColumn> columns = new ArrayList<SchemaColumn>();
 
     // 构造方法
@@ -146,6 +147,14 @@ public class SchemaColumn {
 
     public void setDatetimeFormat(String datetimeFormat) {
         this.datetimeFormat = datetimeFormat;
+    }
+
+    public String getDataSetId() {
+        return dataSetId;
+    }
+
+    public void setDataSetId(String dataSetId) {
+        this.dataSetId = dataSetId;
     }
 
     public List<SchemaColumn> getColumns() {

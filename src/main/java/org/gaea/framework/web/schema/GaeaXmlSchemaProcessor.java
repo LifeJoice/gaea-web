@@ -1,5 +1,9 @@
 package org.gaea.framework.web.schema;
 
+import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.DataItem;
+import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
@@ -7,7 +11,6 @@ import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
 import org.gaea.framework.web.schema.convertor.list.ListSchemaHtmlConvertor;
 import org.gaea.framework.web.schema.domain.*;
 import org.gaea.framework.web.schema.domain.view.*;
-import org.apache.commons.lang3.StringUtils;
 import org.gaea.util.GaeaJacksonUtils;
 import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
@@ -93,7 +96,7 @@ public class GaeaXmlSchemaProcessor {
             Node rootNode = getRootNode(document);
             // 获取ur-schema的属性。
             gaeaXmlSchema = GaeaXmlUtils.copyAttributesToBean(rootNode, gaeaXmlSchema, GaeaXmlSchema.class);
-            if(StringUtils.isBlank(gaeaXmlSchema.getId())){
+            if (StringUtils.isBlank(gaeaXmlSchema.getId())) {
                 throw new ValidationFailedException("根元素<ur-schema>必须有ID！而且该ID为全局唯一！");
             }
             // 遍历根节点下的第一级子节点，给各个解析器去处理。
@@ -102,7 +105,7 @@ public class GaeaXmlSchemaProcessor {
             for (int i = 0; i < componentNodes.getLength(); i++) {
                 Node node = componentNodes.item(i);
                 // xml解析会把各种换行符等解析成元素。统统跳过。
-                if(!(node instanceof Element)){
+                if (!(node instanceof Element)) {
                     continue;
                 }
                 if (XmlSchemaDefinition.DATA_NAME.equals(node.getNodeName())) { // 生成数据
@@ -119,6 +122,7 @@ public class GaeaXmlSchemaProcessor {
                     gaeaXmlSchema.setSchemaViews(schemaViews);
                 }
             }
+            // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
             resultMap = combineSchemaInfo(gaeaXmlSchema);
             // 根据XML SCHEMA生成额外的信息
             completeSchemaLogicInfo(resultMap, gaeaXmlSchema);
@@ -140,13 +144,13 @@ public class GaeaXmlSchemaProcessor {
         } catch (InvocationTargetException e) {
             logger.warn("把XML SCHEMA的属性等转换为bean对象出错。BeanUtils setProperty error.");
             throw e;
-        } catch (ValidationFailedException e){
+        } catch (ValidationFailedException e) {
             logger.warn(e.getMessage());
         } catch (InvalidDataException e) {
             logger.warn(e.getMessage());
         }
         // 缓存XML SCHEMA。这里没有做真正的SCHEMA缓存，只是缓存了方便列表页生成后的删除等二次操作的查询而已。
-        if(gaeaSchemaCache.get(gaeaXmlSchema.getId())==null) {
+        if (gaeaSchemaCache.get(gaeaXmlSchema.getId()) == null) {
             gaeaSchemaCache.put(gaeaXmlSchema.getId(), gaeaXmlSchema);
         }
         return listSchemaHtml.getContent();
@@ -155,6 +159,7 @@ public class GaeaXmlSchemaProcessor {
     /**
      * 根据XML Schema的原始信息，我们生成、完善一些关联信息。例如：<br/>
      * button的link-view-id关联的对象，和需要的一些额外信息等。
+     *
      * @param resultMap
      * @param gaeaXmlSchema
      */
@@ -164,12 +169,12 @@ public class GaeaXmlSchemaProcessor {
         // 查找button的link-view-id并组装对应的信息
         if (actions != null && actions.getButtons() != null) {
             for (SchemaButton button : actions.getButtons()) {
-                if(!StringUtils.isBlank(button.getLinkViewId())){
+                if (!StringUtils.isBlank(button.getLinkViewId())) {
                     SchemaViewsComponent component = gaeaXmlSchema.getViewsComponents().get(button.getLinkViewId());
                     // 找到link-view-id对应的组件
-                    if(component!=null){
+                    if (component != null) {
                         String type = component.getType();
-                        if("workflow-approval".equals(type)){
+                        if ("workflow-approval".equals(type)) {
                             button.setLinkComponent(type);
                         }
                     }
@@ -233,25 +238,23 @@ public class GaeaXmlSchemaProcessor {
     private Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws IOException {
         Map<String, Object> root = new HashMap<String, Object>();
         Map<String, Object> viewsMap = new HashMap<String, Object>();
-//        Map<String, Object> gridMap = null;
         SchemaViews schemaViews = gaeaXmlSchema.getSchemaViews();
         SchemaData schemaData = gaeaXmlSchema.getSchemaData();
-        // Grid转换为json的结构和最终要的数据差不多。就以Grid返回的为基础。
-//        gridMap = schemaViews.getGrid().getJsonData();
         // 拼装数据，转换结果集中的数据库字段名。
-        DataSet dataSet = changeDbColumnNameInData(schemaData.getDataSetList().get(0),schemaViews.getGrid());
+        DataSet dataSet = changeDbColumnNameInData(schemaData.getDataSetList().get(0), schemaViews.getGrid());
         schemaViews.getGridJO().setData(dataSet.getSqlResult());
         schemaViews.getGridJO().getPage().setRowCount(dataSet.getTotalElements());
-//        gridMap.put("data", dataSet.getSqlResult());
         // 指定放置在页面哪个DIV中
-//        gridMap.put("renderTo", schemaViews.getGrid().getRenderTo());
         viewsMap.put("dialogs", schemaViews.getDialogs());
         viewsMap.put("actions", schemaViews.getActions());
         viewsMap.put("title", schemaViews.getTitle());
+        // 获取grid各个column有绑定ds的。返回也前端使用。例如：快捷查询做下拉列表等。
+        Map<String, List<DataItem>> columnDataSets = getColumnSimpleDataSets(schemaViews.getGrid().getColumns());
         // 这些都是放在json数据根下的。
         root.put("grid", schemaViews.getGridJO());
         root.put("views", viewsMap);
         root.put("id", gaeaXmlSchema.getId());
+        root.put("columnDataSets", columnDataSets);
         return root;
     }
 
@@ -259,26 +262,33 @@ public class GaeaXmlSchemaProcessor {
      * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
      * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
      * 所以需要把结果集中的数据库字段名改为别名，即column.name
+     *
      * @param dataSet
      * @param grid
      * @return
      */
-    public DataSet changeDbColumnNameInData(DataSet dataSet,SchemaGrid grid){
+    public DataSet changeDbColumnNameInData(DataSet dataSet, SchemaGrid grid) {
         List<SchemaColumn> columns = grid.getColumns();
         List<Map<String, Object>> origResults = dataSet.getSqlResult();
         List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
         // 遍历所有记录
-        for(Map<String,Object> eachMap:origResults){
-            Map<String,Object> oneResultMap = new HashMap<String, Object>();
+        for (Map<String, Object> eachMap : origResults) {
+            Map<String, Object> oneResultMap = new HashMap<String, Object>();
             // 遍历一条记录的所有字段
             Set<String> keys = eachMap.keySet();
-            for(String key:keys){
+            for (String key : keys) {
                 boolean hasDefined = false;
                 // 遍历SCHEMA的“column”元素，对数据库字段名重命名
                 for (SchemaColumn column : columns) {
-                    if(key.equals(column.getDbColumnName())){
-                        // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
-                        oneResultMap.put(column.getName(), eachMap.get(key));   // 按新名字放入原值
+                    // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
+                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
+                        /**
+                         * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
+                         * 例如：
+                         * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
+                         */
+                        Object newValue = getValueFromDS(eachMap.get(key), column.getDataSetId());
+                        oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
                         hasDefined = true;
 //                        // 键名和column.name不一致才要移除。例如：key=ID和column.name=id这种在map是会被替换的。
 //                        if(!key.equalsIgnoreCase(column.getName())) {
@@ -288,7 +298,7 @@ public class GaeaXmlSchemaProcessor {
                     }
                 }
                 // 如果XML SCHEMA没有定义该字段的column元素，而且又设置了display-undefined-column=true，就把该值传到前端。
-                if(!hasDefined && grid.getDisplayUndefinedColumn()){
+                if (!hasDefined && grid.getDisplayUndefinedColumn()) {
                     oneResultMap.put(key, eachMap.get(key));
                 }
             }
@@ -302,7 +312,61 @@ public class GaeaXmlSchemaProcessor {
     }
 
     /**
+     * 把value处理一下，根据对应的数据集，看有没有对应value的text。有，则作转换。
+     * 例如：
+     * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
+     *
+     * @param value
+     * @param dataSetId
+     * @return
+     */
+    private Object getValueFromDS(Object value, String dataSetId) {
+        Object newValue = value;
+        if (value != null) {
+            if (StringUtils.isNotEmpty(dataSetId)) {
+                GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSetId);
+                if (gaeaDataSet != null) {
+                    List<DataItem> dsDatas = gaeaDataSet.getStaticResults();
+                    if (dsDatas != null) {
+                        // 遍历数据集
+                        for (DataItem dataItem : dsDatas) {
+                            if (dataItem.getValue().equalsIgnoreCase(String.valueOf(value))) {
+                                newValue = dataItem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return newValue;
+    }
+
+    /**
+     * 获取grid.column对应的数据集的集合。
+     * <p>
+     * 注意：
+     * 目前只针对静态配置数据。sql数据集不支持！
+     * </p>
+     *
+     * @param columns
+     * @return
+     */
+    private Map<String, List<DataItem>> getColumnSimpleDataSets(List<SchemaColumn> columns) {
+        Map<String, List<DataItem>> dataSets = new HashMap<String, List<DataItem>>();
+        for (SchemaColumn column : columns) {
+            String dataSetId = column.getDataSetId();
+            if (StringUtils.isNotEmpty(dataSetId)) {
+                GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSetId);
+                List<DataItem> dsData = gaeaDataSet.getStaticResults();
+                dataSets.put(dataSetId, dsData);
+            }
+        }
+        return dataSets;
+    }
+
+    /**
      * 遍历文档，寻找根节点"ur-schema"。并校验。
+     *
      * @param document
      * @return
      * @throws ValidationFailedException
@@ -316,7 +380,7 @@ public class GaeaXmlSchemaProcessor {
             if (!(node instanceof Element)) {
                 continue;
             }
-            if(XmlSchemaDefinition.ROOT_NODE.equals(node.getNodeName())){
+            if (XmlSchemaDefinition.ROOT_NODE.equals(node.getNodeName())) {
                 rootNode = node;
                 break;
             }

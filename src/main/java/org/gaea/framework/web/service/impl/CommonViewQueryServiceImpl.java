@@ -1,9 +1,10 @@
 package org.gaea.framework.web.service.impl;
 
-import org.gaea.data.dataset.GaeaDataSetResolver;
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
+import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.SysLogicalException;
@@ -15,13 +16,12 @@ import org.gaea.framework.web.schema.data.domain.SchemaConditionSet;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.PageResult;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
-import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.service.CommonViewQueryService;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +46,6 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     private GaeaSqlProcessor gaeaSqlProcessor;
     @Autowired
     private SchemaDataService schemaDataService;
-    @Autowired(required = false)
-    private GaeaDataSetResolver gaeaDataSetResolver;
 
     @Override
     public PageResult query(String schemaId, List<QueryCondition> filters,
@@ -149,9 +147,6 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 //        if(gaeaXmlSchema ==null){
 //            throw new SysLogicalException("未能从缓存获取对应的Schema对象。请检查逻辑关系！");
 //        }
-        if (gaeaDataSetResolver == null) {
-            logger.warn(" Gaea的数据集处理器 GaeaDataSetResolver 未初始化。可能无法检索所有的DataSet。");
-        }
         try {
             SchemaGrid grid = null;
             DataSet dataSet = null;
@@ -185,7 +180,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                  */
                 if ((dataSet != null && StringUtils.isNotEmpty(datasetId) && !StringUtils.equalsIgnoreCase(dataSet.getId(), datasetId))
                         || (StringUtils.isNotEmpty(datasetId)) && dataSet == null) {
-                    GaeaDataSet gaeaDataSet = gaeaDataSetResolver.getDataSet(datasetId);
+                    GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(datasetId);
                     if (gaeaDataSet == null) {
                         logger.debug(MessageFormat.format("找不到对应的数据集，无法进行查询。dataSet ID: {0}", datasetId));
                         return null;

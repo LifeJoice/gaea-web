@@ -1563,9 +1563,9 @@ define([
          */
         gaeaData.fieldData = {
             /**
-             *
-             * @param divId
-             * @param dataObj
+             * 一般是用在弹出框的编辑数据的情况下。初始化弹框里的字段的数据。
+             * @param divId 弹框的区域
+             * @param dataObj 要填充到区域中的字段的js对象
              * @returns {$.Deffered}
              */
             init: function (divId, dataObj) {
@@ -1585,16 +1585,27 @@ define([
                 gaeaData.fieldData._setValue(divId, dataObj);
                 return dfd.promise();
             },
+            /**
+             * 遍历dataObj，把里面各个属性值，设置到某个区域（div）里面的对应输入框之类中。
+             * @param divId 要注入的区域id
+             * @param dataObj 数据
+             * @private
+             */
             _setValue: function (divId, dataObj) {
                 var $div = $("#" + divId);
                 // 遍历对象里的每一个属性和值
-                $.each(dataObj, function (key, val) {
-                    if (_.isArray(val)) {
-                        $.each(val, function (idx, val2) {
+                $.each(dataObj, function (key, fieldValue) {
+                    if (_.isArray(fieldValue)) {
+                        $.each(fieldValue, function (idx, val2) {
                             gaeaData.fieldData._setValue(divId, val2);
                         });
                     } else {
-                        gaeaData.fieldData._setFieldValue($div, key, val);
+                        var value = fieldValue;
+                        // 如果是对象，则可能服务端给数据集转换过了。取其中的value作为值。
+                        if (_.isObject(fieldValue)) {
+                            value = fieldValue.value;
+                        }
+                        gaeaData.fieldData._setFieldValue($div, key, value);
                     }
                 });
             },

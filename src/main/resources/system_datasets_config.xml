@@ -86,10 +86,18 @@
         </where>
     </dataset>
     <!--cache-type ：是否缓存结果集。有个配置项是none。但当下全部的缓存。估计静态的数据量不多。-->
+    <dataset id="DS_MENU_LEVELS" cache-type="static">
+        <data>
+            <data-element value="1" text="一级菜单"/>
+            <data-element value="2" text="二级菜单"/>
+            <data-element value="3" text="三级菜单"/>
+        </data>
+    </dataset>
+    <!--cache-type ：是否缓存结果集。有个配置项是none。但当下全部的缓存。估计静态的数据量不多。-->
     <dataset id="DS_IS_ENABLED" cache-type="static">
         <data>
-            <data-element value="0" text="不启用" />
-            <data-element value="1" text="启用" />
+            <data-element value="0" text="不启用"/>
+            <data-element value="1" text="启用"/>
         </data>
     </dataset>
 </dataset-definition>

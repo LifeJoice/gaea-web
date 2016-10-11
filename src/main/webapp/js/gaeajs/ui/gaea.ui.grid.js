@@ -630,7 +630,14 @@ define([
                         //    $("#mars-tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + "' data-field-id='" + field.id + "'><p>" + tmpCol.text + "</p></div>");
                         //}
                         // 遍历数据（一行）中每一列的值，如果id和当前列id一致就填充进去。
-                        $.each(row, function (key, nRowColVal) {
+                        $.each(row, function (key, cell) {
+                            var cellText = cell;
+                            if (_.isObject(cell)) {
+                                if (gaeaValid.isNull(cell.text)) {
+                                    console.warn("grid单元格是对象，但text却为空( text为系统默认的显示文本 )。 cell: %s", JSON.stringify(cell));
+                                }
+                                cellText = cell.text;
+                            }
                             // 如果数据中的key和field（grid数据结构定义）中的设置一致（即类似data.columnname = grid.columnname），则把值复制到表格中。
                             if (gaeaStringUtils.equalsIgnoreCase(field.id, key)) {
                                 hasNotMatchedField = false; // 找到对应的列单元格数据
@@ -646,11 +653,11 @@ define([
                                         "</td>");
                                 }
                                 // 转换日期格式
-                                if (gaeaValid.isNotNull(nRowColVal) && gaeaValid.isNotNull(column.datetimeFormat)) {
-                                    nRowColVal = gaeaDT.getDate(nRowColVal, {format: column.datetimeFormat});
+                                if (gaeaValid.isNotNull(cellText) && gaeaValid.isNotNull(column.datetimeFormat)) {
+                                    cellText = gaeaDT.getDate(cellText, {format: column.datetimeFormat});
                                 }
                                 $(lastTRselector).append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
-                                    "<div class=\"grid-td-div\">" + nRowColVal + "</div></td>");
+                                    "<div class=\"grid-td-div\">" + cellText + "</div></td>");
                             }
                         });
                         // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位

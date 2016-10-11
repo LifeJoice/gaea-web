@@ -1,7 +1,8 @@
 package org.gaea.framework.web.service.impl;
 
-import org.gaea.data.dataset.GaeaDataSetResolver;
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.SystemConfigException;
@@ -12,7 +13,6 @@ import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.service.CommonCRUDService;
 import org.gaea.util.GaeaPropertiesReader;
 import org.gaea.workflow.service.WorkflowRuntimeService;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +36,6 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
     private WorkflowRuntimeService workflowRuntimeService;
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    @Autowired(required = false)
-    private GaeaDataSetResolver gaeaDataSetResolver;
     @Autowired(required = false)
     @Qualifier("systemPropertiesReader")
     private GaeaPropertiesReader systemProperties;
@@ -163,7 +161,7 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
             tableName = gaeaXmlSchema.getSchemaData().getDataSetList().get(0).getPrimaryTable();
         } else {
             String primaryDS = gaeaXmlSchema.getSchemaViews().getGrid().getDatasetId();
-            GaeaDataSet ds = gaeaDataSetResolver.getDataSet(primaryDS);
+            GaeaDataSet ds = SystemDataSetFactory.getDataSet(primaryDS);
             tableName = ds.getPrimaryTable();
         }
 
