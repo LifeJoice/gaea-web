@@ -18,7 +18,7 @@ require(['jquery','gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gae
     gaeaGrid.create(viewSchema.initData.grid);
     // 初始化 TOOLBAR
     gaeaToolbar.create({
-        renderTo: "ur-toolbar",
+        renderTo: "gaea-toolbar",
         buttons: viewSchema.initData.views.actions.buttons
         /**    ur_gridview.html的自定义通用功能!!!    **/
         //interface:{

@@ -11,7 +11,7 @@ public class SchemaActions {
     private String name;
     private String htmlName;
     private String htmlId;
-    private List<SchemaButton> buttons = new ArrayList<SchemaButton>();
+    private List buttons = new ArrayList(); // 这个即可能是SchemaButton，也可能是SchemaButtonGroup
 
     public String getId() {
         return id;
@@ -45,11 +45,11 @@ public class SchemaActions {
         this.htmlId = htmlId;
     }
 
-    public List<SchemaButton> getButtons() {
+    public List getButtons() {
         return buttons;
     }
 
-    public void setButtons(List<SchemaButton> buttons) {
+    public void setButtons(List buttons) {
         this.buttons = buttons;
     }
 }

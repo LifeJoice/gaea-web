@@ -1,10 +1,11 @@
 package org.gaea.framework.web.schema.convertor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
-import org.gaea.framework.web.schema.domain.view.SchemaButton;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
-import org.apache.commons.lang3.StringUtils;
+import org.gaea.framework.web.schema.domain.view.SchemaButton;
+import org.gaea.framework.web.schema.domain.view.SchemaButtonGroup;
 import org.gaea.util.GaeaXmlUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
@@ -30,16 +31,21 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
                 continue;
             }
             if (XmlSchemaDefinition.ACTION_BUTTON_NAME.equals(viewNode.getNodeName())) {
-                SchemaButton button = covertToButton(viewNode);
+                // 解析< button >
+                SchemaButton button = convertToButton(viewNode);
                 schemaActions.getButtons().add(button);
+            } else if (XmlSchemaDefinition.ACTION_BUTTON_GROUP_NAME.equals(viewNode.getNodeName())) {
+                // 解析< button-group >
+                SchemaButtonGroup buttonGroup = convertToButtonGroup(viewNode);
+                schemaActions.getButtons().add(buttonGroup);
             }
         }
         return schemaActions;
     }
 
-    private SchemaButton covertToButton(Node node) throws InvocationTargetException, IllegalAccessException, InvalidDataException {
+    private SchemaButton convertToButton(Node node) throws InvocationTargetException, IllegalAccessException, InvalidDataException {
         SchemaButton button = new SchemaButton();
-        button.setViewName(node.getNodeName());
+        button.setComponentName(node.getNodeName());
         button = GaeaXmlUtils.copyAttributesToBean(node, button, SchemaButton.class);
         // 如果column.name有值，而htmlId为空，则默认使用column.name作为htmlId
         if (StringUtils.isBlank(button.getHtmlId()) && !StringUtils.isBlank(button.getName())) {
@@ -50,5 +56,34 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
             button.setHtmlName(button.getName());
         }
         return button;
+    }
+
+    /**
+     * 解析XML的按钮组部分。
+     *
+     * @param node
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InvalidDataException
+     */
+    private SchemaButtonGroup convertToButtonGroup(Node node) throws InvocationTargetException, IllegalAccessException, InvalidDataException {
+        SchemaButtonGroup buttonGroup = new SchemaButtonGroup();
+        buttonGroup.setComponentName(node.getNodeName());
+        buttonGroup = GaeaXmlUtils.copyAttributesToBean(node, buttonGroup, SchemaButtonGroup.class);
+        NodeList nodes = node.getChildNodes();// < button >
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node viewNode = nodes.item(i);
+            // xml解析会把各种换行符等解析成元素。统统跳过。
+            if (!(viewNode instanceof Element)) {
+                continue;
+            }
+            if (XmlSchemaDefinition.ACTION_BUTTON_NAME.equals(viewNode.getNodeName())) {
+                // 解析< button >
+                SchemaButton button = convertToButton(viewNode);
+                buttonGroup.getButtons().add(button);
+            }
+        }
+        return buttonGroup;
     }
 }

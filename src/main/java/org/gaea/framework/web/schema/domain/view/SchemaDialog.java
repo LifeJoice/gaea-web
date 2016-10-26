@@ -19,7 +19,7 @@ public class SchemaDialog implements SchemaViewsComponent {
     private String type;        // 内置模板，例如工作流审批等。value=normal|workflow-approval|macula-dialog
     private String contentUrl;      // 准备加载内容到dialog的URL地址
     private String submitUrl;       // dialog中内容要提交到的URL。会在dialog内容外包裹一个form。
-    private String viewName;
+    private String componentName;
     private String idField;         // id的html name。在update dialog有用。
     private List<SchemaButton> buttons = new ArrayList<SchemaButton>();
 
@@ -96,12 +96,12 @@ public class SchemaDialog implements SchemaViewsComponent {
     }
 
     @Override
-    public String getViewName() {
-        return viewName;
+    public String getComponentName() {
+        return componentName;
     }
 
-    public void setViewName(String viewName) {
-        this.viewName = viewName;
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
     }
 
     public String getType() {

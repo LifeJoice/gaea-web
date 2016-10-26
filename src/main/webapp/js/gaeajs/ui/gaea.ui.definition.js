@@ -13,7 +13,11 @@ define(function () {
             GRID: "grid",
             TABLE: "table",
             SELECT: "select",
-            TABS: "tabs"
+            TABS: "tabs",
+            BUTTON: {
+                DEFAULT: "button",
+                BUTTON_GROUP: "button-group"
+            }
         },
         DIALOG: {
             TYPE: {
@@ -24,13 +28,24 @@ define(function () {
             COMMON_CONFIG_DIALOG_ID: "gaeaUI_common_config_dialog" // 通用的确认弹框的默认id.因为很多地方用弹框但并不关系弹框是什么, 只是要用弹框显示点信息而已. 就共用这个就好了. 确保名字别重复就好.
         },
         GRID: {
-            ID: "gridId"
+            ID: "gridId",
+            GAEA_GRID_DEFAULT_ID: "urgrid"
         },
         SCHEMA: {
             ID: "urSchemaId"
         },
         INPUT: {
             CLASS: "gaea-query-field"
+        },
+        BUTTON_GROUP: {
+            TEMPLATE: {
+                // 整个按钮组的框架的HTML,除了按钮
+                HTML: '<span id="<%= GROUP_ID %>" class="gaea-button-group">' +
+                '<div class="title"><%= GROUP_TEXT %><i class="fa fa-chevron-down"></i></div>' +
+                '<div id="<%= BUTTONS_PANEL_ID %>" class="detail"></div></span>',
+                // 按钮组的按钮的HTML
+                SUB_BUTTON_HTML: '<li id="<%= ID %>" data-url="<%= URL %>"><%=TEXT %></li>'
+            }
         }
     };
     var PAGE = {
@@ -68,7 +83,10 @@ define(function () {
      * 针对< html data-gaea-data='' >
      */
     var GAEA_DATA = {
-        GAEA_DATA: "gaea-data"
+        GAEA_DATA: "gaea-data",
+        DS: {
+            DEFAULT_VALUE_NAME: "value" // 数据集的值的默认param name。（ liek this: text:可用, value:1 ）
+        }
     };
     return {
         UI: UI,

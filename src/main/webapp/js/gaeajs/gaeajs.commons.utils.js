@@ -7,10 +7,10 @@
  */
 define([
         "jquery", "underscore", 'underscore-string',
-        'gaeajs-common-utils-validate', "gaeajs-common-utils-string"
+        'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaeajs-ui-definition"
     ],
     function ($, _, _s,
-              gaeaValid, gaeaString) {
+              gaeaValid, gaeaString, GAEA_UI_DEFINE) {
 
         var utils = {};
 
@@ -76,6 +76,121 @@ define([
                     dfd.resolveWith(data);
                 });
                 return dfd.promise();
+            }
+        };
+
+        /**
+         * 这个是通用的数据处理工具。
+         * 这一点是和gaeaData的区别。很重要！
+         */
+        utils.data = {
+            /**
+             * 把data里的所有对象扁平化。主要是为了适配Spring MVC的bean注入。
+             * jQuery会把对象的属性用[]包住.例如: user:{id:1} 会变成 user[id]=1.
+             * 但Spring会觉得中括号的,要么是list,要么是map. 跟接收的bean对不上就会抛异常.
+             * 例如：
+             {
+                    id:1,
+                    medal:["金牌","银牌","铜牌"],
+                    children:[{id:101,name:"Joe",title:{text:"TheBoy",value:1,color:[{id:1,desc:"red"},{id:2,desc:"yellow"}]}},{id:102,name:"jack",title:{text:"Awesome",value:2,color:["red","yellow"]}}]
+             }
+             就会压扁成：
+             id:1
+             medal[0]:"金牌"
+             medal[1]:"银牌"
+             medal[2]:"铜牌"
+             children[0].id:101
+             children[0].name:"Joe"
+             children[0].title:1
+             children[0].title.color[0].desc:"red"
+             children[0].title.color[0].id:1
+             children[0].title.color[1].desc:"yellow"
+             children[0].title.color[1].id:2
+             children[0].title.text:"TheBoy"
+             children[0].title.value:1
+             children[1].id:102
+             children[1].name:"jack"
+             children[1].title:2
+             children[1].title.color[0]:"red"
+             children[1].title.color[1]:"yellow"
+             children[1].title.text:"Awesome"
+             children[1].title.value:2
+             * @param data 原数据
+             * @param opts 配置项(暂时没用)
+             * @param parentFieldName 父对象的名字。用来把对象扁平化后拼凑对象名。例如：children[0].title
+             */
+            flattenData: function (data, opts, parentFieldName) {
+                if (gaeaValid.isNull(data)) {
+                    return;
+                }
+                var result = {};
+                /**
+                 * 如果是数组
+                 */
+                if (_.isArray(data)) {
+                    $.each(data, function (idx, val) {
+                        // 拼凑请求paramName,作为父名称传给递归调用.才能实现扁平化.
+                        var paramName = "[" + idx + "]";
+                        if (gaeaValid.isNotNull(parentFieldName)) {
+                            paramName = parentFieldName + "." + paramName;
+                        }
+                        // 递归调用
+                        var newData = utils.data.flattenData(this, opts, paramName);
+                        // 把转换过的值覆盖到现在结果中。因为扁平化后，不同对象中同名的属性，应该变成不同属性名了。
+                        result = _.extend(result, newData);
+                    });
+                } else if (_.isObject(data)) {
+                    /**
+                     * 如果是对象
+                     * 遍历对象属性。如果对象中某个属性值是数组或对象，继续递归调用。
+                     */
+                        // 遍历对象的属性
+                    $.each(data, function (key, val) {
+                        // 拼凑请求paramName,作为父名称传给递归调用.才能实现扁平化.
+                        var paramName = key;
+                        if (gaeaValid.isNotNull(parentFieldName)) {
+                            paramName = parentFieldName + "." + key;
+                        }
+                        if (_.isArray(val)) {
+                            $.each(val, function (idx2, val2) {
+                                // 拼凑请求paramName,作为父名称传给递归调用.才能实现扁平化.
+                                var paramName2 = paramName + "[" + idx2 + "]";
+                                // 递归调用
+                                var newData = utils.data.flattenData(val2, opts, paramName2);
+                                // 把转换过的值覆盖到现在结果中。因为扁平化后，不同对象中同名的属性，应该变成不同属性名了。
+                                result = _.extend(result, newData);
+                            });
+                        } else if (_.isObject(val)) {
+                            // 递归调用
+                            var newData = utils.data.flattenData(this, opts, paramName);
+                            // 把转换过的值覆盖到现在结果中。因为扁平化后，不同对象中同名的属性，应该变成不同属性名了。
+                            result = _.extend(result, newData);
+                        } else {
+                            result[paramName] = val;
+                            /**
+                             * 如果有一个"value=123"这样的键值对，则认为可能这就是父对象属性的原本的值（即用了数据集，虽然不严谨但不重要了）。就加一个直接和父对象属性的值。
+                             * 举例
+                             * 对于 { level: { value:1, text:一级, ... } }
+                             * 由于有value，最后应该转换成：
+                             * { level:1, level.value:1, level.text:一级 ... }
+                             */
+                            if (gaeaString.equalsIgnoreCase(key, GAEA_UI_DEFINE.GAEA_DATA.DS.DEFAULT_VALUE_NAME) && gaeaValid.isNotNull(parentFieldName) && gaeaValid.isNull(result[parentFieldName])) {
+                                result[parentFieldName] = val;
+                            }
+                        }
+                    });
+                } else {
+                    /**
+                     * 如果只是普通的值，简单赋值后返回
+                     * 例如：medal : ["金牌","银牌","铜牌"]
+                     */
+                    if (gaeaValid.isNull(parentFieldName)) {
+                        result = data;
+                    } else {
+                        result[parentFieldName] = data;
+                    }
+                }
+                return result;
             }
         };
         /**

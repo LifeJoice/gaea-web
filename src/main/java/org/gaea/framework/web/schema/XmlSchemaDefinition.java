@@ -25,4 +25,5 @@ public class XmlSchemaDefinition {
     public static String GRID_COLUMN_NAME = "column";
     /* *************************************************** ACTION *************************************************** */
     public static String ACTION_BUTTON_NAME = "button";
+    public static String ACTION_BUTTON_GROUP_NAME = "button-group";
 }

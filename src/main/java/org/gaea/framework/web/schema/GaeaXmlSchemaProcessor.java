@@ -167,20 +167,30 @@ public class GaeaXmlSchemaProcessor {
         initSchemaViewComponentList(gaeaXmlSchema);
         SchemaActions actions = gaeaXmlSchema.getSchemaViews().getActions();
         // 查找button的link-view-id并组装对应的信息
-        if (actions != null && actions.getButtons() != null) {
-            for (SchemaButton button : actions.getButtons()) {
-                if (!StringUtils.isBlank(button.getLinkViewId())) {
-                    SchemaViewsComponent component = gaeaXmlSchema.getViewsComponents().get(button.getLinkViewId());
-                    // 找到link-view-id对应的组件
-                    if (component != null) {
-                        String type = component.getType();
-                        if ("workflow-approval".equals(type)) {
-                            button.setLinkComponent(type);
-                        }
-                    }
-                }
-            }
-        }
+//        if (actions != null && actions.getButtons() != null) {
+//            for (Object obj : actions.getButtons()) {
+//                if(obj instanceof SchemaButtonGroup){
+//                    continue;
+//                }
+////                SchemaButton button = (SchemaButton) obj;
+//
+//                /**
+//                 * 应该不需要了。可以通过link-view-id找到对应的component，而component的componentName,即对应XML里面的元素名（例如：< crud-dialog >）。然后以componentName作前端的组件初始化之类的。
+//                 * by Iverson 2016-10-15 18:46:23
+//                 */
+//
+////                if (!StringUtils.isBlank(button.getLinkViewId())) {
+////                    SchemaViewsComponent component = gaeaXmlSchema.getViewsComponents().get(button.getLinkViewId());
+////                    // 找到link-view-id对应的组件
+////                    if (component != null) {
+////                        String type = component.getType();
+////                        if ("workflow-approval".equals(type)) {
+////                            button.setLinkComponent(type);
+////                        }
+////                    }
+////                }
+//            }
+//        }
     }
 
     /**
@@ -196,7 +206,11 @@ public class GaeaXmlSchemaProcessor {
         }
         SchemaActions actions = gaeaXmlSchema.getSchemaViews().getActions();
         if (actions != null && actions.getButtons() != null) {
-            for (SchemaButton button : actions.getButtons()) {
+            for (Object obj : actions.getButtons()) {
+                if (obj instanceof SchemaButtonGroup) {
+                    continue;
+                }
+                SchemaButton button = (SchemaButton) obj;
                 if (!StringUtils.isBlank(button.getId())) {
                     gaeaXmlSchema.getViewsComponents().put(button.getId(), button);
                 }

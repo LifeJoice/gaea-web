@@ -29,7 +29,7 @@ public class XmlDialogViewSchemaConvertor implements SchemaConvertor<SchemaDialo
     public SchemaDialog convert(Node node) throws InvalidDataException {
         SchemaDialog schemaDialog = new SchemaDialog();
         // 设置viewName。前端会根据这个区分不同的弹出框类型（组件），进行不同的处理。有点类似type了。
-        schemaDialog.setViewName(node.getNodeName());
+        schemaDialog.setComponentName(node.getNodeName());
         schemaDialog = GaeaXmlUtils.copyAttributesToBean(node, schemaDialog, SchemaDialog.class);
         NodeList nodes = node.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {

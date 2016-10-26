@@ -6,6 +6,7 @@ package org.gaea.framework.web.schema.domain;
 public interface SchemaViewsComponent {
     public String getId();
     public String getName();
-    public String getViewName();        // 组件名。例如：dialog,button之类的。
-    public String getType();
+
+    public String getComponentName();        // 组件名。例如：dialog,button之类的。
+//    public String getType();
 }

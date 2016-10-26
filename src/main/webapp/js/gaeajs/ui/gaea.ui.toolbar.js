@@ -5,10 +5,10 @@
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
-        "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url"],
+        "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
-              GAEA_EVENTS, gaeaActions, URL) {
+              GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils) {
         var toolbar = {
             options: {
                 renderTo: null,
@@ -42,26 +42,48 @@ define([
             create: function (options, inViews) {
                 this.options = options;
                 var that = this;
-                var urToolbar = $("#" + options.renderTo);
-                urToolbar.addClass("finder-action-items");
+                var containerId = options.renderTo;
+                var $container = $("#" + options.renderTo);
+                $container.addClass("finder-action-items");
                 // 遍历按钮配置(views.actions.buttons)
                 $.each(this.options.buttons, function (key, val) {
                     var thisButton = this;
                     var $button = $("#" + this.htmlId);
                     var dialogDef = null;
-                    // [1] 生成按钮的基础html。例如：<a>新增</a>
-                    thisButton.text = thisButton.htmlValue;     // 按钮的名称，即htmlValue属性。
-                    urToolbar.append(that.button._create(thisButton));
+                    /**
+                     * if 是按钮组
+                     *      按照按钮组的逻辑处理
+                     * else if 普通按钮
+                     *      创建普通按钮
+                     */
+                    if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.BUTTON.BUTTON_GROUP, thisButton.componentName)) {
+                        /**
+                         * 按钮组
+                         */
+                        $container.append(toolbar.button.createButtonGroup({
+                            buttonDef: thisButton,
+                            containerId: containerId
+                        }));
+                    } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.BUTTON.DEFAULT, thisButton.componentName)) {
+                        /**
+                         * 普通按钮
+                         */
+                            // [1] 生成按钮的基础html。例如：<a>新增</a>
+                        thisButton.text = thisButton.htmlValue;     // 按钮的名称，即htmlValue属性。
+                        $container.append(that.button._create(thisButton));
+                    } else {
+                        throw "不可识别的toolbar component类型: " + thisButton.componentName;
+                    }
                     /**
                      * [2] 处理button的关联组件
                      * 【 生成各种组件 】 根据action的linkId找到对应的组件并构造它
                      * 例如：
-                     * “审批”按钮对应的是工作流的审批弹出框，则根据返回的json数据(views.dialogs[x].viewName:wf-dialog)，
+                     * “审批”按钮对应的是工作流的审批弹出框，则根据返回的json数据(views.dialogs[x].componentName:wf-dialog)，
                      * 找到关于工作流弹出框的描述信息，然后构造。
                      */
                     if (gaeaValid.isNotNull(this.linkViewId)) {
                         var linkObj = gaeaDialog.findDialog(inViews, this.linkViewId);
-                        if ("wf-dialog" == linkObj.viewName) {
+                        if ("wf-dialog" == linkObj.componentName) {
                             dialogDef = linkObj;
                             gaeaWF.dialog.create(linkObj, this);
                             //var dialogOption = linkObj;
@@ -85,7 +107,7 @@ define([
                         /**
                          * 如果有上传组件的dialog，则初始化上传组件。
                          */
-                        else if (gaeaString.equalsIgnoreCase("uploader-dialog", linkObj.viewName)) {
+                        else if (gaeaString.equalsIgnoreCase("uploader-dialog", linkObj.componentName)) {
                             console.log("初始化uploader-dialog");
                             dialogDef = linkObj;
                             gaeaUploader.uploader(null, linkObj, this);
@@ -93,7 +115,7 @@ define([
                         /**
                          * 处理增删改dialog。
                          */
-                        else if ("crud-dialog" == linkObj.viewName) {
+                        else if ("crud-dialog" == linkObj.componentName) {
                             //var $button = $("#" + button.htmlId);
                             var row = gaeaGrid.getSelected();
                             var options = {
@@ -106,7 +128,7 @@ define([
                         /**
                          * 最后，处理普通dialog。
                          */
-                        else if ("dialog" == linkObj.viewName) {
+                        else if ("dialog" == linkObj.componentName) {
                             if (gaeaValid.isNull(linkObj.htmlId)) {
                                 throw "没有htmlId(对于页面DIV ID)，无法创建Dialog。";
                             }
@@ -236,13 +258,77 @@ define([
                     return inViews;
                 },
                 _create: function (btnOptions) {
-                    var html = "<a id='" + btnOptions.htmlId + "'" +
+                    var html = "<span><a id='" + btnOptions.htmlId + "'" +
                         " class=\"medium darkslategrey button\"" +
                         "<span>" +
                         btnOptions.text +
                         "</span>" +
-                        "</a>";
+                        "</a></span>";
                     return html;
+                },
+                /**
+                 * 创建按钮组。
+                 * @param opts
+                 *              buttonDef 按钮组定义
+                 *              containerId 整个按钮组的容器id
+                 */
+                createButtonGroup: function (opts) {
+                    var buttonGroupDef = opts.buttonDef;
+                    var $container = $("#" + opts.containerId);
+                    var buttonPanelId = buttonGroupDef.id + "-buttons-panel";
+                    var groupTemplate = _.template(GAEA_UI_DEFINE.UI.BUTTON_GROUP.TEMPLATE.HTML);
+                    // 创建按钮组的整体框架（即除了按钮）
+                    $container.append(groupTemplate({
+                        GROUP_ID: buttonGroupDef.id,
+                        GROUP_TEXT: buttonGroupDef.text,
+                        BUTTONS_PANEL_ID: buttonPanelId
+                    }));
+                    var $buttonsPanel = $("#" + buttonPanelId);
+                    var $buttonList = $("<ul></ul>");
+                    // < a >点击默认不带操作。由jQuery绑定事件。
+                    var buttonTemplate = _.template(GAEA_UI_DEFINE.UI.BUTTON_GROUP.TEMPLATE.SUB_BUTTON_HTML);
+                    /**
+                     * 遍历按钮组里面的按钮。
+                     * 【注意】
+                     * 暂时不支持多级button嵌套！
+                     */
+                    $.each(buttonGroupDef.buttons, function (idx, val) {
+                        var button = this;
+                        // [1] 生成按钮的基础html。例如：<a>新增</a>
+                        var $li = $(buttonTemplate({
+                            ID: button.id,
+                            TEXT: button.htmlValue,
+                            URL: button.submitUrl
+                        }));
+                        /**
+                         * 添加点击事件
+                         */
+                        $li.click(function () {
+                            var url = $(this).data("url");
+                            if (gaeaValid.isNull(url)) {
+                                throw "按钮对应的请求地址为空(可能是缺少配置)。";
+                            }
+                            var row = gaeaGrid.getSelected();
+                            // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
+                            var newRow = gaeaUtils.data.flattenData(row);
+                            // 提交
+                            gaeaAjax.post({
+                                url: url,
+                                data: newRow,
+                                success: function (data) {
+                                    gaeaNotify.message(button.msg + "操作成功。");
+                                    // 刷新grid数据
+                                    $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                                },
+                                fail: function (data) {
+                                    gaeaNotify.error(button.msg + "操作失败！");
+                                }
+                            });
+                        });
+                        // 把按钮附加到按钮组
+                        $buttonList.append($li);
+                    });
+                    $buttonsPanel.append($buttonList);
                 },
                 //_createMaculaAction: function (btnOptions) {
                 //    var html = "<a class=\"urFinderAction\"" +

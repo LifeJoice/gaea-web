@@ -1,12 +1,13 @@
 /*重写覆盖macula默认的样式。因为会影响到当前的样式。*/
 .finder-action-items a {
-    background: red; /* 这个影响按钮的背景 */
+    /*background: red; !* 这个影响按钮的背景 *!*/
     float: none; /* 这个会影响toolbar和tb-head-title重叠 */
     height: auto;
 }
 
 /* ALL ------>> 所有的按钮class都必须加上"a."，否则会受macula样式影响。*/
-.gaea-ui-page a.button {
+.gaea-ui-page a.button,
+.gaea-button-group .title {
     cursor: pointer;
     display: inline-block;
     line-height: 1;
@@ -144,7 +145,9 @@
 }
 
 /*深蓝灰色效果*/
-.gaea-ui-page a.darkslategrey.button {
+.gaea-ui-page a.darkslategrey.button,
+.gaea-button-group .title,
+.gaea-button-group .detail {
     background-color: #5D6D7D;
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 86%, 1));*/
 }
@@ -165,4 +168,86 @@
     -ms-transition-property: background color;
     -ms-transition-duration: .3s;
 }
+
+/**
+ *  ****************************************************
+ *                        按钮组
+ *  ****************************************************
+ */
+/*整个按钮组区域*/
+.gaea-button-group {
+    position: absolute;
+    font-size: 13px;
+    color: white; /* 按钮字体颜色 */
+    z-index: 1; /* 因为对于列表页，toolbar在grid上面，所以按钮组的列表应该盖住grid。但如果在其他页面toolbar就不一定这样了。*/
+}
+
+/*按钮组里面的按钮.初始是隐藏的.*/
+.gaea-button-group .detail ul li {
+    overflow: hidden;
+    height: 0;
+    -webkit-transition: height 150ms ease-in;
+    -moz-transition: height 150ms ease-in;
+    -o-transition: height 150ms ease-in;
+    transition: height 150ms ease-in;
+}
+
+.gaea-button-group .detail > ul {
+    /*宽度和title一致。*/
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 26px;
+    z-index: 1;
+    background-color: #5D6D7D;
+    padding: 0px;
+    margin: 0;
+    border-radius: 1px;
+    box-shadow: 0px 0px 3px #000;
+}
+
+/*移动到按钮组的时候,展开按钮.*/
+.gaea-button-group:hover > .detail ul li {
+    height: 30px;
+    line-height: 30px;
+}
+
+/* 按钮组title的下拉图标( awesomeFont字体 ) */
+.gaea-button-group .title i.fa {
+    margin-left: 5px;
+}
+
+/* 按钮组的按钮 */
+.gaea-button-group .detail ul li {
+    list-style-type: none;
+    overflow: hidden;
+    height: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    cursor: pointer;
+}
+
+/*按钮组的按钮的hover颜色。和一般按钮不同。分开定义。*/
+.gaea-button-group .title:hover,
+.gaea-button-group .detail li:hover {
+    /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 82%, 1));*/
+    background-color: #5C95CE;
+    /* 按钮渐变 */
+    transition-property: background color;
+    transition-duration: .3s;
+    /* 垮浏览器兼容参数 */
+    -webkit-transition-property: background color;
+    -webkit-transition-duration: .3s;
+    -moz-transition-property: background color;
+    -moz-transition-duration: .3s;
+    -o-transition-property: background color;
+    -o-transition-duration: .3s;
+    -ms-transition-property: background color;
+    -ms-transition-duration: .3s;
+}
+
+
+
+
+
 

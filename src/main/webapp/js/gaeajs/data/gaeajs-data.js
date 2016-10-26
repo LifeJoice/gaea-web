@@ -1307,7 +1307,7 @@ define([
                             "href": null,
                             "linkViewId": null,
                             "linkComponent": null,
-                            "viewName": "button",
+                            "componentName": "button",
                             "action": null
                         }]
                     });
