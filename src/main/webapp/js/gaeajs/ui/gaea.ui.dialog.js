@@ -48,9 +48,12 @@ define([
                 }
                 $(jqSelector).gaeaDialog("open");
             },
+            /**
+             * 关闭dialog
+             * @param jqSelector
+             */
             close: function (jqSelector) {
-                // 不能直接用dialog的divId或create的dialog对象关闭弹框，不知道为什么，必须加上.ui-dialog-content。不排除可能重复创建了dialog。
-                $(jqSelector + ".ui-dialog-content").gaeaDialog("close");
+                $(jqSelector).gaeaDialog("close");
             },
             findDialog: function (inViews, linkViewId) {
                 var dialog = null;
@@ -859,12 +862,15 @@ define([
                         });
                     },
                     "取消": function () {
-                        // 取消数据绑定
+                        /**
+                         * 必须首先关闭dialog。否则后面的操作会把整个dialog的DOM删除。jQuery dialog的事件就统统失效了。
+                         */
+                        dialog.close("#" + options.dialogId);
+                        // 取消数据绑定. 这里也会把dialog的DOM干掉！需要注意！
                         gaeaData.unbind(options.dialogId);
                         // 清空表单内容
-                        //$dialog.html("");
+                        // 彻底删除相关的HTML DOM
                         $dialogForm.html("");
-                        dialog.close("#" + options.dialogId);
                     }
                 };
                 return buttons;
