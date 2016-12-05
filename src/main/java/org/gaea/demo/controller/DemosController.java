@@ -1,8 +1,23 @@
 package org.gaea.demo.controller;
 
+import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.db.QueryCondition;
+import org.gaea.exception.ProcessFailedException;
+import org.gaea.exception.SysInitException;
+import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.framework.web.schema.domain.PageResult;
+import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
+import org.gaea.framework.web.service.CommonViewQueryService;
+import org.gaea.framework.web.service.ExcelService;
 import org.gaea.poi.ExcelReader;
+import org.gaea.poi.domain.Field;
+import org.gaea.poi.export.ExcelExport;
 import org.gaea.poi.reader.ExcelImportProcessor;
 import org.gaea.security.domain.Menu;
 import org.gaea.security.domain.Resource;
@@ -19,6 +34,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 系统各种通用样例的controller。
@@ -37,10 +54,16 @@ public class DemosController {
     private ExcelReader excelReader;
     @Autowired
     private ExcelImportProcessor excelImportProcessor;
+    @Autowired
+    private CommonViewQueryService commonViewQueryService;
+    @Autowired
+    private ExcelExport excelExport;
+    @Autowired
+    private ExcelService excelService;
 
     @RequestMapping("/management")
     public String list() {
-        return "system/security/resource_management.xml";
+        return "demo/demo_management.xml";
     }
 
     /**
@@ -55,7 +78,7 @@ public class DemosController {
 
     @RequestMapping(value = "/tabs/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String save(Resource resource,@RequestBean Menu menu) {
+    public String save(Resource resource, @RequestBean Menu menu) {
         systemResourcesService.save(resource);
         return "";
     }
@@ -247,4 +270,56 @@ public class DemosController {
 //////            fileNames[index++] = basePath + destDir + fileNameNew;
 ////        }
 //    }
+
+    @RequestMapping(value = "/button-group-hello1", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void test1(Resource resource) {
+        System.out.println("------------------------------------------\n test 1 \n------------------------------------------\n");
+    }
+
+    @RequestMapping(value = "/export-excel", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void exportExcel(String schemaId, String conditions, @RequestBean("filters") List<QueryCondition> filters) throws ValidationFailedException {
+        logger.info("------------------------------------------\n export excel demo \n------------------------------------------\n");
+//        ObjectMapper mapper = new ObjectMapper();
+//        DataSetCommonQueryConditionDTO queryConditionDTO = null;
+//        if (StringUtils.isNotEmpty(conditions)) {
+//            try {
+//                queryConditionDTO = mapper.readValue(conditions, DataSetCommonQueryConditionDTO.class);
+//            } catch (IOException e) {
+//                logger.debug("转换查询条件失败！", e);
+//                throw new ValidationFailedException("转换查询条件失败！");
+//            }
+//        }
+        // 数据集ID（dsId）和SCHEMA ID（schemaId）必须要有其一
+        if (StringUtils.isEmpty(schemaId)) {
+            throw new ValidationFailedException("无法获取页面的SchemaId。无法导出操作！");
+        }
+        try {
+//            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, queryConditionDTO);
+
+//            PageResult result = commonViewQueryService.query(schemaId, filters, new SchemaGridPage(1,1000), true); // 默认导出1000条
+            /**
+             * *********************************************************** TEST 2 利用模板导出任意dataset
+             */
+            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", null, "EXCEL_EXPORT_DEMO"); // 默认导出1000条
+            Map<String, Field> fieldsMap = GaeaExcelUtils.getFields(schemaId);
+            //test
+            Field field = fieldsMap.get("level");
+            field.setCellValueTransferBy(Field.TRANSFER_BY_DS_TEXT);
+            fieldsMap.put("level", field);
+            // test end
+//            excelExport.export("EXCEL_EXPORT_DEMO",result.getContent()); // 利用模板导出
+            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR)); // 利用模板导出
+//            excelExport.export(result.getContent(),"Iverson测试excel导出",fieldsMap,null); // 一般性导出(可以用于通用导出)
+//            return result;
+        } catch (SysLogicalException e) {
+            logger.debug(e.getMessage(), e);
+            throw new ValidationFailedException("系统逻辑错误！请联系管理员处理。");
+        } catch (SysInitException e) {
+            logger.error("系统初始化异常！", e);
+        } catch (ProcessFailedException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 }

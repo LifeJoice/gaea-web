@@ -6,7 +6,7 @@ import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.framework.web.view.jo.SchemaGridJO;
+import org.gaea.framework.web.schema.view.jo.SchemaGridJO;
 import org.gaea.util.GaeaXmlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

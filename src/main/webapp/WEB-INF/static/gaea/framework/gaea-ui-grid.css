@@ -35,7 +35,8 @@
     background-color: #CCD7E3;
     /*opacity: 0.5;*/
 }
-.tb-body tr.selected{
+
+.gaea-grid-body .tb-body tr.selected {
     border-bottom:1px solid #2D3E50;
 }
 /* 列头 */

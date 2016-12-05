@@ -56,10 +56,15 @@ define([
              * @param funcArray
              */
             functionsExecutor: function (funcArray) {
-                if (gaeaValid.isNull(funcArray) || !_.isArray(funcArray)) {
+                var dfd = $.Deferred();// JQuery同步对象
+                if (gaeaValid.isNull(funcArray)) {
+                    console.debug("functionsExecutor要执行的方法队列为空.");
+                    dfd.resolve();
+                    return dfd.promise();
+                }
+                if (!_.isArray(funcArray)) {
                     throw "不正确使用。输入参数非function数组。";
                 }
-                var dfd = $.Deferred();// JQuery同步对象
                 var deferreds = new Array();
                 // 遍历方法数组，逐一推到deferred数组中。是以function()的方式哦。会触发一次调用。
                 $.each(funcArray, function (idx, func) {

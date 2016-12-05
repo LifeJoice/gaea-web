@@ -1,0 +1,40 @@
+<!--Excel自定义模板的导出参考。-->
+<!--file-name为空，自动生成带日期的文件名。-->
+<excel-template id="EXCEL_EXPORT_DEMO" file-name="">
+    <block dataset-id="DS_EXCEL_EXPORT_DEMO">
+        <!--width
+        是为字符数。不是像素或其他。而且，这个和字体还有关系。不同字体会导致同样的width，实际效果却不一样。-->
+        <!--cellValueTransferBy
+        默认默认1 就是object.toString-->
+        <!--2 // 默认按数据集的value（Item.value）转换-->
+        <!--3 // 默认按数据集的text（Item.text）转换-->
+        <!--其中3需要配合dataset-id一起用。只有数据集有相关的映射关系，才能把值转换成另一个。-->
+        <field name="m_id" title="菜单ID" db-column-name="m_id"
+               width="10" data-type="string" title-comment="菜单ID"/>
+        <field name="m_level" title="菜单级别" db-column-name="m_level"
+               width="10" data-type="string" dataset-id="DS_MENU_LEVELS" cellValueTransferBy="ds_text"
+               title-comment="菜单级别"/>
+        <field name="m_name" title="菜单名" db-column-name="m_name"
+               width="10" data-type="string" title-comment="菜单名"/>
+        <field name="m_parentid" title="菜单父ID" db-column-name="m_parentid"
+               width="10" data-type="string" title-comment="菜单父ID"/>
+        <field name="m_res_id" title="菜单对应资源ID" db-column-name="m_res_id"
+               width="10" data-type="string"/>
+        <field name="m_status" title="菜单状态" db-column-name="m_status"
+               width="10" data-type="integer"/>
+        <field name="r_desc" title="资源描述" db-column-name="r_desc"
+               width="10" data-type="string"/>
+        <field name="r_id" title="资源ID" db-column-name="r_id"
+               width="10" data-type="string"/>
+        <field name="r_level" title="资源级别" db-column-name="r_level"
+               width="10" data-type="string"/>
+        <field name="r_name" title="资源名称" db-column-name="r_name"
+               width="10" data-type="string"/>
+        <field name="r_order" title="资源顺序号" db-column-name="r_order"
+               width="10" data-type="double"/>
+        <field name="r_parent_id" title="资源父级ID" db-column-name="r_parent_id"
+               width="10" data-type="string"/>
+        <field name="r_res" title="资源" db-column-name="r_res"
+               width="30" data-type="string"/>
+    </block>
+</excel-template>

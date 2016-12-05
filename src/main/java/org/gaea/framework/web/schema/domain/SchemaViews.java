@@ -3,7 +3,7 @@ package org.gaea.framework.web.schema.domain;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
 import org.gaea.framework.web.schema.domain.view.SchemaDialog;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
-import org.gaea.framework.web.view.jo.SchemaGridJO;
+import org.gaea.framework.web.schema.view.jo.SchemaGridJO;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -19,6 +19,7 @@ public class XmlSchemaDefinition {
     public static String ACTIONS_NAME = "actions";
     public static String IMPORT_JAVASCRIPT_NAME = "import-javascript";
     public static String IMPORT_CSS_NAME = "import-css";
+    public static String PARAM_NAME = "param"; // 参数的元素名。现在主要用在"button-action"里面。以后可能也能扩展到用到其他元素中。
     /* *************************************************** DATA *************************************************** */
     public static String DATA_DATASET_NAME = "dataset";
     /* *************************************************** GRID *************************************************** */
@@ -26,4 +27,5 @@ public class XmlSchemaDefinition {
     /* *************************************************** ACTION *************************************************** */
     public static String ACTION_BUTTON_NAME = "button";
     public static String ACTION_BUTTON_GROUP_NAME = "button-group";
+    public static String BUTTON_ACTION_NAME = "button-action"; // "button"的子元素。
 }

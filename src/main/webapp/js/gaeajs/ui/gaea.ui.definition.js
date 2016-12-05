@@ -60,6 +60,11 @@ define(function () {
             DELETE_SELECTED: "deleteSelected",// 删除选择的行
             PSEUDO_DELETE_SELECTED: "pseudoDeleteSelected",// 伪删除选择的行
             UPDATE: "update"// 新增操作，跟服务端配置对应
+        },
+        EXPORT_EXCEL: "export-excel",
+        SUBMIT_TYPE: { // 和button的定义相关
+            AJAX: "ajax",
+            FORM_SUBMIT: "formSubmit"
         }
     };
     var TEMPLATE = {

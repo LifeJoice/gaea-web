@@ -1,15 +1,21 @@
 package org.gaea.db;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
+import org.gaea.framework.web.schema.data.domain.SchemaCondition;
+import org.gaea.framework.web.schema.data.domain.SchemaConditionSet;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
+import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +36,11 @@ import java.util.Map;
  */
 @Component
 public class GaeaSqlProcessor {
-    final Logger log = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(GaeaSqlProcessor.class);
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
     private GaeaSchemaCache gaeaSchemaCache;
+    public static final String PLACEHOLDER_PREFIX = ":"; // appendSQL用的占位符的特殊标记开始。例如“:AUTH_ID_NOT_EQ”
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -84,8 +91,8 @@ public class GaeaSqlProcessor {
             if (total > 0) {
                 // 获取分页sql
                 String limitedSQL = dialect.getPageSql(sql, primaryTable, startPos, pageSize);
-                if (log.isDebugEnabled()) {
-                    log.debug("Page SQL:" + limitedSQL);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Page SQL:" + limitedSQL);
                 }
                 params.addValue("START_ROWNUM", startPos);
                 params.addValue("PAGE_SIZE", pageSize);
@@ -94,8 +101,8 @@ public class GaeaSqlProcessor {
             }
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Count SQL:" + countSQL);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Count SQL:" + countSQL);
         }
         pageResult.setContent(content);
         pageResult.setTotalElements(total);
@@ -107,18 +114,31 @@ public class GaeaSqlProcessor {
      * 根据SQL，把conditions主动组装条件加到SQL上，然后查询出结果。
      *
      * @param sql
-     * @param conditions
+     * @param conditionSet      可以为空。
+     * @param queryConditionDTO 可以为空。查询条件对象，包含若干where ... and ... and ...
      * @return
      */
-    public List<Map<String, Object>> query(String sql, List<QueryCondition> conditions) throws ValidationFailedException {
+    public List<Map<String, Object>> query(String sql, SchemaConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
         MapSqlParameterSource params = null;
         /* 拼凑【WHERE】条件语句 */
-        String whereCause = genWhereString(conditions);
-        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
+        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
+//        String whereCause = genWhereString(conditions);
+        /**
+         * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
+         * else 按条件对象，拼凑条件参数值
+         * 用Spring Template查询必须。
+         */
+        if (conditionSet == null || CollectionUtils.isEmpty(conditionSet.getConditions())) {
+            params = new MapSqlParameterSource();
+        } else {
+            params = genWhereParams(getConditions(conditionSet, queryConditionDTO));
+        }
+//        params = CollectionUtils.isEmpty(conditionSet.getConditions()) ? new MapSqlParameterSource() : genWhereParams(getConditions(conditionSet, queryConditionDTO));
+//        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
         if (StringUtils.isNotEmpty(whereCause)) {
             sql = sql + " WHERE " + whereCause;
         }
-        log.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
+        logger.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
 
         List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
         // 查询数据
@@ -201,6 +221,114 @@ public class GaeaSqlProcessor {
     }
 
     /**
+     * 把conditionSet和它的值对象queryConditionDTO合并，转换为where条件语句并返回。
+     * <p>
+     * 包括Spring查询占位符的生成、各种关系符的转换（OR,AND)、LIKE的不同查询情况的处理、appendSQL的替换等。
+     * </p>
+     *
+     * @param conditionSet
+     * @param queryConditionDTO
+     * @return
+     * @throws ValidationFailedException
+     */
+    public String parseConditionSet(SchemaConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+        if (conditionSet == null || queryConditionDTO == null) {
+            return "";
+        }
+        StringBuffer whereSql = new StringBuffer();
+        List<QueryCondition> newConditions = getConditions(conditionSet, queryConditionDTO);// 按通用查询组装标准查询对象
+        String appendSql = conditionSet.getAppendSql();
+        /**
+         * if 没有appendSQL，只有普通查询条件
+         *      简单的按queryCondition拼凑查询条件
+         * else
+         *      appendSQL需要的转换placeholder，然后替换placeholder的位置。
+         */
+        if (StringUtils.isEmpty(appendSql) && CollectionUtils.isNotEmpty(newConditions)) {
+            String whereCause = genWhereString(newConditions);
+            whereSql.append(whereCause);
+        } else {
+            if (CollectionUtils.isNotEmpty(newConditions)) {
+                for (QueryCondition cond : newConditions) {
+                    String placeholderName = cond.getPlaceholder();
+                    String fullPlaceholder = PLACEHOLDER_PREFIX + placeholderName;
+                    String columnName = cond.getPropertyName();
+                    // 查询条件，变量名或值为空就略过
+                    if (StringUtils.isEmpty(columnName)) {
+                        continue;
+                    }
+                    StringBuffer conditionSql = new StringBuffer();
+//                    if (StringUtils.isNotEmpty(whereSql.toString())) {
+                    // 如果condOp为空，默认就当AND处理。正常应该是不会的。因为condOp是XML元素名。
+                    String op = parseCondOp(cond);
+//                        String op = StringUtils.isEmpty(cond.getCondOp()) ? " AND " : " " + cond.getCondOp() + " ";
+                    conditionSql.append(op);
+//                    }
+                    /**
+                     * 拼凑查询条件.
+                     * if value不为空
+                     *      username = :USER_NAME
+                     * else value为空
+                     *      直接用操作符。例如：
+                     *      username is not null
+                     * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
+                     */
+                    if (StringUtils.isNotEmpty(cond.getValue())) {
+                        conditionSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
+                    } else {
+                        conditionSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
+                    }
+                    /**
+                     * if 没有placeholder,或者placeholder找不到
+                     *      直接加上条件SQL即可
+                     * else
+                     *      把条件SQL配置项
+                     *      （例如：<or field="auth.id" field-op="ne" placeholder="AUTH_ID_NOT_EQ">）
+                     *      转换后的SQL替换掉placeholder的位置。
+                     */
+                    if (StringUtils.isEmpty(placeholderName) || !StringUtils.contains(appendSql, fullPlaceholder)) {
+                        appendSql += conditionSql;
+                    } else {
+                        appendSql = StringUtils.replace(appendSql, fullPlaceholder, conditionSql.toString());
+                    }
+                }
+                whereSql.append(appendSql);
+            }
+        }
+        return whereSql.toString();
+    }
+
+    /**
+     * 把conditionSet和对应的值对象queryConditionDTO作匹配，转换成后台通用的查询对象QueryCondition。才能和后台的功能对接。
+     *
+     * @param conditionSet
+     * @param queryConditionDTO 页面用的通用查询传值对象
+     * @return
+     * @throws ValidationFailedException
+     */
+    public List<QueryCondition> getConditions(SchemaConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+        List<QueryCondition> newConditions = new ArrayList<QueryCondition>();// 按通用查询组装标准查询对象
+        if (conditionSet.getConditions().size() != queryConditionDTO.getValues().size()) {
+            throw new ValidationFailedException("查询失败！conditionSet的值和queryCondition的值的个数不匹配。可能XML配置和页面值配置不匹配导致。请检查。");
+        }
+        for (int i = 0; i < conditionSet.getConditions().size(); i++) {
+            // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
+            SchemaCondition schemaCondition = conditionSet.getConditions().get(i);
+            DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
+            QueryCondition cond = new QueryCondition();
+            BeanUtils.copyProperties(schemaCondition, cond);
+            cond.setPropertyName(schemaCondition.getField());// 查询字段为XML SCHEMA中的定义
+            cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
+            cond.setValue(valueDTO.getValue());// value为页面传过来的值
+            cond.setOp(schemaCondition.getFieldOp());
+//            cond.setPlaceholder(schemaCondition.getPlaceholder());
+//            cond.setCondOp(schemaCondition.getCondOp());
+            newConditions.add(cond);
+        }
+        return newConditions;
+    }
+
+    /**
      * 组装where条件语句的值。使用占位符的方式。
      *
      * @param conditions
@@ -234,6 +362,12 @@ public class GaeaSqlProcessor {
         return params;
     }
 
+    /**
+     * 转换值。主要是增加like操作符。是以**开始，还是以**结束。就是“%”加在前面还是后面。
+     *
+     * @param cond
+     * @return
+     */
     private String parseParamValue(QueryCondition cond) {
         String value = cond.getValue();
         if (QueryCondition.FIELD_OP_LK.equalsIgnoreCase(cond.getOp())) {
@@ -246,8 +380,24 @@ public class GaeaSqlProcessor {
         return value;
     }
 
-//    List<Map<String, Object>> content = jdbcTemplate.queryForList(sql, getExtractParams());
-//    return new PageImpl<Map<String, Object>>(caseInsensitiveMap(content), new PageRequest(0, Integer.MAX_VALUE),
-//    content.size());
-//    }
+    /**
+     * 转换查询条件里面的关系操作符。是and，还是or。还有一种是不需要，填充空。因为可能是整段sql替换，条件可以放到appendSql里面。
+     *
+     * @param cond
+     * @return
+     */
+    private String parseCondOp(QueryCondition cond) {
+        String op = cond.getCondOp();
+        if (QueryCondition.COND_OP_AND.equalsIgnoreCase(cond.getCondOp())) {
+            op = " AND ";
+        } else if (QueryCondition.COND_OP_OR.equalsIgnoreCase(cond.getCondOp())) {
+            op = " OR ";
+        } else if (QueryCondition.COND_OP_NONE.equalsIgnoreCase(cond.getCondOp())) {
+            op = " ";
+        } else if (StringUtils.isEmpty(cond.getCondOp())) {
+            logger.debug("配置的条件之间比较符为空。默认使用'AND'. QueryCondition: " + cond.toString());
+            op = " AND ";
+        }
+        return op;
+    }
 }

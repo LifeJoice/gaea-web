@@ -5,10 +5,12 @@
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
-        "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils"],
+        "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils",
+        "gaeajs-ui-view", "gaea-system-url"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
-              GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils) {
+              GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils,
+              gaeaView, SYS_URL) {
         var toolbar = {
             options: {
                 renderTo: null,
@@ -207,7 +209,11 @@ define([
                     /**
                      * [3] 触发事件框架，去寻找有没有对应的系统功能要处理之类的。
                      */
-                    toolbar.button._initAction(thisButton, dialogDef, row);
+                    toolbar.button._initAction({
+                        button: thisButton,
+                        dialog: dialogDef,
+                        selectedRow: row
+                    });
                 });
             },
             /**
@@ -284,7 +290,7 @@ define([
                         BUTTONS_PANEL_ID: buttonPanelId
                     }));
                     var $buttonsPanel = $("#" + buttonPanelId);
-                    var $buttonList = $("<ul></ul>");
+                    //var $buttonList = $("<ul></ul>");
                     // < a >点击默认不带操作。由jQuery绑定事件。
                     var buttonTemplate = _.template(GAEA_UI_DEFINE.UI.BUTTON_GROUP.TEMPLATE.SUB_BUTTON_HTML);
                     /**
@@ -294,113 +300,308 @@ define([
                      */
                     $.each(buttonGroupDef.buttons, function (idx, val) {
                         var button = this;
-                        // [1] 生成按钮的基础html。例如：<a>新增</a>
+                        // [1] 先创建容器
+                        if (idx == 0) {
+                            $buttonsPanel.append('<ul></ul>');
+                        }
+                        // [2] 生成按钮组的基础html。例如：<li>新增</li>
                         var $li = $(buttonTemplate({
                             ID: button.id,
                             TEXT: button.htmlValue,
                             URL: button.submitUrl
                         }));
+                        // 要把DOM先构建出来，否则后面依附不了事件。
+                        $buttonsPanel.children("ul").append($li);
                         /**
-                         * 添加点击事件
+                         * [3] 点击事件，和触发事件等。
+                         * isBindOnClick为false。因为这里
+                         * 这里，主要是delete等方法，初始化一些监听全局事件。
+                         * 还有，添加点击事件。
                          */
-                        $li.click(function () {
-                            var url = $(this).data("url");
-                            if (gaeaValid.isNull(url)) {
-                                throw "按钮对应的请求地址为空(可能是缺少配置)。";
-                            }
-                            var row = gaeaGrid.getSelected();
-                            // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
-                            var newRow = gaeaUtils.data.flattenData(row);
-                            // 提交
-                            gaeaAjax.post({
-                                url: url,
-                                data: newRow,
-                                success: function (data) {
-                                    gaeaNotify.message(button.msg + "操作成功。");
-                                    // 刷新grid数据
-                                    $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                                },
-                                fail: function (data) {
-                                    gaeaNotify.error(button.msg + "操作失败！");
-                                }
-                            });
+                        toolbar.button._initAction({
+                            button: button,
+                            jqButton: $li,
+                            isBindOnClick: true // 是否绑定onclick
                         });
-                        // 把按钮附加到按钮组
-                        $buttonList.append($li);
                     });
-                    $buttonsPanel.append($buttonList);
                 },
-                //_createMaculaAction: function (btnOptions) {
-                //    var html = "<a class=\"urFinderAction\"" +
-                //        "id='" + btnOptions.htmlId + "'" +
-                //        " submit=\"" + btnOptions.href + "\"" +
-                //        " minrowselected=\"1\" maxrowselected=\"1\" target=\"dialog::{title: '编辑店铺', width:'520',height:'380'}\">" +
-                //        "<span>" +
-                //            //"<img src=\"/resources20150703125423/admin/app-1.0.0/themes/default/images/bundle/btn_edit.gif\">" +
-                //        btnOptions.text +
-                //        "</span>" +
-                //        "</a>";
-                //    return html;
-                //}
-                _initAction: function (buttonDef, dialogDef, row) {
+                /**
+                 * 初始化action操作。其实主要就是绑定按钮点击的事件。
+                 * 当然，有些按钮需要多初始化一些功能，例如监听一些事件等。
+                 * @param opts
+                 *              button
+                 *              isBindOnClick 是否绑定click事件。如果是按钮的，可以为空。默认绑定。对于按钮组，这个应该为false，不绑定。
+                 * @private
+                 */
+                _initAction: function (opts) {
+                    var buttonDef = opts.button;
                     var $button = $("#" + buttonDef.htmlId);
-                    //var row = gaeaGrid.getSelected();
-                    var options = {
-                        button: buttonDef,
-                        dialog: dialogDef,
-                        selectedRow: row
-                    };
-                    // TODO 下面这个应该移到gaeajs-action会更好吧？
-                    if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
-                        // 初始化绑定事件
-                        //gaeaCommonCRUD.init(options);
-                        // 点击触发事件
-                        $button.click(function () {
-                            var row = gaeaGrid.getSelected();
-                            options.selectedRow = row;
-                            $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options);
-                        });
-                    } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
-                        // 点击触发事件
-                        $button.click(function () {
-                            $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, options);
-                        });
-                    } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                    /**
+                     * 对于删除按钮，需要通过监听事件进行。
+                     */
+                    if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
                         // 请求真删除
-                        options.url = URL.CRUD.DELETE;
+                        opts.url = URL.CRUD.DELETE;
                         // 初始化通用删除功能（绑定点击事件等）
-                        gaeaActions.deleteSelected.init(options);
-                        // 点击触发事件
-                        $button.click(function () {
-                            // 弹框。确认删除？
-                            gaeaDialog.confirmDialog({
-                                title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
-                                content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
-                            }, function () {
-                                var row = gaeaGrid.getSelected();
-                                $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                                    selectedRow: row
-                                });
-                            });
-                        });
+                        gaeaActions.deleteSelected.init(opts);
                     } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
                         // 初始化通用删除功能（绑定点击事件等）
-                        gaeaActions.deleteSelected.init(options);// options默认伪删除
-                        // 点击触发事件
+                        gaeaActions.deleteSelected.init(opts);// options默认伪删除
+                    }
+                    /**
+                     * 按钮点击的事件
+                     */
+                    if (gaeaValid.isNull(opts.isBindOnClick) || opts.isBindOnClick) {
                         $button.click(function () {
-                            // 弹框。确认删除？
-                            gaeaDialog.confirmDialog({
-                                title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
-                                content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
-                            }, function () {
-                                var row = gaeaGrid.getSelected();
-                                $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                                    selectedRow: row
-                                });
-                            });
+                            /**
+                             * 创建按钮点击的对应处理。并执行。
+                             */
+                            var onClickFunction = _private.createOnClickFunc(opts);
+                            onClickFunction();
                         });
                     }
                 }
+            }
+        };
+
+        var _private = {
+            button: {
+                /**
+                 *
+                 * @param opts
+                 *                  button schema的button定义。其中应该也包含了buttonAction，但还是单独吧。
+                 *                  buttonAction 某个button的某个action
+                 *                  data 要POST到后台的数据. 应该必须有schemaId。
+                 */
+                doAction: function (opts) {
+                    var button = opts.button;
+                    var buttonAction = button.actions[0];// 暂时只支持绑定一个action
+                    var data = opts.data;
+                    data.method = buttonAction.method; // 赋予"method"属性和值. Action必须!
+                    /**
+                     * 如果是获取文件的action，例如导出，不能用ajax。必须用submit才行。
+                     */
+                    //$("<form action='" + SYS_URL.ACTION.DO_ACTION + "' method='post'><input type='hidden' name='method' value='" + data.method + "'><input type='hidden' name='schemaId' value='" + data.schemaId + "'><input type='hidden' name='buttonId' value='" + button.id + "'></form>").submit();
+                    if (gaeaString.equalsIgnoreCase(button.submitType, GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT)) {
+                        var submitFormHtml = '' +
+                            '<form action="<%= ACTION %>" method="post">' +
+                            '<input type="hidden" name="method" value="<%= METHOD %>">' +
+                            '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
+                            '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
+                            '</form>';
+                        var formHtmlTemplate = _.template(submitFormHtml);
+                        var jqHtmlSelector = formHtmlTemplate({
+                            ACTION: SYS_URL.ACTION.DO_ACTION,
+                            METHOD: data.method,
+                            SCHEMA_ID: data.schemaId,
+                            BUTTON_ID: button.id
+                        });
+                        $(jqHtmlSelector).submit();
+                    } else {
+                        gaeaAjax.post({
+                            url: SYS_URL.ACTION.DO_ACTION,
+                            data: data,
+                            success: function (data) {
+                                gaeaNotify.message(button.msg + "操作成功。");
+                                // 刷新grid数据
+                                $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                            },
+                            fail: function (data) {
+                                gaeaNotify.error(button.msg + "操作失败！");
+                            }
+                        });
+                    }
+
+
+                    // 提交
+                    //gaeaAjax.post({
+                    //    url: SYS_URL.ACTION.DO_ACTION,
+                    //    data: data,
+                    //    success: function (data) {
+                    //        gaeaNotify.message(button.msg + "操作成功。");
+                    //        // 刷新grid数据
+                    //        $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                    //    },
+                    //    fail: function (data) {
+                    //        gaeaNotify.error(button.msg + "操作失败！");
+                    //    }
+                    //});
+                },
+                /**
+                 * 和doAction大同小异。但这个，一方面提交处理的url不是同一个。另外，一些细节的东西，例如method，是没有的。
+                 * @param opts
+                 */
+                doSimpleAction: function (opts) {
+                    var button = opts.button;
+                    var data = opts.data;
+                    //data.method = buttonAction.method; // 赋予"method"属性和值. Action必须!
+                    /**
+                     * 如果是获取文件的action，例如导出，不能用ajax。必须用submit才行。
+                     */
+                    if (gaeaString.equalsIgnoreCase(button.submitType, GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT)) {
+                        // 构建一个临时的form，来用于提交。
+                        var submitFormHtml = '' +
+                            '<form action="<%= ACTION %>" method="post">' +
+                            '<input type="hidden" name="actionName" value="<%= ACTION_NAME %>">' +
+                            '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
+                            '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
+                            '</form>';
+                        var formHtmlTemplate = _.template(submitFormHtml);
+                        var jqHtmlSelector = formHtmlTemplate({
+                            ACTION: SYS_URL.ACTION.DO_SIMPLE_ACTION,
+                            ACTION_NAME: data.actionName,
+                            SCHEMA_ID: data.schemaId,
+                            BUTTON_ID: button.id
+                        });
+                        // 提交form
+                        $(jqHtmlSelector).submit();
+                    } else {
+                        /**
+                         * 走ajax提交路线。
+                         */
+                        gaeaAjax.post({
+                            url: SYS_URL.ACTION.DO_SIMPLE_ACTION,
+                            data: data,
+                            success: function (data) {
+                                gaeaNotify.message(button.msg + "操作成功。");
+                                // 刷新grid数据
+                                $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                            },
+                            fail: function (data) {
+                                gaeaNotify.error(button.msg + "操作失败！");
+                            }
+                        });
+                    }
+                    //$("<form action='" + SYS_URL.ACTION.DO_ACTION + "' method='post'><input type='hidden' name='method' value='" + data.method + "'><input type='hidden' name='schemaId' value='" + data.schemaId + "'><input type='hidden' name='buttonId' value='" + button.id + "'></form>").submit();
+                }
+            },
+            /**
+             *
+             * @param opts
+             *              rowParamName row作为data的属性的名。即 data.paramName=row. 空即data=row.
+             * @returns data
+             */
+            getSubmitData: function (opts) {
+                var data = {};
+                var row = gaeaGrid.getSelected();
+                // 获取页面的SCHEMA ID
+                var schemaId = gaeaView.list.getSchemaId();
+                data.schemaId = schemaId;
+                // 获取页面快捷查询的条件
+                var queryConditions = gaeaGrid.query.getQueryConditions();
+                // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
+                var newRow = gaeaUtils.data.flattenData(row);
+                if (gaeaValid.isNotNull(opts) && gaeaValid.isNotNull(opts.rowParamName)) {
+                    /**
+                     * row的数据作为data的一个属性值
+                     */
+                    var rowParamName = opts.rowParamName;
+                    data[rowParamName] = newRow;
+                } else {
+                    /**
+                     * 需要把row值合并到data
+                     */
+                    data = _.extend(data, newRow);
+                    data = _.extend(data, queryConditions);
+                }
+                return data;
+            },
+            /**
+             * 创建按钮点击时的处理方法。
+             * 因为这个方法，普通按钮和按钮组要共用。所以重构，从_initAction中重构过来，整合了按钮组的功能和原来按钮的功能于一体。
+             * @param opts
+             * @returns {*}
+             */
+            createOnClickFunc: function (opts) {
+                var clickFunction;
+                var buttonDef = opts.button;
+                var $button = $("#" + buttonDef.htmlId);
+                //var opts = {
+                //    button: buttonDef,
+                //    dialog: dialogDef,
+                //    selectedRow: row
+                //};
+                // TODO 下面这个应该移到gaeajs-action会更好吧？
+                if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
+                    // 初始化绑定事件
+                    //gaeaCommonCRUD.init(options);
+                    // 点击触发事件
+                    clickFunction = function () {
+                        var row = gaeaGrid.getSelected();
+                        opts.selectedRow = row;
+                        $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, opts);
+                    };
+                } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
+                    // 点击触发事件
+                    clickFunction = function () {
+                        $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, opts);
+                    };
+                } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                    //// 请求真删除
+                    //opts.url = URL.CRUD.DELETE;
+                    //// 初始化通用删除功能（绑定点击事件等）
+                    //gaeaActions.deleteSelected.init(opts);
+                    // 点击触发事件
+                    clickFunction = function () {
+                        // 弹框。确认删除？
+                        gaeaDialog.confirmDialog({
+                            title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
+                            content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
+                        }, function () {
+                            var row = gaeaGrid.getSelected();
+                            $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                                selectedRow: row
+                            });
+                        });
+                    };
+                } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                    //// 初始化通用删除功能（绑定点击事件等）
+                    //gaeaActions.deleteSelected.init(opts);// options默认伪删除
+                    // 点击触发事件
+                    clickFunction = function () {
+                        // 弹框。确认删除？
+                        gaeaDialog.confirmDialog({
+                            title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
+                            content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
+                        }, function () {
+                            var row = gaeaGrid.getSelected();
+                            $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                                selectedRow: row
+                            });
+                        });
+                    };
+                } else if (gaeaValid.isNotNull(buttonDef.actions)) {
+                    var data = _private.getSubmitData();
+                    data.buttonId = buttonDef.id;
+                    data.actionName = buttonDef.action;
+                    if (buttonDef.actions.length > 1) {
+                        gaeaNotify.error("当前不支持一个按钮绑定多个action！请联系系统管理员检查。");
+                        return;
+                    }
+                    /**
+                     * 暂时只支持绑定一个action。
+                     */
+                    _private.button.doAction({
+                        button: buttonDef,
+                        //buttonAction: buttonDef.actions[0],
+                        data: data
+                    });
+                    //});
+                } else if (gaeaValid.isNotNull(buttonDef.action) && gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
+                    var data = _private.getSubmitData();
+                    data.buttonId = buttonDef.id;
+                    data.actionName = buttonDef.action;
+                    /**
+                     * 普通action的处理（没有button-action子项）
+                     * 【重要】
+                     * TODO 暂时限定export excel走这个方法。因为其他的还没改过来。
+                     */
+                    _private.button.doSimpleAction({
+                        button: buttonDef,
+                        data: data
+                    });
+                }
+                return clickFunction;
             }
         };
         /**

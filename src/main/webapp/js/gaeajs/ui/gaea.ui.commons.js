@@ -11,10 +11,11 @@
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
-        "gaeajs-ui-grid", "gaeajs-ui-multiselect"
+        "gaeajs-ui-multiselect"
     ],
     function ($, _, _s,
-              gaeaValid, gaeaString, GAEA_UI_DEFINE, gaeaGrid, gaeaMultiSelect) {
+              gaeaValid, gaeaString, GAEA_UI_DEFINE,
+              gaeaMultiSelect) {
         /**
          * DateTime Picker
          * 2016-6-19 18:19:14

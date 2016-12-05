@@ -8,6 +8,7 @@ import java.util.List;
 public class SchemaConditionSet {
     private String id;
     private List<SchemaCondition> conditions;
+    private String appendSql; // 附加的sql。主要针对当前condition-set使用。即把目前的condition和appendSql混合后，一起拼凑给主SQL。
 
     public String getId() {
         return id;
@@ -23,5 +24,13 @@ public class SchemaConditionSet {
 
     public void setConditions(List<SchemaCondition> conditions) {
         this.conditions = conditions;
+    }
+
+    public String getAppendSql() {
+        return appendSql;
+    }
+
+    public void setAppendSql(String appendSql) {
+        this.appendSql = appendSql;
     }
 }

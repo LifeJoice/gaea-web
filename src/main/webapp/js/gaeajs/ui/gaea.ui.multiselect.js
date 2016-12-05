@@ -357,7 +357,10 @@ define([
                  * 加到目标列表
                  */
                 var liTemplate = _.template(TEMPLATE.HTML.LI_WITH_DATA);
-                $selectedBox.find("ul").append(
+                if (gaeaValid.isNull($selectedBox.children("ul"))) {
+                    $selectedBox.append("<ul></ul>");
+                }
+                $selectedBox.children("ul").append(
                     liTemplate({
                         TEXT: text,
                         VALUE: value

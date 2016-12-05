@@ -1,11 +1,14 @@
 package org.gaea.framework.web.schema.convertor;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
 import org.gaea.framework.web.schema.domain.view.SchemaButton;
 import org.gaea.framework.web.schema.domain.view.SchemaButtonGroup;
+import org.gaea.framework.web.schema.view.domain.ActionParam;
+import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.util.GaeaXmlUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
@@ -13,6 +16,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Iverson on 2015/7/6.
@@ -55,7 +60,49 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
         if (StringUtils.isBlank(button.getHtmlName()) && !StringUtils.isBlank(button.getName())) {
             button.setHtmlName(button.getName());
         }
+        // 遍历"button-action"
+        NodeList nodes = node.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node viewNode = nodes.item(i);
+            // xml解析会把各种换行符等解析成元素。统统跳过。
+            if (!(viewNode instanceof Element)) {
+                continue;
+            }
+            if (XmlSchemaDefinition.BUTTON_ACTION_NAME.equals(viewNode.getNodeName())) {
+                if (CollectionUtils.isEmpty(button.getActions())) {
+                    button.setActions(new ArrayList<ExcelExportButtonAction>());
+                }
+                // 解析< button >
+                ExcelExportButtonAction buttonAction = parseButtonAction(viewNode);
+                button.getActions().add(buttonAction);
+            }
+        }
         return button;
+    }
+
+    private ExcelExportButtonAction parseButtonAction(Node inNode) throws InvalidDataException {
+        ExcelExportButtonAction buttonAction = new ExcelExportButtonAction();
+        buttonAction.setActionParamMap(new HashMap<String, ActionParam>());
+        buttonAction = GaeaXmlUtils.copyAttributesToBean(inNode, buttonAction, ExcelExportButtonAction.class);
+        NodeList nodes = inNode.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
+            // xml解析会把各种换行符等解析成元素。统统跳过。
+            if (!(node instanceof Element)) {
+                continue;
+            }
+            if (XmlSchemaDefinition.PARAM_NAME.equals(node.getNodeName())) {
+                ActionParam param = parseParam(node);
+                buttonAction.getActionParamMap().put(param.getName(), param); // Map< param.name , param obj >
+            }
+        }
+        return buttonAction;
+    }
+
+    private ActionParam parseParam(Node inNode) throws InvalidDataException {
+        ActionParam actionParam = new ActionParam();
+        actionParam = GaeaXmlUtils.copyAttributesToBean(inNode, actionParam, ActionParam.class);
+        return actionParam;
     }
 
     /**

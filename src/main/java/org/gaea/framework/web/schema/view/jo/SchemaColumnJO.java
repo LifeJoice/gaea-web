@@ -1,4 +1,4 @@
-package org.gaea.framework.web.view.jo;
+package org.gaea.framework.web.schema.view.jo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;

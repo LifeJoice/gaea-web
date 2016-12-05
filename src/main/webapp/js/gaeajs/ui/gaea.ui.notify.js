@@ -16,7 +16,7 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
         DEFAULT: "message",
         WARN: "warn",
         ERROR: "error"
-    }
+    };
     var gaeaNotify = {
         init: function () {
             $notify.jnotifyInizialize({
@@ -33,13 +33,13 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
                 });
         },
         message: function (msg) {
-            this.show(msg, msgDefaultType.DEFAULT);
+            gaeaNotify.show(msg, msgDefaultType.DEFAULT);
         },
         warn: function (msg) {
-            this.show(msg, msgDefaultType.WARN);
+            gaeaNotify.show(msg, msgDefaultType.WARN);
         },
         error: function (msg) {
-            this.show(msg, msgDefaultType.ERROR);
+            gaeaNotify.show(msg, msgDefaultType.ERROR);
         },
         show: function (msg, msgType) {
             //options = $.extend({},options,opt);
@@ -55,8 +55,14 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
                     permanent: false,
                     type: 'error'
                 });
+            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.ERROR, msgType)) {
+                $notify.jnotifyAddMessage({
+                    text: msg,
+                    permanent: false,
+                    type: 'error'
+                });
             }
         }
     };
     return gaeaNotify;
-})
+});

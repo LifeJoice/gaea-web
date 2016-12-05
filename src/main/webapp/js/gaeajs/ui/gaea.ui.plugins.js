@@ -10,11 +10,10 @@
  */
 define([
     "jquery", "underscore", 'underscore-string',
-    'gaeajs-common-utils-validate',"datetimepicker","gaeajs-common-utils-string",'gaeajs-ui-definition',
-    "gaeajs-ui-grid"
+        'gaeajs-common-utils-validate', "datetimepicker", "gaeajs-common-utils-string"
 ],
-    function ($,_,_s,
-              gaeaValid,jqDateTimePicker,gaeaString,GAEA_UI_DEFINE,gaeaGrid) {
+    function ($, _, _s,
+              gaeaValid, jqDateTimePicker, gaeaString) { // jqDateTimePicker不用，但依赖，需要导入
     /**
      * DateTime Picker
      * 2016-6-19 18:19:14

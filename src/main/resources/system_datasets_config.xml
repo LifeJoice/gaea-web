@@ -14,11 +14,11 @@
     <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
     <dataset id="DS_AUTH_RESOURCE" table="GAEA_SYS_AUTHORITIES_RESOURCES" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
-            <![CDATA[SELECT res.id value, res.name text FROM gaea_sys_authorities auth LEFT JOIN gaea_sys_authorities_resources auRes ON auth.id=auRes.authority_id LEFT JOIN gaea_sys_resources res ON auRes.resource_id=res.id]]>
+            <![CDATA[SELECT res.id value, res.name text FROM gaea_sys_resources res LEFT JOIN gaea_sys_authorities_resources auRes ON res.id=auRes.RESOURCE_ID LEFT JOIN gaea_sys_authorities auth ON auRes.AUTHORITY_ID=auth.id]]>
         </data-sql>
         <where>
-            <condition-set id="selectable">
-                <and field="auth.id" field-op="ne"></and>
+            <condition-set id="selectable" append-sql=" auth.id IS NULL :AUTH_ID_NOT_EQ">
+                <or field="auth.id" field-op="ne" placeholder="AUTH_ID_NOT_EQ"></or>
             </condition-set>
             <condition-set id="selected">
                 <and field="auth.id" field-op="eq"></and>
@@ -100,4 +100,18 @@
             <data-element value="1" text="启用"/>
         </data>
     </dataset>
+    <!-- ++++++++++++++++++++++++++++++++++++  TEST  ++++++++++++++++++++++++++++++++++++ -->
+    <dataset id="DS_EXCEL_EXPORT_DEMO" table="TEST" cache-type="auto" expire-time="1ms|s|min|d">
+        <data-sql>
+            <![CDATA[SELECT
+  menu.ID m_id,menu.`LEVEL` m_level,menu.`NAME` m_name,menu.`PARENT_ID` m_parentid,menu.`RESOURCE_ID` m_res_id,menu.`STATUS` m_status,res.`description` r_desc,res.`ID` r_id,res.`LEVEL` r_level,res.`NAME` r_name,res.`ORDER_SEQ` r_order,res.`PARENT_ID` r_parent_id,res.`RESOURCE` r_res
+FROM
+  gaea_sys_menus menu
+  LEFT JOIN gaea_sys_menus pmenu
+    ON menu.`PARENT_ID` = pmenu.`ID`
+  LEFT JOIN gaea_sys_resources res
+    ON res.id = menu.`RESOURCE_ID`]]>
+        </data-sql>
+    </dataset>
+    <!-- ++++++++++++++++++++++++++++++++++++  TEST END  ++++++++++++++++++++++++++++++++++++ -->
 </dataset-definition>

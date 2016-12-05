@@ -5,8 +5,8 @@ import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.framework.web.view.jo.SchemaColumnJO;
-import org.gaea.framework.web.view.jo.SchemaGridJO;
+import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
+import org.gaea.framework.web.schema.view.jo.SchemaGridJO;
 import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +43,9 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
         // 处理工作流相关的特殊column。如果with-workflow="true"自动加上。
         if (grid.getWithWorkflow()) {
             // 流程实例ID
-            SchemaColumn wfProcInstIdColumn = new SchemaColumn("wfProcInstId", "wfProcInstId", "流程实例Id", "WF_PROC_INST_ID", false, "100", "String");
+            SchemaColumn wfProcInstIdColumn = new SchemaColumn("wfProcInstId", "wfProcInstId", "流程实例Id", "WF_PROC_INST_ID", false, "100", "String", null, null);
             // 当前流程节点名
-            SchemaColumn wfActNameColumn = new SchemaColumn("wfActName", "wfActName", "当前节点", "WF_ACT_NAME", false, "100", "String");
+            SchemaColumn wfActNameColumn = new SchemaColumn("wfActName", "wfActName", "当前节点", "WF_ACT_NAME", false, "100", "String", null, null);
             grid.getColumns().add(wfProcInstIdColumn);
             grid.getColumns().add(wfActNameColumn);
         }

@@ -28,4 +28,15 @@
             </list>
         </constructor-arg>
     </bean>
+    <!-- ************************************************
+                    这个是excel通用导出模板的处理类
+            触发了整个系统的通用导出功能。模板从这个类的配置设定。
+         ************************************************ -->
+    <bean id="gaeaExcelExportProcessor" class="org.gaea.poi.export.GaeaExcelExportProcessor">
+        <constructor-arg>
+            <list value-type="java.lang.String">
+                <value>classpath:config/sys/excel-export/*.xml</value>
+            </list>
+        </constructor-arg>
+    </bean>
 </beans>

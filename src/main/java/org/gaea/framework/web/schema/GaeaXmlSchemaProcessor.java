@@ -1,5 +1,6 @@
 package org.gaea.framework.web.schema;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.data.dataset.domain.GaeaDataSet;
@@ -11,6 +12,7 @@ import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
 import org.gaea.framework.web.schema.convertor.list.ListSchemaHtmlConvertor;
 import org.gaea.framework.web.schema.domain.*;
 import org.gaea.framework.web.schema.domain.view.*;
+import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.util.GaeaJacksonUtils;
 import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
@@ -249,14 +251,18 @@ public class GaeaXmlSchemaProcessor {
      * @param gaeaXmlSchema
      * @return
      */
-    private Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws IOException {
+    private Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws IOException, ValidationFailedException {
         Map<String, Object> root = new HashMap<String, Object>();
         Map<String, Object> viewsMap = new HashMap<String, Object>();
         SchemaViews schemaViews = gaeaXmlSchema.getSchemaViews();
         SchemaData schemaData = gaeaXmlSchema.getSchemaData();
+        DataSet dataSet = null;
+        if (schemaData != null && CollectionUtils.isNotEmpty(schemaData.getDataSetList())) {
+            dataSet = schemaData.getDataSetList().get(0);
+        }
         // 拼装数据，转换结果集中的数据库字段名。
-        DataSet dataSet = changeDbColumnNameInData(schemaData.getDataSetList().get(0), schemaViews.getGrid());
-        schemaViews.getGridJO().setData(dataSet.getSqlResult());
+        List<Map<String, Object>> dataList = changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid());
+        schemaViews.getGridJO().setData(dataList);
         schemaViews.getGridJO().getPage().setRowCount(dataSet.getTotalElements());
         // 指定放置在页面哪个DIV中
         viewsMap.put("dialogs", schemaViews.getDialogs());
@@ -277,52 +283,67 @@ public class GaeaXmlSchemaProcessor {
      * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
      * 所以需要把结果集中的数据库字段名改为别名，即column.name
      *
-     * @param dataSet
+     * @param dataList
      * @param grid
      * @return
+     * @throws ValidationFailedException
      */
-    public DataSet changeDbColumnNameInData(DataSet dataSet, SchemaGrid grid) {
-        List<SchemaColumn> columns = grid.getColumns();
-        List<Map<String, Object>> origResults = dataSet.getSqlResult();
+    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid) throws ValidationFailedException {
+        if (grid == null) {
+            throw new ValidationFailedException("XML Schema grid定义为空。无法执行转换操作！");
+        }
+        // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
+        Map<String, SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
+        return changeDbColumnNameInData(dataList, columnMap, grid.getDisplayUndefinedColumn());
+    }
+
+    /**
+     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
+     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
+     * 所以需要把结果集中的数据库字段名改为别名，即column.name
+     * <p>
+     * columnMap的key之所以为DB-COLUMN-NAME，是因为这个方法本身就是把data的key，从数据库字段名改为xml column name的。<br/>
+     * 在转换之前,无法通过data的key(这时候还是db column name),去找column(如果key是xml column name的话).
+     * </p>
+     *
+     * @param dataList               sql查询的数据列表。一行 = Map < 字段名 ： 字段值 >
+     * @param columnMap              Map< db_column_name : schemaColumn >
+     * @param displayUndefinedColumn 是否显示XML Schema中未定义的列。如果是，则key以数据库字段名返回。
+     * @return
+     */
+    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, Map<String, SchemaColumn> columnMap, boolean displayUndefinedColumn) {
+//        List<SchemaColumn> columns = grid.getColumns();
+//        List<Map<String, Object>> origResults = dataSet.getSqlResult();
         List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
         // 遍历所有记录
-        for (Map<String, Object> eachMap : origResults) {
+        for (Map<String, Object> rowDataMap : dataList) {
             Map<String, Object> oneResultMap = new HashMap<String, Object>();
             // 遍历一条记录的所有字段
-            Set<String> keys = eachMap.keySet();
+            Set<String> keys = rowDataMap.keySet();
             for (String key : keys) {
-                boolean hasDefined = false;
-                // 遍历SCHEMA的“column”元素，对数据库字段名重命名
-                for (SchemaColumn column : columns) {
-                    // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
-                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
-                        /**
-                         * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
-                         * 例如：
-                         * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
-                         */
-                        Object newValue = getValueFromDS(eachMap.get(key), column.getDataSetId());
-                        oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
-                        hasDefined = true;
-//                        // 键名和column.name不一致才要移除。例如：key=ID和column.name=id这种在map是会被替换的。
-//                        if(!key.equalsIgnoreCase(column.getName())) {
-//                            eachMap.remove(key);                               // 再删掉旧key
-//                        }
-                        break;
-                    }
-                }
+                SchemaColumn column = columnMap.get(key);
                 // 如果XML SCHEMA没有定义该字段的column元素，而且又设置了display-undefined-column=true，就把该值传到前端。
-                if (!hasDefined && grid.getDisplayUndefinedColumn()) {
-                    oneResultMap.put(key, eachMap.get(key));
+                if (column == null && displayUndefinedColumn) {
+                    oneResultMap.put(key, rowDataMap.get(key));
                 }
+                if (column == null) {
+                    continue;
+                }
+                // 遍历SCHEMA的“column”元素，对数据库字段名重命名
+//                for (SchemaColumn column : columns) {
+                // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
+//                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
+                /**
+                 * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
+                 * 例如：
+                 * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
+                 */
+                Object newValue = getValueFromDS(rowDataMap.get(key), column.getDataSetId());
+                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
             }
             newResultMapList.add(oneResultMap);
         }
-        // 声明,释放原结果集内存
-        dataSet.setSqlResult(null);
-        // 设置新的结果
-        dataSet.setSqlResult(newResultMapList);
-        return dataSet;
+        return newResultMapList;
     }
 
     /**

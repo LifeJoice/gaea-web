@@ -35,7 +35,7 @@ public class SchemaColumn {
     public SchemaColumn() {
     }
 
-    public SchemaColumn(String id, String name, String label, String dbColumnName, Boolean visible, String htmlWidth, String dataType) {
+    public SchemaColumn(String id, String name, String label, String dbColumnName, Boolean visible, String htmlWidth, String dataType, String dataSetId, String datetimeFormat) {
         this.id = id;
         this.name = name;
         this.label = label;
@@ -43,6 +43,8 @@ public class SchemaColumn {
         this.visible = visible;
         this.htmlWidth = htmlWidth;
         this.dataType = dataType;
+        this.datetimeFormat = datetimeFormat;
+        this.dataSetId = dataSetId;
     }
 
     public String getId() {

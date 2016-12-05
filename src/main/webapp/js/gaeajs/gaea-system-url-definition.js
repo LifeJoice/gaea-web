@@ -7,23 +7,32 @@
  */
 define(function () {
     var url = {
-        DATA:{
-            DATASET:{
-                GET:"/gaea/data/ds/get" // 获取数据集接口
+        DATA: {
+            DATASET: {
+                GET: "/gaea/data/ds/get" // 获取数据集接口
             }
         },
-        QUERY:{
-            COMMON:"/sys/query", // 通用查询的url
-            BY_CONDITION:"/sys/query/byCondition"
+        QUERY: {
+            COMMON: "/sys/query", // 通用查询的url
+            BY_CONDITION: "/sys/query/byCondition"
         },
-        CRUD:{
+        CRUD: {
             //PRE_UPDATE:"/sys/common/pre-update",
-            UPDATE:"/sys/common/update",
-            DELETE:"/gaea/common/crud/delete",
-            PSEUDO_DELETE:"/gaea/common/crud/pseudo-delete"// 伪删除
+            UPDATE: "/sys/common/update",
+            DELETE: "/gaea/common/crud/delete",
+            PSEUDO_DELETE: "/gaea/common/crud/pseudo-delete"// 伪删除
         },
-        MENU:{
-            FIND_ALL:"/gaea/security/menu/find-all"// 查找所有的菜单
+        MENU: {
+            FIND_ALL: "/gaea/security/menu/find-all"// 查找所有的菜单
+        },
+        /**
+         * 这个数据结构有点特别。
+         * key：method
+         * value：url
+         */
+        ACTION: {
+            DO_SIMPLE_ACTION: "/gaea/actions/doSimpleAction",
+            DO_ACTION: "/gaea/actions/doAction"
         }
     };
     return url;
