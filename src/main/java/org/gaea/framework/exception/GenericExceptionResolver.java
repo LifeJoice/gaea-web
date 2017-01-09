@@ -8,9 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.gaea.exception.DataIntegrityViolationException;
-import org.gaea.exception.GaeaException;
-import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.*;
 import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +44,7 @@ public class GenericExceptionResolver implements HandlerExceptionResolver {
         try {
             /* 相应的状态码设置 */
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);// 默认错误 500
-            if (ex instanceof GaeaException) {
+            if (isSimpleFailed(ex)) {
                 response.setStatus(GaeaException.DEFAULT_FAIL);// 自定义一般校验错误 600
             }
             /* 解决返回json乱码的问题 */
@@ -78,17 +76,37 @@ public class GenericExceptionResolver implements HandlerExceptionResolver {
                 return new ModelAndView("error", errorMsg);
             }
         } catch (IOException iox) {
-            logger.error("异常处理框架错误！", iox);
+            logger.error("自定义的Spring MVC的异常拦截器发生异常！", iox);
         }
         return mav;
     }
 
     private void logException(Exception ex) {
-        if ((ex instanceof InvalidDataException) || (ex instanceof DataIntegrityViolationException)) {
+        if ((ex instanceof InvalidDataException) ||
+                (ex instanceof ValidationFailedException) ||
+                (ex instanceof ProcessFailedException) ||
+                (ex instanceof DataIntegrityViolationException)
+                ) {
             logger.warn("校验异常。错误信息：  {}", ex.getMessage());
         } else {
             logger.error("捕捉到系统异常！", ex);
         }
     }
 
+    /**
+     * 是否是普通是异常，可以显示给用户看。
+     *
+     * @param ex
+     * @return
+     */
+    private boolean isSimpleFailed(Exception ex) {
+        if ((ex instanceof InvalidDataException) ||
+                (ex instanceof ValidationFailedException) ||
+                (ex instanceof ProcessFailedException) ||
+                (ex instanceof DataIntegrityViolationException)
+                ) {
+            return true;
+        }
+        return false;
+    }
 }
