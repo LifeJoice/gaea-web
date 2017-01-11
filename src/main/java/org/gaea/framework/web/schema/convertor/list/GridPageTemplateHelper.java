@@ -4,12 +4,13 @@ import org.gaea.framework.web.schema.convertor.HtmlPage;
 import org.gaea.framework.web.schema.domain.SchemaImport;
 
 /**
+ * 列表页对应转换。对应gaeaGrid.html模板。
  * 把XML SCHEMA中的内容注入HTML模板中。例如：数据、引入的js、css等。
  * Created by Iverson on 2015/7/25.
  */
-public class ListSchemaHtmlConvertor extends HtmlPage {
+public class GridPageTemplateHelper extends HtmlPage {
 
-    public ListSchemaHtmlConvertor(String htmlContent) {
+    public GridPageTemplateHelper(String htmlContent) {
         super(htmlContent);
     }
 
