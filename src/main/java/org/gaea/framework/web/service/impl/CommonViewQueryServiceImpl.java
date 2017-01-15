@@ -1,19 +1,22 @@
 package org.gaea.framework.web.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.Condition;
+import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SysLogicalException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
+import org.gaea.framework.web.data.authority.DsAuthorityResult;
+import org.gaea.framework.web.data.domain.DataSetEntity;
+import org.gaea.framework.web.data.service.SystemDataSetAuthorityService;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
-import org.gaea.framework.web.schema.data.domain.SchemaCondition;
-import org.gaea.framework.web.schema.data.domain.SchemaConditionSet;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.PageResult;
@@ -23,6 +26,7 @@ import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.service.CommonViewQueryService;
+import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +51,21 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     private GaeaSqlProcessor gaeaSqlProcessor;
     @Autowired
     private SchemaDataService schemaDataService;
+    @Autowired
+    private SystemDataSetAuthorityService systemDataSetAuthorityService;
+
+    @Override
+    public PageResult query(GaeaXmlSchema gaeaXml, List<QueryCondition> filters,
+                            SchemaGridPage page, String loginName) throws ValidationFailedException, SysLogicalException, InvalidDataException {
+        if (gaeaXml == null || StringUtils.isEmpty(gaeaXml.getId())) {
+            return null;
+        }
+        return query(gaeaXml.getId(), filters, page, loginName);
+    }
 
     @Override
     public PageResult query(String schemaId, List<QueryCondition> filters,
-                            SchemaGridPage page, boolean translate) throws ValidationFailedException, SysLogicalException {
+                            SchemaGridPage page, String loginName) throws ValidationFailedException, SysLogicalException, InvalidDataException {
         PageResult pageResult = new PageResult();
         if (StringUtils.isBlank(schemaId)) {
             throw new ValidationFailedException("未能获取Schema id (in param schema id is null).无法查询！");
@@ -59,34 +74,121 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
         if (gaeaXmlSchema == null) {
             throw new SysLogicalException("未能从缓存获取对应的Schema对象。请检查逻辑关系！");
         }
+        // 构建一个，可能权限校验有额外的条件。
+        if (filters == null) {
+            filters = new ArrayList<QueryCondition>();
+        }
         try {
             DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
+            if (dataSet == null || StringUtils.isEmpty(dataSet.getId())) {
+                throw new SystemConfigException("XML Schema的DataSet配置错误。没有配置DataSet或DataSet缺少id。SchemaId : " + schemaId);
+            }
+            GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
             SchemaGrid grid = gaeaXmlSchema.getSchemaViews().getGrid();
-            final String sql = dataSet.getSql();
+            final String sql = gaeaDataSet.getSql();
             // 根据XML SCHEMA的定义，把页面传过来的查询条件做一定处理
             rebuildQueryConditionBySchema(filters, grid);
             // 获取分页的信息
-            int pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : 0;
+            int pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : SchemaGrid.DEFAULT_PAGE_SIZE;
             page.setSize(pageSize);
-            pageResult = gaeaSqlProcessor.query(sql, dataSet.getPrimaryTable(), filters, page);
+            // 数据集权限校验
+            ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
+            // 如果权限校验，没有条件。可能是具有所有数据权限。创建一个空列表给后面用。
+            if (authorityConditionSet == null) {
+                authorityConditionSet = new ConditionSet();
+                authorityConditionSet.setConditions(new ArrayList<Condition>());
+            }
+            // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
+            // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
+            authorityConditionSet.getConditions().addAll(convertToConditions(filters));
+            // 构建默认的SQL中表达式要用的上下文对象
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+            pageResult = gaeaSqlProcessor.query(sql, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
 
             List<Map<String, Object>> dataList = pageResult.getContent();
             // 基于UR XML SCHEMA的结果集格式转换
             dataList = schemaDataService.transformViewData(dataList, grid);
             pageResult.setContent(dataList);
             return pageResult;
-        } catch (ValidationFailedException e) {
-            logger.warn(e.getMessage());
-        } catch (Exception e) {
+        } catch (SystemConfigException e) {
             logger.error(e.getMessage(), e);
         }
 
         return null;
     }
 
+    private ConditionSet getAuthorityConditions(GaeaDataSet gaeaDataSet, String loginName) throws ValidationFailedException, SystemConfigException {
+        /**
+         * if 数据集的校验方式，不是不校验
+         *      进行校验
+         *      if 校验结果=没有角色对应
+         *          if 数据集配置，没有角色就没有权限
+         *              return 没结果对象
+         *      else if 校验结果=有角色、有条件
+         *          把条件和页面的filter结合。并且权限条件是在filter前面
+         *      else 有角色、没条件等
+         *          继续现在逻辑，不显式处理
+         */
+        if (gaeaDataSet.getAuthorityType() != DataSetEntity.DATASET_AUTHORITY_TYPE_NONE) {
+            // 根据数据集+用户, 校验并获得结果
+            DsAuthorityResult authorityResult = systemDataSetAuthorityService.authority(gaeaDataSet, loginName);
+            // 判断校验结果
+            // 如果结果是: 没有匹配角色
+            if (authorityResult.getResult() == DsAuthorityResult.RESULT_NO_ROLE) {
+                // 如果数据集配置: 没有角色就没有权限
+                if (gaeaDataSet.getAuthorityType() == DataSetEntity.DATASET_AUTHORITY_TYPE_NO_ROLE_NO_PERMIT) {
+                    logger.debug("用户 {} 数据权限检查, 没匹配角色. 不允许访问数据.", loginName);
+                    throw new ValidationFailedException("未授权读取对应的数据。");
+                } else if (gaeaDataSet.getAuthorityType() == DataSetEntity.DATASET_AUTHORITY_TYPE_NO_ROLE_ALL_PERMIT) {
+                    logger.debug("用户 {} 数据权限检查, 没匹配角色. 系统配置没有角色可以访问所有数据. 允许访问数据.", loginName);
+                } else if (gaeaDataSet.getAuthorityType() == DataSetEntity.DATASET_AUTHORITY_TYPE_NONE) {
+                    logger.trace("该数据集配置不需要数据权限控制。");
+                } else {
+                    throw new ValidationFailedException("该数据集未配置合适的数据权限管理。");
+                }
+            } else if (authorityResult.getResult() == DsAuthorityResult.RESULT_WITH_ROLE_AND_CONDITIONS) {
+                logger.trace("用户 {} 数据权限检查, 数据权限和角色匹配. 允许访问数据.", loginName);
+//                return authorityResult.getQueryConditions();
+                return authorityResult.getConditionSet();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param gaeaDataSet 数据集的定义。主要用sql，primaryTable等。
+     * @param conditions  条件
+     * @param page
+     * @param loginName   登录账户名。主要用于数据权限过滤。
+     * @return
+     * @throws ValidationFailedException
+     * @throws InvalidDataException
+     * @throws SystemConfigException
+     */
+    @Override
+    public PageResult query(GaeaDataSet gaeaDataSet, List<QueryCondition> conditions, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
+        if (gaeaDataSet != null) {
+            if (conditions == null) {
+                conditions = new ArrayList<QueryCondition>();
+            }
+            // 数据集权限校验
+            ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
+            // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
+            if (authorityConditionSet != null && CollectionUtils.isNotEmpty(authorityConditionSet.getConditions())) {
+                // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
+                List<Condition> originConditions = CollectionUtils.isEmpty(conditions) ? new ArrayList<Condition>() : convertToConditions(conditions);
+                authorityConditionSet.getConditions().addAll(originConditions);
+            }
+            // 构建默认的SQL中表达式要用的上下文对象
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+            return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
+        }
+        return null;
+    }
+
     /**
      * <p>
-     *     主要负责从schemaId和datasetId中获取合适的dataset，再调用queryByConditions(DataSet dataSet, DataSetCommonQueryConditionDTO queryConditionDTO)查询数据。
+     * 主要负责从schemaId和datasetId中获取合适的dataset，再调用queryByConditions(DataSet dataSet, DataSetCommonQueryConditionDTO queryConditionDTO)查询数据。
      * </p>
      * 根据查询条件进行查询。<p/>
      * 查询条件可能包括：<br/>
@@ -94,18 +196,18 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * <li>使用XML SCHEMA中的那个condition-set，作为条件，和对应的值。</li>
      * </ul>
      * <p>
-     *     schemaId,其实也是用于获取dataset. 如果schemaId和datasetId同时存在，则用dataSetId获取的DataSet.
+     * schemaId,其实也是用于获取dataset. 如果schemaId和datasetId同时存在，则用dataSetId获取的DataSet.
      * </p>
      *
-     * @param schemaId             可以为空。如果schemaId和datasetId同时存在，则用dataSetId.
-     * @param datasetId            可以为空。如果schemaId和datasetId同时存在，则用dataSetId.
-     * @param queryConditionDTO
-     * @return
+     * @param schemaId          可以为空。如果schemaId和datasetId同时存在，则用dataSetId.
+     * @param datasetId         可以为空。如果schemaId和datasetId同时存在，则用dataSetId.
+     * @param defaultDsContext
+     * @param queryConditionDTO @return
      * @throws ValidationFailedException
      * @throws SysLogicalException
      */
     @Override
-    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException {
+    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException {
         GaeaXmlSchema gaeaXmlSchema = null;
         if (StringUtils.isNotEmpty(schemaId)) {
             gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
@@ -138,9 +240,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                 return null;
             }
             dataSet = GaeaSchemaUtils.translateDataSet(gaeaDataSet);
-//            sql = dataSet.getSql();
         }
-        List<Map<String, Object>> newDataList = queryByConditions(dataSet, queryConditionDTO);
+        List<Map<String, Object>> newDataList = queryByConditions(dataSet, queryConditionDTO, defaultDsContext);
         // 基于XML SCHEMA的结果集格式转换，如果有传过来XML SCHEMA ID的话
         if (grid != null) {
             newDataList = schemaDataService.transformViewData(newDataList, grid);
@@ -160,19 +261,20 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      *
      * @param dataSet           要查询的数据集。
      * @param queryConditionDTO
+     * @param defaultDsContext
      * @return
      * @throws ValidationFailedException
      * @throws SysLogicalException
      */
     @Override
-    public List<Map<String, Object>> queryByConditions(DataSet dataSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException {
+    public List<Map<String, Object>> queryByConditions(DataSet dataSet, DataSetCommonQueryConditionDTO queryConditionDTO, GaeaDefaultDsContext defaultDsContext) throws ValidationFailedException, SysLogicalException {
         if (dataSet == null) {
             logger.debug("数据集为空，无法进行系统通用条件查询。");
             return null;
         }
         try {
             List<QueryCondition> newConditions = new ArrayList<QueryCondition>();// 按通用查询组装标准查询对象
-            SchemaConditionSet conditionSet = null;// SCHEMA定义的条件集合
+            ConditionSet conditionSet = null;// SCHEMA定义的条件集合
 
 
             // 查找请求有没有对应的查询的条件集合，转换为标准查询条件，给查询处理器处理
@@ -181,24 +283,19 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                 if (conditionSet != null && conditionSet.getConditions() != null) {
                     for (int i = 0; i < conditionSet.getConditions().size(); i++) {
                         // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
-                        SchemaCondition schemaCondition = conditionSet.getConditions().get(i);
+                        Condition schemaCondition = conditionSet.getConditions().get(i);
                         DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
-//                    for(SchemaCondition schemaCondition:conditionSet.getConditions()){
                         QueryCondition cond = new QueryCondition();
-                        cond.setPropertyName(schemaCondition.getField());// 查询字段为XML SCHEMA中的定义
+                        cond.setPropName(schemaCondition.getPropName());// 查询字段为XML SCHEMA中的定义
                         cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
-                        cond.setValue(valueDTO.getValue());// value为页面传过来的值
-                        cond.setOp(schemaCondition.getFieldOp());
+                        cond.setPropValue(valueDTO.getValue());// value为页面传过来的值
+                        cond.setOp(schemaCondition.getOp());
                         newConditions.add(cond);
                     }
                 }
             }
-            List<Map<String, Object>> result = gaeaSqlProcessor.query(dataSet.getSql(), conditionSet, queryConditionDTO);
+            List<Map<String, Object>> result = gaeaSqlProcessor.query(dataSet.getSql(), conditionSet, defaultDsContext, queryConditionDTO);
             dataSet.setSqlResult(result);
-//            // 基于XML SCHEMA的结果集格式转换，如果有传过来XML SCHEMA ID的话
-//            if (grid != null) {
-//                dataSet = schemaDataService.transformViewData(dataSet, grid);
-//            }
             return dataSet.getSqlResult();
         } catch (ValidationFailedException e) {
             logger.info("系统动态查询失败。" + e.getMessage());
@@ -218,21 +315,38 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * @param grid
      */
     private void rebuildQueryConditionBySchema(List<QueryCondition> queryConditions, SchemaGrid grid) throws ValidationFailedException {
-        for (QueryCondition condition : queryConditions) {
-            if (StringUtils.isEmpty(condition.getPropertyName())) {
-                throw new ValidationFailedException(
-                        MessageFormat.format("快捷查询的propertyName为空，无法查询！op={0} value={1}",
-                                condition.getOp(), condition.getValue()).toString());
+        if (queryConditions != null) {
+            for (QueryCondition condition : queryConditions) {
+                if (StringUtils.isEmpty(condition.getPropName())) {
+                    throw new ValidationFailedException(
+                            MessageFormat.format("快捷查询的propertyName为空，无法查询！op={0} value={1}",
+                                    condition.getOp(), condition.getPropValue()).toString());
+                }
+                SchemaColumn schemaColumn = GaeaSchemaUtils.getViewColumn(grid, condition.getPropName());
+                String dbName = schemaColumn.getDbColumnName();
+                condition.setPropName(dbName);
+                condition.setDataType(schemaColumn.getDataType());
+                condition.setOp(condition.getOp());
             }
-            SchemaColumn schemaColumn = GaeaSchemaUtils.getViewColumn(grid, condition.getPropertyName());
-//            String dbName = GaeaSchemaUtils.getDbColumnName(grid, fa.getPropertyName());
-            String dbName = schemaColumn.getDbColumnName();
-            condition.setPropertyName(dbName);
-            condition.setDataType(schemaColumn.getDataType());
-            condition.setOp(condition.getOp());
-//            if(SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(schemaColumn.getDataType())){
-//                condition.setSqlType(Types.DATE);
-//            }
         }
+    }
+
+    /**
+     * 一个vo到vo的类型手动转换。
+     *
+     * @param queryConditions
+     * @return
+     */
+    private List<Condition> convertToConditions(List<QueryCondition> queryConditions) {
+        if (CollectionUtils.isNotEmpty(queryConditions)) {
+            List<Condition> conditionList = new ArrayList<Condition>();
+            for (QueryCondition queryCondition : queryConditions) {
+                Condition condition = new Condition();
+                BeanUtils.copyProperties(queryCondition, condition);
+                conditionList.add(condition);
+            }
+            return conditionList;
+        }
+        return null;
     }
 }

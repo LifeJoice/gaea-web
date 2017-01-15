@@ -1,5 +1,6 @@
 package org.gaea.framework.web.schema;
 
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.view.domain.ActionParam;
 
@@ -37,6 +38,7 @@ public interface Action<T> {
      * Action对应的处理方法。
      *
      * @return
+     * @param loginName
      */
-    T doAction() throws ValidationFailedException;
+    T doAction(String loginName) throws ValidationFailedException, InvalidDataException;
 }

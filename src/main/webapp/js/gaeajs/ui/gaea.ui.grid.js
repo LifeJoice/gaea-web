@@ -32,8 +32,8 @@ define([
             QUERY: {
                 DIV_FIELD: '<div id="<%= ID %>" class="gaea-query-field <%= CLASS %>">' +
                 '</div>', // 查询字段块（包括下拉按钮）
-                PARAM_NAME: "filters[<%= P_SEQ %>].propertyName", // 单个请求的变量名
-                PARAM_VALUE: "filters[<%= P_SEQ %>].value", // 单个查询的key
+                PARAM_NAME: "filters[<%= P_SEQ %>].propName", // 请求查询的属性名
+                PARAM_VALUE: "filters[<%= P_SEQ %>].propValue", // 请求查询的属性名
                 PARAM_OP: "filters[<%= P_SEQ %>].op" // 查询的比较符
             }
         };

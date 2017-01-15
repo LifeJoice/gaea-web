@@ -153,7 +153,7 @@
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="packagesToScan" value="org.gaea.**.domain,iverson.test.**.domain" />
+        <property name="packagesToScan" value="org.gaea.**.domain,org.gaea.**.entity,iverson.test.**.domain" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
         </property>

@@ -3,6 +3,7 @@ package org.gaea.framework.web.controller;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.schema.SystemCacheFactory;
@@ -11,7 +12,6 @@ import org.gaea.framework.web.schema.domain.view.SchemaButton;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.framework.web.schema.view.action.ExcelExportSimpleButtonAction;
-import org.gaea.framework.web.schema.view.domain.ActionParam;
 import org.gaea.framework.web.schema.view.service.ActionsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 页面各种内置action的处理。例如：导出当前页excel、按模板导出excel等。
@@ -62,7 +60,7 @@ public class CommonActionsController {
         SchemaButton button = GaeaSchemaUtils.getButton(xmlSchema, buttonId, method);
         if (button != null && CollectionUtils.isNotEmpty(button.getActions())) {
             for (ExcelExportButtonAction buttonAction : button.getActions()) {
-                actionsService.doAction(buttonAction, response);
+                actionsService.doAction(buttonAction, response, request);
             }
         }
     }
@@ -80,7 +78,7 @@ public class CommonActionsController {
      */
     @RequestMapping(value = "/doSimpleAction")
     public void doSimpleAction(String schemaId, String buttonId, String actionName, @RequestBean("filters") List<QueryCondition> queryConditionList,
-                               HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException {
+                               HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, InvalidDataException {
         if (StringUtils.isEmpty(schemaId)) {
             throw new ValidationFailedException("获取不到Schema id。无法进行导出操作。");
         }
@@ -88,20 +86,8 @@ public class CommonActionsController {
             throw new ValidationFailedException("缺少操作名（actionName）,无法执行doSimpleAction操作。");
         }
         ExcelExportSimpleButtonAction excelSimpleAction = new ExcelExportSimpleButtonAction(actionName, schemaId, queryConditionList);
-//        Map<String, ActionParam> actionParamMap = new HashMap<String, ActionParam>();
-//        excelSimpleAction.setName(actionName);
-//        // 以下是excelSimpleAction必须的一些param。
-//        ActionParam<String> schemaIdParam = new ActionParam<String>();
-//        schemaIdParam.setName("schemaId");
-//        schemaIdParam.setValue(schemaId);
-//        actionParamMap.put("schemaId", schemaIdParam);
-//        ActionParam<List<QueryCondition>> queryConditionsParam = new ActionParam<List<QueryCondition>>();
-//        queryConditionsParam.setName("queryConditions");
-//        queryConditionsParam.setValue(queryConditionList);
-//        actionParamMap.put("queryConditions", queryConditionsParam);
-//        excelSimpleAction.setActionParamMap(actionParamMap);
         // 执行action定义的方法
-        actionsService.doSimpleAction(excelSimpleAction, response);
+        actionsService.doSimpleAction(excelSimpleAction, response, request);
 
     }
 }

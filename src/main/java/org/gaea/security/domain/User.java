@@ -25,7 +25,7 @@ public class User implements Serializable {
     private String password;
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     @JoinTable(
-            name = "USERS_ROLES", joinColumns = {
+            name = "GAEA_SYS_USERS_ROLES", joinColumns = {
             @JoinColumn(name = "USER_ID")
     }, inverseJoinColumns = {
             @JoinColumn(name = "ROLE_ID")

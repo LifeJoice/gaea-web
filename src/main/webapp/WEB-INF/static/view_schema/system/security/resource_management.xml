@@ -16,7 +16,7 @@
                 <condition-set id="byId">
                     <!--对应SchemaCondition-->
                     <!--这里不设value属性（或者要设置也可以）。value由页面传过来。-->
-                    <and field="id" field-op="eq"></and>
+                    <and propName="id" op="eq"></and>
                     <!--<or field="name" field-op="eq"></or>-->
                 </condition-set>
 

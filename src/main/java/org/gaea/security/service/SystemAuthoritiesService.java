@@ -11,4 +11,6 @@ public interface SystemAuthoritiesService {
     public List<String> findCodeList();
 
     void save(Authority authority);
+
+    void saveAuthResource(Authority authority, List<String> resourceIds);
 }

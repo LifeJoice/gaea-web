@@ -18,10 +18,10 @@
         </data-sql>
         <where>
             <condition-set id="selectable" append-sql=" auth.id IS NULL :AUTH_ID_NOT_EQ">
-                <or field="auth.id" field-op="ne" placeholder="AUTH_ID_NOT_EQ"></or>
+                <or propName="auth.id" op="ne" placeholder="AUTH_ID_NOT_EQ"></or>
             </condition-set>
             <condition-set id="selected">
-                <and field="auth.id" field-op="eq"></and>
+                <and propName="auth.id" op="eq"></and>
             </condition-set>
         </where>
     </dataset>
@@ -38,8 +38,8 @@
             <condition-set id="byId">
                 <!--对应SchemaCondition-->
                 <!--这里不设value属性（或者要设置也可以）。value由页面传过来。-->
-                <!--field-op : or and eq ne lt gt le ge-->
-                <and field="resource_id" field-op="eq"></and>
+                <!--op : or and eq ne lt gt le ge-->
+                <and propName="resource_id" op="eq"></and>
                 <!--<or field="name" op="eq"></or>-->
             </condition-set>
 
@@ -52,10 +52,10 @@
         </data-sql>
         <where>
             <condition-set id="selectable">
-                <and field="test.resource_id" field-op="eq"></and>
+                <and propName="test.resource_id" op="eq"></and>
             </condition-set>
             <condition-set id="selected">
-                <and field="test.resource_id" field-op="ne"></and>
+                <and propName="test.resource_id" op="ne"></and>
             </condition-set>
         </where>
     </dataset>
@@ -67,10 +67,10 @@
         </data-sql>
         <where>
             <condition-set id="selectable">
-                <and field="role.id" field-op="ne"></and>
+                <and propName="role.id" op="ne"></and>
             </condition-set>
             <condition-set id="selected">
-                <and field="role.id" field-op="eq"></and>
+                <and propName="role.id" op="eq"></and>
             </condition-set>
         </where>
     </dataset>
@@ -81,7 +81,7 @@
         </data-sql>
         <where>
             <condition-set id="testTrigger">
-                <and field="resource_id" field-op="eq"></and>
+                <and propName="resource_id" op="eq"></and>
             </condition-set>
         </where>
     </dataset>

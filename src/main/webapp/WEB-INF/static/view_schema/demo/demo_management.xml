@@ -3,25 +3,30 @@
 <ur-schema id="GAEA_SCHEMA_DEMO_MANAGEMENT">
     <!--<ur-schema xmlns:views="http://www.ur.com.cn/schema/views">-->
     <data>
+        <!--
+        authority-type
+        数据校验方式。 0：不校验 1：校验,无对应的当没权限. 2：校验,无对应的当有权限.
+        -->
+        <dataset id="DEMO_MANAGEMENT" primary-table="GAEA_SYS_RESOURCES"></dataset>
         <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
-        <dataset id="DS_RESOURCE_MANAGEMENT" primary-table="GAEA_SYS_RESOURCES">
-            <!--bean-ref：即关联的数据源。用该数据源查询。-->
-            <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource"/>
-            <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
-            <data-sql>
-                <![CDATA[SELECT r.* FROM gaea_sys_resources r]]>
-            </data-sql>
-            <!--对应SchemaWhere-->
-            <where>
-                <condition-set id="byId">
-                    <!--对应SchemaCondition-->
-                    <!--这里不设value属性（或者要设置也可以）。value由页面传过来。-->
-                    <and field="id" field-op="eq"></and>
-                    <!--<or field="name" field-op="eq"></or>-->
-                </condition-set>
+        <!--<dataset id="DEMO_MANAGEMENT" primary-table="GAEA_SYS_RESOURCES">-->
+        <!--&lt;!&ndash;bean-ref：即关联的数据源。用该数据源查询。&ndash;&gt;-->
+        <!--<data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource"/>-->
+        <!--&lt;!&ndash; data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。&ndash;&gt;-->
+        <!--<data-sql>-->
+        <!--<![CDATA[SELECT r.* FROM gaea_sys_resources r]]>-->
+        <!--</data-sql>-->
+        <!--&lt;!&ndash;对应SchemaWhere&ndash;&gt;-->
+        <!--<where>-->
+        <!--<condition-set id="byId">-->
+        <!--&lt;!&ndash;对应SchemaCondition&ndash;&gt;-->
+        <!--&lt;!&ndash;这里不设value属性（或者要设置也可以）。value由页面传过来。&ndash;&gt;-->
+        <!--<and propName="id" op="eq"></and>-->
+        <!--&lt;!&ndash;<or field="name" field-op="eq"></or>&ndash;&gt;-->
+        <!--</condition-set>-->
 
-            </where>
-        </dataset>
+        <!--</where>-->
+        <!--</dataset>-->
         <data-schema>
             <table name="DEMO_DAYOFF_FORM">
                 <foreign-key name="" ref-table="">
@@ -156,7 +161,9 @@
                     visible="true" sortable="false" html-width="240" data-type="string"/>
             <column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"
                     visible="true" sortable="false" html-width="120" data-type="string"/>
-            <column id="date" name="date" label="测试时间" db-column-name="DATE"
+            <column id="createBy" name="createBy" label="创建人" db-column-name="CREATE_BY"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="createTime" name="createTime" label="创建时间" db-column-name="CREATE_TIME"
                     visible="true" sortable="true" html-width="180" data-type="date"
                     datetime-format="yyyy-MM-dd HH:mm"/>
         </grid>

@@ -26,11 +26,13 @@
         </property>
     </bean>
     <!--add by Iverson 2015-9-25 -->
+    <!-- 不在这里声明，会导致无法使用Spring的注解注入功能。而且放这里也没啥配置的。 by Iverson 2017年1月11日 星期三 -->
     <!--XML Schema的处理器-->
-    <bean id="gaeaHtmlView" class="org.gaea.springframework.web.servlet.view.GaeaHtmlView">
-        <property name="contentType" value="text/html;charset=UTF-8"/>
-        <property name="url" value=""/>
-    </bean>
+    <!--<bean id="gaeaHtmlView" class="org.gaea.springframework.web.servlet.view.GaeaHtmlView">-->
+    <!--<property name="gaeaXmlSchemaProcessor" ref="gaeaXmlSchemaProcessor"/>-->
+    <!--<property name="contentType" value="text/html;charset=UTF-8"/>-->
+    <!--<property name="url" value=""/>-->
+    <!--</bean>-->
 
     <bean id="gaeaHtmlViewResolver" class="org.gaea.springframework.web.servlet.view.GaeaHtmlViewResolver">
         <property name="gaeaXmlSchemaProcessor" ref="gaeaXmlSchemaProcessor"/>

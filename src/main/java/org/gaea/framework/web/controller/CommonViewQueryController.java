@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.db.QueryCondition;
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,19 +53,9 @@ public class CommonViewQueryController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public PageResult page(@RequestBean SchemaGridPage page, String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
-//                        @RequestBean("staticParams") List<FinderStaticParam> staticParams,
-                           HttpServletRequest request, HttpServletResponse response) {
-        try {
-//            Pageable pageable1 = new PageRequest(page.getPage(),page.getSize());
-            PageResult result = commonViewQueryService.query(urSchemaId, filters, page, true);
+                           HttpServletRequest request, HttpServletResponse response) throws InvalidDataException, SysLogicalException, ValidationFailedException {
+        PageResult result = commonViewQueryService.query(urSchemaId, filters, page, GaeaWebSecuritySystem.getUserName(request));
             return result;
-//            return (List<Map<String, Object>>) result.getContent();
-        } catch (ValidationFailedException e) {
-            logger.warn(e.getMessage());
-        } catch (SysLogicalException e) {
-            logger.warn(e.getMessage());
-        }
-        return null;
     }
 
     /**
@@ -96,7 +88,7 @@ public class CommonViewQueryController {
             return null;
         }
         try {
-            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, queryConditionDTO);
+            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, null, queryConditionDTO);
             return result;
         } catch (SysLogicalException e) {
             logger.debug(e.getMessage(), e);

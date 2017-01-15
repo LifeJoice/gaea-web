@@ -20,6 +20,7 @@ public class SchemaGrid {
     //    private Map<String, Object> jsonData;
     private String renderTo;                                // grid渲染到页面哪个div中
     private String pageSize;                                // 每页显示多少条记录
+    public static final int DEFAULT_PAGE_SIZE = 20;
 
     public String getId() {
         return id;
@@ -146,10 +147,10 @@ public class SchemaGrid {
 //        }
 //        return 0;
 //    }
-
     public String getPageSize() {
         return pageSize;
     }
+
     public void setPageSize(String pageSize) {
         this.pageSize = pageSize;
     }

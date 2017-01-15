@@ -1,11 +1,7 @@
 package org.gaea.framework.web.schema.domain;
 
-import org.apache.commons.lang3.StringUtils;
-import org.gaea.framework.web.schema.data.domain.SchemaWhere;
-import org.gaea.util.GaeaJacksonUtils;
+import org.gaea.data.dataset.domain.Where;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +16,7 @@ public class DataSet {
     private List<Map<String,Object>> sqlResult;
     private String jsonData;
     private long totalElements;
-    private SchemaWhere where;
+    private Where where;
     private String primaryTable;
 
     public String getId() {
@@ -60,44 +56,44 @@ public class DataSet {
      * <b>这个方法直接使用已转换过的jsonData对象（类似缓存），会存在数据过期的问题。使用时要注意。</b>
      * @return
      */
-    public String getJsonData() throws IOException {
-        if(StringUtils.isBlank(this.jsonData)){
-            this.jsonData = convertToJson(this.getSqlResult());
-        }
-        return jsonData;
-    }
-
-    public void setJsonData(String jsonData) {
-        this.jsonData = jsonData;
-    }
-
-    private String convertToJson(List<Map<String, Object>> queryData) throws IOException {
-//        Page<?> result = (Page<?>)inResult;
-//        // 获取SQL查询后的结果
-//        List<Map<String, Object>> queryData = (List<Map<String, Object>>) result.getContent();
-        Map<String,Object> rootMap = new HashMap<String, Object>();
-        rootMap.put("data",queryData);
-        // 遍历结果，每一行
-//        for (Map<String, Object> row : queryData) {
-//            // 遍历每一列
-//            for (Map.Entry<String, Object> dbColumn : row.entrySet()) {
-//                String dbColumnName = dbColumn.getKey();
+//    public String getJsonData() throws IOException {
+//        if(StringUtils.isBlank(this.jsonData)){
+//            this.jsonData = convertToJson(this.getSqlResult());
+//        }
+//        return jsonData;
+//    }
 //
-//            }
-//        }
-//        StringWriter sw = new StringWriter();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(System.out, JsonEncoding.UTF8);
-//            jsonGenerator.writeObject(queryData);
-//            JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(sw);
-//            objectMapper.writeValue(jsonGenerator,rootMap);
-//            System.out.println("\n"+sw.toString());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        return GaeaJacksonUtils.parse(rootMap);
-    }
+//    public void setJsonData(String jsonData) {
+//        this.jsonData = jsonData;
+//    }
+
+//    private String convertToJson(List<Map<String, Object>> queryData) throws IOException {
+////        Page<?> result = (Page<?>)inResult;
+////        // 获取SQL查询后的结果
+////        List<Map<String, Object>> queryData = (List<Map<String, Object>>) result.getContent();
+//        Map<String,Object> rootMap = new HashMap<String, Object>();
+//        rootMap.put("data",queryData);
+//        // 遍历结果，每一行
+////        for (Map<String, Object> row : queryData) {
+////            // 遍历每一列
+////            for (Map.Entry<String, Object> dbColumn : row.entrySet()) {
+////                String dbColumnName = dbColumn.getKey();
+////
+////            }
+////        }
+////        StringWriter sw = new StringWriter();
+////        ObjectMapper objectMapper = new ObjectMapper();
+////        try {
+////            JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(System.out, JsonEncoding.UTF8);
+////            jsonGenerator.writeObject(queryData);
+////            JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(sw);
+////            objectMapper.writeValue(jsonGenerator,rootMap);
+////            System.out.println("\n"+sw.toString());
+////        } catch (IOException e) {
+////            e.printStackTrace();
+////        }
+//        return GaeaJacksonUtils.parse(rootMap);
+//    }
 
     public String getBeanRef() {
         return beanRef;
@@ -115,11 +111,11 @@ public class DataSet {
         this.totalElements = totalElements;
     }
 
-    public SchemaWhere getWhere() {
+    public Where getWhere() {
         return where;
     }
 
-    public void setWhere(SchemaWhere where) {
+    public void setWhere(Where where) {
         this.where = where;
     }
 

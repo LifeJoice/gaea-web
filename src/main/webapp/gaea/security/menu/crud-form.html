@@ -1,7 +1,16 @@
-<div class="gaea-form gaea-ui-page">
+<div id="div-menu-mgr" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
     <div class="row">
-        <div class="field-block"><span class="fieldname">名称</span><span class="fieldvalue"><input id="menu.name" name="menu.name" value=""></span></div>
-        <div class="field-block"><span class="fieldname">菜单级别</span><span class="fieldvalue"><input id="menu.level" name="menu.level" value=""></span></div>
+        <div class="field-block"><span class="fieldname">名称</span><span class="fieldvalue"><input id="menu.name"
+                                                                                                  name="menu.name"
+                                                                                                  value=""
+                                                                                                  data-msg-required="名称不能为空"
+                                                                                                  required></span></div>
+        <div class="field-block"><span class="fieldname">菜单级别</span><span class="fieldvalue"><input id="menu.level"
+                                                                                                    name="menu.level"
+                                                                                                    value=""
+                                                                                                    data-msg="输入要求是整数 1~3."
+                                                                                                    required></span>
+        </div>
         <!--<div class="field-block"><span class="fieldname">顺序号</span><span class="fieldvalue"><input id="orderSeq" name="orderSeq" value=""></span></div>-->
     </div>
     <div class="row">

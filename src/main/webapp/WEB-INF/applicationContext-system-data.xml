@@ -17,8 +17,11 @@
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
 
+    <!-- ************************************************************************************************************
+            Gaea数据集的初始化
+            配置了Gaea数据集的默认读取位置。
+         ************************************************************************************************************ -->
     <bean id="gaeaDataSetResolver" class="org.gaea.data.dataset.GaeaDataSetResolver" >
-        <!--<property name="filePath" value="classpath:system_datasets_config.xml" />-->
-        <constructor-arg name="filePath" value="classpath:system_datasets_config.xml" />
+        <constructor-arg name="filePath" value="classpath:config/sys/dataset/*.xml"/>
     </bean>
 </beans>

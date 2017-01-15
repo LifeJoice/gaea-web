@@ -3,9 +3,12 @@ package org.gaea.framework.web.schema.convertor;
 import org.gaea.data.convertor.XmlDataSetConvertor;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.dataset.domain.Where;
+import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.data.xml.DataSetSchemaDefinition;
 import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.ProcessFailedException;
+import org.gaea.exception.SysInitException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
@@ -72,7 +75,7 @@ public class XmlDataSchemaConvertor {
             }
         }
         // 根据前面解析的XML SCHEMA的DATASET配置，查询结果并回填。
-        schemaData.setDataSetList(sqlQuery(schemaData.getDataSetList()));
+//        schemaData.setDataSetList(sqlQuery(schemaData.getDataSetList()));
 //        DataSource dataSource = dataSourceService.findByCode(schemaData.getDataSetList().get(0).getCode());
 //
 //
@@ -104,6 +107,13 @@ public class XmlDataSchemaConvertor {
     private DataSet convertDataSet(Node xmlDataSetNode) throws ValidationFailedException, InvalidDataException {
         GaeaDataSet gaeaDataSet = xmlDataSetConvertor.convertDataSet(xmlDataSetNode);
         DataSet dataSet = GaeaSchemaUtils.translateDataSet(gaeaDataSet);
+//        try {
+//            SystemDataSetFactory.cacheDataSet(gaeaDataSet);
+//        } catch (ProcessFailedException e) {
+//            logger.error(e.getMessage(),e);
+//        } catch (SysInitException e) {
+//            logger.error(e.getMessage(),e);
+//        }
 //        Element dataSetElement = (Element) xmlDataSetNode;
 //        NodeList nodes = dataSetElement.getChildNodes();
 //        for (int i = 0; i < nodes.getLength(); i++) {
@@ -147,52 +157,4 @@ public class XmlDataSchemaConvertor {
         logger.warn("Xml schema中包含错误数据。data中包含非dataset信息: <" + nodeName + ">");
     }
 
-    /**
-     * 根据dataSetList中dataset的配置信息（sql，数据源等），查询结果并回填。
-     * // TODO 这个方法必须移到GaeaXmlSchemaProcessor去查询数据。不要在这里查询数据！！
-     * @param dataSetList
-     * @return 回填了查询结果的dataSetList
-     */
-    private List<DataSet> sqlQuery(List<DataSet> dataSetList) {
-//        DataSource dataSource = dataSourceService.findByCode(dataSetList.get(0).getCode());
-        // 遍历dataSet list，并为其中每个dataset查询结果，并把数据结果回填
-        for (DataSet dataSet : dataSetList) {
-            if (StringUtils.isBlank(dataSet.getSql())) {
-                continue;
-            }
-            // TODO 使用macula的查询链。未彻底迁移完成，例如还有分页等
-//            DataHandlerChain dataHandleChain = new DataHandlerChain(
-//                    ApplicationContext.getBean(UrPrepareFinderHandler.class),       // UR自有的PrepareFinderHandler
-//                    ApplicationContext.getBean(QueryParserDataHandler.class),
-//                    ApplicationContext.getBean(QueryExecutorHandler.class));
-//            ;
-////        dataHandleChain.addInitialParameter(PrepareFinderHandler.FINDER_SCHEMA, this.schema);
-////        dataHandleChain.addInitialParameter(PrepareFinderHandler.FINDER_TAB_VIEW, tabView);
-////            dataHandleChain.addInitialParameter(PrepareFinderHandler.FINDER_ARGS, arguments);
-//            dataHandleChain.addInitialParameter(QueryExecutorHandler.AUTO_FIX_PAGE_NUM, Boolean.TRUE);
-//
-////            if (staticParams != null && !staticParams.isEmpty()) {
-////                for (FinderStaticParam staticParam : staticParams) {
-////                    dataHandleChain.addInitialParameter(staticParam.getName(), staticParam.getValue());
-////                }
-////            }
-//
-//            Page<?> handleResult = (Page<?>) dataHandleChain.handle(dataSet.getSql(), SecurityUtils.getUserContext(), DataSourceUtils.get(dataSource),
-//                    null);
-//            Pageable pageable = new PageRequest(1,20);
-            PageResult pageResultSet = null;
-            try {
-                pageResultSet = gaeaSqlProcessor.query(dataSet.getSql(),dataSet.getPrimaryTable(), null, new SchemaGridPage(1, 20));
-
-                logger.debug("\n【SQL】 " + dataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
-                dataSet.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
-                dataSet.setTotalElements(pageResultSet.getTotalElements());
-            } catch (ValidationFailedException e) {
-                logger.info("系统动态查询失败。" + e.getMessage());
-            } catch (InvalidDataException e) {
-                logger.info("系统动态查询失败。" + e.getMessage());
-            }
-        }
-        return dataSetList;
-    }
 }

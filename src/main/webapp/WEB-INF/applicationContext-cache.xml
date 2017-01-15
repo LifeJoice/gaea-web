@@ -49,20 +49,34 @@
         <!--</property>-->
     </bean>
 
+    <!--这个主要是json用。因为每次调用都需要设置特定的valueSerializer，不跟上面的redisTemplate混了。-->
+    <bean id="jsonRedisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--         如果不配置Serializer，那么存储的时候智能使用String，如果用User类型存储，那么会提示错误User can't cast to String！！！-->
+        <!--通用配置。正常key都是String吧。 by Iverson 2016-3-10 15:23:43-->
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="hashKeySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <!--<property name="valueSerializer">-->
+        <!--<bean-->
+        <!--class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>-->
+        <!--</property>-->
+    </bean>
+    <!-- 移动system-cache.properties到classpath中 by Iverson 2017年1月11日 星期三 -->
     <bean id="cachePropReader" class="org.gaea.util.GaeaPropertiesReader">
-        <!--<constructor-arg>-->
-            <!--<list value-type="java.lang.String">-->
-                <!--<value>classpath:system-cache.properties</value>-->
-            <!--</list>-->
-        <!--</constructor-arg>-->
-        <constructor-arg ref="dsPropResource" />
+        <constructor-arg>
+            <list value-type="java.lang.String">
+                <value>classpath:config/sys/db/system-cache.properties</value>
+            </list>
+        </constructor-arg>
+        <!--<constructor-arg ref="dsPropResource" />-->
     </bean>
 
-    <bean id="dsPropResource" class="org.springframework.web.context.support.ServletContextResource">
-        <constructor-arg ref="servletContext" />
-        <constructor-arg value="/WEB-INF/system-cache.properties" />
-    </bean>
-
-    <!--<bean id="viewResolver"-->
-    <!--class="org.springframework.web.servlet.view.InternalResourceViewResolver" />-->
+    <!--<bean id="dsPropResource" class="org.springframework.web.context.support.ServletContextResource">-->
+        <!--<constructor-arg ref="servletContext" />-->
+        <!--<constructor-arg value="/WEB-INF/system-cache.properties" />-->
+    <!--</bean>-->
 </beans>

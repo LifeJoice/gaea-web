@@ -1,12 +1,8 @@
 package org.gaea.framework.web.schema.view.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.lang3.BooleanUtils;
 import org.gaea.db.QueryCondition;
-import org.gaea.exception.ProcessFailedException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SysLogicalException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
@@ -56,8 +52,13 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
         setActionParamMap(actionParamMap);
     }
 
+    /**
+     * @param loginName 用于数据权限校验
+     * @return
+     * @throws ValidationFailedException
+     */
     @Override
-    public File doAction() throws ValidationFailedException {
+    public File doAction(String loginName) throws ValidationFailedException, InvalidDataException {
         // 这个本身不是一个托管给Spring的bean。所以需要通过静态方法获取上下文的bean。
         try {
             ExcelService excelService = GaeaWebSystem.getBean(ExcelService.class);
@@ -71,7 +72,7 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
             int limitQty = Integer.parseInt(SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_EXPORT_LIMIT));
 
             // 通过通用查询接口，查询数据。默认查询数量，以配置文件为准。
-            PageResult result = commonViewQueryService.query(schemaId, queryConditionList, new SchemaGridPage(1, limitQty), true); // 默认导出1000条
+            PageResult result = commonViewQueryService.query(schemaId, queryConditionList, new SchemaGridPage(1, limitQty), loginName); // 默认导出1000条
             List<Map<String, Object>> data = result.getContent();
             // 通过XML Schema的view.grid定义，获取各个列的相关定义
             Map<String, Field> fieldsDefineMap = GaeaExcelUtils.getFields(schemaId);

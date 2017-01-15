@@ -1,5 +1,8 @@
 package org.gaea.security.service;
 
+import org.gaea.exception.DataIntegrityViolationException;
+import org.gaea.exception.SystemConfigException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.security.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -16,4 +19,10 @@ public interface SystemUsersService {
     public String findPasswordByLoginName(String loginName);
 
     public User findByLoginName(String username);
+
+    void cacheUserRoles(User user) throws DataIntegrityViolationException, SystemConfigException;
+
+    String[] getCacheUserRoles(String loginName) throws ValidationFailedException, SystemConfigException;
+
+    boolean isLogin(String loginName) throws SystemConfigException, ValidationFailedException;
 }

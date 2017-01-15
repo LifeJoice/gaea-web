@@ -1,5 +1,7 @@
 package org.gaea.security.domain;
 
+import org.gaea.data.dataset.domain.DsAuthRole;
+import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -11,7 +13,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "GAEA_SYS_ROLES")
-public class Role implements Serializable {
+public class Role implements Serializable, DsAuthRole {
     private static final long serialVersionUID = 1L;
     @Id
     @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
@@ -44,6 +46,17 @@ public class Role implements Serializable {
             @JoinColumn(name = "AUTHORITY_ID")
     })
     private List<Authority> authorities;
+    /**
+     * 一个角色，可能对应n个数据集权限控制组。
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "GAEA_SYS_DS_AUTHORITIES_ROLES", joinColumns = {
+            @JoinColumn(name = "ROLE_ID")
+    }, inverseJoinColumns = {
+            @JoinColumn(name = "DS_AUTHORITY_ID")
+    })
+    private List<DsAuthorityEntity> dsAuthorities;
 
     public String getId() {
         return id;
@@ -107,5 +120,13 @@ public class Role implements Serializable {
 
     public void setAuthorities(List<Authority> authorities) {
         this.authorities = authorities;
+    }
+
+    public List<DsAuthorityEntity> getDsAuthorities() {
+        return dsAuthorities;
+    }
+
+    public void setDsAuthorities(List<DsAuthorityEntity> dsAuthorities) {
+        this.dsAuthorities = dsAuthorities;
     }
 }

@@ -1,15 +1,18 @@
 package org.gaea.framework.web.schema.view.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.SchemaActionDefinition;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.framework.web.schema.view.action.ExcelExportSimpleButtonAction;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
@@ -28,10 +31,11 @@ public class ActionsService {
      * <p>当前未考虑返回，是因为觉得action千差万别，不确定返回的是什么类型。好像也无法用泛型去规范。</p>
      *
      * @param action
-     * @param response
+     * @param response    利用流回写文件
+     * @param request     获取用户登录信息
      * @throws ValidationFailedException
      */
-    public void doAction(Action action, HttpServletResponse response) throws ValidationFailedException {
+    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request) throws ValidationFailedException {
         if (action == null) {
             logger.warn("传入参数是一个空action。无法执行！");
             return;
@@ -41,7 +45,8 @@ public class ActionsService {
              * 转换成ExcepExportButtonAction，执行Action本身的逻辑。
              * 转换成ExcepExportButtonAction，就可以获得返回的File。通用Action执行方法，没有明确返回的类型。
              */
-            File file = ((ExcelExportButtonAction) action).doAction();
+            String loginName = GaeaWebSecuritySystem.getUserName(request);
+            File file = ((ExcelExportButtonAction) action).doAction(loginName);
             writeFileToResponse(file, response);
 //            response.reset();
 //            response.setCharacterEncoding("utf-8");
@@ -80,10 +85,11 @@ public class ActionsService {
      * <p>普通action，即一般是XML定义中，没有定义< button-action >的。</p>
      *
      * @param action
-     * @param response
+     * @param response    利用流回写文件
+     * @param request     获取用户登录信息
      * @throws ValidationFailedException
      */
-    public void doSimpleAction(Action action, HttpServletResponse response) throws ValidationFailedException {
+    public void doSimpleAction(Action action, HttpServletResponse response, HttpServletRequest request) throws ValidationFailedException, InvalidDataException {
         if (action == null) {
             logger.warn("传入参数是一个空action。无法执行！");
             return;
@@ -93,6 +99,7 @@ public class ActionsService {
             return;
         }
         if (SchemaActionDefinition.ACTION_NAME_EXPORT_EXCEL.equalsIgnoreCase(action.getName())) { // method=导出excel
+            String loginName = GaeaWebSecuritySystem.getUserName(request);
             /**
              * 转换成ExcepExportButtonAction，执行Action本身的逻辑。
              * 转换成ExcepExportButtonAction，就可以获得返回的File。通用Action执行方法，没有明确返回的类型。
@@ -100,7 +107,7 @@ public class ActionsService {
 //        ExcelExportSimpleButtonAction exportAction = (ExcelExportSimpleButtonAction)action;
 
 
-            File file = ((ExcelExportSimpleButtonAction) action).doAction();
+            File file = ((ExcelExportSimpleButtonAction) action).doAction(loginName);
             writeFileToResponse(file, response);
 
         }

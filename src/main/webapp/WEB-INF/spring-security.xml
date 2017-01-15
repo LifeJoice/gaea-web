@@ -59,6 +59,10 @@
                     ref="myAccessDecisionManager"/>
         <b:property name="securityMetadataSource"
                     ref="mySecurityMetadataSource"/>
+        <!--
+        启用. 登录成功后，发布AuthorizedEvent事件.
+        我们可以在监听到事件后，缓存已登录用户的信息（例如：角色）等-->
+        <b:property name="publishAuthorizationSuccess" value="true" />
     </b:bean>
 
     <!-- 注意能够为authentication-manager 设置alias别名  -->

@@ -37,14 +37,14 @@ public class Authority implements Serializable {
             @JoinColumn(name = "RESOURCE_ID")
     })
     private List<Resource> resources;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-    @JoinTable(
-            name = "GAEA_SYS_ROLES_AUTHORITIES", joinColumns = {
-            @JoinColumn(name = "RESOURCE_ID")
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "ROLE_ID")
-    })
-    private List<Role> roles;
+//    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+//    @JoinTable(
+//            name = "GAEA_SYS_ROLES_AUTHORITIES", joinColumns = {
+//            @JoinColumn(name = "RESOURCE_ID")
+//    }, inverseJoinColumns = {
+//            @JoinColumn(name = "ROLE_ID")
+//    })
+//    private List<Role> roles;
 
     public String getId() {
         return id;
@@ -102,11 +102,11 @@ public class Authority implements Serializable {
         this.resources = resources;
     }
 
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
-    }
+//    public List<Role> getRoles() {
+//        return roles;
+//    }
+//
+//    public void setRoles(List<Role> roles) {
+//        this.roles = roles;
+//    }
 }

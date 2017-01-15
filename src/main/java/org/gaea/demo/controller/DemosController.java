@@ -1,7 +1,6 @@
 package org.gaea.demo.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.SysInitException;
@@ -10,9 +9,9 @@ import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
-import org.gaea.framework.web.schema.domain.PageResult;
-import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.framework.web.service.ExcelService;
 import org.gaea.poi.ExcelReader;
@@ -32,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -279,7 +279,7 @@ public class DemosController {
 
     @RequestMapping(value = "/export-excel", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void exportExcel(String schemaId, String conditions, @RequestBean("filters") List<QueryCondition> filters) throws ValidationFailedException {
+    public void exportExcel(String schemaId, String conditions, @RequestBean("filters") List<QueryCondition> filters, HttpServletRequest request) throws ValidationFailedException {
         logger.info("------------------------------------------\n export excel demo \n------------------------------------------\n");
 //        ObjectMapper mapper = new ObjectMapper();
 //        DataSetCommonQueryConditionDTO queryConditionDTO = null;
@@ -302,7 +302,8 @@ public class DemosController {
             /**
              * *********************************************************** TEST 2 利用模板导出任意dataset
              */
-            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", null, "EXCEL_EXPORT_DEMO"); // 默认导出1000条
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getUserName(request));
+            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO",defaultDsContext); // 默认导出1000条
             Map<String, Field> fieldsMap = GaeaExcelUtils.getFields(schemaId);
             //test
             Field field = fieldsMap.get("level");

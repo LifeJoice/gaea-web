@@ -1,8 +1,8 @@
 package org.gaea.framework.web.schema;
 
 import org.gaea.cache.GaeaCacheOperator;
-import org.gaea.data.cache.CacheFactory;
-import org.gaea.data.cache.CacheOperator;
+import org.gaea.cache.CacheFactory;
+import org.gaea.cache.CacheOperator;
 import org.gaea.exception.SysInitException;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.poi.cache.GaeaPoiCache;

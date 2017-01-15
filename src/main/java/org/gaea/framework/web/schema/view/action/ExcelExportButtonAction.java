@@ -10,9 +10,9 @@ import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.view.domain.ActionParam;
-import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.framework.web.service.ExcelService;
 import org.gaea.poi.export.ExcelExport;
 import org.slf4j.Logger;
@@ -66,7 +66,7 @@ public class ExcelExportButtonAction implements Action<File> {
     }
 
     @Override
-    public File doAction() throws ValidationFailedException {
+    public File doAction(String loginName) throws ValidationFailedException {
         File file = null;
         Map<String, ActionParam> actionParamMap = getActionParamMap();
         ActionParam<String> dataSetParam = actionParamMap.get("dataSetId");
@@ -86,7 +86,8 @@ public class ExcelExportButtonAction implements Action<File> {
              * 其实就是，除非withData=false，否则都会查询data
              */
             if (withDataParam == null || BooleanUtils.toBooleanObject(withDataParam.getValue()) == null || BooleanUtils.toBooleanObject(withDataParam.getValue())) {
-                data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), null, excelTemplateParam.getValue()); // 默认导出1000条
+                GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+                data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), excelTemplateParam.getValue(), defaultDsContext); // 默认导出1000条
             }
             file = excelExport.export(excelTemplateParam.getValue(), data, SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
         } catch (SysLogicalException e) {

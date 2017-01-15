@@ -14,7 +14,7 @@
             <where>
                 <!--编辑的数据筛选-->
                 <condition-set id="byId">
-                    <and field="id" field-op="eq"></and>
+                    <and propName="id" op="eq"></and>
                 </condition-set>
             </where>
         </dataset>

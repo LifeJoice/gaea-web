@@ -9,11 +9,12 @@ import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
 import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
-import org.gaea.framework.web.schema.convertor.list.ListSchemaHtmlConvertor;
-import org.gaea.framework.web.schema.domain.*;
+import org.gaea.framework.web.schema.domain.DataSet;
+import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
+import org.gaea.framework.web.schema.domain.SchemaData;
+import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
-import org.gaea.util.GaeaJacksonUtils;
 import org.gaea.util.GaeaXmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,7 +32,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -41,7 +40,7 @@ import java.util.*;
  */
 @Component
 public class GaeaXmlSchemaProcessor {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(GaeaXmlSchemaProcessor.class);
     @Autowired
     private XmlDataSchemaConvertor xmlDataSchemaConvertor;
     @Autowired
@@ -49,47 +48,32 @@ public class GaeaXmlSchemaProcessor {
     @Autowired
     private GaeaSchemaCache gaeaSchemaCache;
 
-    public String process(ApplicationContext springApplicationContext, String viewSchemaLocation, String schemaName) throws ValidationFailedException {
-        String htmlPage = "";
-        String viewSchemaPath = viewSchemaLocation + schemaName;
-
-        try {
-            logger.info(viewSchemaPath);
-            // 获得HTML模板混合XML SCHEMA的页面。
-            htmlPage = parseXml(viewSchemaPath, springApplicationContext);
-        } catch (IOException e) {
-            // 返回 null, 以便被下一个 resolver 处理
-            logger.info("No file found for file: " + viewSchemaPath);
-            return null;
-        } catch (ParserConfigurationException e) {
-            logger.error("create XML document object ERROR。", e);
-            return null;
-        } catch (SAXException e) {
-            logger.error("XML document.parse XML SCHEMA ERROR。", e);
-            return null;
-        } catch (IllegalAccessException e) {
-            logger.error("translate XML SCHEMA properties to bean ERROR。BeanUtils setProperty error.", e);
-            return null;
-        } catch (InvocationTargetException e) {
-            logger.error("translate XML SCHEMA properties to bean ERROR。BeanUtils setProperty error.", e);
-            return null;
-        }
-        logger.info("Requested file found: " + viewSchemaPath + ", viewName:" + schemaName);
-        return htmlPage;
-    }
-
-    private String parseXml(String viewSchemaPath, ApplicationContext springApplicationContext) throws ValidationFailedException, IOException, SAXException, IllegalAccessException, InvocationTargetException, ParserConfigurationException {
-        String resultJson = "";
-        ListSchemaHtmlConvertor listSchemaHtml = null;
+    /**
+     * 解析Gaea框架的XML页面描述文件。
+     *
+     * @param viewSchemaPath           全路径。例如：/WEB-INF/static/view_schema/demo/demo_management.xml
+     * @param springApplicationContext spring上下文。主要为了获取WEB-INF下面的内容。
+     * @return
+     * @throws ValidationFailedException
+     * @throws IOException
+     * @throws SAXException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws ParserConfigurationException
+     */
+    public GaeaXmlSchema parseXml(String viewSchemaPath, ApplicationContext springApplicationContext)
+            throws ValidationFailedException, IOException, SAXException, IllegalAccessException, InvocationTargetException, ParserConfigurationException {
+//        String resultJson = "";
+//        GridPageTemplateHelper listSchemaHtml = null;
         GaeaXmlSchema gaeaXmlSchema = new GaeaXmlSchema();
         SchemaViews schemaViews = null;
         SchemaData schemaData = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = null;
         Node document = null;
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+//        Map<String, Object> resultMap = new HashMap<String, Object>();
         try {
-            listSchemaHtml = new ListSchemaHtmlConvertor(readTemplate(springApplicationContext));
+//            listSchemaHtml = new GridPageTemplateHelper(readTemplate(springApplicationContext));
             Resource resource = springApplicationContext.getResource(viewSchemaPath);
             db = dbf.newDocumentBuilder();
             // document是整个XML schema
@@ -124,16 +108,17 @@ public class GaeaXmlSchemaProcessor {
                     gaeaXmlSchema.setSchemaViews(schemaViews);
                 }
             }
-            // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
-            resultMap = combineSchemaInfo(gaeaXmlSchema);
-            // 根据XML SCHEMA生成额外的信息
-            completeSchemaLogicInfo(resultMap, gaeaXmlSchema);
-            // 把最终结果转换为json字符串
-            resultJson = GaeaJacksonUtils.parse(resultMap);
-            logger.debug("\nresultJson\n" + resultJson);
-            // 把结果注入HTML页面
-            listSchemaHtml.replaceData(resultJson);
-            listSchemaHtml.replaceImport(schemaViews.getImports());
+//            // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
+//            resultMap = combineSchemaInfo(gaeaXmlSchema);
+//            // 根据XML SCHEMA生成额外的信息
+//            completeSchemaLogicInfo(resultMap, gaeaXmlSchema);
+//            // 把最终结果转换为json字符串
+//            resultJson = GaeaJacksonUtils.parse(resultMap);
+//            logger.debug("\nresultJson\n" + resultJson);
+//            // 把结果注入HTML页面
+//            listSchemaHtml.replaceData(resultJson);
+//            listSchemaHtml.replaceImport(schemaViews.getImports());
+//            return gaeaXmlSchema;
         } catch (ParserConfigurationException e) {
             logger.warn("构建XML解析的document对象出错。");
             throw e;
@@ -155,48 +140,28 @@ public class GaeaXmlSchemaProcessor {
         if (gaeaSchemaCache.get(gaeaXmlSchema.getId()) == null) {
             gaeaSchemaCache.put(gaeaXmlSchema.getId(), gaeaXmlSchema);
         }
-        return listSchemaHtml.getContent();
+        return gaeaXmlSchema;
+//        return listSchemaHtml.getContent();
     }
 
     /**
      * 根据XML Schema的原始信息，我们生成、完善一些关联信息。例如：<br/>
      * button的link-view-id关联的对象，和需要的一些额外信息等。
+     * <p>
+     *     直接修改gaeaXML里面的内容，所以没有返回。
+     * </p>
      *
-     * @param resultMap
      * @param gaeaXmlSchema
      */
-    private void completeSchemaLogicInfo(Map<String, Object> resultMap, GaeaXmlSchema gaeaXmlSchema) {
+    public void completeSchemaLogicInfo(GaeaXmlSchema gaeaXmlSchema) {
         initSchemaViewComponentList(gaeaXmlSchema);
-        SchemaActions actions = gaeaXmlSchema.getSchemaViews().getActions();
-        // 查找button的link-view-id并组装对应的信息
-//        if (actions != null && actions.getButtons() != null) {
-//            for (Object obj : actions.getButtons()) {
-//                if(obj instanceof SchemaButtonGroup){
-//                    continue;
-//                }
-////                SchemaButton button = (SchemaButton) obj;
-//
-//                /**
-//                 * 应该不需要了。可以通过link-view-id找到对应的component，而component的componentName,即对应XML里面的元素名（例如：< crud-dialog >）。然后以componentName作前端的组件初始化之类的。
-//                 * by Iverson 2016-10-15 18:46:23
-//                 */
-//
-////                if (!StringUtils.isBlank(button.getLinkViewId())) {
-////                    SchemaViewsComponent component = gaeaXmlSchema.getViewsComponents().get(button.getLinkViewId());
-////                    // 找到link-view-id对应的组件
-////                    if (component != null) {
-////                        String type = component.getType();
-////                        if ("workflow-approval".equals(type)) {
-////                            button.setLinkComponent(type);
-////                        }
-////                    }
-////                }
-//            }
-//        }
     }
 
     /**
      * 初始化组件列表（key：组件id value：组件对象<br/>
+     * <p>
+     *     所谓组件列表, GaeaXmlSchema.viewsComponents, 就是一个组件混合列表,我随时可以通过一个id找到对应的组件信息.方便前端各种渲染使用.
+     * </p>
      * 所谓组件，就是各种<button>, <views:dialog>等。
      * <p>因为像button的link-view-id可以链接到别的组件，所以我们需要通过组件列表去在后期获取对应的组件，而不用每次都遍历。
      *
@@ -228,20 +193,11 @@ public class GaeaXmlSchemaProcessor {
         }
     }
 
-    private String readTemplate(ApplicationContext springApplicationContext) throws IOException {
-        String htmlPage = "";
-        String gridviewTmplPath = "/js/gaeajs/ui/template/gaeaGrid.html";// TODO 改为在配置文件里配置。
-        Resource gridViewResource = springApplicationContext.getResource(gridviewTmplPath);
-        htmlPage = StreamUtils.copyToString(gridViewResource.getInputStream(), Charset.forName("UTF-8"));
-        return htmlPage;
-    }
-
-//    private String injectToView(String inJsonData, ListSchemaHtmlConvertor htmlPage) throws IOException {
-////        String htmlPage = "";
-////        String gridviewTmplPath = "/WEB-INF/static/html/template/ur_gridview.html";
-////        Resource gridViewResource = springApplicationContext.getResource(gridviewTmplPath);
-////        htmlPage = StreamUtils.copyToString(gridViewResource.getInputStream(), Charset.forName("UTF-8"));
-//        htmlPage = StringUtils.replace(htmlPage, "<!UR_VIEW_SCHEMA VIEWS_GRID_JSON_DATA>", inJsonData);
+//    private String readTemplate(ApplicationContext springApplicationContext) throws IOException {
+//        String htmlPage = "";
+//        String gridviewTmplPath = "/js/gaeajs/ui/template/gaeaGrid.html";// TODO 改为在配置文件里配置。
+//        Resource gridViewResource = springApplicationContext.getResource(gridviewTmplPath);
+//        htmlPage = StreamUtils.copyToString(gridViewResource.getInputStream(), Charset.forName("UTF-8"));
 //        return htmlPage;
 //    }
 
@@ -251,7 +207,7 @@ public class GaeaXmlSchemaProcessor {
      * @param gaeaXmlSchema
      * @return
      */
-    private Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws IOException, ValidationFailedException {
+    public Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws IOException, ValidationFailedException {
         Map<String, Object> root = new HashMap<String, Object>();
         Map<String, Object> viewsMap = new HashMap<String, Object>();
         SchemaViews schemaViews = gaeaXmlSchema.getSchemaViews();

@@ -3,15 +3,16 @@ package org.gaea.db;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.gaea.data.dataset.domain.Condition;
+import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
-import org.gaea.framework.web.schema.GaeaSchemaCache;
-import org.gaea.framework.web.schema.data.domain.SchemaCondition;
-import org.gaea.framework.web.schema.data.domain.SchemaConditionSet;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
+import org.gaea.framework.web.data.GaeaSqlExpressionParser;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
@@ -23,7 +24,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.sql.Types;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -37,77 +37,44 @@ import java.util.Map;
 @Component
 public class GaeaSqlProcessor {
     private final Logger logger = LoggerFactory.getLogger(GaeaSqlProcessor.class);
+    public static final String PLACEHOLDER_PREFIX = ":"; // appendSQL用的占位符的特殊标记开始。例如“:AUTH_ID_NOT_EQ”
+    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
-    private GaeaSchemaCache gaeaSchemaCache;
-    public static final String PLACEHOLDER_PREFIX = ":"; // appendSQL用的占位符的特殊标记开始。例如“:AUTH_ID_NOT_EQ”
-
-    @Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
-
-//    public Page<?> query(String urSchemaId,List<QueryCondition> conditions,Pageable pageable){
-//        GaeaXmlSchema urSchema = urSchemaCache.get(urSchemaId);
-//        DataSet dataSet = urSchema.getSchemaData().getDataSetList().get(0);
-//        final String sql = dataSet.getSql();
-//        return query(sql,conditions,pageable);
-//    }
+    private GaeaSqlExpressionParser gaeaSqlExpressionParser;
 
     /**
      * 根据参数查询分页过的数据。
      *
-     * @param sql          基础的查询sql
-     * @param primaryTable 分页id相关的主表。主要是MySQL分页用。
-     * @param conditions   查询条件
-     * @param page         分页对象
+     * @param sql              基础的查询sql
+     * @param primaryTable     分页id相关的主表。主要是MySQL分页用。
+     * @param conditions       查询条件
+     * @param page             分页对象
+     * @param defaultDsContext SQL的表达式需要用到的上下文对象。可以为空。空，则不进行SQL的表达式转换。
      * @return
      * @throws ValidationFailedException
      * @throws InvalidDataException
      */
-    public PageResult query(String sql, String primaryTable, List<QueryCondition> conditions, SchemaGridPage page) throws ValidationFailedException, InvalidDataException {
+    public PageResult query(String sql, String primaryTable, List<QueryCondition> conditions, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext) throws ValidationFailedException, InvalidDataException {
         PageResult pageResult = new PageResult();
-        MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
+//        MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         MapSqlParameterSource params = null;
         /* 拼凑【WHERE】条件语句 */
         String whereCause = genWhereString(conditions);
-        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
+        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions, defaultDsContext);
         if (StringUtils.isNotEmpty(whereCause)) {
             sql = sql + " WHERE " + whereCause;
         }
-        /* 拼凑【COUNT】语句 */
-        String countSQL = new SQL().
-                SELECT("count(*)")
-                .FROM("(" + sql + ") results")
-                .toString();
-        // 查询记录数
-        int total = namedParameterJdbcTemplate.queryForObject(countSQL, params, Integer.class);
-
-        List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
-        // 如果给定的页码值是Integer.Max_VALUE，则认为是不需要查内容
-        if (page.getPage() < Integer.MAX_VALUE) {
-            int startPos = (page.getPage() - 1) * page.getSize();
-            int pageSize = page.getSize();
-            if (total > 0) {
-                // 获取分页sql
-                String limitedSQL = dialect.getPageSql(sql, primaryTable, startPos, pageSize);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Page SQL:" + limitedSQL);
-                }
-                params.addValue("START_ROWNUM", startPos);
-                params.addValue("PAGE_SIZE", pageSize);
-                // 查询数据
-                content = namedParameterJdbcTemplate.queryForList(limitedSQL, params);
-            }
+        /* 转换SQL里面的表达式 */
+        /**
+         * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
+         * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
+         */
+        if (defaultDsContext != null) {
+            sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext);
         }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Count SQL:" + countSQL);
-        }
-        pageResult.setContent(content);
-        pageResult.setTotalElements(total);
+        pageResult = query(sql, params, primaryTable, page);
         return pageResult;
-//        return new PageImpl<Map<String, Object>>(content, new PageRequest(page.getPage(),page.getSize()), total);
     }
 
     /**
@@ -118,7 +85,7 @@ public class GaeaSqlProcessor {
      * @param queryConditionDTO 可以为空。查询条件对象，包含若干where ... and ... and ...
      * @return
      */
-    public List<Map<String, Object>> query(String sql, SchemaConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+    public List<Map<String, Object>> query(String sql, ConditionSet conditionSet, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
         MapSqlParameterSource params = null;
         /* 拼凑【WHERE】条件语句 */
         String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
@@ -131,7 +98,7 @@ public class GaeaSqlProcessor {
         if (conditionSet == null || CollectionUtils.isEmpty(conditionSet.getConditions())) {
             params = new MapSqlParameterSource();
         } else {
-            params = genWhereParams(getConditions(conditionSet, queryConditionDTO));
+            params = genWhereParams(getConditions(conditionSet, queryConditionDTO), defaultDsContext);
         }
 //        params = CollectionUtils.isEmpty(conditionSet.getConditions()) ? new MapSqlParameterSource() : genWhereParams(getConditions(conditionSet, queryConditionDTO));
 //        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
@@ -147,6 +114,40 @@ public class GaeaSqlProcessor {
     }
 
     /**
+     * 查询。
+     *
+     * @param sql
+     * @param primaryTable
+     * @param conditionSet      条件。
+     * @param page
+     * @param defaultDsContext  主要用权限过滤，和SQL中的表达式（如果有）的解析。
+     * @param queryConditionDTO 查询的条件的值。这个一般页面发起的查询有。一般的可以放入到ConditionSet。有点重复了。
+     * @return
+     * @throws ValidationFailedException
+     * @throws InvalidDataException
+     */
+    public PageResult query(String sql, String primaryTable, ConditionSet conditionSet, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, InvalidDataException {
+        MapSqlParameterSource params = null;
+        /* 拼凑【WHERE】条件语句 */
+        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
+        /**
+         * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
+         * else 按条件对象，拼凑条件参数值
+         * 用Spring Template查询必须。
+         */
+        if (conditionSet == null || CollectionUtils.isEmpty(conditionSet.getConditions())) {
+            params = new MapSqlParameterSource();
+        } else {
+            params = genWhereParams(getConditions(conditionSet, queryConditionDTO), defaultDsContext);
+        }
+        if (StringUtils.isNotEmpty(whereCause)) {
+            sql = sql + " WHERE " + whereCause;
+        }
+        PageResult pageResult = query(sql, params, primaryTable, page);
+        return pageResult;
+    }
+
+    /**
      * 根据查询条件，拼凑SQL的WHERE语句（不包含WHERE关键字）。
      *
      * @param conditions
@@ -158,7 +159,7 @@ public class GaeaSqlProcessor {
         }
         StringBuilder whereSql = new StringBuilder("");
         for (QueryCondition cond : conditions) {
-            String columnName = cond.getPropertyName();
+            String columnName = cond.getPropName();
             // 查询条件，变量名或值为空就略过
             if (StringUtils.isEmpty(columnName)) {
                 continue;
@@ -175,7 +176,7 @@ public class GaeaSqlProcessor {
              *      username is not null
              * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
              */
-            if (StringUtils.isNotEmpty(cond.getValue())) {
+            if (StringUtils.isNotEmpty(cond.getPropValue())) {
                 whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
             } else {
                 whereSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
@@ -225,14 +226,21 @@ public class GaeaSqlProcessor {
      * <p>
      * 包括Spring查询占位符的生成、各种关系符的转换（OR,AND)、LIKE的不同查询情况的处理、appendSQL的替换等。
      * </p>
+     * <p/>
+     * <p>
+     * param name支持'.'所以<br/><b>
+     * R.CREATE_BY = :R.CREATE_BY
+     * </b><br/>
+     * 这样的命名是没有问题的.
+     * </p>
      *
      * @param conditionSet
-     * @param queryConditionDTO
+     * @param queryConditionDTO 可以为空
      * @return
      * @throws ValidationFailedException
      */
-    public String parseConditionSet(SchemaConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
-        if (conditionSet == null || queryConditionDTO == null) {
+    public String parseConditionSet(ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+        if (conditionSet == null) {
             return "";
         }
         StringBuffer whereSql = new StringBuffer();
@@ -252,7 +260,7 @@ public class GaeaSqlProcessor {
                 for (QueryCondition cond : newConditions) {
                     String placeholderName = cond.getPlaceholder();
                     String fullPlaceholder = PLACEHOLDER_PREFIX + placeholderName;
-                    String columnName = cond.getPropertyName();
+                    String columnName = cond.getPropName();
                     // 查询条件，变量名或值为空就略过
                     if (StringUtils.isEmpty(columnName)) {
                         continue;
@@ -273,7 +281,7 @@ public class GaeaSqlProcessor {
                      *      username is not null
                      * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
                      */
-                    if (StringUtils.isNotEmpty(cond.getValue())) {
+                    if (StringUtils.isNotEmpty(cond.getPropValue())) {
                         conditionSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
                     } else {
                         conditionSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
@@ -283,7 +291,7 @@ public class GaeaSqlProcessor {
                      *      直接加上条件SQL即可
                      * else
                      *      把条件SQL配置项
-                     *      （例如：<or field="auth.id" field-op="ne" placeholder="AUTH_ID_NOT_EQ">）
+                     *      （例如：<or field="auth.id" op="ne" placeholder="AUTH_ID_NOT_EQ">）
                      *      转换后的SQL替换掉placeholder的位置。
                      */
                     if (StringUtils.isEmpty(placeholderName) || !StringUtils.contains(appendSql, fullPlaceholder)) {
@@ -300,29 +308,34 @@ public class GaeaSqlProcessor {
 
     /**
      * 把conditionSet和对应的值对象queryConditionDTO作匹配，转换成后台通用的查询对象QueryCondition。才能和后台的功能对接。
+     * <p>
+     * 如果Condition配置了值，同时页面也传了值。则页面的值会覆盖配置的值。
+     * </p>
      *
      * @param conditionSet
      * @param queryConditionDTO 页面用的通用查询传值对象
      * @return
      * @throws ValidationFailedException
      */
-    public List<QueryCondition> getConditions(SchemaConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+    public List<QueryCondition> getConditions(ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
         List<QueryCondition> newConditions = new ArrayList<QueryCondition>();// 按通用查询组装标准查询对象
-        if (conditionSet.getConditions().size() != queryConditionDTO.getValues().size()) {
+        if (queryConditionDTO != null && conditionSet.getConditions().size() != queryConditionDTO.getValues().size()) {
             throw new ValidationFailedException("查询失败！conditionSet的值和queryCondition的值的个数不匹配。可能XML配置和页面值配置不匹配导致。请检查。");
         }
         for (int i = 0; i < conditionSet.getConditions().size(); i++) {
             // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
-            SchemaCondition schemaCondition = conditionSet.getConditions().get(i);
-            DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
+            Condition schemaCondition = conditionSet.getConditions().get(i);
+            // 以Condition的value为基础
+            String value = schemaCondition.getPropValue();
+            if (queryConditionDTO != null) {
+                // 【重要】假设顺序一致
+                DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);
+                value = valueDTO.getValue();
+            }
             QueryCondition cond = new QueryCondition();
             BeanUtils.copyProperties(schemaCondition, cond);
-            cond.setPropertyName(schemaCondition.getField());// 查询字段为XML SCHEMA中的定义
             cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
-            cond.setValue(valueDTO.getValue());// value为页面传过来的值
-            cond.setOp(schemaCondition.getFieldOp());
-//            cond.setPlaceholder(schemaCondition.getPlaceholder());
-//            cond.setCondOp(schemaCondition.getCondOp());
+            cond.setPropValue(value);// value为页面传过来的值 or 写死在condition中的值
             newConditions.add(cond);
         }
         return newConditions;
@@ -330,30 +343,36 @@ public class GaeaSqlProcessor {
 
     /**
      * 组装where条件语句的值。使用占位符的方式。
+     * <p>
+     * param name支持'.'所以<br/>
+     * R.CREATE_BY = :R.CREATE_BY<br/>
+     * 这样的命名是没有问题的.
+     * </p>
      *
      * @param conditions
      * @return
      */
-    private MapSqlParameterSource genWhereParams(List<QueryCondition> conditions) {
+    private MapSqlParameterSource genWhereParams(List<QueryCondition> conditions, GaeaDefaultDsContext defaultDsContext) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         try {
             for (QueryCondition cond : conditions) {
-                String columnName = cond.getPropertyName();
-                String value = cond.getValue();
+                String columnName = cond.getPropName();
+//                String value = cond.getPropValue();
+                Object value = parseParamValue(cond, defaultDsContext);
                 // 查询条件，变量名或值为空就略过
-                if (StringUtils.isEmpty(columnName) || StringUtils.isEmpty(value)) {
+                if (StringUtils.isEmpty(columnName) || value == null) {
                     continue;
                 }
                 // 拼凑查询条件 username=:USER_NAME
                 if (SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
-                    FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd");
-                    params.addValue(columnName.toUpperCase(), df.parse(value), Types.DATE);
+//                    FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd");
+                    params.addValue(columnName.toUpperCase(), value, Types.DATE);
                 } else if (SchemaColumn.DATA_TYPE_DATETIME.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
-                    FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
-                    params.addValue(columnName.toUpperCase(), df.parse(value), Types.DATE);
+//                    FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
+                    params.addValue(columnName.toUpperCase(), value, Types.DATE);
                 } else {
                     // 普通的值，通过parseParamValue处理一下，比如有like的情况，需要把值加上%。
-                    params.addValue(columnName.toUpperCase(), parseParamValue(cond));
+                    params.addValue(columnName.toUpperCase(), value);
                 }
             }
         } catch (ParseException e) {
@@ -366,16 +385,42 @@ public class GaeaSqlProcessor {
      * 转换值。主要是增加like操作符。是以**开始，还是以**结束。就是“%”加在前面还是后面。
      *
      * @param cond
+     * @param defaultDsContext
      * @return
      */
-    private String parseParamValue(QueryCondition cond) {
-        String value = cond.getValue();
+    private Object parseParamValue(QueryCondition cond, GaeaDefaultDsContext defaultDsContext) throws ParseException {
+        String value = cond.getPropValue();
+        if (StringUtils.isEmpty(value)) {
+            // 返回null是为了方便调用方法判断
+            return null;
+        }
+        /**
+         * 检查值是否有SPEL表达式。如果有，则先转换为正常静态值
+         */
+        if (gaeaSqlExpressionParser.hasExpression(value)) {
+            value = gaeaSqlExpressionParser.parse(value, defaultDsContext);
+        }
+        /**
+         * 对特殊关系操作符的处理。
+         * 例如：like，需要加上前后模糊查询符等。
+         */
         if (QueryCondition.FIELD_OP_LK.equalsIgnoreCase(cond.getOp())) {
             value = "%" + value + "%";
         } else if (QueryCondition.FIELD_OP_LLK.equalsIgnoreCase(cond.getOp())) {
             value = value + "%";
         } else if (QueryCondition.FIELD_OP_RLK.equalsIgnoreCase(cond.getOp())) {
             value = "%" + value;
+        }
+        /**
+         * 根据QueryCondition的数据类型，转换数据的值
+         * 例如：日期类的转换为Date类型。
+         */
+        if (SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
+            FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd");
+            return df.parse(value);
+        } else if (SchemaColumn.DATA_TYPE_DATETIME.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
+            FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
+            return df.parse(value);
         }
         return value;
     }
@@ -399,5 +444,55 @@ public class GaeaSqlProcessor {
             op = " AND ";
         }
         return op;
+    }
+
+    /**
+     * 最终执行查询的方法。没有什么其他的数据组装逻辑。
+     *
+     * @param sql
+     * @param params
+     * @param primaryTable
+     * @param page
+     * @return
+     * @throws InvalidDataException
+     */
+    private PageResult query(String sql, MapSqlParameterSource params, String primaryTable, SchemaGridPage page) throws InvalidDataException {
+        MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
+        PageResult pageResult = new PageResult();
+        /* 拼凑【COUNT】语句 */
+        String countSQL = new SQL().
+                SELECT("count(*)")
+                .FROM("(" + sql + ") results")
+                .toString();
+        // 查询记录数
+        int total = namedParameterJdbcTemplate.queryForObject(countSQL, params, Integer.class);
+
+        List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
+        // 如果给定的页码值是Integer.Max_VALUE，则认为是不需要查内容
+        if (page != null && page.getPage() < Integer.MAX_VALUE) {
+            int startPos = (page.getPage() - 1) * page.getSize();
+            int pageSize = page.getSize();
+            if (total > 0) {
+                // 获取分页sql
+                String limitedSQL = dialect.getPageSql(sql, primaryTable, startPos, pageSize);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Page SQL:" + limitedSQL);
+                }
+                params.addValue("START_ROWNUM", startPos);
+                params.addValue("PAGE_SIZE", pageSize);
+                // 查询数据
+                content = namedParameterJdbcTemplate.queryForList(limitedSQL, params);
+            }
+        } else {
+            content = namedParameterJdbcTemplate.queryForList(sql, params);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Count SQL:" + countSQL);
+            logger.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
+        }
+        pageResult.setContent(content);
+        pageResult.setTotalElements(total);
+        return pageResult;
     }
 }

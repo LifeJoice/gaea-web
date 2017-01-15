@@ -65,8 +65,7 @@ public class SystemAuthoritiesController {
 
     @RequestMapping(value = "/saveAuthResource", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String saveAuthResource(Authority authority, @RequestBean List<String> resourceIds) {
-//        systemAuthoritiesService.save(authority);
-        return "";
+    public void saveAuthResource(Authority authority, @RequestBean List<String> resourceIds) {
+        systemAuthoritiesService.saveAuthResource(authority, resourceIds);
     }
 }

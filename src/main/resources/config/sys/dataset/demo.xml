@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<dataset-definition>
+    <dataset id="DEMO_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="1">
+        <data-sql>
+            <![CDATA[SELECT r.* FROM demo_resources r]]>
+        </data-sql>
+        <where>
+            <condition-set id="byId">
+                <and propName="id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+</dataset-definition>

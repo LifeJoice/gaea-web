@@ -40,6 +40,13 @@ public class Resource implements Serializable {
     })
     private List<Authority> authorities;
 
+    public Resource() {
+    }
+
+    public Resource(String inId) {
+        this.id = inId;
+    }
+
     public String getId() {
         return id;
     }

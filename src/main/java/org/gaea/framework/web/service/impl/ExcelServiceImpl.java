@@ -4,6 +4,7 @@ import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.framework.web.service.ExcelService;
@@ -29,8 +30,13 @@ public class ExcelServiceImpl implements ExcelService {
     private SchemaDataService schemaDataService;
 
     @Override
-    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, DataSetCommonQueryConditionDTO queryConditionDTO, String excelTemplateId) throws ValidationFailedException, SysLogicalException, SysInitException {
-        List<Map<String, Object>> newDataList = commonViewQueryService.queryByConditions(schemaId, datasetId, queryConditionDTO);
+    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, String excelTemplateId, GaeaDefaultDsContext defaultDsContext) throws ValidationFailedException, SysLogicalException, SysInitException {
+        return queryByConditions(schemaId, datasetId, excelTemplateId, defaultDsContext, null);
+    }
+
+    @Override
+    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, String excelTemplateId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException {
+        List<Map<String, Object>> newDataList = commonViewQueryService.queryByConditions(schemaId, datasetId, null, queryConditionDTO);
         // 对查询数据作处理，例如，把数据库字段名改一改等，再返回
         return schemaDataService.transformViewData(newDataList, excelTemplateId);
     }

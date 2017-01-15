@@ -7,8 +7,8 @@ package org.gaea.db;
  * Created by Iverson on 2015/9/23.
  */
 public class QueryCondition {
-    private String propertyName;
-    private String value;
+    private String propName;
+    private String propValue;
     private boolean ignoreCase;
     private String op;                // 操作符。例如：> , = , like 等
     /*  单字段条件的比较操作符：eq ne lt gt le ge.这个在处理时会被转义.  */
@@ -37,15 +37,15 @@ public class QueryCondition {
     public QueryCondition() {
     }
 
-    protected QueryCondition(String propertyName, String value, String op) {
-        this.propertyName = propertyName;
-        this.value = value;
+    protected QueryCondition(String propName, String propValue, String op) {
+        this.propName = propName;
+        this.propValue = propValue;
         this.op = op;
     }
 
-    protected QueryCondition(String propertyName, String value, String op, boolean ignoreCase) {
-        this.propertyName = propertyName;
-        this.value = value;
+    protected QueryCondition(String propName, String propValue, String op, boolean ignoreCase) {
+        this.propName = propName;
+        this.propValue = propValue;
         this.ignoreCase = ignoreCase;
         this.op = op;
     }
@@ -54,20 +54,20 @@ public class QueryCondition {
         return op;
     }
 
-    public String getPropertyName() {
-        return propertyName;
+    public String getPropName() {
+        return propName;
     }
 
-    public String getValue() {
-        return value;
+    public String getPropValue() {
+        return propValue;
     }
 
-    public void setPropertyName(String propertyName) {
-        this.propertyName = propertyName;
+    public void setPropName(String propName) {
+        this.propName = propName;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setPropValue(String propValue) {
+        this.propValue = propValue;
     }
 
     public void setOp(String op) {
@@ -147,7 +147,7 @@ public class QueryCondition {
 
     @Override
     public String toString() {
-        return "'" + condOp + "'" + propertyName + getOp() + value;
+        return "'" + condOp + "'" + propName + getOp() + propValue;
     }
 
 
