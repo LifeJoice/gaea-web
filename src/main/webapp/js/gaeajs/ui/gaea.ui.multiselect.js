@@ -50,7 +50,7 @@ define([
         multiSelect.init = function (containerId, options) {
             var dfd = $.Deferred();// JQuery同步对象
             var that = this;
-            // 没有想过的组件，也是需要resolve的
+            // 没有相关的组件，也是需要resolve的
             if (gaeaValid.isNull($("#" + containerId).find(".gaea-multi-select"))) {
                 dfd.resolve();
             }
@@ -88,8 +88,6 @@ define([
                     console.warn("初始化复选框数据失败！");
                     dfd.resolve();
                 });
-                //that.initSelectableList(initSelectOptions);
-                //that.initSelectedList(initSelectOptions);
                 /**
                  * 初始化选中某个。因为绑定是的具体项的点击事件，必须等数据加载后才能。
                  */
@@ -244,9 +242,6 @@ define([
                 var $choose = data.chooseJQueryObj;
                 // 给当前项加上选中效果
                 $choose.toggleClass("select");
-                //if(!$choose.hasClass("select")) {
-                //    cache[msId].selectJqList.push(data.chooseJQueryObj);// 选择的<li>的JQuery对象的列表
-                //}
             });
         };
         /**
