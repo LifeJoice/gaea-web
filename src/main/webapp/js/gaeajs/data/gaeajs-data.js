@@ -103,58 +103,6 @@ define([
                 var $formDiv = $("#" + divId);
                 /* 遍历所有配置了data-gaea-data的元素 */
                 gaeaData.dataSet.scanAndInit(divId);
-                //$formDiv.find("[data-gaea-data]").each(function (index, element) {
-                //    var $select = $(this);// 默认是下拉选择框，其实可能不是。
-                //    var gaeaDataStr = $(this).data("gaea-data");
-                //    console.log("scan gaea form data. gaea-data : " + gaeaDataStr);
-                //    //var elementCo = ;
-                //    // 把元素的gaea-data配置转成对象，并和默认配置合并。
-                //    var configOptions = _.extend(options, gaeaString.parseJSON(gaeaDataStr));
-                //    options = configOptions;
-                //    var dataSetId = configOptions.dataset;
-                //    var bindPrefix = configOptions.bindPrefix;
-                //    if (gaeaValid.isNotNull(configOptions.dataset)) {
-                //        gaeaAjax.post({
-                //            url: SYS_URL.DATA.DATASET.GET,
-                //            data: {
-                //                dsId: configOptions.dataset
-                //            },
-                //            success: function (data) {
-                //                var viewModel = root.select.initData(dataSetId, data, $select, $formDiv, bindPrefix);
-                //                options._viewModel = _.extend(options._viewModel, viewModel);
-                //                //var result = $.parseJSON(jqXHR.responseText);
-                //                // 用查询结果，刷新数据列表
-                //            },
-                //            fail: function (data) {
-                //                gaeaNotify.error(_.template("加载数据集<%= dsName %>失败!")({dsName: configOptions.dataset}));
-                //            }
-                //        });
-                //    }
-                //});
-                //gaeaData.component.init(divId);
-                // 在所有的ajax请求后再绑定KO。否则多个DATASET的时候会导致重复绑定出错。
-                //$(document).ajaxStop(function () {
-                //    // 应用于KnockoutJS
-                //    if (!root.isBinded($formDiv)) {
-                //        ko.applyBindings(options._viewModel, $formDiv[0]);
-                //        /**
-                //         * 在KO绑定后再调用。
-                //         * 场景( 编辑用户信息 )：
-                //         * 对于通用的更新操作，点击编辑 -> 弹框 -> 加载数据集 -> 绑定 -> afterBindingCallback( 加载编辑数据 -> 填充编辑数据 )
-                //         * 上面的场景，就可以在加载了数据集后，再用编辑数据覆盖数据集。否则数据集的内容就会反过来覆盖要编辑的数据。
-                //         */
-                //        if (gaeaValid.isNotNull(afterBindingCallback)) {
-                //            afterBindingCallback();
-                //        }
-                //        //var $data = ko.dataFor($formDiv[0]);
-                //        //$data.dsIsEnabled_options.push({"text":"永远OK","value":"2"});
-                //        //$data.dsResourceManagement_options = ko.observableArray([{"text":"登录","description":"登录url","resource":"/login","value":"1","orderseq":"1"},{"text":"测试","description":"测试菜单","resource":"/menu/test","value":"2","orderseq":"2"}]);
-                //        //}else{
-                //        //ko.cleanNode($formDiv[0]);
-                //        //var $data = ko.dataFor($formDiv[0]);
-                //        //ko.applyBindings(options._viewModel, $formDiv[0]);
-                //    }
-                //});
             },
             /**
              * 解除绑定。
@@ -180,59 +128,6 @@ define([
                 initModelAndData: function (options) {
                     var viewModel = {};
                     var data = options.data;
-                    //var $select = $("#" + options.bindSelectId);
-                    //var root = this;
-                    //if (gaeaValid.isNull(data)) {
-                    //    //throw "数据为空，无法初始化下拉选择框。而且进行KO binding会出错。";
-                    //    data = new Array();
-                    //}
-                    //if (!_.isArray(data)) {
-                    //    data = [data];
-                    //}
-                    ///**
-                    // * 把数据集的名称，转换为驼峰命名的变量名，
-                    // * 然后作为当前这个下拉框的所有ko binding的一个标志（例如，参与到所有的自动生成变量的命名中）
-                    // * idPrefix = userList_dsUserDataSet (下拉框id+_+数据集名称
-                    // */
-                    ////var idPrefix = _s.camelize(config.toLocaleLowerCase(), true) + "_";
-                    //var idPrefix = options.bindSelectId + "_" + _s.camelize(config.toLocaleLowerCase(), true);
-                    //console.log("idprefix: " + idPrefix + " test: " + _s.camelize("gaeaDataSetManagement", true));
-                    //var dataStr = JSON.stringify(data);
-                    //console.log("before clean: " + dataStr);
-                    ////$(data).each(function (index, element) {
-                    //// 定义一个ViewModel
-                    //var selectOptions = idPrefix + "_options";
-                    //var selected = idPrefix + "_selected";
-                    //var selectedObj = idPrefix + "_Obj";
-                    //viewModel[selectOptions] = ko.observableArray(data);// 可以用一个空的数组初始化
-                    //viewModel[selected] = ko.observable();// 这个就是中间变量
-                    ///**
-                    // * 计算对象，根据下拉框选中的值去json数据中找对应的对象。代表下拉选择的对象。例如user。
-                    // * 再把对象的属性和表单的各个字段绑定。例如：(user)name,address,phone...
-                    // * ko.computed在加载的时候就会运行一次了！切记！这个时候如果返回undefined，会导致页面错误！
-                    // */
-                    //viewModel[selectedObj] = ko.computed(function () { // 通过中间变量，遍历数组查找对象。再触发页面更新。
-                    //    if (gaeaValid.isNull(data) || !_.isArray(data)) {
-                    //        return null;
-                    //    }
-                    //    var result = ko.utils.arrayFirst(data, function (item) {
-                    //        //console.log("item name:" + item.value + " self name:" + viewModel[selected]());
-                    //        // 一开始viewModel[selected]是没用值的，undefined。这个时候需要初始化，返回一个对象，否则会出错！！( ERROR : unable to process binding value function () return order seq cannot read property of null )
-                    //        if (gaeaValid.isNull(viewModel[selected]())) {
-                    //            return _.first(data);
-                    //        }
-                    //        return item.value === viewModel[selected]();
-                    //    });
-                    //    return result;
-                    //});
-                    //// 初始化
-                    //// 下拉框的data-bind模板
-                    //var selectBindingTemplate = _.template("options:<%= selectOptionsName %>,optionsText:'text',optionsValue:'value',value:<%= selectedVarName %>");
-                    //// 应用模板
-                    //$select.attr("data-bind", selectBindingTemplate({
-                    //    selectOptionsName: selectOptions,
-                    //    selectedVarName: selected
-                    //}));
 
                     // 首先建立数据集的对象模型
                     viewModel = gaeaData.select.initModel(options);
@@ -252,21 +147,6 @@ define([
                         var bindObjName = gaeaData.select.getBindObjName(options.bindSelectId, options.dataset);
                         gaeaData._bindHtmlField(options, dataSample, bindObjName);
                     }
-                    //$formDiv.find("input,textarea").each(function (index, element) {
-                    //    var $self = $(this);
-                    //    var elementName = $(this).attr("name");
-                    //    console.log("element name: " + elementName);
-                    //    // 检查JSON数据中是否有该字段存在
-                    //    var hasDataKey = _.has(data[0], elementName);
-                    //    console.log("has key : " + hasDataKey);
-                    //    if (hasDataKey) {
-                    //        $self.attr("data-bind", "value:" + selectedObj + "()." + elementName);
-                    //    }
-                    //});
-
-                    //ko.applyBindings(koViewModel);
-                    //var dataFor = ko.dataFor($("#createOrEditDialog")[0]);
-                    //var contextFor = ko.contextFor($("#createOrEditDialog").get());
                     return viewModel;
                 },
                 /**
@@ -312,9 +192,6 @@ define([
                         selectOptionsName: selectOptions,
                         selectedVarName: selected
                     }));
-                    //cacheViewModel = _.extend(cacheViewModel, vm);
-                    // 返回增量的部分。一般没用。
-                    //return vm;
                     // 把viewModel缓存
                     gaeaData.dataSet.setViewModel(bindContainerId, vm);
                 },
@@ -334,7 +211,6 @@ define([
                     }
                     var data = options.data;
                     var bindContainerId = options.bindContainerId;
-                    //var idPrefix = gaeaData.utils.getIdPrefix(options.bindSelectId, options.dataset);
                     var selectOptions = gaeaData.select.getOptionsName(options.bindSelectId, options.dataset);
                     // 使用KO的原生方法先把原有数组清空！
                     gaeaData.ko.removeAll(gaeaData.viewModel[bindContainerId][selectOptions]);
@@ -358,7 +234,6 @@ define([
                     }
                     var selectOptions = gaeaData.select.getOptionsName(options.bindSelectId, options.dataset);
                     var bindContainerId = options.bindContainerId;
-                    //var selectOptions = idPrefix + "_options";
                     // 使用KO的原生方法先把原有数组清空！
                     gaeaData.ko.removeAll(gaeaData.viewModel[bindContainerId][selectOptions]);
                 },
@@ -406,18 +281,9 @@ define([
                 // 查找要绑定的HTML元素的id
                 var bindContainerId = gaeaData.dataBind.findBindingId(divId);
                 var $bindContainer = $("#" + bindContainerId);
-                //if(gaeaValid.isNotNull(bindAreaTag) && _.isBoolean(bindAreaTag) && bindAreaTag){
-                //    $bindContainer = $formDiv;
-                //}else{
-                //
-                //var $bindDiv = $formDiv.find("[data-gaea-data-bind-area=true]");
-                //    $bindContainer = $bindDiv;
-                //}
-                //$(document).ajaxStop(function () {
                 var root = this;
                 // 应用于KnockoutJS
                 if (!gaeaData.isBinded($bindContainer)) {
-                    //ko.applyBindings(options._viewModel, $formDiv[0]);
                     ko.applyBindings(gaeaData.viewModel[bindContainerId], $bindContainer[0]);
                     /**
                      * 在KO绑定后再调用。
@@ -577,168 +443,6 @@ define([
                 return queryCondition;
             },
             /**
-             * 解析配置的查询条件。
-             *
-             * @param options 对应data-gaea-data。格式：
-             *              dataset: ***,
-             *              bindAsObject: false, // 是否作为对象绑定。默认不是。
-             *              condition:{
-             *                  id:'byId',
-             *                  values:[{
-             *                      type:'static | pageContext | dependTrigger',
-             *                      value:'id',
-             *                     dependId: 'someId',
-             *                     triggerEvent: 'change'
-             *                      }]}
-             *               bindSelectId : ***, // 数据集要绑定的下拉框的id
-             *               bindFieldContainerId: *** // 数据集要绑定一堆input,则这堆input在哪里?给出一个容器的id
-             * @returns queryCondition
-             *              init 初始化function. 如果页面的condition是级联(触发)的话, 需要一个绑定事件的初始化.
-             */
-            //parseCondition: function (options) {
-            //    var configCondition = options.condition;
-            //    //var dataSetId = options.dataset;
-            //    //var bindPrefix = options.bindPrefix;
-            //    var queryCondition = {};
-            //    //var $pageContext = PAGE_CONTEXT;
-            //    //if(gaeaValid.isNotNull(configObj.condition)){
-            //    //    var configCondition = configObj.condition;
-            //    queryCondition.id = configCondition.id;
-            //    if (gaeaValid.isNotNull(configCondition.values) && _.isArray(configCondition.values)) {
-            //        var queryValues = new Array();
-            //        $.each(configCondition.values, function (key, condValue) {
-            //            var value = null;
-            //            /**
-            //             * 如果配置项要的是当前页面上下文的值，则需要从上下文取值。而不是页面配置的静态值。
-            //             */
-            //            if (gaeaString.equalsIgnoreCase(condValue.type, DEFINE.CONDITION.TYPE.PAGE_CONTEXT)) {
-            //                if (gaeaValid.isNotNull(condValue.value)) {
-            //                    gaeaData.utils.getPageContextValue(condValue.value);
-            //                    //if (_s.startsWith(condValue.value, "$pageContext.")) {
-            //                    //    value = eval(condValue.value);
-            //                    //}
-            //                    //if (gaeaValid.isNull(value)) {
-            //                    //    value = PAGE_CONTEXT[condValue.value];
-            //                    //}
-            //                    queryValues.push({
-            //                        type: condValue.type,
-            //                        value: value
-            //                    });
-            //                }
-            //            } else if (gaeaString.equalsIgnoreCase(condValue.type, DEFINE.CONDITION.TYPE.STATIC)) {
-            //                queryValues.push({
-            //                    type: condValue.type,
-            //                    value: condValue.value
-            //                });
-            //            }
-            //            /**
-            //             * 如果是级联（依赖）数据集。
-            //             */
-            //            else if (gaeaString.equalsIgnoreCase(condValue.type, DEFINE.CONDITION.TYPE.DEPEND_TRIGGER)) {
-            //
-            //                options.conditionValue = condValue;
-            //                gaeaData.dataSet.dependTriggerDataSetInit(options, function (data) {
-            //                    if (gaeaValid.isNotNull(data)) {
-            //                        options.data = data;
-            //                        gaeaData.select.resetData(options);
-            //                        // 把当前数据集作对象绑定。把数据集其他字段和页面同名字段绑定。
-            //                        // bindAsObject暂时未启用和测试。预留。
-            //                        if (gaeaValid.isNotNull(options.bindAsObject) && options.bindAsObject) {
-            //                            gaeaData.ko.createComputeObj(options);
-            //                        }
-            //                    }else{
-            //                        gaeaData.select.removeAllData(options);
-            //                    }
-            //                });
-            //
-            //
-            //
-            //
-            //                //// 看是否有内置变量，处理一下。
-            //                //if (gaeaValid.isNotNull(condValue.value)) {
-            //                //    value = eval(condValue.value);
-            //                //}
-            //                //if (gaeaValid.isNull(value)) {
-            //                //    var domId = condValue.dependId;
-            //                //    var triggerEvent = condValue.triggerEvent;
-            //                //    if (gaeaValid.isNull(domId)) {
-            //                //        throw "数据集配置有误.type是dependTrigger,要求dependId不允许为空.";
-            //                //    }
-            //                //    // 默认事件为onchange
-            //                //    if (gaeaValid.isNull(triggerEvent)) {
-            //                //        triggerEvent = "change";
-            //                //    }
-            //                //
-            //                //    var $target = $("#" + domId);// 目标对象，一般是个下拉框（带数据集功能）
-            //                //
-            //                //    /**
-            //                //     * 初始化select下拉框, 建模,data-bind...
-            //                //     * 一开始就初始化，不要等到依赖的上级触发再初始化。那样会导致重复binding问题。
-            //                //     */
-            //                //    var viewModel = gaeaData.select.initModel(options);
-            //                //    // Function ---------------------------------------------------->>>>
-            //                //    // 监听事件. 当依赖的对象的值有变化的时候, 就触发重新查询结果集.
-            //                //    //var valueInit = function (options) {
-            //                //
-            //                //    // 默认在依赖对象的gaeaUI_event_init_complete事件发生后，再进行自己的初始化
-            //                //    $target.on(GAEA_EVENTS.DEFINE.UI.INIT_COMPLETE, function () {
-            //                //        // 依赖的对象触发change事件（一般），则发起请求刷新当前的组件。
-            //                //        $target.on(triggerEvent, function (event, data) {
-            //                //            var newCondition = queryCondition;
-            //                //            queryValues = new Array();
-            //                //            value = $(this).val();
-            //                //            if (gaeaValid.isNotNull(value)) {
-            //                //                queryValues.push({
-            //                //                    type: condValue.type,
-            //                //                    value: value
-            //                //                });
-            //                //            }
-            //                //            //if (_.isFunction(options.success)) {
-            //                //            //options.success(queryValues);
-            //                //
-            //                //
-            //                //            //
-            //                //            //
-            //                //            newCondition.values = queryValues;
-            //                //            gaeaData.dataSet.getData({
-            //                //                isConditionParsed: true,// 表示condition已经解析过，不要再解析了！
-            //                //                condition: gaeaData.newQueryCondition(newCondition),
-            //                //                dsId: dataSetId,
-            //                //                isAsync: true,// 异步调用
-            //                //                success: function (data) {
-            //                //                    //var viewModel = gaeaData.select.initModelAndData(options,dataSetId, data, $select, $formDiv, bindPrefix);
-            //                //                    //options._viewModel = _.extend(options._viewModel, viewModel);
-            //                //                    ////var result = $.parseJSON(jqXHR.responseText);
-            //                //                    //// 用查询结果，刷新数据列表
-            //                //                    options.data = data;
-            //                //                    if (gaeaValid.isNotNull(data)) {
-            //                //                        gaeaData.select.resetData(options);
-            //                //                        // 把当前数据集作对象绑定。把数据集其他字段和页面同名字段绑定。
-            //                //                        if (gaeaValid.isNotNull(options.bindAsObject) && options.bindAsObject) {
-            //                //                            gaeaData.ko.createComputeObj(options);
-            //                //                        }
-            //                //                    }
-            //                //                }
-            //                //            });
-            //                //        });
-            //                //    });
-            //                //
-            //                //}
-            //
-            //                //queryValues.push({
-            //                //    type: condValue.type,
-            //                //    value: condValue.value,
-            //                //    init: valueInit
-            //                //});
-            //            }
-            //        });
-            //        queryCondition.values = queryValues;
-            //    }
-            //
-            //    //}
-            //    return queryCondition;
-            //},
-            /**
              * 创建一个新的queryCondition。如果传入参数有，以传入参数为基础裁剪。
              * 主要是，请求查询的查询对象只需要几个关键值，而queryCondition有时候会有一些init:function之类的额外无关参数。
              * @param queryCondition
@@ -769,31 +473,6 @@ define([
             scanAndInit: function (divId) {
                 var dfd = $.Deferred();// JQuery同步对象
                 var $formDiv = $("#" + divId);
-                /**
-                 * 校验：
-                 * binding区域是否正确，是否有需要的配置（id等）
-                 */
-                //var imBindArea = $formDiv.data("gaea-data-bind-area");// 是否本身就是binding位置
-                //if (gaeaValid.isNull($formDiv.find("[data-gaea-data-bind-area=true]")) && gaeaValid.isNull(imBindArea)) {
-                //    throw "找不到对应的数据绑定区域(data-gaea-data-bind-area属性)设置。无法初始化dataset。";
-                //}
-                //var $bindingContainer = null;
-                //if(gaeaValid.isNotNull(imBindArea)){
-                //    if(!_.isBoolean(imBindArea)){
-                //        throw "data-gaea-data-bind-area配置必须是boolean.";
-                //    }
-                //    if(imBindArea){
-                //    $bindingContainer = $formDiv;
-                //    }else{
-                //        return;
-                //    }
-                //}else{
-                //$bindingContainer = $formDiv.find("[data-gaea-data-bind-area=true]").first();
-                //}
-                //var bindContainerId = $bindingContainer.attr("id");// 做data binding的整个容器（div）的id
-                //if(gaeaValid.isNull(bindContainerId)){
-                //    throw "gaea data binding区域（一般是HTML元素）的id不允许为空！";
-                //}
                 var bindContainerId = gaeaData.dataBind.findBindingId(divId);
                 var $bindingContainer = $("#" + bindContainerId);
                 var dsLoadFunctions = new Array();
@@ -805,12 +484,8 @@ define([
                     var $select = $(this);// 默认是下拉选择框，其实可能不是。
                     var gaeaDataStr = $(this).data("gaea-data");
                     var thisId = $select.attr("id");
-                    //console.log("scan gaea form data. gaea-data : " + gaeaDataStr);
-                    //var elementCo = ;
                     // 把元素的gaea-data配置转成对象，并和默认配置合并。
-                    //var configOptions = _.extend(options, gaeaString.parseJSON(gaeaDataStr));
                     var configOptions = gaeaString.parseJSON(gaeaDataStr);
-                    //options = configOptions;
                     var dataSetId = configOptions.dataset;
                     var bindPrefix = configOptions.bindPrefix;
                     configOptions.bindSelectId = $select.attr("id");
@@ -885,55 +560,10 @@ define([
                                 });
                                 queryCondition.values = queryValues;
                             }
-
-                            //$.each(newCondition.values, function (idx, condValue) {
-                            //    if (_.isFunction(condValue.init)) {
-                            //        condValue.init({
-                            //            success: function (queryValues) {
-                            //                newCondition.values = queryValues;
-                            //                gaeaData.dataSet.getData({
-                            //                    isConditionParsed: true,// 表示condition已经解析过，不要再解析了！
-                            //                    condition: gaeaData.newQueryCondition(newCondition),
-                            //                    dsId: dataSetId,
-                            //                    isAsync: true,// 异步调用
-                            //                    success: function (data) {
-                            //                        var viewModel = gaeaData.select.initData(dataSetId, data, $select, $formDiv, bindPrefix);
-                            //                        options._viewModel = _.extend(options._viewModel, viewModel);
-                            //                        //var result = $.parseJSON(jqXHR.responseText);
-                            //                        // 用查询结果，刷新数据列表
-                            //                    }
-                            //                });
-                            //            }
-                            //        });
-                            //    }
-                            //});
                         }
                         // 解析完condition后，把condition的值合并，统一发起查询。
                         // 如果没有配置（或配置了initTiming :'onload'） , 一开始就加载一次数据。
                         if (gaeaValid.isNull(configOptions.initTiming) || gaeaString.equalsIgnoreCase(configOptions.initTiming, "onload")) {
-                            //var result = gaeaData.dataSet.getData({
-                            //    url: SYS_URL.DATA.DATASET.GET,
-                            //    //condition: newCondition,
-                            //    dsId: dataSetId,
-                            //    isAsync: true,// 异步调用
-                            //    success: function (data) {
-                            //        if (!_.isArray(data)) {
-                            //            data = [data];
-                            //        }
-                            //        configOptions.data = data;
-                            //        var viewModel = gaeaData.select.initModelAndData(configOptions);
-                            //        //options._viewModel = _.extend(options._viewModel, viewModel);
-                            //        //gaeaData.viewModel = _.extend(gaeaData.viewModel, viewModel);
-                            //        //var result = $.parseJSON(jqXHR.responseText);
-                            //        // 用查询结果，刷新数据列表
-                            //
-                            //        // 告诉全世界，我初始化完啦！
-                            //        // 其他绑定到这个组件的级联数据集，就会开始初始化or刷新。
-                            //        $select.trigger(GAEA_EVENTS.DEFINE.UI.INIT_COMPLETE);
-                            //    }
-                            //});
-
-
                             // 把加载数据集的方法push到一个数组里面。随后一起并发加载。
                             dsLoadFunctions.push(function () {
                                 return gaeaData.dataSet.getData({
@@ -950,9 +580,6 @@ define([
                                          * data bind建模，初始化数据
                                          */
                                         var viewModel = gaeaData.select.initModelAndData(configOptions);
-                                        //options._viewModel = _.extend(options._viewModel, viewModel);
-                                        //gaeaData.viewModel = _.extend(gaeaData.viewModel, viewModel);
-                                        //var result = $.parseJSON(jqXHR.responseText);
                                         // 用查询结果，刷新数据列表
 
                                         // 告诉全世界，我初始化完啦！
@@ -962,23 +589,6 @@ define([
                                 })
                             });
                         }
-
-
-                        //gaeaAjax.post({
-                        //    url: SYS_URL.DATA.DATASET.GET,
-                        //    data: {
-                        //        dsId: configOptions.dataset
-                        //    },
-                        //    success: function (data) {
-                        //        var viewModel = gaeaData.select.initData(dataSetId, data, $select, $formDiv, bindPrefix);
-                        //        options._viewModel = _.extend(options._viewModel, viewModel);
-                        //        //var result = $.parseJSON(jqXHR.responseText);
-                        //        // 用查询结果，刷新数据列表
-                        //    },
-                        //    fail: function (data) {
-                        //        gaeaNotify.error(_.template("加载数据集<%= dsName %>失败!")({dsName: configOptions.dataset}));
-                        //    }
-                        //});
                     }
                 });
                 // 对同个页面多个数据集并发ajax请求，加载数据
@@ -1077,19 +687,6 @@ define([
                     condition: configObj.condition,
                     dsId: configObj.dataset
                 });
-                /**
-                 * 解析gaea-data配置的查询条件。
-                 */
-                //if (gaeaValid.isNotNull(configObj.condition)) {
-                //    queryCondition = gaeaData.parseCondition(configObj.condition);
-                //}
-                //var result = gaeaData.getData({
-                //    data: {
-                //        conditions: JSON.stringify(queryCondition),
-                //        dsId: configObj.dataset
-                //    }
-                //});
-                //return result;
             },
             /**
              *
@@ -1104,9 +701,6 @@ define([
              *              gaeaData ajax返回的data放在这个属性中
              */
             getData: function (options) {
-                //var $container = $("#" + containerId);
-                //var configStr = $container.data("gaea-data");
-                //var configObj = gaeaString.parseJSON(configStr);
                 var queryCondition = {};// 查询条件。( gaea-data: ... condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]} ... )
                 var isConditionParsed = gaeaValid.isNull(options.isConditionParsed) ? false : options.isConditionParsed;// 默认false
                 /**
@@ -1119,8 +713,6 @@ define([
                 }
                 options.conditions = JSON.stringify(queryCondition);
                 return gaeaData.getData(options);
-                //var result = gaeaData.getData(options);
-                //return result;
             },
             /**
              * 获取缓存的ViewModel的某个。
@@ -1221,12 +813,6 @@ define([
                                 });
                             };
                             dsLoadFunctions.push(func());
-
-
-                            //// 获取数据
-                            //var dsData = gaeaData.dataSet.getDataByDomId(componentCtId);
-                            //// 初始化table
-                            //gaeaData.component.table.initData(componentCtId, dsData);
                         }
                     }
                 });
@@ -1253,7 +839,6 @@ define([
                     /**
                      * 把数据转换为table显示
                      */
-                    //if(gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
                     var dataStr = $this.data("gaea-data");
                     var dataConfig = gaeaString.parseJSON(dataStr);
                     if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
@@ -1262,7 +847,6 @@ define([
                         }
                         gaeaData.component.table.initAfterBinding(componentCtId, dataConfig);
                     }
-                    //}
                 });
             },
             /**
@@ -1313,15 +897,8 @@ define([
                     });
 
 
-                    //if (gaeaValid.isNotNull(name)) {
                     var array = new Array();
-                    //options._viewModel[name]=new Array();
                     var tableDefine = gaeaGrid.tableGrid.getColumnDefine(containerId);
-                    //// 根据定义，生成一个对象，对象各个属性为空
-                    //var obj = {};
-                    //$.each(tableDefine.columns, function (idx,column) {
-                    //    obj[column.id] = "";
-                    //});
                     // TODO 把按钮触发封装一下？
                     $("#" + btnAddName).click(function () {
                         // 根据定义，生成一个对象，对象各个属性为空
@@ -1332,10 +909,6 @@ define([
                          * 这其中的id,name,age等属性需要从column定义中获取.
                          */
                         obj = gaeaData.createEmptyObject(tableDefine.columns);
-                        //$.each(tableDefine.columns, function (idx,column) {
-                        //    obj[column.id] = "";
-                        //});
-                        //options._viewModel[name].push(obj);// push后，由于KO binding了，所以table会多出一行
                         gaeaData.viewModel[bindContainerId][name].push(obj);// push后，由于KO binding了，所以table会多出一行
 
                         // 找到最后一行，把里面的input的name属性修改掉
@@ -1367,32 +940,6 @@ define([
                     gaeaData.dataBind.bindForEach($tbody, name);
                     //options._viewModel[name] = ko.observableArray(array);
                     gaeaData.viewModel[bindContainerId][name] = ko.observableArray(array);
-                    /**
-                     * 填充数据
-                     */
-                    //if(gaeaValid.isNotNull(data)){
-                    //    if(_.isArray(data)){
-                    //        $.each(data, function (key, val) {
-                    //            options._viewModel[name].push(val);
-                    //        });
-                    //    }else {
-                    //        options._viewModel[name].push(data);
-                    //    }
-                    //    //var TRs = $tbody.children("tr");
-                    //    //console.log("row count: "+TRs.length);
-                    //    // 把填充的数据的name属性修改掉。按照数组的方式命名。
-                    //    //$.each($tbody.children("tr"), function (trIdx,tr) {
-                    //    //    console.log("idx: "+trIdx);
-                    //    //    $.each($(tr).find("td input"), function (idx, val) {
-                    //    //        var nameVal = $(this).attr("name");
-                    //    //        gaeaData.component.table.resetName($(this),{
-                    //    //            ARRAY_NAME:name,
-                    //    //            ARRAY_INDEX:trIdx,
-                    //    //            NAME:nameVal
-                    //    //        });
-                    //    //    });
-                    //    //});
-                    //}
                 },
                 initData: function (containerId, data) {
                     var $this = $("#" + containerId);
@@ -1672,10 +1219,6 @@ define([
                     }
 
                     jqXHR.gaeaData = result;
-                    //result = data[0];
-                    // 用查询结果，刷新数据列表
-                    //ur.component.bridge.grid.refreshData(data);
-                    //alert("成功");
                 },
                 fail: function (data) {
                     alert("加载数据集 '" + options.dsId + "' 失败.");
