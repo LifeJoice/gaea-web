@@ -22,6 +22,6 @@
             配置了Gaea数据集的默认读取位置。
          ************************************************************************************************************ -->
     <bean id="gaeaDataSetResolver" class="org.gaea.data.dataset.GaeaDataSetResolver" >
-        <constructor-arg name="filePath" value="classpath:config/sys/dataset/*.xml"/>
+        <constructor-arg name="filePath" value="classpath:config/sys/dataset/**/*.xml"/>
     </bean>
 </beans>

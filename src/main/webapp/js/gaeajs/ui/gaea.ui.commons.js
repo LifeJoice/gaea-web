@@ -11,15 +11,63 @@
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
-        "gaeajs-ui-multiselect"
+        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
-              gaeaMultiSelect) {
+              gaeaMultiSelect, gaeaButton, gaeaUtils) {
 
         var gaeaCommons = {
-            initComponents: function (containerId) {
+            initGaeaUI: function (containerId) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(containerId)) {
+                    dfd.resolve();
+                }
+                // 初始化按钮(在html中通过data-gaea-ui-button配置的)
+                _private.initGaeaButton(containerId);
+
                 return gaeaMultiSelect.init(containerId);
+            }
+        };
+
+        var _private = {
+            /**
+             * 初始化按钮。
+             * 当前只初始化弹出框中页面的按钮，不负责初始化toolbar中的按钮。
+             */
+            initGaeaButton: function (containerId) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(containerId)) {
+                    dfd.resolve();
+                }
+                // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
+                var attrName = "data-" + GAEA_UI_DEFINE.UI.BUTTON.DEFINE;
+                // 找gaeaUI按钮的jq选择器条件( <a data-gaea-ui-button=*** ...> )
+                var buttonFilterTemplate = _.template("a[<%= ATTR_NAME %>]");
+                // 查找所有按钮，遍历并初始化
+                $("#" + containerId).find(buttonFilterTemplate({
+                    ATTR_NAME: attrName
+                })).each(function (idx, obj) {
+                    var id = $(obj).attr("id");
+                    /**
+                     * debug
+                     * 检查是否有重复元素！
+                     * 这个很重要。否则会有一些莫名其妙的问题。
+                     */
+                    if (!gaeaUtils.dom.checkUnique(id)) {
+                        console.debug("某元素根据id查找不唯一。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
+
+                    var gaeaButton = require("gaeajs-ui-button");
+                    gaeaButton.initGaeaButton({
+                        id: id,
+                        parentDialogId: containerId
+                    });
+                });
+
+                return dfd.promise();
             }
         };
 

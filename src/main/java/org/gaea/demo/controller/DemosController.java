@@ -2,6 +2,8 @@ package org.gaea.demo.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
+import org.gaea.demo.entity.DemoClassEntity;
+import org.gaea.demo.service.DemoClassService;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
@@ -60,6 +62,8 @@ public class DemosController {
     private ExcelExport excelExport;
     @Autowired
     private ExcelService excelService;
+    @Autowired
+    private DemoClassService demoClassService;
 
     @RequestMapping("/management")
     public String list() {
@@ -73,14 +77,38 @@ public class DemosController {
      */
     @RequestMapping(value = "/tabs-crud-form", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/demo/tabs-crud-form.html";
+        return "/demo/tabs-crud-form.html";
     }
 
-    @RequestMapping(value = "/tabs/add", produces = "plain/text; charset=UTF-8")
+    @RequestMapping(value = "/class-crud-form", produces = "plain/text; charset=UTF-8")
+    public String showAddClassForm() {
+        return "/demo/class-crud-form.html";
+    }
+
+    @RequestMapping(value = "/class-crud-form-2", produces = "plain/text; charset=UTF-8")
+    public String showAddClassForm2() {
+        return "/demo/class-crud-form-2.html";
+    }
+
+    @RequestMapping(value = "/class-crud-form-3", produces = "plain/text; charset=UTF-8")
+    public String showAddClassForm3() {
+        return "/demo/class-crud-form-3.html";
+    }
+
+    @RequestMapping(value = "/class-crud-form-2-1", produces = "plain/text; charset=UTF-8")
+    public String showAddClassForm21() {
+        return "/demo/class-crud-form-2-1.html";
+    }
+
+    @RequestMapping(value = "/class-crud-form-3-1", produces = "plain/text; charset=UTF-8")
+    public String showAddClassForm31() {
+        return "/demo/class-crud-form-3-1.html";
+    }
+
+    @RequestMapping(value = "/add-class", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String save(Resource resource, @RequestBean Menu menu) {
-        systemResourcesService.save(resource);
-        return "";
+    public void saveClass(DemoClassEntity classEntity, @RequestBean Menu menu, HttpServletRequest request) {
+//        demoClassService.save(classEntity, GaeaWebSecuritySystem.getUserName(request));
     }
 
     @RequestMapping(value = "/test", produces = "plain/text; charset=UTF-8")

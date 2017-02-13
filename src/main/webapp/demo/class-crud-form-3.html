@@ -1,0 +1,37 @@
+<div id="div-demo-class-mgr-3" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">班级名称3</span>
+            <span class="fieldvalue"><input id="className3" name="className3" value="" data-msg-required="名称不能为空"
+                                            required></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">第几届3</span>
+            <span class="fieldvalue"><input id="termYear3" name="termYear3" value="" type="number" min="2015" max="2099"
+                                            step="1" data-msg="输入要求是年份 2015~2099." required></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">年级3</span>
+            <span class="fieldvalue"><input id="currentYear3" name="currentYear3" value="" type="number" min="1" max="9"
+                                            step="1" data-msg="输入要求是年级 1~9." data-msg-required="年级不允许为空"
+                                            required></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">班级号3</span>
+            <span class="fieldvalue">
+                <input id="classNo3" name="classNo3" value="" type="number" min="1" max="99" step="1"
+                       data-msg="输入要求是几班 1~99." data-msg-required="班级号不允许为空" required>
+            </span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">选择班级3</span>
+            <span class="fieldvalue">
+                <input id="test3" name="test3" value="" type="hidden">
+                <a id="btnNewDialog3" class="medium darkslategrey button"
+                   data-gaea-ui-button="newId:'classCrudDialog3', action:'new_dialog', openStyle:'inOne', submitAction:'writeback_in_one',refInputId:'test3', contentUrl:'/gaea/demo/class-crud-form-3-1' ">新增</a>
+            </span>
+        </div>
+    </div>
+</div>

@@ -198,6 +198,22 @@ define([
                 return result;
             }
         };
+
+        utils.dom = {
+            /**
+             * 检查某id在整个页面是否唯一。
+             * 无法用JQuery检查，因为对于一些ajax加载的内容页，会检查不出来。所以还是使用原生的js语法检查。
+             * @param id
+             * @returns {boolean}
+             */
+            checkUnique: function (id) {
+                if (gaeaValid.isNull(id)) {
+                    throw "id为空，无法进行元素的唯一性检查！";
+                }
+                return document.querySelectorAll("#" + id).length == 1;
+            }
+        };
+
         /**
          * 返回接口定义。
          */

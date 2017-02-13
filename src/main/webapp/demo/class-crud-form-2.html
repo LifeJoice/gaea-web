@@ -1,0 +1,38 @@
+<div id="div-demo-class-mgr-2" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">班级名称2</span>
+            <span class="fieldvalue"><input id="className2" name="form2.className" value="" data-msg-required="名称不能为空"
+                                            required></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">第几届2</span>
+            <span class="fieldvalue"><input id="termYear2" name="termYear2" value="" type="number" min="2015" max="2099"
+                                            step="1" data-msg="输入要求是年份 2015~2099." required></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">年级2</span>
+            <span class="fieldvalue">
+                <select id="currentYear2" name="currentYear2" data-gaea-data="dataset:'DEMO_PRIMARY_GRADE'">
+                </select>
+            </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">班级号2</span>
+            <span class="fieldvalue">
+                <input id="classNo2" name="classNo2" value="" type="number" min="1" max="99" step="1"
+                       data-msg="输入要求是几班 1~99." data-msg-required="班级号不允许为空" required>
+            </span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">选择班级2</span>
+            <span class="fieldvalue">
+                <input id="test2" name="test2" value="" type="hidden">
+                <a id="btnNewDialog2" class="medium darkslategrey button"
+                   data-gaea-ui-button="newId:'classCrudDialog21', action:'new_dialog', openStyle:'inOne', submitAction:'writeback_in_one',refInputId:'test2', contentUrl:'/gaea/demo/class-crud-form-2-1' ">新增</a>
+            </span>
+        </div>
+    </div>
+</div>

@@ -2173,6 +2173,7 @@ require.config({
         "jquery-ui-draggable":'/js/thirdparty/jquery/ui/draggable',
         "jquery-ui-position":'/js/thirdparty/jquery/ui/position',
         "jquery-ui-resizable":'/js/thirdparty/jquery/ui/resizable',
+        "jquery-ui-effects-all": '/js/thirdparty/jquery/ui/jquery-ui-effects-all', // jQueryUI的动画效果的一体包
         /* JQuery-UI的gaea扩展 */
         "gaea-jqui-dialog":'/js/gaeajs/ui/extends/gaea-jquery.ui.dialog.custom',
         /* JQuery插件扩展 */

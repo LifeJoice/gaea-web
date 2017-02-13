@@ -7,6 +7,21 @@
 define(function () {
     var UI = {
         /**
+         * 通过
+         * < div data-gaea-ui-xxx >
+         * 定义的组件名
+         */
+        BUTTON: {
+            DEFINE: "gaea-ui-button", // data-gaea-ui-button
+            ACTION: {
+                NEW_DIALOG: "new_dialog" // 点击是新打开一个弹框
+            },
+            SUBMIT_ACTION: {
+                WRITEBACK_IN_ONE: "writeback_in_one",
+                WRITEBACK_BY_FIELD: "writeback_by_field"
+            }
+        },
+        /**
          * UI定义的组件类型。
          */
         COMPONENT: {
@@ -69,6 +84,7 @@ define(function () {
     };
     var TEMPLATE = {
         DIV: {
+            HIDDEN: '<div id="<%=ID%>" name="<%=NAME%>" style="display: none;"><%=CONTENT%></div>',
             WITH_NAME: '<div id="<%=ID%>" name="<%=NAME%>"><%=CONTENT%></div>'
         },
         INPUT: {

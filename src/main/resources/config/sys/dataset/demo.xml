@@ -3,12 +3,24 @@
 <dataset-definition>
     <dataset id="DEMO_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="1">
         <data-sql>
-            <![CDATA[SELECT r.* FROM demo_resources r]]>
+            <![CDATA[SELECT c.* FROM demo_class c]]>
         </data-sql>
         <where>
             <condition-set id="byId">
                 <and propName="id" op="eq"></and>
             </condition-set>
         </where>
+    </dataset>
+
+    <!-- ********************************************** 小学年级 ********************************************** -->
+    <dataset id="DEMO_PRIMARY_GRADE" cache-type="static">
+        <data>
+            <data-element value="1" text="一年级"/>
+            <data-element value="2" text="二年级"/>
+            <data-element value="3" text="三年级"/>
+            <data-element value="4" text="四年级"/>
+            <data-element value="5" text="五年级"/>
+            <data-element value="6" text="六年级"/>
+        </data>
     </dataset>
 </dataset-definition>

@@ -178,10 +178,12 @@ define([
                      * 然后作为当前这个下拉框的所有ko binding的一个标志（例如，参与到所有的自动生成变量的命名中）
                      * idPrefix = userList_dsUserDataSet (下拉框id+_+数据集名称)
                      */
-                    var idPrefix = gaeaData.utils.getIdPrefix(options.bindSelectId, options.dataset);
+                    //var idPrefix = gaeaData.utils.getIdPrefix(options.bindSelectId, options.dataset);
                     // 定义一个ViewModel
-                    var selectOptions = idPrefix + "_options";
-                    var selected = idPrefix + "_selected";
+                    //var selectOptions = idPrefix + "_options";
+                    var selectOptions = gaeaData.select.getOptionsName(options.bindSelectId, options.dataset);
+                    //var selected = idPrefix + "_selected";
+                    var selected = gaeaData.select.getSelectedName(options.bindSelectId, options.dataset);
                     vm[selectOptions] = ko.observableArray(data);// 可以用一个空的数组初始化
                     vm[selected] = ko.observable();// 这个就是中间变量
                     // 初始化
@@ -192,6 +194,12 @@ define([
                         selectOptionsName: selectOptions,
                         selectedVarName: selected
                     }));
+
+                    // debug
+                    //gaeaData.utils.debug.checkViewId({
+                    //    viewModelName: bindContainerId,
+                    //    optionName:selectOptions
+                    //});
                     // 把viewModel缓存
                     gaeaData.dataSet.setViewModel(bindContainerId, vm);
                 },
@@ -335,12 +343,12 @@ define([
                         // 检查属性名是否有前缀（区分本身没有，还是去掉了）
                         datakeyMapsName = _s.startsWith(fullName, bindPrefix + ".");
                     }
-                    console.log("element name: " + fullName + " withoutObjectPrefix : " + withoutpreName);
+                    //console.log("element name: " + fullName + " withoutObjectPrefix : " + withoutpreName);
                     // 转换为小写。因为服务端返回的结果集的key应该都是小写。data-bind的属性不需要跟input属性名一致，重点是跟数据集key一致。
                     withoutpreName = withoutpreName.toLowerCase();
                     // 检查JSON数据中是否有该字段存在
                     var hasDataKey = _.has(jsonObj, withoutpreName);
-                    console.log("has key : " + hasDataKey);
+                    //console.log("has key : " + hasDataKey);
                     // 如果数据集结果有对应的字段，而且页面表单也有对应的属性的元素（如<input>），则绑定。
                     if (hasDataKey && datakeyMapsName) {
                         /**
@@ -1233,14 +1241,19 @@ define([
             /**
              * 根据给定的某个元素的id，找到对应的具体binding HTML元素的id。
              * 从当前id的元素，向下找（包括当前）。找到的第一个返回。
-             * @param beginId
+             * @param {string} beginId                  从dom的哪个id往下找
+             * @param {string} html                     如果非空，就在这堆html里面找，而不是整个页面找。
              * @returns {html id} 某包含data-gaea-data-bind-area=true的HTML元素的id
              */
-            findBindingId: function (beginId) {
+            findBindingId: function (beginId, html) {
                 if (gaeaValid.isNull(beginId)) {
                     throw "查找gaea data binding的起始id不允许为空！";
                 }
                 var $someDiv = $("#" + beginId);
+                // 如果html不为空，则在给定的html里面找。
+                if (gaeaValid.isNotNull(html)) {
+                    $someDiv = $(html);
+                }
                 // 是否本身就是binding位置
                 var imBindArea = $someDiv.data("gaea-data-bind-area");
                 // 如果所有子元素都没有data-gaea-data-bind-area，或者本身也没有
@@ -1297,6 +1310,61 @@ define([
         };
         gaeaData.utils = {
             /**
+             * 当前，只会复制input、textarea、select的值。
+             * 以源区域的内容为基准，寻找覆盖目标区域同名的。
+             * <p>
+             *     所谓同名，是在加上前缀（无论源前缀，还是目标前缀）基础上。
+             * </p>
+             * <p>对前缀的判断，不区分大小写</p>
+             * 举例：
+             * 源区域：
+             *     <form id='form2'><input name='b.name'></form>
+             * 目标区域
+             *     <form id='form1'><input name='a.name'></form>
+             * 则复制就该是：
+             * opts.fromCtId='form2', opts.fromFieldPrefix='b.', opts.toCtId='form1', opts.toFieldPrefix='a.'
+             * 这样才能匹配到name这个值。
+             * @param {object} opts
+             * @param {string} opts.fromCtId                这是源区域的id
+             * @param {string} opts.fromFieldPrefix         源字段的默认前缀
+             * @param {string} opts.toCtId                  这是目标区域的id
+             * @param {string} opts.toFieldPrefix           目标字段的默认前缀
+             */
+            copyByField: function (opts) {
+                if (gaeaValid.isNull(opts.fromCtId) || gaeaValid.isNull(opts.toCtId)) {
+                    throw "fromCtId 或 toCtId为空，无法复制。";
+                }
+                var $fromCT = $("#" + opts.fromCtId);
+                var $toCT = $("#" + opts.toCtId);
+                $fromCT.find("input,textarea,select").each(function (idx, val) {
+                    var $fromInput = $(this);
+                    var fromName = $fromInput.attr("name");
+                    // 先假设from/to的name一样。后面不一样再修改。
+                    var baseName = fromName; // 这个是复制双方去掉前缀后，共同拥有的部分
+                    // 缺少name属性的略过
+                    if (gaeaValid.isNull(fromName)) {
+                        return;
+                    }
+                    if (gaeaValid.isNotNull(opts.fromFieldPrefix)) {
+                        // 缺少fromFieldPrefix的略过
+                        if (!_s.startsWith(fromName.toLowerCase(), opts.fromFieldPrefix.toLowerCase())) {
+                            return;
+                        }
+                        // 去掉前缀，得到baseName
+                        baseName = fromName.substring(opts.fromFieldPrefix.length);
+                    }
+                    var toName = gaeaValid.isNull(opts.toFieldPrefix) ? baseName : opts.toFieldPrefix + baseName;
+                    var $toInput = $("[name='" + toName + "'");
+                    if ($toInput.length > 1) {
+                        console.debug("批量复制值的目标对象'%s'有不止一个!", toName);
+                    }
+                    console.debug("准备复制。baseName:%s, 从name='%s' 到 name='%s'", baseName, fromName, toName);
+                    $toInput.val($fromInput.val());
+                    //}
+
+                });
+            },
+            /**
              * 把绑定数据集的下拉框的id，如果名字有一些特殊字符的，例如“.”，去掉并转成驼峰命名。
              * @param bindSelectId
              * @param dataSetId
@@ -1340,6 +1408,63 @@ define([
                 return value;
             }
         };
+
+        // 放一些重要的debug方法
+        gaeaData.utils.debug = {
+            /**
+             * 检查是否有同名的viewModelName，这个很重要！
+             * 这是很多页面数据集出不来的一个重要原因。因为bindContainerId是用div的id动态生成的。
+             * 如果多个页面的做binding的div id相同（例如多个嵌套dialog），就会导致后面页面的数据集出不来。
+             * @param {object} opts
+             * @param {string} opts.viewModelName
+             * @param {string} opts.optionName
+             */
+            checkViewId: function (opts) {
+                if (gaeaValid.isNotNull(gaeaData.viewModel[opts.viewModelName]) && _.keys(gaeaData.viewModel[opts.viewModelName]).length > 0) {
+                    console.debug(" id = '%s'该ViewModel的子项已经存在。\nkey列表: %s",
+                        opts.viewModelName,
+                        JSON.stringify(_.keys(gaeaData.viewModel[opts.viewModelName]))
+                    );
+                    // 有时候，不知道为什么KO的model里面的属性返回的是一个window对象。会导致js错误。所以这里得判断一下。
+                    if (_.isFunction(gaeaData.viewModel[opts.viewModelName][opts.optionName]) && !Object.is(gaeaData.viewModel[opts.viewModelName][opts.optionName]()[0], window)
+                    ) {
+                        // 把某个数据集的项（options）打印出来。限100个，避免死循环。
+                        for (var i = 0; i < gaeaData.viewModel[opts.viewModelName][opts.optionName]().length && i < 100; i++) {
+                            var debugOptions = gaeaData.viewModel[opts.viewModelName][opts.optionName]()[i];
+                            console.debug("%s.%s 的值: %s", opts.viewModelName, opts.optionName, JSON.stringify(debugOptions));
+                        }
+                    }
+                }
+            },
+            /**
+             * 检查是否有同名的viewModelName，这个很重要！
+             * <p>这个，暂时在dialog加载内容的时候调用（对新加入的内容做检查）。</p>
+             * 这是很多页面数据集出不来的一个重要原因。因为bindContainerId是用div的id动态生成的。
+             * 如果多个页面的做binding的div id相同（例如多个嵌套dialog），就会导致后面页面的数据集出不来。
+             * @param {object} opts
+             * @param {string} opts.containerId
+             * @param {string} opts.html
+             */
+            checkViewModel: function (opts) {
+                if (gaeaValid.isNotNull(opts.containerId)) {
+                    var viewModelName = gaeaData.dataBind.findBindingId(opts.containerId, opts.html);
+                    if (gaeaValid.isNotNull(opts.html) && $("#" + viewModelName).length > 0) {
+                        console.debug(" id = '%s'的html元素已经存在页面。这是关系数据集初始化、缓存根命名、数据绑定的id，重复会导致不同页面的数据不一致。\nkey列表: %s",
+                            viewModelName,
+                            JSON.stringify(_.keys(gaeaData.viewModel[viewModelName]))
+                        );
+                    }
+
+                    if (gaeaValid.isNull(opts.html) && !gaeaCommonUtils.dom.checkUnique(viewModelName)) {
+                        console.debug(" id = '%s'的html元素已经存在页面。这是关系数据集初始化、缓存根命名、数据绑定的id，重复会导致不同页面的数据不一致。\nkey列表: %s",
+                            viewModelName,
+                            JSON.stringify(_.keys(gaeaData.viewModel[viewModelName]))
+                        );
+                    }
+                }
+            }
+        };
+
         /**
          * 依赖KO框架的一些方法
          */

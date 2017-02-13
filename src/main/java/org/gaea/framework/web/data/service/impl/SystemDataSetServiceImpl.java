@@ -1,5 +1,6 @@
 package org.gaea.framework.web.data.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -71,6 +72,8 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             synchronizeDBDataSet();
         } catch (SysInitException e) {
             logger.error(e.getMessage(), e);
+        } catch (JsonProcessingException e) {
+            logger.error("把数据集的data转换为json数据失败！", e);
         }
     }
 
@@ -96,7 +99,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      */
     @Override
     @Transactional
-    public void synchronizeCacheToDB() throws SysInitException {
+    public void synchronizeCacheToDB() throws SysInitException, JsonProcessingException {
         Map<String, GaeaDataSet> dataSetMap = SystemDataSetFactory.getAllDataSets();
         // 先查出数据库所有数据集。用于比对，没有的可以删掉
         List<DataSetEntity> dbAllDataSets = systemDataSetRepository.findAll();
@@ -157,7 +160,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * @param cacheGaeaDataSet 从缓存（Redis）中读出的GaeaDataSet
      * @param dbDsEntity       从数据库读出的和上面的cacheGaeaDataSet同名的数据集
      */
-    private void syncDataSetToDb(GaeaDataSet cacheGaeaDataSet, DataSetEntity dbDsEntity) {
+    private void syncDataSetToDb(GaeaDataSet cacheGaeaDataSet, DataSetEntity dbDsEntity) throws JsonProcessingException {
         DataSetEntity newDataSetEntity = new DataSetEntity(cacheGaeaDataSet);
         /**
          * dsAuthorities不能覆盖! 这里忽略！

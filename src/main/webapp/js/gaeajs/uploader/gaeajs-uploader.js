@@ -33,7 +33,11 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 $("#" + buttonOptions.htmlId).click(function () {
                     //console.log("Go. Open dialog.");
                     // 打开dialog
-                    gaeaDialog.open("#" + dialogOptions.htmlId);
+                    gaeaDialog.open({
+                        id:dialogOptions.htmlId
+                    }
+                    //"#" + dialogOptions.htmlId
+                    );
                 });
 
 

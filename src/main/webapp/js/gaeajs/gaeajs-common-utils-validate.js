@@ -8,32 +8,64 @@
 define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
     /**
      * 验证字符是否为空。
-     * @param inArg
+     * 如果opts是对象，且有exception的值，则校验不通过的时候，抛出异常。
+     * 否则只是返回false。
+     * @param {object} opts
+     * @param {string} opts.check                   要检验的对象
+     * @param {string} opts.exception               抛出的异常描述. 如果这个字段有值，则校验不通过抛出异常；否则返回false
      * @returns {boolean}
      */
-    var isNotNull = function (inArg) {
-        try {
-            if (_.isNull(inArg)) {
-                return false;
+    var isNotNull = function (opts) {
+        if (_.isNull(opts) || _.isUndefined(opts)) {
+            return false;
+        }
+
+        /**
+         * 如果opts是对象，且有exception的值，则校验不通过的时候，抛出异常。
+         * 否则只是返回false。
+         */
+        if (_.isString(opts.exception) && _s.trim(opts.exception).length > 0) {
+            var check = opts.check;
+            //if(_.isString(opts.exception) && _s.trim(opts.exception).length>0){
+            if (isNotNull(check)) {
+                return true;
+                //}
+            } else {
+                throw opts.exception;
             }
-            if (_.isUndefined(inArg)) {
-                return false;
-            }
-            // 去掉前后空格
-            _s.trim(inArg);
-            if (inArg.length == 0) {
-                return false;
-            }
-        } catch (error) {
-            console.log("错误信息：" + error.message);
-            if (error.message.indexOf("undefined")) {
-                return false;
+        } else {
+            // 如果没有opts.exception，直接检查本身
+            var check = opts;
+            try {
+                if (_.isNull(check) || _.isUndefined(check)) {
+                    return false;
+                }
+                // 去掉前后空格
+                _s.trim(check);
+                if (check.length == 0) {
+                    return false;
+                }
+            } catch (error) {
+                console.log("错误信息：" + error.message);
+                if (error.message.indexOf("undefined")) {
+                    return false;
+                }
             }
         }
         return true;
     };
-    var isNull = function (inArg) {
-        return !isNotNull(inArg);
+
+    /**
+     * 检查是否为空。
+     * 如果opts是对象，且有exception的值，则校验不通过的时候，抛出异常。
+     * 否则只是返回false。
+     * @param {object} opts
+     * @param {string} opts.check                   要检验的对象
+     * @param {string} opts.exception               抛出的异常描述. 如果这个字段有值，则校验不通过抛出异常；否则返回false
+     * @returns {boolean}
+     */
+    var isNull = function (opts) {
+        return !isNotNull(opts);
     };
     var isNotNullArray = function (inArg) {
         if (isNull(inArg)) {

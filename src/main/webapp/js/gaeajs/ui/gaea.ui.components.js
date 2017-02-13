@@ -19,6 +19,7 @@ define([
             options: {
                 containerId: null
             },
+            // TODO 这个应该移到gaea.ui.commons去。主要其实就是tabs的初始化而已。
             init: function (options) {
                 var myOptions = _.clone(components.options);
                 myOptions = _.extend(myOptions, options);

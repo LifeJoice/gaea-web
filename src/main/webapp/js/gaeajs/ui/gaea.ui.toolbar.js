@@ -191,10 +191,16 @@ define([
                                     // 初始化数据相关的（数据集，MVVM等）
                                     gaeaData.scanAndInit(dialogOption.id);
                                 });
-                                // 初始化Dialog参数
-                                gaeaDialog.create(dialogOption);
+                                //// 初始化Dialog参数
+                                //gaeaDialog.create(dialogOption);
                                 // 打开dialog
-                                gaeaDialog.open(dlgSelector, dialogPosition);
+                                gaeaDialog.open({
+                                        id: dialogOption.id,
+                                        position: dialogPosition,
+                                        submitUrl: dialogOption.submitUrl
+                                    }
+                                    //dlgSelector, dialogPosition
+                                );
                             });
                             // 创建弹出框
                             //gaeaDialog.create(dialogOption);
@@ -266,7 +272,7 @@ define([
                 _create: function (btnOptions) {
                     var html = "<span><a id='" + btnOptions.htmlId + "'" +
                         " class=\"medium darkslategrey button\"" +
-                        "<span>" +
+                        "><span>" +
                         btnOptions.text +
                         "</span>" +
                         "</a></span>";

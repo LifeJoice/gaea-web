@@ -1,0 +1,83 @@
+<div id="div-demo-class-mgr" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">班级名称</span>
+            <span class="fieldvalue"><input id="className" name="form1.className" value="" data-msg-required="名称不能为空"
+                                            required></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">第几届</span>
+            <span class="fieldvalue"><input id="termYear" name="termYear" value="" type="number" min="2015" max="2099"
+                                            step="1" data-msg="输入要求是年份 2015~2099." required></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">年级</span>
+            <span class="fieldvalue">
+                <select id="currentYear" name="currentYear" data-gaea-data="dataset:'DEMO_PRIMARY_GRADE'">
+                </select>
+            </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">班级号</span>
+            <span class="fieldvalue">
+                <input id="classNo" name="classNo" value="" type="number" min="1" max="99" step="1"
+                       data-msg="输入要求是几班 1~99." data-msg-required="班级号不允许为空" required>
+            </span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">选择班级</span>
+            <span class="fieldvalue">
+                <input id="test" name="test" value="" type="hidden">
+                <a id="btnNewDialog" class="medium darkslategrey button"
+                   data-gaea-ui-button="newId:'classCrudDialog2', action:'new_dialog', openStyle:'inOne', submitAction:'writeback_by_field',
+                   writeBack:{fromCtId: 'div-demo-class-mgr-2', fromFieldPrefix:'form2.', toCtId: 'div-demo-class-mgr', toFieldPrefix:'form1.'},
+                   refInputId:'test', contentUrl:'/gaea/demo/class-crud-form-2' ">新增</a>
+            </span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">选择另一个班级</span>
+            <span class="fieldvalue">
+                <input id="testB" name="testB" value="" type="hidden">
+                <a id="btnNewDialogB" class="medium darkslategrey button"
+                   data-gaea-ui-button="newId:'classCrudDialog3', action:'new_dialog', openStyle:'inOne', submitAction:'writeback_in_one',refInputId:'testB', contentUrl:'/gaea/demo/class-crud-form-3' ">新增</a>
+            </span>
+        </div>
+    </div>
+    <!--<div class="row">-->
+    <!--<div class="field-block">-->
+    <!--<span class="fieldname">描述</span>-->
+    <!--<span class="fieldvalue"><textarea id="description" name="description" value=""></textarea></span>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!-- ***********************************************  这个是可编辑从表  *********************************************** -->
+    <!--<div class="row">-->
+    <!--<div class="field-block">-->
+    <!--<span class="fieldname">子表数据</span>-->
+    <!--<span class="fieldvalue">-->
+    <!--<div id="testList"-->
+    <!--data-gaea-data="name:'testList',dataset:'DS_TEST', condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}"-->
+    <!--data-gaea-ui="component:'table',isbindGaeaData:true">-->
+    <!--&lt;!&ndash;<a id="testAdd" class="gaea-ui medium darkslategrey button"><span>添加</span></a>&ndash;&gt;-->
+    <!--&lt;!&ndash;<input type="button" id="testAdd" value="添加">&ndash;&gt;-->
+    <!--<div>-->
+    <!--<table>-->
+    <!--<thead>-->
+    <!--<tr>-->
+    <!--<th data-gaea-ui="column:{id:'id',hidden:true,width:30,primaryKey:true,dataType:'String'}">ID</th>-->
+    <!--<th data-gaea-ui="column:{id:'name',hidden:false,width:120,primaryKey:false,dataType:'String'}">姓名-->
+    <!--</th>-->
+    <!--&lt;!&ndash;<th>地址</th>&ndash;&gt;-->
+    <!--&lt;!&ndash;<th>电话</th>&ndash;&gt;-->
+    <!--</tr>-->
+    <!--</thead>-->
+    <!--<tbody>-->
+    <!--</tbody>-->
+    <!--</table>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!--</span>-->
+    <!--</div>-->
+    <!--</div>-->
+</div>

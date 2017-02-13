@@ -1,5 +1,6 @@
 package org.gaea.framework.web.data.domain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -35,10 +36,12 @@ public class DataSetEntity implements Serializable {
     private String name; // XML里定义的id
     @Column(name = "PRIMARY_TABLE")
     private String primaryTable;
-    @Column(name = "DATA_SQL")
+    @Column(name = "DATA_SQL", length = 4000)
     private String sql;
-    @Column(name = "DS_DATA")
+    @Column(name = "DS_DATA", length = 2000)
     private String dsData;
+    @Column(name = "CACHE_TYPE", length = 20)
+    private String cacheType;
     /**
      * 校验方式。 0：不校验 1：校验,无对应的当没权限. 2：校验,无对应的当有权限.
      */
@@ -55,7 +58,7 @@ public class DataSetEntity implements Serializable {
     public DataSetEntity() {
     }
 
-    public DataSetEntity(GaeaDataSet gaeaDataSet) {
+    public DataSetEntity(GaeaDataSet gaeaDataSet) throws JsonProcessingException {
         if (gaeaDataSet == null) {
             throw new IllegalArgumentException("gaeaDataSet为空，是无法构建DataSet entity的。");
         }
@@ -64,11 +67,11 @@ public class DataSetEntity implements Serializable {
 //        this.sql = gaeaDataSet.getSql();
         if (CollectionUtils.isNotEmpty(gaeaDataSet.getStaticResults())) {
             ObjectMapper objectMapper = new ObjectMapper();
-            try {
+//            try {
                 this.dsData = objectMapper.writeValueAsString(gaeaDataSet.getStaticResults());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
         Map<String, ConditionSet> gaeaDsConditions = gaeaDataSet.getWhere() == null ? null : gaeaDataSet.getWhere().getConditionSets();
@@ -152,5 +155,13 @@ public class DataSetEntity implements Serializable {
 
     public void setDsAuthorities(List<DsAuthorityEntity> dsAuthorities) {
         this.dsAuthorities = dsAuthorities;
+    }
+
+    public String getCacheType() {
+        return cacheType;
+    }
+
+    public void setCacheType(String cacheType) {
+        this.cacheType = cacheType;
     }
 }

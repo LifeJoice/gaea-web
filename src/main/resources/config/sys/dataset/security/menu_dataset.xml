@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<dataset-definition>
+    <dataset id="DS_MENU_MANAGEMENT" primary-table="GAEA_SYS_MENUS" authority-type="0">
+        <data-sql>
+            <![CDATA[SELECT menu.*,pmenu.`NAME` parentMenuName,res.`RESOURCE` resource FROM gaea_sys_menus menu LEFT JOIN gaea_sys_menus pmenu ON menu.`PARENT_ID`=pmenu.`ID` LEFT JOIN gaea_sys_resources res ON res.id=menu.`RESOURCE_ID`]]>
+        </data-sql>
+        <where>
+            <condition-set id="byId">
+                <and propName="id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+</dataset-definition>
