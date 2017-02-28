@@ -14,6 +14,35 @@ define([
 
         var utils = {};
 
+        utils.object = {
+            /**
+             * 帮助从object中获取某个key的值。主要是解决大小写问题。即：key可能是小写，而obj里面的key是大写。
+             * 例如：
+             * key=text
+             * object.TEXT = 'hi'
+             * 这个时候本方法就有用了。
+             * @param key   要获取的对象某个属性的key
+             * @param obj   对象
+             * @returns {*}
+             */
+            getValue: function (key, obj) {
+                if(gaeaValid.isNull(key) || gaeaValid.isNull(obj)){
+                    console.debug("key或object为空，无法从指定object获取指定key的值。");
+                    return;
+                }
+                var result;
+                $.each(_.keys(obj), function (idx, eachKey) {
+                    // 如果请求的key，和对象的某个key相等
+                    if(gaeaString.equalsIgnoreCase(key, eachKey)){
+                        // 必须用遍历的key去获取值，因为可能大小写不一样，用请求的key去获取值会获取不到的
+                        result = obj[eachKey];
+                        return false;
+                    }
+                });
+                return result;
+            }
+        };
+
         utils.array = {
             /**
              * 合并两个数组并返回。

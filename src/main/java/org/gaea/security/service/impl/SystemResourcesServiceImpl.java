@@ -32,14 +32,14 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
     public List<String> findByAuthorityCode(String authority) {
 //        String sql = "SELECT CODE FROM GAEA_SYS_AUTHORITIES";
         String sql = "SELECT \n" +
-                "  res.`RESOURCE` \n" +
+                "  res.RESOURCE_URL \n" +
                 "FROM\n" +
                 "  gaea_sys_resources res \n" +
                 "  LEFT JOIN gaea_sys_authorities_resources aures \n" +
-                "    ON res.`ID` = aures.`RESOURCE_ID` \n" +
+                "    ON res.ID = aures.RESOURCE_ID \n" +
                 "  LEFT JOIN gaea_sys_authorities auth \n" +
-                "    ON aures.`AUTHORITY_ID` = auth.`ID` \n" +
-                "WHERE auth.`CODE` = :AUTH_CODE ";
+                "    ON aures.AUTHORITY_ID = auth.ID \n" +
+                "WHERE auth.CODE = :AUTH_CODE ";
 //        Session session = sessionFactory.openSession();
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("AUTH_CODE", authority);

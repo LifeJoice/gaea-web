@@ -32,7 +32,7 @@ public class DataSetEntity implements Serializable {
     private String id;
     //        @Column(name = "DS_ID")
 //    private String dsId;
-    @Column(name = "NAME")
+    @Column(name = "NAME",unique = true)
     private String name; // XML里定义的id
     @Column(name = "PRIMARY_TABLE")
     private String primaryTable;

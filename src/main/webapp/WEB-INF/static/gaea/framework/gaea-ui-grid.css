@@ -19,26 +19,28 @@
 /* grid的数据部分的容器 */
 .gaea-grid-body {
     margin-top: 3px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 /* 表格 */
 .tb-body {
-    width: 100%;     /* 解决样式受macula样式影响撑大的问题。 */
+    width: 100%; /* 解决样式受macula样式影响撑大的问题。 */
     table-layout: fixed;
     border-style: none;
     border-collapse: collapse;
     /*border-width: 1px 0 0;*/
 }
+
 /*行*/
-.tb-body tr:hover{
+.tb-body tr:hover {
     background-color: #CCD7E3;
     /*opacity: 0.5;*/
 }
 
 .gaea-grid-body .tb-body tr.selected {
-    border-bottom:1px solid #2D3E50;
+    border-bottom: 1px solid #2D3E50;
 }
+
 /* 列头 */
 .column-header {
     float: left;
@@ -54,8 +56,9 @@
     /*文字垂直居中。line-height和div高度一致即可。*/
     line-height: 40px;
 }
+
 /*列头最后一列。空列。填充满行的剩余部分。*/
-.column-header.last{
+.column-header.last {
     float: none;
     /*下面两个解决最后一列铺满的问题*/
     width: auto;
@@ -83,7 +86,7 @@
 /*border-bottom-color: #D8D8D8;*/
 /*}*/
 /*行前复选框*/
-.tb-head .select-all{
+.tb-head .select-all {
     width: 35px;
 }
 
@@ -109,15 +112,18 @@
     /* 各种效果 */
     padding: 1px;
 }
+
 /*行前复选框*/
-.tb-body td.checkbox{
+.tb-body td.checkbox {
     width: 35px;
     padding: 0px;
 }
-.tb-body .row-check{
+
+.tb-body .row-check {
     position: relative;
     width: 35px;
 }
+
 /*.row-check span{*/
 /*margin:auto;*/
 /*top: 0; left: 0; bottom: 0; right: 0;*/
@@ -131,24 +137,28 @@
     /*margin-top: 5px; /!* 保持距离，不然会重叠 *!/*/
     /*padding-left: 21px; /!* 留出复选框的距离 *!/*/
 }
+
 /*查询输入框前的占位容器。为了和列头对齐。这个宽度是写死的。怎么对齐怎么写。*/
 .head-query-column.select-all {
     width: 35px;
     height: 100%;
 }
+
 .head-query-column.row-headactions {
     width: 60px;
 }
+
 /*查询条件的输入框的容器，和按钮的容器*/
 .mars-headquery-actions {
     width: 100%;
     height: 30px;
 }
-.mars-headquery-inputs{
+
+.mars-headquery-inputs {
     position: relative;
     width: 100%;
-    height: 35px;   /* 这个和( 列头高度 - padding) 一致。 */
-    padding-top: 5px;   /* 解决输入框撑变形无法靠左问题。 */
+    height: 35px; /* 这个和( 列头高度 - padding) 一致。 */
+    padding-top: 5px; /* 解决输入框撑变形无法靠左问题。 */
     background-color: #90CAE2;
 }
 
@@ -157,18 +167,23 @@
     float: left;
     overflow: hidden;
     /*垂直居中*/
-    margin:auto;
-    top: 0; left: 0; bottom: 0; right: 0;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
-.head-query-column span{
+
+.head-query-column span {
     display: block;
     margin: 0 auto; /* 水平居中 */
     width: 90%;
 }
-.head-query-column input{
+
+.head-query-column input {
     height: 24px;
-    border-width: 0px;  /* 不要显示边框 */
-    width: 100%;    /* 不要留空。方便外面的span定位 */
+    border-width: 0px; /* 不要显示边框 */
+    width: 100%; /* 不要留空。方便外面的span定位 */
 }
 
 /* --------------- >>>> 列表行的操作区，包括行前操作区，行尾操作区等 <<<< --------------- */
@@ -176,17 +191,27 @@
 .tb-head .row-headactions {
     width: 70px;
 }
-.tb-body .row-headactions{
+
+.tb-body .row-headactions {
     width: 66px;
 }
+
 /* *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*   分页   *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* */
+.gaea-grid-footer {
+    position: fixed;
+    bottom: 5px;
+}
+
 /*分页块的整体定义*/
-.gaea-grid-footer .pagination{
+.gaea-grid-footer .pagination {
     height: 30px;
     margin-left: 5px;
+    padding-right: 5px;
 }
+
 /* 需要和整个块保持同样高度并居中的字体。单独设置 */
-.gaea-grid-footer .pagination .page-numbers span,.gaea-grid-footer .pagination .page-desc{
+.gaea-grid-footer .pagination .page-numbers span, .gaea-grid-footer .pagination .page-desc {
+    font-size: 13px;
     /*下面两个确保字体居中*/
     text-align: center;
     line-height: 30px; /* line-height设为和要居中的块一样高即可。 */
@@ -194,44 +219,55 @@
 
 /*分页的1-20部分的css。放右下角*/
 .gaea-grid-footer .pagination .page-desc {
-    float: right;
+    position: fixed;
+    right: 10px;
 }
-.gaea-grid-footer .pagination div{
+
+/*上一页、下一页等按钮*/
+.gaea-grid-footer .pagination div {
     position: relative;
     float: left;
     height: 100%;
     /*width: 20px;*/
 }
+
 /*分页单个按钮宽度。*/
-.gaea-grid-footer .pagination div.button{
+.gaea-grid-footer .pagination div.button {
     width: 30px;
 }
+
 /*分页，页码块的整体宽度。 分页的固定数字部分。1 2 3 4 ... */
 .gaea-grid-footer .pagination .page-numbers {
     display: block;
     float: left;
-    width: 220px;
+    /*width: 220px;*/
     margin-left: 10px;
 }
+
 /*分页的每个页码、按钮部分的css*/
-.gaea-grid-footer .pagination .page-numbers span:not(.selected),span.icon {
-    /*display: block;*/
-    /*float: left;*/
-    cursor: pointer;
-}
+/*.gaea-grid-footer .pagination .page-numbers span:not(.selected),span.icon {*/
+/*!*display: block;*!*/
+/*!*float: left;*!*/
+/*cursor: pointer;*/
+/*}*/
+/* *************************************** 上一页、下一页、最后一页等按钮 *************************************** */
 /*按钮。这个以后可以抽取为通用按钮。*/
-span.icon{
+span.icon {
     width: 10px;
     height: 10px;
     border-style: solid;
     border-color: black;
     /*下面三个确保居中*/
     position: absolute;
-    margin:auto;
-    top: 0; left: 0; bottom: 0; right: 0;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
+
 /*向左的按钮。上一页。*/
-span.icon.first{
+span.icon.first {
     border-width: 0 0 2px 2px;
     /*旋转的方向。指向左。*/
     -webkit-transform: rotate(45deg);
@@ -240,8 +276,9 @@ span.icon.first{
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
 /*第一页的竖线。和上面的配合。*/
-span.icon.first::after{
+span.icon.first::after {
     content: '';
     display: block;
     /*以下都是为了竖线和箭头对其。width,left,top是相关的几个定位参数。*/
@@ -260,8 +297,9 @@ span.icon.first::after{
     -o-transform: rotate(-45deg);
     transform: rotate(-45deg);
 }
+
 /*向左的按钮。上一页。*/
-span.icon.previous{
+span.icon.previous {
     border-width: 0 0 2px 2px;
     /*旋转的方向。指向左。*/
     -webkit-transform: rotate(45deg);
@@ -270,8 +308,9 @@ span.icon.previous{
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
 /*向右的按钮。下一页。*/
-span.icon.next{
+span.icon.next {
     border-width: 2px 2px 0 0;
     /*旋转的方向。指向右。*/
     -webkit-transform: rotate(45deg);
@@ -280,8 +319,9 @@ span.icon.next{
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
 /*最后一页的按钮。 */
-span.icon.last{
+span.icon.last {
     border-width: 2px 2px 0 0;
     /*旋转的方向。指向右。*/
     -webkit-transform: rotate(45deg);
@@ -290,8 +330,9 @@ span.icon.last{
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
 /*最后一页的竖线。和上面的配合。*/
-span.icon.last::after{
+span.icon.last::after {
     content: '';
     display: block;
     /*以下都是为了竖线和箭头对其。width,left,top是相关的几个定位参数。*/
@@ -313,15 +354,15 @@ span.icon.last::after{
 
 /*/!*分页的固定数字部分。1 2 3 4 ...*!/*/
 /*.gaea-grid-footer .pagination .page-numbers {*/
-    /*display: block;*/
-    /*float: left;*/
+/*display: block;*/
+/*float: left;*/
 /*}*/
 
 /*固定数字的每个样式*/
-.gaea-grid-footer .pagination .page-numbers span {
+.gaea-grid-footer .pagination .page-numbers span.gaea-icon {
     display: block;
     float: left;
-    width: 20px;
+    width: 30px;
     margin-right: 10px;
 }
 
@@ -329,16 +370,17 @@ span.icon.last::after{
     font-weight: bold;
     font-size: 16px;
 }
+
 /* 已选中的页码。深色底白字。 */
-.gaea-grid-footer .pagination span.selected {
-    border-color: #2D3E50;
-    background-color: #2D3E50;
-    color: white;
-    padding: 4px;
-    line-height: 20px;
-    /*是个圆形*/
-    -webkit-border-radius: 100%;
-    -moz-border-radius: 100%;
-    border-radius: 100%;
-}
+/*.gaea-grid-footer .pagination span.selected {*/
+/*border-color: #2D3E50;*/
+/*background-color: #2D3E50;*/
+/*color: white;*/
+/*padding: 4px;*/
+/*line-height: 20px;*/
+/*!*是个圆形*!*/
+/*-webkit-border-radius: 100%;*/
+/*-moz-border-radius: 100%;*/
+/*border-radius: 100%;*/
+/*}*/
 

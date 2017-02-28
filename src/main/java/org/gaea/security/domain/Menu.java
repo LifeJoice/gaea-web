@@ -21,7 +21,7 @@ public class Menu {
     @OneToOne(cascade=CascadeType.REMOVE)
     @JoinColumn(name="RESOURCE_ID")
     private Resource resource;
-    @Column(name = "LEVEL")
+    @Column(name = "LEVEL_NUM")
     private Integer level;          // 菜单树中的级别
     @Column(name = "STATUS")
     private Integer status;         // -1 删除 0 禁用 1 可用

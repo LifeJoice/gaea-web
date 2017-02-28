@@ -20,7 +20,7 @@ import java.util.List;
  * Created by iverson on 2017-1-4 09:32:10.
  */
 @Entity
-@Table(name = "GAEA_SYS_DS_AUTHORITIES_CONDITION_SET")
+@Table(name = "GAEA_SYS_DS_AUTH_CONDITION_SET")
 public class DsAuthConditionSetEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -30,7 +30,7 @@ public class DsAuthConditionSetEntity implements Serializable {
     private String id;
     @Column(name = "NAME")
     private String name; // XML里定义的id
-    @Column(name = "APPEND_SQL")
+    @Column(name = "APPEND_SQL",length = 1000)
     private String appendSql;
     @OneToMany(mappedBy = "dsAuthConditionSetEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DsAuthConditionEntity> dsAuthConditionEntities;

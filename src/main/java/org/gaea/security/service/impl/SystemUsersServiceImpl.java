@@ -55,12 +55,12 @@ public class SystemUsersServiceImpl implements SystemUsersService {
                 "FROM\n" +
                 "  gaea_sys_authorities auth \n" +
                 "  LEFT JOIN gaea_sys_roles_authorities roleauth \n" +
-                "    ON auth.`ID` = roleauth.`AUTHORITY_ID` \n" +
+                "    ON auth.ID = roleauth.AUTHORITY_ID \n" +
                 "  LEFT JOIN gaea_sys_users_roles userrole \n" +
-                "    ON roleauth.`ROLE_ID` = userrole.`ROLE_ID` \n" +
+                "    ON roleauth.ROLE_ID = userrole.ROLE_ID \n" +
                 "  LEFT JOIN gaea_sys_users users \n" +
-                "    ON userrole.`USER_ID` = users.`id` \n" +
-                "WHERE users.`login_name` = :LOGIN_NAME";
+                "    ON userrole.USER_ID = users.id \n" +
+                "WHERE users.login_name = :LOGIN_NAME";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("LOGIN_NAME", loginName);
         List<String> codeLists = namedParameterJdbcTemplate.queryForList(sql, params, String.class);

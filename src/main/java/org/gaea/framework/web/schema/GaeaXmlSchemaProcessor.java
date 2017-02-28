@@ -16,6 +16,7 @@ import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.util.GaeaXmlUtils;
+import org.gaea.util.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,7 +220,12 @@ public class GaeaXmlSchemaProcessor {
         // 拼装数据，转换结果集中的数据库字段名。
         List<Map<String, Object>> dataList = changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid());
         schemaViews.getGridJO().setData(dataList);
-        schemaViews.getGridJO().getPage().setRowCount(dataSet.getTotalElements());
+        // 设置翻页相关数据
+        Integer pageSize = schemaViews.getGridJO().getPage().getSize();                                     // 每页多少条
+        Long pageRowCount = dataSet.getTotalElements();                                                     // 总记录数
+        Double pageCount = Math.ceil(MathUtils.div(pageRowCount.doubleValue(), pageSize.doubleValue()));     // 多少页
+        schemaViews.getGridJO().getPage().setRowCount(pageRowCount);
+        schemaViews.getGridJO().getPage().setPageCount(pageCount.intValue());
         // 指定放置在页面哪个DIV中
         viewsMap.put("dialogs", schemaViews.getDialogs());
         viewsMap.put("actions", schemaViews.getActions());

@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
 <dataset-definition>
+    <!-- 这个因为之前没有分清楚，是给一些测试功能、下拉框等用了 -->
     <dataset id="DS_RESOURCE_MANAGEMENT" cache-type="auto" expire-time="1ms|s|min|d" authority-type="0">
         <data-sql>
-            <![CDATA[SELECT NAME text,ID value,ORDER_SEQ orderSeq,RESOURCE resource,description description FROM GAEA_SYS_RESOURCES]]>
+            <![CDATA[SELECT NAME text,ID value,ORDER_SEQ orderSeq,RESOURCE_URL,description description FROM GAEA_SYS_RESOURCES]]>
+        </data-sql>
+    </dataset>
+    <!-- 这个是列表页用 -->
+    <dataset id="DS_RESOURCE_MANAGEMENT_LIST" cache-type="auto" expire-time="1ms|s|min|d" authority-type="0">
+        <data-sql>
+            <![CDATA[SELECT * FROM GAEA_SYS_RESOURCES]]>
         </data-sql>
     </dataset>
 </dataset-definition>

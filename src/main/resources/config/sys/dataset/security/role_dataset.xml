@@ -11,4 +11,53 @@
             </condition-set>
         </where>
     </dataset>
+
+    <!-- *******************************************  角色用户关系复选框  ******************************************* -->
+    <dataset id="DS_ROLE_USERS_MGR" table="GAEA_SYS_ROLES" cache-type="auto">
+        <data-sql>
+            <![CDATA[SELECT distinct u.id value, u.name text
+  FROM gaea_sys_users u
+  LEFT JOIN gaea_sys_users_roles usrRoles
+    ON u.id = usrRoles.User_Id
+  LEFT JOIN gaea_sys_roles r
+    ON usrRoles.Role_Id=r.id]]>
+        </data-sql>
+        <where>
+            <condition-set id="selectable" append-sql=" u.id not in (SELECT u.id FROM gaea_sys_users u LEFT JOIN gaea_sys_users_roles usrRoles ON u.id = usrRoles.User_Id LEFT JOIN gaea_sys_roles r ON usrRoles.Role_Id = r.id where :SUB_QUERY_ID_EQ) :AUTH_ID_NOT_EQ">
+                <none propName="usrRoles.Role_Id" op="eq" placeholder="SUB_QUERY_ID_EQ"></none>
+                <and propName="r.id" op="ne" placeholder="AUTH_ID_NOT_EQ"></and>
+            </condition-set>
+            <condition-set id="selected">
+                <and propName="r.id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+
+    <!-- *******************************************  角色权限关系复选框  ******************************************* -->
+    <dataset id="DS_ROLE_AUTHORITIES_MGR" table="GAEA_SYS_ROLES" cache-type="auto">
+        <data-sql>
+            <![CDATA[SELECT distinct auth.id value, auth.name text
+  FROM gaea_sys_authorities auth
+  LEFT JOIN gaea_sys_roles_authorities rauth
+    ON auth.id = rauth.authority_id
+  LEFT JOIN gaea_sys_roles r
+    ON rauth.Role_Id = r.id]]>
+        </data-sql>
+        <where>
+            <condition-set id="selectable" append-sql=" auth.id not in
+       (SELECT auth.id
+          FROM gaea_sys_authorities auth
+          LEFT JOIN gaea_sys_roles_authorities rauth
+            ON auth.id = rauth.authority_id
+          LEFT JOIN gaea_sys_roles r
+            ON rauth.Role_Id = r.id
+         where :SUB_QUERY_ID_EQ) :ROLE_ID_NOT_EQ">
+                <none propName="rauth.Role_Id" op="eq" placeholder="SUB_QUERY_ID_EQ"></none>
+                <and propName="r.id" op="ne" placeholder="ROLE_ID_NOT_EQ"></and>
+            </condition-set>
+            <condition-set id="selected">
+                <and propName="r.id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
 </dataset-definition>

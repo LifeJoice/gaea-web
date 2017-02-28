@@ -20,13 +20,15 @@
     <bean id="propertyConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
           p:location="classpath:/config/sys/db/jdbc.properties" />
-    <!-- 数据源，用的是Spring -->
-    <bean id="dataSource"
-          class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-          p:driverClassName="${jdbc.driverClassName}"
-          p:url="${jdbc.url}"
-          p:username="${jdbc.username}"
-          p:password="${jdbc.password}" />
+
+    <!--移到applicationContext-db.xml-->
+    <!--&lt;!&ndash; 数据源，用的是Spring &ndash;&gt;-->
+    <!--<bean id="dataSource"-->
+          <!--class="org.springframework.jdbc.datasource.DriverManagerDataSource"-->
+          <!--p:driverClassName="${jdbc.driverClassName}"-->
+          <!--p:url="${jdbc.url}"-->
+          <!--p:username="${jdbc.username}"-->
+          <!--p:password="${jdbc.password}" />-->
 
     <!-- 配置SessionFactory -->
     <!--<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">-->
@@ -139,9 +141,9 @@
     <!--<bean id="genericExceptionResolver" class="GenericExceptionResolver"></bean>-->
     <!--增加多AOP注解的扫描。例如，针对：@Aspect...-->
     <aop:aspectj-autoproxy/>
-    <bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
-        <constructor-arg type="javax.sql.DataSource" ref="dataSource"/>
-    </bean>
+    <!--<bean id="namedParameterJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">-->
+        <!--<constructor-arg type="javax.sql.DataSource" ref="dataSource"/>-->
+    <!--</bean>-->
     <!--<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />-->
 
@@ -160,7 +162,7 @@
         <property name="jpaProperties">
             <props>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
                 <prop key="hibernate.show_sql">true</prop>
                 <!--<prop key="hibernate.format_sql">true</prop>-->
             </props>

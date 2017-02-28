@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,18 +43,22 @@ public class SystemAuthoritiesServiceImpl implements SystemAuthoritiesService {
     }
 
     @Override
+    @Transactional
     public void saveAuthResource(Authority authority, List<String> resourceIds) {
-        if (authority == null || StringUtils.isEmpty(authority.getId())) {
+         if (authority == null || StringUtils.isEmpty(authority.getId())) {
             throw new IllegalArgumentException("用户权限authority对象的id为空！无法执行更新操作！");
         }
         authority = authoritiesRepository.findOne(authority.getId());
         if (CollectionUtils.isNotEmpty(resourceIds)) {
-            List<Resource> resources = new ArrayList<Resource>();
+            List<Resource> resources = authority.getResources();
+            resources.clear();
             for (String id : resourceIds) {
-                Resource resource = new Resource(id);
-                resources.add(resource);
+                if(StringUtils.isNotEmpty(id)) {
+                    Resource resource = new Resource(id);
+                    resources.add(resource);
+                }
             }
-            authority.setResources(resources);
+//            authority.setResources(resources);
             save(authority);
         }
 //        authoritiesRepository.save(authority);

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<dataset-definition>
+    <dataset id="DS_DEMO_PRODUCT_MANAGEMENT" primary-table="PRODUCT_INFO" authority-type="0">
+        <data-sql>
+            <![CDATA[select pi.id id,
+       pi.name name,
+       pi.longname longname,
+       pi.microdiscount microdiscount,
+       ps.sku sku,
+       pi.style style,
+       pi.material material,
+       b.brandname,
+       c.name categoryName,
+       pi.rank,
+       pp.initialPrice,
+       pi.componentdesc componentdesc,
+       (select name
+          from code_type_value
+         where codetype = 'measurement_unit_code'
+           and code = pi.unit) unit,
+       decode(pi.status,
+              '-1',
+              '已删除',
+              1,
+              '已上架',
+              2,
+              '已下架',
+              3,
+              '待审核',
+              4,
+              '审核通过',
+              5,
+              '审核不通过',
+              6,
+              '草稿') status,
+       decode(pi.newproduct, 1, '是', 0, '否') newproduct,
+       pi.createtime,
+       usr.name create_by,
+       (SELECT listagg('<img width=''12%'' src=''http://localhost/data' || url ||
+                       '''>',
+                       '') within GROUP(order by platform, seq)
+          FROM PRODUCT_PHOTO
+         where productid = pi.id
+           and platform = 1) photos,
+       (select name
+          from code_type_value
+         where codetype = 'portalLink'
+           and status = 1
+           and rownum = 1) || pi.id portalLink
+  from product_info pi
+  left join product_sku ps
+    on pi.id = ps.productId
+  left join product_category_ref pc
+    on pi.id = pc.productid
+  left join product_brand_ref pb
+    on pi.id = pb.productid
+  left join brand_info b
+    on pb.brandid = b.id
+  left join product_category c
+    on pc.categoryid = c.id
+  left join product_price pp
+    on pi.id = pp.productid
+    left join user_info usr
+    on pi.createby=usr.id
+ where pi.status in (1, 2, 3, 4, 5, 6)
+ order by pi.updateTime desc, pi.id]]>
+        </data-sql>
+        <where>
+            <condition-set id="byId">
+                <and propName="id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+
+    <!-- ********************************************** 小学年级 ********************************************** -->
+    <!--<dataset id="DEMO_PRIMARY_GRADE" cache-type="static">-->
+    <!--<data>-->
+    <!--<data-element value="1" text="一年级"/>-->
+    <!--<data-element value="2" text="二年级"/>-->
+    <!--<data-element value="3" text="三年级"/>-->
+    <!--<data-element value="4" text="四年级"/>-->
+    <!--<data-element value="5" text="五年级"/>-->
+    <!--<data-element value="6" text="六年级"/>-->
+    <!--</data>-->
+    <!--</dataset>-->
+</dataset-definition>

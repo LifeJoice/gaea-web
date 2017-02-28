@@ -5,7 +5,11 @@
 
 .gaea-ui-page {
     font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
-    padding:10px;
+    padding: 10px 0 0 10px;
+    /* padding和宽度一致 */
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 /* ******************************************** >>> >> > TOOLBAR（工具条，按钮区） < << <<< ******************************************** */

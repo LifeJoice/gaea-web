@@ -4,19 +4,19 @@
     <data>
         <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
         <dataset id="DS_MENU_MANAGEMENT" primary-table="GAEA_SYS_MENUS">
-            <!--bean-ref：即关联的数据源。用该数据源查询。-->
-            <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />
-            <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
-            <data-sql>
-                <![CDATA[SELECT menu.*,pmenu.`NAME` parentMenuName,res.`RESOURCE` resource FROM gaea_sys_menus menu LEFT JOIN gaea_sys_menus pmenu ON menu.`PARENT_ID`=pmenu.`ID` LEFT JOIN gaea_sys_resources res ON res.id=menu.`RESOURCE_ID`]]>
-            </data-sql>
-            <!--对应SchemaWhere-->
-            <where>
-                <!--编辑的数据筛选-->
-                <condition-set id="byId">
-                    <and propName="id" op="eq"></and>
-                </condition-set>
-            </where>
+            <!--&lt;!&ndash;bean-ref：即关联的数据源。用该数据源查询。&ndash;&gt;-->
+            <!--<data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />-->
+            <!--&lt;!&ndash; data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。&ndash;&gt;-->
+            <!--<data-sql>-->
+                <!--<![CDATA[SELECT menu.*,pmenu.`NAME` parentMenuName,res.`RESOURCE_URL` resource_url FROM gaea_sys_menus menu LEFT JOIN gaea_sys_menus pmenu ON menu.`PARENT_ID`=pmenu.`ID` LEFT JOIN gaea_sys_resources res ON res.id=menu.`RESOURCE_ID`]]>-->
+            <!--</data-sql>-->
+            <!--&lt;!&ndash;对应SchemaWhere&ndash;&gt;-->
+            <!--<where>-->
+                <!--&lt;!&ndash;编辑的数据筛选&ndash;&gt;-->
+                <!--<condition-set id="byId">-->
+                    <!--<and propName="id" op="eq"></and>-->
+                <!--</condition-set>-->
+            <!--</where>-->
         </dataset>
     </data>
     <views title="菜单管理">
@@ -55,13 +55,13 @@
                     visible="false" sortable="true" html-width="30" primary-key="true" data-type="String" />
             <column id="name" name="name" label="名称" db-column-name="name"
                     visible="true" sortable="false" html-width="120" data-type="String" />
-            <column id="level" name="level" label="层级" db-column-name="level"
+            <column id="level" name="level" label="层级" db-column-name="LEVEL_NUM"
                     visible="true" sortable="false" html-width="120" data-type="String" />
             <column id="parentMenuName" name="parentMenuName" label="父级菜单名" db-column-name="parentMenuName"
                     visible="true" sortable="false" html-width="300" data-type="String" />
             <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->
                     <!--visible="true" sortable="false" html-width="240" data-type="String" />-->
-            <column id="resource" name="resource" label="资源链接" db-column-name="resource"
+            <column id="resourceUrl" name="resourceUrl" label="资源链接" db-column-name="resource_url"
                     visible="true" sortable="false" html-width="300" data-type="String" />
         </grid>
     </views>

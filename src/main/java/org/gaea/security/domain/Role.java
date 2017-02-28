@@ -38,7 +38,7 @@ public class Role implements Serializable, DsAuthRole {
             @JoinColumn(name = "USER_ID")
     })
     private List<User> users;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_ROLES_AUTHORITIES", joinColumns = {
             @JoinColumn(name = "ROLE_ID")

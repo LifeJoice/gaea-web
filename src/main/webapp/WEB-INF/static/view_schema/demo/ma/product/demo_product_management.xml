@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SCHEMA id必须全局唯一。会进入系统的cache。-->
+<ur-schema id="GAEA_SCHEMA_DEMO_MANAGEMENT">
+    <data>
+        <dataset id="DS_DEMO_PRODUCT_MANAGEMENT" primary-table="PRODUCT_INFO"></dataset>
+    </data>
+    <views title="演示功能-产品管理">
+        <!--<import-javascript src="" position="headfirst|headlast(default)|bodyend" />-->
+        <!--<import-css src="" /> css暂时是没有position属性的。默认都为headlast -->
+        <!--<import-javascript src="/static/plugins/jquery/datetimepicker/jquery.datetimepicker.js" />-->
+        <!--<import-css src="/static/plugins/jquery/datetimepicker/jquery.datetimepicker.css" />-->
+        <!--<import-css src="/static/ur/framework/gaea-ui-views.css" />-->
+
+        <actions id="myActions">
+            <!--<button-list>-->
+            <!--macula中的setHref(admin/dis/shop/creat)，就是这里的href。也就是macula页面的<a submit="xxx"></a>-->
+            <!--name的存在，会自动填写html-id="" html-name=""-->
+            <!--type=submit应该是对应普通弹出框保存、修改的那种。这个需要重新想想-->
+            <!--type="submit|goto|deleteSelected|maculaAction"-->
+            <!--type设计变更一下。具体的动作很多时候是不同组件间交互的动作。因此不要用type去定义，改为用interface-action。定义动作名称，但具体实现放在各个模板页。-->
+            <!--interface-action(替换原来的type) :  接口action，只定义，后台框架无实现。定义的内容由具体模板页(例如公用列表页等）去实现，而不由XML SCHEMA解析框架处理。-->
+            <!-- type改为action合理一点 -->
+            <!--interface-action="submit|goto|deleteSelected|maculaAction"-->z
+            <!--<button id="btnNew" name="btnNew" html-value="新增" type="maculaAction" href="admin/dis/shop/creat" />-->
+            <!--<button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="newDialog" />-->
+            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
+            <button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="wfDialog"/>
+            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
+            <button id="btnImport" name="btnImport" html-value="测试导入"/>
+            <button id="btnUpload" name="btnUpload" html-value="测试上传文件" link-view-id="uploaderDialog"/>
+            <button id="btnExcelExport2" name="btnExcelExport2" html-value="导出当前页面数据2" action="export-excel"
+                    submit-type="formSubmit"/>
+            <!--按钮组定义。-->
+            <!--text：就是按钮显示的文字。-->
+            <!--msg: 是按钮操作的说明。会用在按钮触发后的提示信息(msg 成功...)。-->
+            <!--submit-type: ajax | formSubmit. 按钮点击后提交的方式。一般是ajax。如果是下载文件类的，需要指定用form submit. -->
+            <button-group id="wfButtonGroup" name="wfButtonGroup" text="这是按钮组">
+                <button id="btnExcelExport" name="btnExcelExport" html-value="导出当前页面数据" action="export-excel"
+                        submit-type="formSubmit"/>
+                <button id="btnExportByTemplate" name="btnExportByTemplate" html-value="按模板导出" submit-type="formSubmit">
+                    <!--
+                    一个action，其实就是一个method。method是系统实现的。其实就是对应某个类的方法。
+                    当前不支持调用spring bean的method。以后其实可以考虑扩展。
+                    包括使用Spring的bean作为param。
+                    param当前是只支持静态的值。但以后可以考虑动态的值。包括如果扩展一个type，可以支持list类型等。
+                    -->
+                    <button-action method="excelExportByTemplate">
+                        <!--name，用于代码（ActionsProcessor）中获取。就name是代码写死的。-->
+                        <param name="excelTemplateId" value="EXCEL_EXPORT_DEMO"/>
+                        <param name="dataSetId" value="DS_EXCEL_EXPORT_DEMO"/>
+                    </button-action>
+                </button>
+                <button id="btnExportJustTemplate" name="btnExportJustTemplate" html-value="只导出模板"
+                        submit-type="formSubmit">
+                    <button-action method="excelExportByTemplate">
+                        <param name="excelTemplateId" value="EXCEL_EXPORT_DEMO"/>
+                        <param name="dataSetId" value="DS_EXCEL_EXPORT_DEMO"/>
+                        <param name="withData" value="false"/>
+                    </button-action>
+                </button>
+                <button id="btnImport11" name="btnImport11" html-value="提交到某个Controller"
+                        submit-url="/gaea/demo/button-group-hello1" msg="提交到某个Controller"/>
+                <button id="btnImport5" name="btnImport5" html-value="测试按钮组5" submit-url="/gaea/demo/test5"/>
+                <button id="btnDel2" name="btnDel2" html-value="删除2" action="deleteSelected"/>
+            </button-group>
+            <!--</button-list>-->
+        </actions>
+
+        <!--viewName: 即dialog的元素名。-->
+        <!--type=normal|workflow-approval|macula-dialog-->
+        <!-- 改一下：type改为描述dialog子类型的，而不是像workflow-dialog|macula-dialog这么大范围的。而是描述<wf-dialog>中，有哪几种。
+             default(approve-or-not)| -->
+        <!--button的type会关系到页面生成按钮的样式-->
+        <wf-dialog id="wfDialog" title="流程审批" html-width="500" html-height="500"
+                   submit-url="/admin/wf-demo/new-dayoff/complete.do">
+            <button id="btnApproved" name="btnApproved" html-value="批准" type="approve"/>
+            <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove"/>
+            <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel"/>
+        </wf-dialog>
+        <!-- 对于一般dialog而言，html-id就是要生成dialog的DIV ID。或者可以理解是JQuery.dialog(#htmlId) -->
+        <!--crud-dialog，是特别针对增删改的dialog。会涉及数据集的加载，编辑数据填充等许多特有功能。-->
+        <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
+        <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/demo/showCreateUpdateForm"
+                     submit-url="/gaea/demo/add"/>
+        <crud-dialog id="classCrudDialog" html-id="classCrudDialog" content-url="/gaea/demo/class-crud-form"
+                     submit-url="/gaea/demo/add-class"/>
+        <crud-dialog id="editDialog" html-id="createOrEditDialog" id-field="id"
+                     content-url="/gaea/demo/showCreateUpdateForm" submit-url="/gaea/demo/add"/>
+        <uploader-dialog id="uploaderDialog" html-id="uploaderDialog" content-url="" submit-url=""/>
+        <!-- 这是新页面。一般意味着跳转。 -->
+        <view id="newView" title=""/>
+
+        <link id="deleteLink" url="" params=""/>
+
+        <!--如果一个grid没有primary-key=true的字段，是无法和工作流结合的-->
+        <!--display-undefined-column:如果dataset有的一个字段，但下面没有对应的column元素，是否以json传给页面。默认false-->
+        <!--dataset-id : 预留。待扩展。-->
+        <!--和dataset相关的东东，不应该带到前端。即所有ds-***-->
+        <!--ds-primary-table : 和grid删除操作（和诸如此类）的操作的1对1的主表。因为一个grid对应dataset，dataset可能是多表关联查询。但如果grid有删除功能，包括primary column，就需要对应到一张表。 -->
+        <!--page-size : 定义每页显示多少条。这个放在SCHEMA定义吧。不要放在页面了。-->
+        <grid id="resource-grid" title="产品管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
+              dataset-id="DS_DEMO_PRODUCT_MANAGEMENT" ds-primary-table="PRODUCT_INFO" page-size="26">
+            <column id="id" name="id" label="ID" db-column-name="ID"
+                    visible="false" sortable="true" html-width="30" primary-key="true" data-type="string"/>
+            <!--<column id="name" name="name" label="名称" db-column-name="NAME"-->
+            <!--visible="true" sortable="false" html-width="120" data-type="string"/>-->
+            <column id="longname" name="longname" label="长名称" db-column-name="LONGNAME"
+                    visible="true" sortable="false" html-width="320" data-type="string"/>
+            <column id="sku" name="sku" label="SKU" db-column-name="SKU"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="categoryName" name="categoryName" label="品类名称" db-column-name="CATEGORYNAME"
+                    visible="true" sortable="false" html-width="80" data-type="string"/>
+            <column id="brandName" name="brandName" label="品牌名称" db-column-name="BRANDNAME"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="initialPrice" name="initialPrice" label="原价" db-column-name="initialPrice"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="status" name="status" label="状态" db-column-name="status"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="newProduct" name="newProduct" label="新产品" db-column-name="newproduct"
+                    visible="true" sortable="false" html-width="80" data-type="string"/>
+            <column id="createBy" name="createBy" label="创建人" db-column-name="CREATE_BY"
+                    visible="true" sortable="false" html-width="220" data-type="string"/>
+            <column id="createTime" name="createTime" label="创建时间" db-column-name="createTime"
+                    visible="true" sortable="true" html-width="880" data-type="date"
+                    datetime-format="yyyy-MM-dd HH:mm:ss"/>
+        </grid>
+    </views>
+</ur-schema>

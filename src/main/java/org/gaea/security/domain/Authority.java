@@ -22,14 +22,14 @@ public class Authority implements Serializable {
     private String name;                // 一个方便记忆的权限的名字。例如：查看用户列表
     @Column(name = "CODE")
     private String code;                // 框架判断权限的全英文的编码。例如：USER_LIST_QUERY
-    @Column(name = "LEVEL")
+    @Column(name = "LEVEL_NUM")
     private Integer level = 0;          // 在树中的级别。只是方便管理。
     @Column(name = "DESCRIPTION")
     private String description;
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "PARENT_ID")
     private Authority parent;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_AUTHORITIES_RESOURCES", joinColumns = {
             @JoinColumn(name = "AUTHORITY_ID")
@@ -37,6 +37,13 @@ public class Authority implements Serializable {
             @JoinColumn(name = "RESOURCE_ID")
     })
     private List<Resource> resources;
+
+    public Authority() {
+    }
+
+    public Authority(String authId) {
+        this.id = authId;
+    }
 //    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
 //    @JoinTable(
 //            name = "GAEA_SYS_ROLES_AUTHORITIES", joinColumns = {

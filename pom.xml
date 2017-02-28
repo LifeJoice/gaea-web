@@ -180,10 +180,22 @@
         </dependency>
         <!-- 工作流引擎Activiti相关 by Iverson 2015-9-16   END -->
         <!--Mysql驱动。-->
+        <!--<dependency>-->
+            <!--<groupId>mysql</groupId>-->
+            <!--<artifactId>mysql-connector-java</artifactId>-->
+            <!--<version>5.1.36</version>-->
+        <!--</dependency>-->
+        <!-- Oracle驱动。 -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.36</version>
+            <groupId>cn.easyproject</groupId>
+            <artifactId>ojdbc7</artifactId>
+            <version>12.1.0.2.0</version>
+        </dependency>
+        <!--alibaba的Oracle连接池-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.28</version>
         </dependency>
         <!--Excel导入导出-->
         <dependency>

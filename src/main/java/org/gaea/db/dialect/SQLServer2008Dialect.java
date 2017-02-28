@@ -1,6 +1,10 @@
 package org.gaea.db.dialect;
 
 import org.gaea.db.ibatis.jdbc.SQL;
+import org.gaea.db.service.GaeaDataBaseCommonService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * <b>dialect是针对特定数据库的方言的翻译器。</b>
@@ -11,8 +15,11 @@ import org.gaea.db.ibatis.jdbc.SQL;
  * </p>
  * Created by Iverson on 2015/9/24.
  */
-public class SQLServer2008Dialect {
-    public String getPageSql(final String sql, int startPos, int pageSize) {
+@Service
+public class SQLServer2008Dialect implements GaeaDataBaseCommonService{
+    private final Logger logger = LoggerFactory.getLogger(SQLServer2008Dialect.class);
+
+    public String getPageSql(final String sql, String primaryTable, int startPos, int pageSize) {
         // 写完未测试。
         String pageSql = new SQL(){{
             SELECT("*");

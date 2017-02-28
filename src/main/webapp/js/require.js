@@ -2147,6 +2147,8 @@ require.config({
         "gaeajs-common-utils-string": '/js/gaeajs/gaeajs-common-utils-string',
         "gaea-system-url": '/js/gaeajs/gaea-system-url-definition',
         "gaeajs-common-actions": '/js/gaeajs/gaeajs.commons.actions',
+        // 通用上下文组件
+        "gaeajs-context": '/js/gaeajs/gaeajs.context',
         /* Gaea UI */
         "gaeajs-ui-view": '/js/gaeajs/ui/gaea.ui.view',/* Gaea UI View.View是组件的结合的表示（或者理解为page也可以）。 */
         "gaeajs-ui-definition": '/js/gaeajs/ui/gaea.ui.definition',/* Gaea UI 的一般性定义，如ACTION、UI（和schema对应）的名字等 */
@@ -2185,6 +2187,8 @@ require.config({
         /* 上传组件 */
         "webuploader":'/js/thirdparty/upload/webuploader',
         "gaeajs-uploader":'/js/gaeajs/uploader/gaeajs-uploader',
+        /* 滚动条效果插件 */
+        "jquery-mCustomScrollbar": '/js/thirdparty/mCustomScrollbar/jquery.mCustomScrollbar.min',
         /* 系统公用的URL */
         "system-url":'/js/system-url-definition'
     },

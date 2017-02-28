@@ -6,11 +6,11 @@ define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url',
         "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
-        "gaeajs-ui-definition"],
+        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaStringUtils, gaeaButton, SYS_URL,
               gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
-              GAEA_UI_DEFINE) {
+              GAEA_UI_DEFINE, gaeaContext, gaeaNotify) {
         /**
          *
          * @type {{VIEW: {GRID: {COLUMN: {DATA_TYPE_DATE: string, DATA_TYPE_TIME: string, DATA_TYPE_DATETIME: string}}}}}
@@ -23,6 +23,10 @@ define([
             },
             QUERY: {
                 FILTER_CONTAINER_ID: "mars-tb-head-query" // 列表页的快捷查询块的id
+            },
+            PAGINATION: {
+                // 默认的分页，显示多少页码（1~7页）
+                DEFAULT_PAGE_LIST_LENGTH: 7
             }
         };
         /**
@@ -55,10 +59,12 @@ define([
                         // 用查询结果，刷新数据列表
                         _grid._refreshData(data.content);
                         _grid.options.page.rowCount = data.totalElements;
+                        _grid.options.page.page = data.page; // 当前第几页
+                        _grid.options.page.pageCount = data.totalPages; // 共多少页
                         _grid._createFooter();
                     },
                     fail: function (data) {
-                        alert("失败");
+                        gaeaNotify.error("查询失败！\n" + JSON.stringify(data));
                     }
                 });
             },
@@ -703,13 +709,15 @@ define([
             },
             /**
              * 设置Grid的样式。
-             * 包括列头的宽度，行数据单元格的宽度，隐藏不要显示的列等。
+             * 包括列头的宽度，行数据单元格的宽度，隐藏不要显示的列、计算整个列头的宽度（js）等。
              * @private
              */
             _applyCSS: function () {
                 var that = this;
                 var grid = $("#" + _grid.options.renderTo);
-                var gridHead = $(".gaea-grid-header .tb-head");
+                //var gridHead = $(".gaea-grid-header .tb-head");
+                var totalWidth = 0;
+
                 // 遍历column数组，设置显示样式（CSS等）
                 $.each(_grid.options.columns, function (idx, obj) {
                     var col = this;
@@ -717,17 +725,24 @@ define([
                     if (gaeaValid.isNotNull(col.width) && $.isNumeric(col.width)) {
                         // 设置单元格宽度
                         that.column._setWidth(gridColumnId, col);
+                        // 汇总宽度
+                        if (gaeaValid.isNotNull(col.hidden)) {
+                            totalWidth += parseInt(col.width);
+                        }
                     }
-                    // 隐藏列
+                    // 隐藏列（没宽度也可以）
                     if (gaeaValid.isNotNull(col.hidden)) {
                         that.column._hidden(gridColumnId, col);
                     }
                 });
-                /* 设置数据区域的高度 */
-                var bodyHeight = document.body.scrollHeight;
-                // 页面高度 - 上方title、toolbar等占用高度 - 列头高度 - 调整值
-                bodyHeight = bodyHeight - 130 - 30 - 20;
-                $(".gaea-grid-body").css("height", bodyHeight); // grid行数据部分的高度
+
+                /* 设置头部的宽度 */
+                // 宽度没有页面宽，就100%吧
+                if (totalWidth < document.body.offsetWidth) {
+                    totalWidth = "100%";
+                }
+                GAEA_UI_DEFINE.UI.MAIN.getUIPageJQ().css("width", totalWidth);
+
                 /* 根据行数据，确定列头是否需要行前操作区留白 */
                 if (!_grid.cache.hasRowHeadActions) {
                     $(".head-query-column.row-headactions").css("display", "none");
@@ -765,6 +780,25 @@ define([
                     _query.doQuery({});
                 });
 
+                gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, gridId, function (event, data) {
+                    //$("#urgrid").on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
+                    //console.log("trigger grid select event in gaeaUI dialog.");
+                    //selectedRow = data.selectedRow;
+                    //crudDialog.cache.selectedRow = selectedRow;
+                    gaeaContext.setValue("selectedRow", data.selectedRow);
+                    gaeaContext.setValue("id", data.selectedRow.id);
+                    //});
+                });
+                //$grid.on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
+                //    console.log("trigger grid select event in gaeaUI dialog.");
+                //    selectedRow = data.selectedRow;
+                //    crudDialog.cache.selectedRow = selectedRow;
+                //});
+
+                // 初始化上下文插件（可以重复初始化，所以不怕）
+                gaeaContext.init({
+                    id: GAEA_UI_DEFINE.UI.GAEA_CONTEXT.ID
+                });
 
                 //// 绑定事件。点击行选中复选框。
                 //$(".tb-body").on("click", "tr", function () {
@@ -832,21 +866,20 @@ define([
                 // 页码部分: 1 2 3 4 ...
                 pageDiv.append("<div class='page-numbers'></div>");
                 // 生成页码
-                var half = 3;   // 这个是要显示多少页的一半
-                var firstPage = page - half;
-                var p = firstPage > 0 ? firstPage : 1;
-                for (i = 1; i < 8; i++) {
-                    if (i != page) {
-                        if (firstPage > 0) {
-                            pageDiv.find(".page-numbers").append("<span>" + p + "<input type='hidden' value='" + p + "'></span>");
-                        } else {
-                            pageDiv.find(".page-numbers").append("<span>" + i + "<input type='hidden' value='" + i + "'></span>");
-                        }
+                var pageList = _private.pagination.getPageNoList({
+                    page: page,
+                    pageCount: _grid.options.page.pageCount,
+                    listSize: GRID_DEFINE.PAGINATION.DEFAULT_PAGE_LIST_LENGTH
+                });
+                $.each(pageList, function (idx, val) {
+                    var tempPage = parseInt(val);
+                    if (tempPage != page) {
+                        pageDiv.find(".page-numbers").append('<span class="gaea-float-icon size-m">' + tempPage + "<input type='hidden' value='" + tempPage + "'></span>");
+                        //}
                     } else {
-                        pageDiv.find(".page-numbers").append("<span class=\"selected\">" + p + "</span>");
+                        pageDiv.find(".page-numbers").append("<span class=\"gaea-float-icon selected size-m\">" + tempPage + "</span>");
                     }
-                    p++;
-                }
+                });
                 // 下一页
                 pageDiv.append("<div class='button'><span class=\"icon next\"><input type='hidden' value='" + (page + 1) + "'></span></div>");     // p在循环最后自加了，这里就不用加了。
                 // 最后一页
@@ -857,7 +890,7 @@ define([
                     first += (page - 1) * size;
                 }
                 var last = page * size;
-                pageDiv.append("<span class=\"page-desc\">" + first + " - " + last + " 共 " + rowCount + "</span>");
+                pageDiv.append("<span class=\"page-desc\">" + first + " - " + last + " 共 " + rowCount + "条数据</span>");
                 /* 【2】点击页码事件 */
                 pageDiv.find("span:has(input)").click(function () {
                     var pageVal = $(this).children("input").val();
@@ -1109,7 +1142,6 @@ define([
                      * 例如：
                      * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
                      */
-                        //console.log("grid renderTo: "+_grid.options.renderTo);
                     $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
                         selectedRow: selectedRow
                     });
@@ -1148,6 +1180,63 @@ define([
                 return result;
             }
         };
+
+        /**
+         * 私有方法
+         */
+        var _private = {
+            grid: {
+                head: {
+                    getHeadJQ: function () {
+                        return $("#tb-head");
+                    }
+                },
+                data: {
+                    getTableJQ: function () {
+                        return $(".tb-body");
+                    }
+                }
+            },
+            pagination: {
+                /**
+                 * 根据当前页、共多少页，和要显示多少页，得出一个数组，这个数组就算页码的数组。
+                 * @param {object} opts
+                 * @param {string} opts.page                当前页
+                 * @param {string} opts.pageCount           总共多少页
+                 * @param {string} opts.listSize            分页初始化列表长度. 要显示多少（页）.
+                 * @return {array} 例如：[3,4,5,6]
+                 */
+                getPageNoList: function (opts) {
+                    if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.page) || gaeaValid.isNull(opts.pageCount) || gaeaValid.isNull(opts.listSize)) {
+                        throw "当前页|共多少页|分页初始化列表长度某配置项为空，无法计算页码列表。";
+                    }
+                    var page = parseInt(opts.page);
+                    var pageCount = parseInt(opts.pageCount);
+                    var listSize = parseInt(opts.listSize);
+                    var halfListSize = Math.floor(listSize / 2);  // 整个list的一半（向下取整）
+                    var pagePlusHalf = page + halfListSize;
+                    var resultArray = new Array();
+                    /**
+                     * 获得最大页码
+                     * 通过当前页码+list的一半，和总共多少页比较。
+                     * 例如：要是总共6页，当前第5页，共显示5页，则最大可以显示到第7页。然而，总共就6页，所以，maxPageNo = 6
+                     */
+
+                    // 计算最大页码和显示页码哪个大。针对第1页，本来要显示7页，实际算法最大只到第4页
+                    var maxPageNo = pagePlusHalf > listSize ? pagePlusHalf : listSize;
+                    // 然后比较总页码。如果总共9页，当前第8页，计算显示是12页，则最大应该第9页
+                    maxPageNo = maxPageNo >= pageCount ? pageCount : maxPageNo;
+                    // 最小页码，从1开始，还是从算法计算所得
+                    var minPageNo = (maxPageNo - listSize) <= 0 ? 1 : (maxPageNo - listSize + 1);
+                    // 生成页码数组
+                    while (minPageNo <= maxPageNo) {
+                        resultArray.push(minPageNo);
+                        minPageNo++;
+                    }
+                    return resultArray;
+                }
+            }
+        };
         /**
          * 返回（暴露）的接口
          */
@@ -1159,4 +1248,4 @@ define([
                 getQueryConditions: _query.parser.getQueryConditions
             }
         };
-    })
+    });

@@ -44,10 +44,10 @@ import java.util.Map;
  * Created by iverson on 2016-10-8 09:41:22.
  */
 @Controller
-@RequestMapping("/gaea/demo")
-public class DemosController {
+@RequestMapping("/gaea/demo/product")
+public class ModernAvenueProductDemosController {
 
-    private final Logger logger = LoggerFactory.getLogger(DemosController.class);
+    private final Logger logger = LoggerFactory.getLogger(ModernAvenueProductDemosController.class);
     @Autowired
     private ApplicationContext context;
     @Autowired
@@ -67,7 +67,7 @@ public class DemosController {
 
     @RequestMapping("/management")
     public String list() {
-        return "demo/demo_management.xml";
+        return "demo/ma/product/demo_product_management.xml";
     }
 
     /**
@@ -83,26 +83,6 @@ public class DemosController {
     @RequestMapping(value = "/class-crud-form", produces = "plain/text; charset=UTF-8")
     public String showAddClassForm() {
         return "/demo/class-crud-form.html";
-    }
-
-    @RequestMapping(value = "/class-crud-form-2", produces = "plain/text; charset=UTF-8")
-    public String showAddClassForm2() {
-        return "/demo/class-crud-form-2.html";
-    }
-
-    @RequestMapping(value = "/class-crud-form-3", produces = "plain/text; charset=UTF-8")
-    public String showAddClassForm3() {
-        return "/demo/class-crud-form-3.html";
-    }
-
-    @RequestMapping(value = "/class-crud-form-2-1", produces = "plain/text; charset=UTF-8")
-    public String showAddClassForm21() {
-        return "/demo/class-crud-form-2-1.html";
-    }
-
-    @RequestMapping(value = "/class-crud-form-3-1", produces = "plain/text; charset=UTF-8")
-    public String showAddClassForm31() {
-        return "/demo/class-crud-form-3-1.html";
     }
 
     @RequestMapping(value = "/add-class", produces = "plain/text; charset=UTF-8")
@@ -331,7 +311,7 @@ public class DemosController {
              * *********************************************************** TEST 2 利用模板导出任意dataset
              */
             GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getUserName(request));
-            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO",defaultDsContext); // 默认导出1000条
+            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO", defaultDsContext); // 默认导出1000条
             Map<String, Field> fieldsMap = GaeaExcelUtils.getFields(schemaId);
             //test
             Field field = fieldsMap.get("level");

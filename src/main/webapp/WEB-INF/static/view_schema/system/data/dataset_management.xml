@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SCHEMA id必须全局唯一。会进入系统的cache。-->
+<ur-schema id="GAEA_SCHEMA_DATASET_MANAGEMENT">
+    <data>
+        <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
+        <dataset id="DS_USER_MANAGEMENT" primary-table="GAEA_SYS_DATASET">
+            <!--bean-ref：即关联的数据源。用该数据源查询。-->
+            <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource"/>
+            <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
+            <data-sql>
+                <![CDATA[SELECT * FROM GAEA_SYS_DATASET]]>
+            </data-sql>
+            <!--对应SchemaWhere-->
+            <where>
+                <!--编辑的数据筛选-->
+                <condition-set id="byId">
+                    <and propName="id" op="eq"></and>
+                </condition-set>
+            </where>
+        </dataset>
+    </data>
+    <views title="用户管理">
+        <actions id="myActions">
+            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
+            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
+        </actions>
+
+        <wf-dialog id="wfDialog" title="流程审批" html-width="500" html-height="500"
+                   submit-url="/admin/wf-demo/new-dayoff/complete.do">
+            <button id="btnApproved" name="btnApproved" html-value="批准" type="approve"/>
+            <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove"/>
+            <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel"/>
+        </wf-dialog>
+        <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/security/DATASET/showCreateUpdateForm"
+                     submit-url="/gaea/security/user/add"/>
+        <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
+                     content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/add"/>
+        <grid id="user-grid" title="用户管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
+              dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="20">
+            <column id="id" name="id" label="ID" db-column-name="ID"
+                    visible="true" sortable="true" html-width="200" primary-key="true" data-type="String"/>
+            <column id="name" name="name" label="名称" db-column-name="name"
+                    visible="true" sortable="false" html-width="200" data-type="String"/>
+            <column id="level" name="sql" label="SQL语句" db-column-name="data_sql"
+                    visible="true" sortable="false" html-width="600" data-type="String"/>
+            <!--<column id="code" name="code" label="唯一编码" db-column-name="code"-->
+            <!--visible="true" sortable="false" html-width="300" data-type="String" />-->
+            <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->
+            <!--visible="true" sortable="false" html-width="240" data-type="String" />-->
+            <!--<column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"-->
+            <!--visible="true" sortable="false" html-width="120" data-type="String" />-->
+        </grid>
+    </views>
+</ur-schema>

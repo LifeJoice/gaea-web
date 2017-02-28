@@ -1,6 +1,7 @@
 package org.gaea.framework.web.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.Condition;
 import org.gaea.data.dataset.domain.ConditionSet;
@@ -27,6 +28,7 @@ import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.util.BeanUtils;
+import org.gaea.util.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +91,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             // 根据XML SCHEMA的定义，把页面传过来的查询条件做一定处理
             rebuildQueryConditionBySchema(filters, grid);
             // 获取分页的信息
-            int pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : SchemaGrid.DEFAULT_PAGE_SIZE;
+            Integer pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : SchemaGrid.DEFAULT_PAGE_SIZE;
             page.setSize(pageSize);
             // 数据集权限校验
             ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
@@ -109,6 +111,15 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             // 基于UR XML SCHEMA的结果集格式转换
             dataList = schemaDataService.transformViewData(dataList, grid);
             pageResult.setContent(dataList);
+
+            // 设置翻页相关数据
+            Long pageRowCount = dataSet.getTotalElements();                                                     // 总记录数
+            Double pageCount = Math.ceil(MathUtils.div(pageRowCount.doubleValue(), pageSize.doubleValue()));     // 多少页
+            pageResult.setTotalElements(pageRowCount);
+            pageResult.setTotalPages(pageCount.intValue());
+            pageResult.setPage(page.getPage());
+            pageResult.setSize(page.getSize());
+
             return pageResult;
         } catch (SystemConfigException e) {
             logger.error(e.getMessage(), e);
@@ -216,7 +227,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
         DataSet dataSet = null;
 //        String sql = "";
         if (gaeaXmlSchema != null) {
-            dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
+//            dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0); // 不再从Schema中获取DataSet定义了。只获取配置的对应DataSet的名字。
             grid = gaeaXmlSchema.getSchemaViews().getGrid();
 //            sql = dataSet.getSql();
             SchemaColumn columnDef = GaeaSchemaUtils.getPrimaryKeyColumn(grid);
@@ -232,18 +243,21 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
          * then
          *   重新获取DataSet和SQL
          */
-        if ((dataSet != null && StringUtils.isNotEmpty(datasetId) && !StringUtils.equalsIgnoreCase(dataSet.getId(), datasetId))
-                || (StringUtils.isNotEmpty(datasetId) && dataSet == null)) {
-            GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(datasetId);
-            if (gaeaDataSet == null) {
-                logger.debug(MessageFormat.format("找不到对应的数据集，无法进行查询。dataSet ID: {0}", datasetId));
-                return null;
-            }
-            dataSet = GaeaSchemaUtils.translateDataSet(gaeaDataSet);
+        GaeaDataSet gaeaDataSet = null;
+        if ((StringUtils.isNotEmpty(datasetId))) {
+            gaeaDataSet = SystemDataSetFactory.getDataSet(datasetId);
+        } else {
+            String dsId = gaeaXmlSchema.getSchemaData().getDataSetList().get(0).getId();
+            gaeaDataSet = SystemDataSetFactory.getDataSet(dsId);
         }
+        if (gaeaDataSet == null) {
+            logger.debug(MessageFormat.format("找不到对应的数据集，无法进行查询。dataSet ID: {0}", datasetId));
+            return null;
+        }
+        dataSet = GaeaSchemaUtils.translateDataSet(gaeaDataSet);
         List<Map<String, Object>> newDataList = queryByConditions(dataSet, queryConditionDTO, defaultDsContext);
         // 基于XML SCHEMA的结果集格式转换，如果有传过来XML SCHEMA ID的话
-        if (grid != null) {
+        if (grid != null && CollectionUtils.isNotEmpty(newDataList)) {
             newDataList = schemaDataService.transformViewData(newDataList, grid);
         }
         return newDataList;
@@ -276,9 +290,11 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             List<QueryCondition> newConditions = new ArrayList<QueryCondition>();// 按通用查询组装标准查询对象
             ConditionSet conditionSet = null;// SCHEMA定义的条件集合
 
-
             // 查找请求有没有对应的查询的条件集合，转换为标准查询条件，给查询处理器处理
             if (queryConditionDTO != null && StringUtils.isNotEmpty(queryConditionDTO.getId())) {
+                if (dataSet.getWhere() == null || MapUtils.isEmpty(dataSet.getWhere().getConditionSets())) {
+                    throw new ValidationFailedException(MessageFormat.format("数据集 {0} 缺少条件配置，无法执行请求对应的条件查询。", dataSet.getId()).toString());
+                }
                 conditionSet = dataSet.getWhere().getConditionSets().get(queryConditionDTO.getId());
                 if (conditionSet != null && conditionSet.getConditions() != null) {
                     for (int i = 0; i < conditionSet.getConditions().size(); i++) {
@@ -292,13 +308,17 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                         cond.setOp(schemaCondition.getOp());
                         newConditions.add(cond);
                     }
+                } else {
+                    logger.debug("根据查询请求的ConditionSet id获取不到系统对应的ConditionSet。请求ConditionSet id:{} 系统数据集:{} 所含ConditionSet list size:{}",
+                            queryConditionDTO.getId(), dataSet.getId(), dataSet.getWhere().getConditionSets().size());
                 }
             }
             List<Map<String, Object>> result = gaeaSqlProcessor.query(dataSet.getSql(), conditionSet, defaultDsContext, queryConditionDTO);
             dataSet.setSqlResult(result);
             return dataSet.getSqlResult();
         } catch (ValidationFailedException e) {
-            logger.info("系统动态查询失败。" + e.getMessage());
+            logger.warn("系统动态查询失败。" + e.getMessage());
+            throw e;
         } catch (Exception e) {
             logger.error(MessageFormat.format("根据页面条件查询数据失败。dataSet ID={0}", dataSet.getId()), e);
         }
@@ -338,8 +358,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * @return
      */
     private List<Condition> convertToConditions(List<QueryCondition> queryConditions) {
+        List<Condition> conditionList = new ArrayList<Condition>();
         if (CollectionUtils.isNotEmpty(queryConditions)) {
-            List<Condition> conditionList = new ArrayList<Condition>();
             for (QueryCondition queryCondition : queryConditions) {
                 Condition condition = new Condition();
                 BeanUtils.copyProperties(queryCondition, condition);
@@ -347,6 +367,6 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             }
             return conditionList;
         }
-        return null;
+        return conditionList;
     }
 }

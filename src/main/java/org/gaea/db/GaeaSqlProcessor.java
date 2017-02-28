@@ -42,6 +42,8 @@ public class GaeaSqlProcessor {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
     private GaeaSqlExpressionParser gaeaSqlExpressionParser;
+    @Autowired
+    private GaeaDataBase gaeaDataBase;
 
     /**
      * 根据参数查询分页过的数据。
@@ -141,7 +143,7 @@ public class GaeaSqlProcessor {
             params = genWhereParams(getConditions(conditionSet, queryConditionDTO), defaultDsContext);
         }
         if (StringUtils.isNotEmpty(whereCause)) {
-            sql = sql + " WHERE " + whereCause;
+            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause).toString();
         }
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
@@ -457,7 +459,7 @@ public class GaeaSqlProcessor {
      * @throws InvalidDataException
      */
     private PageResult query(String sql, MapSqlParameterSource params, String primaryTable, SchemaGridPage page) throws InvalidDataException {
-        MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
+//        MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         PageResult pageResult = new PageResult();
         /* 拼凑【COUNT】语句 */
         String countSQL = new SQL().
@@ -474,7 +476,7 @@ public class GaeaSqlProcessor {
             int pageSize = page.getSize();
             if (total > 0) {
                 // 获取分页sql
-                String limitedSQL = dialect.getPageSql(sql, primaryTable, startPos, pageSize);
+                String limitedSQL = gaeaDataBase.getPageSql(sql, primaryTable, startPos, pageSize);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Page SQL:" + limitedSQL);
                 }

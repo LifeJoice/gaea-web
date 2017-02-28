@@ -48,7 +48,7 @@
     <!--     测试multi select    -->
     <dataset id="DS_TEST_AUTH" table="TEST" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
-            <![CDATA[SELECT test.id value,test.name text FROM test test LEFT JOIN gaea_sys_resources r ON test.`resource_id`=r.`ID`]]>
+            <![CDATA[SELECT test.id value,test.name text FROM test test LEFT JOIN gaea_sys_resources r ON test.resource_id=r.ID]]>
         </data-sql>
         <where>
             <condition-set id="selectable">
@@ -104,13 +104,13 @@
     <dataset id="DS_EXCEL_EXPORT_DEMO" table="TEST" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
             <![CDATA[SELECT
-  menu.ID m_id,menu.`LEVEL` m_level,menu.`NAME` m_name,menu.`PARENT_ID` m_parentid,menu.`RESOURCE_ID` m_res_id,menu.`STATUS` m_status,res.`description` r_desc,res.`ID` r_id,res.`LEVEL` r_level,res.`NAME` r_name,res.`ORDER_SEQ` r_order,res.`PARENT_ID` r_parent_id,res.`RESOURCE` r_res
+  menu.ID m_id,menu.LEVEL m_level,menu.NAME m_name,menu.PARENT_ID m_parentid,menu.RESOURCE_ID m_res_id,menu.STATUS m_status,res.description r_desc,res.ID r_id,res.LEVEL r_level,res.NAME r_name,res.ORDER_SEQ r_order,res.PARENT_ID r_parent_id,res.RESOURCE_URL r_res
 FROM
   gaea_sys_menus menu
   LEFT JOIN gaea_sys_menus pmenu
-    ON menu.`PARENT_ID` = pmenu.`ID`
+    ON menu.PARENT_ID = pmenu.ID
   LEFT JOIN gaea_sys_resources res
-    ON res.id = menu.`RESOURCE_ID`]]>
+    ON res.id = menu.RESOURCE_ID]]>
         </data-sql>
     </dataset>
     <!-- ++++++++++++++++++++++++++++++++++++  TEST END  ++++++++++++++++++++++++++++++++++++ -->

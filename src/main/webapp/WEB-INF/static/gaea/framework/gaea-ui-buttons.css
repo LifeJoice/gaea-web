@@ -89,24 +89,84 @@
 
 /**
  * 鼠标移过的效果，背景。
+ * 两种按钮：一种是用span+.gaea-button-bg定义（背景需要单独一个span），还有一个是直接通过:after生成背景效果。
  */
-.gaea-button-bg {
+.gaea-button-bg, .gaea-float-icon:after {
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
     left: 0px;
     opacity: 0; /* 默认为透明，看不到. */
-    position: absolute;
     top: 0px;
     transform: scale(0); /* 收缩为0.看不到. */
     transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
     background: rgb(0, 151, 167);
 }
 
+/*通过span定义的按钮的背景*/
+.gaea-button-bg {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+}
+
+/*通过:after生成的按钮效果*/
+.gaea-float-icon {
+    float: left;
+}
+
+/*尺寸定义*/
+.gaea-float-icon.size-m {
+    width: 30px;
+    line-height: 30px;
+}
+
+/* 已选中的页码。深色底白字。 */
+.gaea-float-icon.selected {
+    /*width:30px;*/
+    float: left;
+    border-color: #2D3E50;
+    background-color: #2D3E50;
+    color: white;
+    /*padding: 4px;*/
+    /*line-height: 30px;*/
+    /*是个圆形*/
+    -webkit-border-radius: 100%;
+    -moz-border-radius: 100%;
+    border-radius: 100%;
+}
+
+/*选中的页码，去掉移上去的效果*/
+.gaea-float-icon.selected:after {
+    background: none;
+    transition: none;
+    transform: none;
+    color: inherit;
+}
+
+/*选中的尺寸。这里得重新一下height，否则会叠加了hover效果的高度*/
+.gaea-float-icon.selected.size-m {
+    height: 30px;
+}
+
+/*移上去变色的按钮*/
+.gaea-float-icon:after {
+    content: '';
+    position: relative;
+    display: block;
+}
+
+.gaea-float-icon.size-m:after {
+    width: 30px;
+    height: 30px;
+    top: -30px;
+}
 /* 鼠标经过的效果，变半透明，并且圆从小变大。注意是移过gaea-icon元素的时候，修改gaea-button-bg的样式... */
-.gaea-icon:hover .gaea-button-bg {
+.gaea-icon:hover .gaea-button-bg, .gaea-float-icon:hover:after {
     opacity: 0.6;
     transform: scale(1);
+}
+
+.gaea-float-icon:not(.selected):hover {
+    color: #06200A;
 }
 
 /**

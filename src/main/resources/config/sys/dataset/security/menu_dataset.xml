@@ -3,11 +3,16 @@
 <dataset-definition>
     <dataset id="DS_MENU_MANAGEMENT" primary-table="GAEA_SYS_MENUS" authority-type="0">
         <data-sql>
-            <![CDATA[SELECT menu.*,pmenu.`NAME` parentMenuName,res.`RESOURCE` resource FROM gaea_sys_menus menu LEFT JOIN gaea_sys_menus pmenu ON menu.`PARENT_ID`=pmenu.`ID` LEFT JOIN gaea_sys_resources res ON res.id=menu.`RESOURCE_ID`]]>
+            <![CDATA[SELECT menu.*, pmenu.NAME parentMenuName, res.RESOURCE_URL resource_url
+  FROM gaea_sys_menus menu
+  LEFT JOIN gaea_sys_menus pmenu
+    ON menu.PARENT_ID = pmenu.ID
+  LEFT JOIN gaea_sys_resources res
+    ON res.id = menu.RESOURCE_ID]]>
         </data-sql>
         <where>
             <condition-set id="byId">
-                <and propName="id" op="eq"></and>
+                <and propName="menu.id" op="eq"></and>
             </condition-set>
         </where>
     </dataset>

@@ -20,9 +20,9 @@ public class Resource implements Serializable {
     private String id;
     @Column(name = "NAME")
     private String name;
-    @Column(name = "RESOURCE")
-    private String resource;                // 资源。暂时来说，就是URL。
-    @Column(name = "LEVEL")
+    @Column(name = "RESOURCE_URL")
+    private String resourceUrl;                // 资源。暂时来说，就是URL。
+    @Column(name = "LEVEL_NUM")
     private Integer level = 0;          // 在树中的级别。只是方便管理。
     @Column(name = "ORDER_SEQ")
     private Integer orderSeq;               // 如果是菜单，有个排序。
@@ -63,12 +63,12 @@ public class Resource implements Serializable {
         this.name = name;
     }
 
-    public String getResource() {
-        return resource;
+    public String getResourceUrl() {
+        return resourceUrl;
     }
 
-    public void setResource(String resource) {
-        this.resource = resource;
+    public void setResourceUrl(String resourceUrl) {
+        this.resourceUrl = resourceUrl;
     }
 
     public Integer getLevel() {

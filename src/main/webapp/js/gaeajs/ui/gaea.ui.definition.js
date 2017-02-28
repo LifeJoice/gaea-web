@@ -6,6 +6,20 @@
  */
 define(function () {
     var UI = {
+        MAIN: {
+            /**
+             * 获取主页面的右边（内容区）的jq对象
+             */
+            getMainRightJQ: function () {
+                return $(".gaea-main").children(".main-right");
+            },
+            /**
+             * 获取一般内容区页的jq对象（一般是grid的父容器）
+             */
+            getUIPageJQ: function () {
+                return $(".gaea-ui-page");
+            }
+        },
         /**
          * 通过
          * < div data-gaea-ui-xxx >
@@ -61,6 +75,10 @@ define(function () {
                 // 按钮组的按钮的HTML
                 SUB_BUTTON_HTML: '<li id="<%= ID %>" data-url="<%= URL %>"><%=TEXT %></li>'
             }
+        },
+        GAEA_CONTEXT: {
+            // gaea context组件的默认绑定容器id
+            ID: "gaea-context-ct"
         }
     };
     var PAGE = {

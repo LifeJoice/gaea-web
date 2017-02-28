@@ -18,7 +18,8 @@
 }
 .gaea-multi-select ul{
     list-style-type: none;/* 不要显示点点 */
-    padding-left:10px;
+    padding-left:0px;
+    margin-top:0;
 }
 /*选中的项的样式*/
 .gaea-multi-select li.select{
@@ -32,10 +33,15 @@
 }
 /*两个选择列表的样式*/
 .gaea-multi-select .select-list{
-    min-width:150px;
+    min-width:208px;
     height:100%;
-    border:solid 1px;
-    overflow: scroll;
+    border:solid 1px #D0D0D0;
+    /*overflow: scroll;*/
+    /*以下几个配合滚动条插件 mCustomScrollbar */
+    overflow: auto;
+    position: relative;
+    padding: 10px 15px 10px 10px;
+    box-sizing: border-box;
 
 }
 /* *-*-*-*-*-*-*-*-*-*-*-*-*-*   中间的命令选择区   *-*-*-*-*-*-*-*-*-*-*-*-*-* */

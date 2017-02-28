@@ -1,5 +1,7 @@
 package org.gaea.framework.web.schema.domain;
 
+import org.gaea.framework.web.schema.domain.view.SchemaGrid;
+
 import java.util.List;
 
 /**
@@ -9,6 +11,8 @@ import java.util.List;
 public class PageResult<T> {
     private int totalPages;
     private long totalElements;
+    private int page = 1;
+    private int size = SchemaGrid.DEFAULT_PAGE_SIZE;
     private List<T> content;
 
     public int getTotalPages() {
@@ -25,6 +29,22 @@ public class PageResult<T> {
 
     public void setTotalElements(long totalElements) {
         this.totalElements = totalElements;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public List<T> getContent() {

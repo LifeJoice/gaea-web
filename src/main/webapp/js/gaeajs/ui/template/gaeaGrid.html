@@ -35,6 +35,8 @@
     <link rel="stylesheet" href="/js/thirdparty/upload/webuploader.css">
     <!-- 时间日期组件 -->
     <link rel="stylesheet" href="/js/thirdparty/jquery/plugins/datetimepicker/gaea-jquery.datetimepicker.css">
+    <!-- 滚动条组件 -->
+    <link rel="stylesheet" href="/js/thirdparty/mCustomScrollbar/jquery.mCustomScrollbar.css">
     <!-- loading效果 -->
     <link rel="stylesheet" href="/css/commons/loading-style.css">
     <!--导入Schema提供的js和css-->
@@ -48,7 +50,7 @@
     <div id="view-title" class="view title"></div>
     <div id='gaea-toolbar' class='gaea-toolbar'></div>
     <div id="urgrid"></div>
-    <div id="workflow-approval-dialog">
+    <div id="workflow-approval-dialog" style="display: none">
         <input type="hidden" id="wfProcInstId" name="wfProcInstId" value="">
         <input type="hidden" id="wfActName" name="wfActName" value="">
         <span><label>审批意见</label><textarea id="wfApprovalReason" name="wfApprovalReason" ></textarea></span>
@@ -59,6 +61,7 @@
         <div id="filePicker"></div>
     </div>
     <div id="gaea-dialog-area"></div>
+    <span id="gaea-context-ct" style="display: none;">上下文事件的绑定对象(不显示)</span>
     <input type="hidden" id="urSchemaId" name="urSchemaId" value="">
 </div>
 <!UR_VIEW_SCHEMA IMPORT_BODYEND>

@@ -5,6 +5,7 @@
  * 2016-6-1 16:50:02
  * input，在代码注释中是个代表关键字，首先代表一个DOM元素，其实是一个输入元素（包括TEXTAREA等）。
  * 因为注释方便描述。
+ * TODO 考虑把PAGE_CONTEXT独立成一个包
  *
  * DEPENDENCE:
  * RequireJS,JQuery
@@ -12,10 +13,10 @@
 define([
         "jquery", "underscore", 'underscore-string', "knockoutJS", 'gaeajs-common-utils-validate', 'gaeajs-common-utils-string', "gaeajs-common-utils-ajax",
         "gaea-system-url", 'gaeajs-ui-notify', 'gaeajs-ui-definition', 'gaeajs-ui-grid',
-        "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-common-utils"],
+        "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-common-utils", "gaeajs-context"],
     function ($, _, _s, ko, gaeaValid, gaeaString, gaeaAjax,
               SYS_URL, gaeaNotify, GAEA_UI_DEFINE, gaeaGrid,
-              GAEA_EVENTS, gaeaUI, gaeaCommonUtils) {
+              GAEA_EVENTS, gaeaUI, gaeaCommonUtils, gaeaContext) {
         /**
          * 当前页面的缓存，主要数据集依赖使用。
          */
@@ -383,7 +384,7 @@ define([
                 return !!ko.dataFor($bindingDiv[0]);
             },
             /**
-             * 监听事件，触发和gaeaData相关的操作。例如：
+             * 监听事件'gaeaEvent_page_context_update'，更新上下文信息。
              *
              * @param eventName
              */
@@ -431,7 +432,8 @@ define([
                          */
                         if (gaeaString.equalsIgnoreCase(condValue.type, "pageContext")) {
                             if (gaeaValid.isNotNull(condValue.value)) {
-                                var val = PAGE_CONTEXT[condValue.value];
+                                //var val = PAGE_CONTEXT[condValue.value];
+                                var val = gaeaContext.getValue(condValue.value);
                                 queryValues.push({
                                     type: condValue.type,
                                     value: val
@@ -524,7 +526,8 @@ define([
                                      */
                                     if (gaeaString.equalsIgnoreCase(condValue.type, DEFINE.CONDITION.TYPE.PAGE_CONTEXT)) {
                                         if (gaeaValid.isNotNull(condValue.value)) {
-                                            gaeaData.utils.getPageContextValue(condValue.value);
+                                            //value = gaeaData.utils.getPageContextValue(condValue.value);
+                                            value = gaeaContext.getValue(condValue.value);
                                             queryValues.push({
                                                 type: condValue.type,
                                                 value: value
@@ -628,7 +631,8 @@ define([
                 queryCondition.id = options.condition.id;
                 var condValue = options.conditionValue;
                 // 看是否有内置变量，处理一下。
-                var value = gaeaData.utils.getPageContextValue(condValue.value);
+                //var value = gaeaData.utils.getPageContextValue(condValue.value);
+                var value = gaeaContext.getValue(condValue.value);
                 if (gaeaValid.isNull(value)) {
                     var domId = condValue.dependId;
                     var triggerEvent = condValue.triggerEvent;
@@ -906,6 +910,7 @@ define([
 
 
                     var array = new Array();
+                    gaeaGrid = require("gaeajs-ui-grid"); // 经常拿不到模块，为什么
                     var tableDefine = gaeaGrid.tableGrid.getColumnDefine(containerId);
                     // TODO 把按钮触发封装一下？
                     $("#" + btnAddName).click(function () {
@@ -1393,19 +1398,19 @@ define([
                     });
                 }
                 return bean;
-            },
-            getPageContextValue: function (name) {
-                var $pageContext = PAGE_CONTEXT;
-                var value = null;
-                if (gaeaValid.isNotNull(name)) {
-                    if (_s.startsWith(name, "$pageContext.")) {
-                        value = eval(name);
-                    }
-                    if (gaeaValid.isNull(value)) {
-                        value = PAGE_CONTEXT[name];
-                    }
-                }
-                return value;
+                //},
+                //getPageContextValue: function (name) {
+                //    var $pageContext = PAGE_CONTEXT;
+                //    var value = null;
+                //    if (gaeaValid.isNotNull(name)) {
+                //        if (_s.startsWith(name, "$pageContext.")) {
+                //            value = eval(name);
+                //        }
+                //        if (gaeaValid.isNull(value)) {
+                //            value = PAGE_CONTEXT[name];
+                //        }
+                //    }
+                //    return value;
             }
         };
 

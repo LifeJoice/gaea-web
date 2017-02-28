@@ -8,23 +8,27 @@
 define([
         "jquery", "underscore",
         'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaeajs-data",
-        "gaeajs-ui-events", "gaeajs-common-utils"
+        "gaeajs-ui-events", "gaeajs-common-utils", "jquery-mCustomScrollbar"
     ],
     function ($, _,
               gaeaAjax, gaeaValid, gaeaString, gaeaData,
-              GAEA_EVENT, gaeaCommonUtils) {
+              GAEA_EVENT, gaeaCommonUtils, jqMScrollbar) {
 
         var TEMPLATE = {
             HTML: {
+                /**
+                 * .select-data-list
+                 * 因为滚动条插件会在select-list和select-data-list之间，插入其他的div块。在原先没有select-data-list情况下，会导致后面选择数据时填充区域错乱。
+                 */
                 MULTI_SELECT: '' +
-                '<div id="selectable" class="select-list"></div>' +
+                '<div id="selectable" class="select-list"><div class="select-data-list"></div></div>' +
                 '<div class="choose-cmd">' +
                 '<span id="selectAll" class="fa fa-angle-double-right fa-2x"></span>' +
                 '<span id="select" class="fa fa-angle-right fa-2x"></span>' +
                 '<span id="disSelect" class="fa fa-angle-left fa-2x"></span>' +
                 '<span id="disSelectAll" class="fa fa-angle-double-left fa-2x"></span>' +
                 '</div>' +
-                '<div id="selected" class="select-list"></div>',
+                '<div id="selected" class="select-list"><div class="select-data-list"></div></div>',
                 LI_WITH_DATA: '<li data-gaea-data="value:\'<%=VALUE%>\'"><%=TEXT%></li>',
                 HIDDEN_INPUT: '<input type="hidden" id="<%=ID%>" name="<%=NAME%>" value="<%=VALUE%>">'
             }
@@ -54,8 +58,8 @@ define([
             if (gaeaValid.isNull($("#" + containerId).find(".gaea-multi-select"))) {
                 dfd.resolve();
             }
-            $("#" + containerId).find(".gaea-multi-select").each(function (idx, multiSelect) {
-                var $this = $(multiSelect);
+            $("#" + containerId).find(".gaea-multi-select").each(function (idx, val) {
+                var $this = $(this);
                 var dataStr = $this.data("gaea-data");
                 var dataConfig = gaeaString.parseJSON(dataStr);
                 var id = $this.attr("id");// div的id，也是这个multi-select的所有相关临时变量的根对象
@@ -82,26 +86,32 @@ define([
                     dataConfig: dataConfig
                 };
                 // 初始化两个列表框的数据
-                $.when(that.initSelectableList(initSelectOptions), that.initSelectedList(initSelectOptions)).done(function () {
+                $.when(that.initSelectableList(initSelectOptions), that.initSelectedList(initSelectOptions)).
+                done(function () {
+                    /**
+                     * 初始化选中某个。因为绑定是的具体项的点击事件，必须等数据加载后才能。
+                     */
+                    that.initChoose(id);
+                    // 初始化"选择"按钮
+                    var initCmdOptions = {
+                        name: name,
+                        id: id
+                    };
+                    // 初始化各种选择事件和处理
+                    that.initSelect(initCmdOptions);
+                    that.initSelectAll(initCmdOptions);
+                    that.initUnSelect(initCmdOptions);
+                    that.initUnSelectAll(initCmdOptions);
+                    // 初始化CSS（滚动条插件等）。必须在内容初始化完后才进行，否则效果会有问题。
+                    multiSelect.initCss({
+                        id: id
+                    });
                     dfd.resolve();
-                }).fail(function () {
+                }).
+                fail(function () {
                     console.warn("初始化复选框数据失败！");
                     dfd.resolve();
                 });
-                /**
-                 * 初始化选中某个。因为绑定是的具体项的点击事件，必须等数据加载后才能。
-                 */
-                that.initChoose(id);
-                // 初始化"选择"按钮
-                var initCmdOptions = {
-                    name: name,
-                    id: id
-                };
-                // 初始化各种选择事件和处理
-                that.initSelect(initCmdOptions);
-                that.initSelectAll(initCmdOptions);
-                that.initUnSelect(initCmdOptions);
-                that.initUnSelectAll(initCmdOptions);
             });
             return dfd.promise();
         };
@@ -175,14 +185,14 @@ define([
                             $multiSelect.append(inputTemplate({
                                 ID: name,
                                 NAME: name,
-                                VALUE: obj.value
+                                VALUE: gaeaCommonUtils.object.getValue("value", obj)
                             }));
                         });
                     } else {
                         $multiSelect.append(inputTemplate({
                             ID: name,
                             NAME: name,
-                            VALUE: data.value
+                            VALUE: gaeaCommonUtils.object.getValue("value", data)
                         }));
                     }
                     // 缓存，暂时没用
@@ -199,9 +209,9 @@ define([
             var id = options.id;// multi-select的div id
             var $multiSelect = $(".gaea-multi-select#" + id);
             if (gaeaValid.isNotNull(data)) {
-                var $selectBox = $multiSelect.find("#" + options.containerId);// 这个一般就是$(".gaea-multi-select .selectable")
+                var $dataBox = $multiSelect.children("#" + options.containerId).find(".select-data-list");// 这个一般就是$(".gaea-multi-select #selectable .select-data-list")
                 // 每次都清空内容
-                $selectBox.html("<ul></ul>");
+                $dataBox.html("<ul></ul>");
                 // 准备单个数据选项的模板
                 var liTemplate = _.template(TEMPLATE.HTML.LI_WITH_DATA);
                 /**
@@ -209,18 +219,18 @@ define([
                  */
                 if (_.isArray(data)) {
                     $.each(data, function (idx, obj) {
-                        $selectBox.children("ul").append(
+                        $dataBox.children("ul").append(
                             liTemplate({
-                                TEXT: obj.text,
-                                VALUE: obj.value
+                                TEXT: gaeaCommonUtils.object.getValue("text", obj),      // 通过方法拿，避免服务端传过来的data里的key大小写不确定
+                                VALUE: gaeaCommonUtils.object.getValue("value", obj)
                             })
                         );
                     });
                 } else {
-                    $selectBox.children("ul").append(
+                    $dataBox.children("ul").append(
                         liTemplate({
-                            TEXT: data.text,
-                            VALUE: data.value
+                            TEXT: gaeaCommonUtils.object.getValue("text", data),      // 通过方法拿，避免服务端传过来的data里的key大小写不确定
+                            VALUE: gaeaCommonUtils.object.getValue("value", data)
                         })
                     );
                 }
@@ -325,6 +335,25 @@ define([
                 $unselectCmd.trigger("click");
             });
         };
+
+        /**
+         * 初始化相关CSS。
+         * 其实主要就是引入滚动条插件，替换掉系统默认的。太丑了。
+         * @param {object} opts
+         * @param {string} opts.id
+         */
+        multiSelect.initCss = function (opts) {
+            if (gaeaValid.isNull(opts.id)) {
+                console.debug("容器id为空，无法初始化multi-select组件的滚动条。");
+                return;
+            }
+            // 初始化滚动条，利用第三方插件 malihu-custom-scrollbar-plugin
+            $("#" + opts.id).find(".select-list").mCustomScrollbar({
+                autoHideScrollbar: true,
+                theme: "minimal-dark"
+                //theme: "rounded"
+            });
+        };
         /**
          * *-*-*-*-*-*-*-*-*-*-*-*-*-*   私有方法，不对外！   *-*-*-*-*-*-*-*-*-*-*-*-*-*
          */
@@ -337,12 +366,12 @@ define([
             var id = options.id;// multi-select的div id
             var name = options.name;
             var $multiSelect = $(".gaea-multi-select#" + id);
-            var $selectBox = $multiSelect.find("#" + options.fromContainerId);
-            var $selectedBox = $multiSelect.find("#" + options.toContainerId);
+            var $selectDataBox = $multiSelect.children("#" + options.fromContainerId).find(".select-data-list");
+            var $selectedDataBox = $multiSelect.children("#" + options.toContainerId).find(".select-data-list");
             /**
              * 遍历所有选中的项
              */
-            $selectBox.find("li.select").each(function (idx, liObj) {
+            $selectDataBox.find("li.select").each(function (idx, liObj) {
                 var $choose = $(this);
                 var dataStr = $choose.data("gaea-data");
                 var dataConfig = gaeaString.parseJSON(dataStr);
@@ -352,10 +381,10 @@ define([
                  * 加到目标列表
                  */
                 var liTemplate = _.template(TEMPLATE.HTML.LI_WITH_DATA);
-                if (gaeaValid.isNull($selectedBox.children("ul"))) {
-                    $selectedBox.append("<ul></ul>");
+                if (gaeaValid.isNull($selectedDataBox.children("ul"))) {
+                    $selectedDataBox.append("<ul></ul>");
                 }
-                $selectedBox.children("ul").append(
+                $selectedDataBox.children("ul").append(
                     liTemplate({
                         TEXT: text,
                         VALUE: value
@@ -363,7 +392,7 @@ define([
                 );
             });
             // 删除可选列表的选中的项
-            $selectBox.find("li.select").remove();
+            $selectDataBox.find("li.select").remove();
         };
         /**
          * 根据选择的元素,移除对应的<input hidden>.

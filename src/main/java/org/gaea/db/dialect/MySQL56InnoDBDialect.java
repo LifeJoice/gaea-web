@@ -2,7 +2,9 @@ package org.gaea.db.dialect;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.ibatis.jdbc.SQL;
+import org.gaea.db.service.GaeaDataBaseCommonService;
 import org.gaea.exception.InvalidDataException;
+import org.springframework.stereotype.Service;
 
 /**
  * <b>dialect是针对特定数据库的方言的翻译器。</b>
@@ -15,7 +17,8 @@ import org.gaea.exception.InvalidDataException;
  * </p>
  * Created by Iverson on 2015/9/24.
  */
-public class MySQL56InnoDBDialect {
+@Service
+public class MySQL56InnoDBDialect implements GaeaDataBaseCommonService{
     /**
      * 获取分页的SQL。
      * @param sql 基础的数据查询sql

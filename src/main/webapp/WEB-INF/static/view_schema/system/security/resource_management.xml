@@ -4,7 +4,7 @@
 <!--<ur-schema xmlns:views="http://www.ur.com.cn/schema/views">-->
     <data>
         <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
-        <dataset id="DS_RESOURCE_MANAGEMENT" primary-table="GAEA_SYS_RESOURCES">
+        <dataset id="DS_RESOURCE_MANAGEMENT_LIST" primary-table="GAEA_SYS_RESOURCES">
             <!--bean-ref：即关联的数据源。用该数据源查询。-->
             <data-source name="xxx" code="LOCAL_DS" bean-ref="dataSource" />
             <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
@@ -113,7 +113,7 @@
                     visible="true" sortable="false" html-width="120" data-type="String" dataset-id="DS_MENU_LEVELS"/>
             <column id="orderSeq" name="orderSeq" label="顺序号" db-column-name="order_seq"
                     visible="true" sortable="false" html-width="120" data-type="String" />
-            <column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"
+            <column id="resourceUrl" name="resourceUrl" label="资源(URL)" db-column-name="RESOURCE_URL"
                     visible="true" sortable="false" html-width="240" data-type="String" />
             <column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"
                     visible="true" sortable="false" html-width="120" data-type="String" />

@@ -26,7 +26,7 @@ public class DsConditionSetEntity implements Serializable {
     private String id;
     @Column(name = "NAME")
     private String name; // XML里定义的id
-    @Column(name = "APPEND_SQL")
+    @Column(name = "APPEND_SQL",length = 1000)
     private String appendSql;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DATASET_ID")
@@ -41,7 +41,8 @@ public class DsConditionSetEntity implements Serializable {
         if (conditionSet == null || dataSetEntity == null || StringUtils.isEmpty(dataSetEntity.getName())) {
             throw new IllegalArgumentException("conditionSet为空，或dataset name（即）为空，是无法构建conditionSet entity的。");
         }
-        this.name = dataSetEntity.getName() + CommonDefinition.COMMON_DATASET_NAME_SEPARATOR + conditionSet.getId();
+//        this.name = dataSetEntity.getName() + CommonDefinition.COMMON_DATASET_NAME_SEPARATOR + conditionSet.getId();
+        this.name = conditionSet.getId();
         this.appendSql = conditionSet.getAppendSql();
         this.dataSetEntity = dataSetEntity;
         List<Condition> conditionList = CollectionUtils.isEmpty(conditionSet.getConditions()) ? null : conditionSet.getConditions();

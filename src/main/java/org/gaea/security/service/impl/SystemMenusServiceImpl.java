@@ -44,7 +44,7 @@ public class SystemMenusServiceImpl implements SystemMenusService {
                             lv2MenuDTO = new MenuDTO();
                             lv2MenuDTO.setName(menu.getName());
                             lv2MenuDTO.setLevel(menu.getLevel());
-                            lv2MenuDTO.setUrl(menu.getResource().getResource());
+                            lv2MenuDTO.setUrl(menu.getResource().getResourceUrl());
                             menuDTOMap.put(menu.getName(), lv2MenuDTO);
                         }
                     } else if (menu.getLevel() == Menu.LEVEL_3) {
@@ -58,7 +58,7 @@ public class SystemMenusServiceImpl implements SystemMenusService {
                         MenuDTO menuDTO = new MenuDTO();
                         menuDTO.setName(menu.getName());
                         menuDTO.setLevel(menu.getLevel());
-                        menuDTO.setUrl(menu.getResource().getResource());
+                        menuDTO.setUrl(menu.getResource().getResourceUrl());
                         parentMenu.getSubMenus().add(menuDTO);
                     }
                 }

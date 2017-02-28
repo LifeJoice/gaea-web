@@ -45,6 +45,11 @@ public class SystemRolesController {
         return "/gaea/security/role/role-users-form.html";
     }
 
+    @RequestMapping(value = "/showRoleAuths", produces = "plain/text; charset=UTF-8")
+    public String showRoleAuths() {
+        return "/gaea/security/role/role-authorities-form.html";
+    }
+
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public String save(Role role) {
@@ -56,6 +61,13 @@ public class SystemRolesController {
     @ResponseBody
     public String saveRoleUsers(Role role, @RequestBean List<String> userIds) {
 //        systemRolesService.save(authority);
+        return "";
+    }
+
+    @RequestMapping(value = "/saveRoleAuths", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String saveRoleAuthorities(Role role, @RequestBean List<String> authIds) {
+        systemRolesService.saveRoleAuthorities(role, authIds);
         return "";
     }
 }

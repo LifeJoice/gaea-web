@@ -22,4 +22,6 @@ public class CommonDefinition {
     public static final String PROP_KEY_REDIS_USER_ROLES = "gaea.login.user.roles";
     // 用户登录超时的key
     public static final String PROP_KEY_REDIS_USER_LOGIN_TIMEOUT = "system.user.login.timeout";
+    // 系统当前使用的数据库. 涉及通用查询等用什么数据库的语法。
+    public static final String PROP_KEY_SYSTEM_DATABASE = "system.database";
 }
