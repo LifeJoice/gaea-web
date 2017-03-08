@@ -13,76 +13,58 @@
 define([
         "jquery", "underscore",
         'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaea-system-url",
-        "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-ui-notify", "gaeajs-ui-dialog"
+        "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-ui-notify", "gaeajs-ui-dialog", "gaeajs-context"
     ],
     function ($, _,
               gaeaAjax, gaeaValid, gaeaString, SYS_URL,
-              GAEA_EVENTS, GAEA_UI_DEFINE, gaeaNotify, gaeaDialog) {
+              GAEA_EVENTS, GAEA_UI_DEFINE, gaeaNotify, gaeaDialog, gaeaContext) {
         var actions = {};
 
         /**
          *
-         * @param opts
-         *                  button schema的button定义。其中应该也包含了buttonAction，但还是单独吧。
-         *                  buttonAction 某个button的某个action
-         *                  data 要POST到后台的数据. 应该必须有schemaId。
+         * @param {object} opts
+         * @param {object} opts.button schema的button定义。其中应该也包含了buttonAction，但还是单独吧。
+         * @param {object} opts.buttonAction 某个button的某个action
+         * @param {object} opts.data 要POST到后台的数据. 应该必须有schemaId。
          */
         actions.doAction = function (opts) {
             var button = opts.button;
             var buttonAction = button.actions[0];// 暂时只支持绑定一个action
             var data = opts.data;
-            data.method = buttonAction.method; // 赋予"method"属性和值. Action必须!
-            /**
-             * 如果是获取文件的action，例如导出，不能用ajax。必须用submit才行。
-             */
-            if (gaeaString.equalsIgnoreCase(button.submitType, GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT)) {
-                var submitFormHtml = '' +
-                    '<form action="<%= ACTION %>" method="post">' +
-                    '<input type="hidden" name="method" value="<%= METHOD %>">' +
-                    '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
-                    '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
-                    '</form>';
-                var formHtmlTemplate = _.template(submitFormHtml);
-                var jqHtmlSelector = formHtmlTemplate({
-                    ACTION: SYS_URL.ACTION.DO_ACTION,
-                    METHOD: data.method,
-                    SCHEMA_ID: data.schemaId,
-                    BUTTON_ID: button.id
-                });
-                $(jqHtmlSelector).submit();
-            } else {
-                gaeaAjax.post({
-                    url: SYS_URL.ACTION.DO_ACTION,
-                    data: data,
-                    success: function (data) {
-                        gaeaNotify.message(button.msg + "操作成功。");
-                        // 刷新grid数据
-                        $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                    },
-                    fail: function (data) {
-                        gaeaNotify.error(button.msg + "操作失败！");
+            var actionMethod = buttonAction.method;
+            data.method = actionMethod; // 赋予"method"属性和值. Action必须!
+
+            //if(gaeaString.equalsIgnoreCase(actionMethod, GAEA_UI_DEFINE.ACTION.METHOD.SUBMIT)){
+            var actions = button.actions;
+            if (_.isArray(actions)) {
+
+                // 遍历actions
+                // 当前应该只会有一个action, 就其实一般只会执行第一个action
+                $.each(actions, function (i, iObj) {
+                    var action = this;
+                    var methodName = action.method;
+                    var extraData = {}; // 额外的数据，一般从action param来再整合当前页面动态信息
+                    if (gaeaValid.isNull(action)) {
+                        return;
                     }
+                    if (gaeaString.equalsIgnoreCase(methodName, GAEA_UI_DEFINE.ACTION.METHOD.SUBMIT)) {
+                        if (gaeaValid.isNull(button.submitUrl)) {
+                            throw "action.method=submit, submitUrl定义不允许为空！";
+                        }
+                        opts.submitUrl = button.submitUrl;
+
+                        extraData = _private.action.submit.getParamsData(action);
+                    }
+
+                    // 整合extra data（一般来自param定义），执行action
+                    opts.data = _.extend(data, extraData);
+                    _private.submit(opts);
                 });
             }
-
-
-            // 提交
-            //gaeaAjax.post({
-            //    url: SYS_URL.ACTION.DO_ACTION,
-            //    data: data,
-            //    success: function (data) {
-            //        gaeaNotify.message(button.msg + "操作成功。");
-            //        // 刷新grid数据
-            //        $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-            //    },
-            //    fail: function (data) {
-            //        gaeaNotify.error(button.msg + "操作失败！");
-            //    }
-            //});
         };
 
         /**
-         * 和doAction大同小异。但这个，一方面提交处理的url不是同一个。另外，一些细节的东西，例如method，是没有的。
+         * 和_private.submit大同小异。但这个，一方面提交处理的url不是同一个。另外，一些细节的东西，例如method，是没有的。
          * @param {object} opts
          * @param {object} opts.button
          * @param {string} opts.button.id
@@ -264,6 +246,103 @@ define([
                         var row = gaeaGrid.getSelected();
                         opts.selectedRow = row;
                         $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, opts);
+                    }
+                }
+            }
+        };
+
+        var _private = {
+            /**
+             * 通用的提交功能。判断submitType，如果有设定就用form提交（一般下载文件用），否则就只用post提交。
+             * @param {object} opts
+             * @param {object} opts.button              schema的button定义。其中应该也包含了buttonAction，但还是单独吧。
+             * @param {object} opts.data                提交到后端的数据
+             * @param {string} opts.submitUrl           最终提交到的url。以这个为准，无视button定义里面的（因为有些业务需要忽略button的url）
+             */
+            submit: function (opts) {
+                var button = opts.button;
+                var buttonAction = button.actions[0];// 暂时只支持绑定一个action
+                var data = opts.data;
+                data.method = buttonAction.method; // 赋予"method"属性和值. Action必须!
+                // 生成url. 默认：SYS_URL.ACTION.DO_ACTION
+                var submitUrl = gaeaValid.isNull(opts.submitUrl) ? SYS_URL.ACTION.DO_ACTION : opts.submitUrl;
+                /**
+                 * 如果是获取文件的action，例如导出，不能用ajax。必须用submit才行。
+                 */
+                if (gaeaString.equalsIgnoreCase(button.submitType, GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT)) {
+                    var submitFormHtml = '' +
+                        '<form action="<%= ACTION %>" method="post">' +
+                        '<input type="hidden" name="method" value="<%= METHOD %>">' +
+                        '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
+                        '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
+                        '</form>';
+                    var formHtmlTemplate = _.template(submitFormHtml);
+                    var jqHtmlSelector = formHtmlTemplate({
+                        ACTION: submitUrl,
+                        METHOD: data.method,
+                        SCHEMA_ID: data.schemaId,
+                        BUTTON_ID: button.id
+                    });
+                    $(jqHtmlSelector).submit();
+                } else {
+                    gaeaAjax.post({
+                        url: submitUrl,
+                        data: data,
+                        success: function (data) {
+                            gaeaNotify.message(button.msg + "操作成功。");
+                            // 刷新grid数据
+                            $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                        },
+                        fail: function (data) {
+                            gaeaNotify.error(button.msg + "操作失败！");
+                        }
+                    });
+                }
+            },
+            /**
+             * 各个系统默认定义action的相关操作。
+             */
+            action: {
+                /**
+                 * action.method=submit的相关操作。
+                 */
+                submit: {
+                    /**
+                     * 负责转换/拼装action.params为json数据并返回。
+                     * @param {object} action
+                     * @returns {json}
+                     */
+                    getParamsData: function (action) {
+                        var extraData = {};
+
+                        /**
+                         * 遍历param，整合param的值。
+                         * 一般，param只给出name，我们需要动态从页面获取值（例如从grid）。当然，也可能param配置了固定的value。
+                         */
+                        var params = action.params;
+                        if (_.isArray(params)) {
+
+                            // 遍历params
+                            $.each(params, function (j, jObj) {
+                                var actionParam = this;
+                                if (gaeaValid.isNotNull(actionParam.name)) {
+                                    var name = gaeaValid.isNull(actionParam.aliasName) ? actionParam.name : actionParam.aliasName;
+                                    var row = gaeaContext.getValue("selectedRow");
+                                    // 优先从定义读值
+                                    var value = actionParam.value;
+                                    // 再从grid select row读值
+                                    if (gaeaValid.isNull(value)) {
+                                        value = gaeaValid.isNull(row) ? "" : row[actionParam.name];
+                                    }
+                                    // set value
+                                    extraData[name] = value;
+                                } else {
+                                    console.debug("action param name为空！action: %s", JSON.stringify(action));
+                                }
+                            });
+                        }
+
+                        return extraData;
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package org.gaea.framework.web.schema.domain.view;
+package org.gaea.framework.web.schema.view.jo;
 
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.SchemaViewsComponent;
@@ -7,9 +7,10 @@ import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import java.util.List;
 
 /**
- * Created by Iverson on 2015/7/6.
+ * copy from SchemaButton
+ * Created by Iverson on 2017年3月1日10:03:44
  */
-public class SchemaButton implements SchemaViewsComponent {
+public class SchemaButtonJO {
     private String id;
     private String name;
     private String htmlName;
@@ -22,8 +23,6 @@ public class SchemaButton implements SchemaViewsComponent {
     private String componentName;
     private String submitUrl; // 按钮点击时，提交的url
     private String submitType = "ajax"; // 按钮点击时，提交的方式：ajax or form submit。
-    public static final String SUBMIT_TYPE_AJAX = "ajax"; // 按钮以ajax方式提交
-    public static final String SUBMIT_TYPE_FORM_SUBMIT = "formSubmit"; // 按钮以submit方式提交。这种一般适合文件下载类等，不适合用ajax的场景。
     private String msg; // action对应的信息。在按钮成功或失败后，可以利用它拼凑个提示信息。
     /**
      * 接口action，只定义，后台框架无实现。定义的内容由具体模板页(例如公用列表页等）去实现，而不由XML SCHEMA解析框架处理。
@@ -35,7 +34,7 @@ public class SchemaButton implements SchemaViewsComponent {
      * 设计想法：
      * 有序。可以按顺序执行多个action。
      */
-    private List actions;
+    private List<ButtonActionJO> actions;
 
     public String getId() {
         return id;
@@ -109,7 +108,6 @@ public class SchemaButton implements SchemaViewsComponent {
         this.linkComponent = linkComponent;
     }
 
-    @Override
     public String getComponentName() {
         return componentName;
     }
@@ -150,11 +148,11 @@ public class SchemaButton implements SchemaViewsComponent {
         this.msg = msg;
     }
 
-    public List getActions() {
+    public List<ButtonActionJO> getActions() {
         return actions;
     }
 
-    public void setActions(List actions) {
+    public void setActions(List<ButtonActionJO> actions) {
         this.actions = actions;
     }
 }

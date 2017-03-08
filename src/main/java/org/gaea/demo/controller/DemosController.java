@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -103,6 +104,19 @@ public class DemosController {
     @RequestMapping(value = "/class-crud-form-3-1", produces = "plain/text; charset=UTF-8")
     public String showAddClassForm31() {
         return "/demo/class-crud-form-3-1.html";
+    }
+
+    /**
+     * action, method=submit的处理。
+     *
+     * @return
+     */
+    @RequestMapping(value = "/submitAction", produces = "plain/text; charset=UTF-8", method = RequestMethod.POST)
+    @ResponseBody
+    public void submitAction(@RequestBean("class") DemoClassEntity classEntity) {
+        if (classEntity != null) {
+            System.out.println("id: " + classEntity.getId() + "class name: " + classEntity.getClassName());
+        }
     }
 
     @RequestMapping(value = "/add-class", produces = "plain/text; charset=UTF-8")

@@ -1,14 +1,20 @@
 package org.gaea.springframework.web.servlet.view;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.gaea.exception.GaeaException;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.service.GaeaXmlViewService;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
+import org.gaea.util.GaeaExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,7 +47,14 @@ public class GaeaHtmlView extends AbstractUrlBasedView {
 //        gaeaXmlViewService
         String loginName = GaeaWebSecuritySystem.getUserName(request);
         // 把XML schema转换成HTML
-        String viewHtml = gaeaXmlViewService.getViewContent(getApplicationContext(), resourceFilePath, loginName);
+        String viewHtml = "";
+        try {
+            viewHtml =  gaeaXmlViewService.getViewContent(getApplicationContext(), resourceFilePath, loginName);
+        }catch(Exception e){
+            logger.error("Gaea框架生成视图内容失败！", e);
+            viewHtml = GaeaExceptionUtils.getJsonMessage(GaeaException.DEFAULT_FAIL,e.getMessage(),"系统错误，请联系管理员！");
+            response.setStatus(GaeaException.DEFAULT_FAIL);// 自定义一般校验错误 600
+        }
         response.setContentType(getContentType());
         response.getWriter().write(viewHtml);
         response.getWriter().close();

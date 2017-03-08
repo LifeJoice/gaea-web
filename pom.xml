@@ -15,7 +15,7 @@
         <jvmargs>-XX:MaxPermSize=384m -Xms512m -Xmx1024m</jvmargs>
         <gaea.common.version>0.1-SNAPSHOT</gaea.common.version>
         <gaea.common.db.version>0.2-SNAPSHOT</gaea.common.db.version>
-        <spring.version>4.2.1.RELEASE</spring.version>
+        <spring.version>4.3.7.RELEASE</spring.version>
         <spring.data.jpa.version>1.8.2.RELEASE</spring.data.jpa.version>
         <spring.security.version>4.0.2.RELEASE</spring.security.version>
         <hibernate.version>4.3.11.Final</hibernate.version>
@@ -50,6 +50,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
             <version>${spring.version}</version>
         </dependency>
         <dependency>

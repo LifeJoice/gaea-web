@@ -98,6 +98,9 @@ define(function () {
         SUBMIT_TYPE: { // 和button的定义相关
             AJAX: "ajax",
             FORM_SUBMIT: "formSubmit"
+        },
+        METHOD: {
+            SUBMIT: "SUBMIT"
         }
     };
     var TEMPLATE = {

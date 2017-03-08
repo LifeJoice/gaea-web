@@ -3,12 +3,15 @@ package org.gaea.framework.web.schema.convertor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.InvalidDataException;
+import org.gaea.framework.web.schema.Action;
+import org.gaea.framework.web.schema.SchemaActionDefinition;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
 import org.gaea.framework.web.schema.domain.view.SchemaButton;
 import org.gaea.framework.web.schema.domain.view.SchemaButtonGroup;
-import org.gaea.framework.web.schema.view.domain.ActionParam;
+import org.gaea.framework.web.schema.view.action.ActionParam;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
+import org.gaea.framework.web.schema.view.action.SimpleButtonAction;
 import org.gaea.util.GaeaXmlUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
@@ -18,6 +21,8 @@ import org.w3c.dom.NodeList;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Iverson on 2015/7/6.
@@ -73,17 +78,50 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
                     button.setActions(new ArrayList<ExcelExportButtonAction>());
                 }
                 // 解析< button >
-                ExcelExportButtonAction buttonAction = parseButtonAction(viewNode);
+                Action buttonAction = parseButtonAction(viewNode);
                 button.getActions().add(buttonAction);
             }
         }
         return button;
     }
 
-    private ExcelExportButtonAction parseButtonAction(Node inNode) throws InvalidDataException {
-        ExcelExportButtonAction buttonAction = new ExcelExportButtonAction();
-        buttonAction.setActionParamMap(new HashMap<String, ActionParam>());
-        buttonAction = GaeaXmlUtils.copyAttributesToBean(inNode, buttonAction, ExcelExportButtonAction.class);
+    /**
+     * 先获取{@code <button-action>}的method属性。根据属性判断生成不同的action.
+     *
+     * @param inNode
+     * @return Action的某实现。根据method判断，可能是ExcelExportButtonAction，也可能是SimpleButtonAction等。
+     * @throws InvalidDataException
+     */
+    private Action parseButtonAction(Node inNode) throws InvalidDataException {
+        // 获取node的属性列表
+        Map<String, String> attributes = GaeaXmlUtils.getAttributes(inNode);
+        String method = attributes.get("method");
+        Action result = null;
+        if (SchemaActionDefinition.METHOD_EXCEL_EXPORT_BY_TEMPLATE.equalsIgnoreCase(method)) {
+            ExcelExportButtonAction excelAction = new ExcelExportButtonAction();
+            excelAction = GaeaXmlUtils.copyAttributesToBean(inNode, excelAction, ExcelExportButtonAction.class);
+            excelAction.setActionParamMap(new HashMap<String, ActionParam>());
+            parseParamList(inNode, excelAction);
+            result = excelAction;
+        } else if (SchemaActionDefinition.METHOD_SUBMIT.equalsIgnoreCase(method)) {
+            SimpleButtonAction simpleAction = new SimpleButtonAction();
+            simpleAction = GaeaXmlUtils.copyAttributesToBean(inNode, simpleAction, SimpleButtonAction.class);
+            simpleAction.setActionParamMap(new HashMap<String, ActionParam>());
+            parseParamList(inNode, simpleAction);
+            result = simpleAction;
+        }
+        return result;
+    }
+
+    /**
+     * 解析{@code <button-action>}下面的所有{@code <param>}.
+     * 这个方法可以给多种Action通用。
+     *
+     * @param inNode
+     * @param action
+     * @throws InvalidDataException
+     */
+    private void parseParamList(Node inNode, Action action) throws InvalidDataException {
         NodeList nodes = inNode.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
@@ -93,10 +131,9 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
             }
             if (XmlSchemaDefinition.PARAM_NAME.equals(node.getNodeName())) {
                 ActionParam param = parseParam(node);
-                buttonAction.getActionParamMap().put(param.getName(), param); // Map< param.name , param obj >
+                action.getActionParamMap().put(param.getName(), param); // Map< param.name , param obj >
             }
         }
-        return buttonAction;
     }
 
     private ActionParam parseParam(Node inNode) throws InvalidDataException {

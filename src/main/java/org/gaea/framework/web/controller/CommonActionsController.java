@@ -6,6 +6,7 @@ import org.gaea.db.QueryCondition;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.SystemCacheFactory;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.view.SchemaButton;
@@ -59,8 +60,9 @@ public class CommonActionsController {
         GaeaXmlSchema xmlSchema = SystemCacheFactory.getGaeaSchema(schemaId);
         SchemaButton button = GaeaSchemaUtils.getButton(xmlSchema, buttonId, method);
         if (button != null && CollectionUtils.isNotEmpty(button.getActions())) {
-            for (ExcelExportButtonAction buttonAction : button.getActions()) {
-                actionsService.doAction(buttonAction, response, request);
+            for (Object objAction : button.getActions()) {
+                Action action = (Action) objAction;
+                actionsService.doAction(action, response, request);
             }
         }
     }

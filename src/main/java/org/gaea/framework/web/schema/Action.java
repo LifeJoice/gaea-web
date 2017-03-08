@@ -2,7 +2,7 @@ package org.gaea.framework.web.schema;
 
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
-import org.gaea.framework.web.schema.view.domain.ActionParam;
+import org.gaea.framework.web.schema.view.action.ActionParam;
 
 import java.util.Map;
 

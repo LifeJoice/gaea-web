@@ -15,6 +15,7 @@ import org.gaea.framework.web.schema.domain.SchemaData;
 import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
+import org.gaea.framework.web.schema.view.service.ActionsService;
 import org.gaea.util.GaeaXmlUtils;
 import org.gaea.util.MathUtils;
 import org.slf4j.Logger;
@@ -48,6 +49,8 @@ public class GaeaXmlSchemaProcessor {
     private XmlViewsConvertor urXmlViewsConvertor;
     @Autowired
     private GaeaSchemaCache gaeaSchemaCache;
+    @Autowired
+    private ActionsService actionsService;
 
     /**
      * 解析Gaea框架的XML页面描述文件。
@@ -228,7 +231,7 @@ public class GaeaXmlSchemaProcessor {
         schemaViews.getGridJO().getPage().setPageCount(pageCount.intValue());
         // 指定放置在页面哪个DIV中
         viewsMap.put("dialogs", schemaViews.getDialogs());
-        viewsMap.put("actions", schemaViews.getActions());
+        viewsMap.put("actions", actionsService.toJson(schemaViews.getActions()));
         viewsMap.put("title", schemaViews.getTitle());
         // 获取grid各个column有绑定ds的。返回也前端使用。例如：快捷查询做下拉列表等。
         Map<String, List<DataItem>> columnDataSets = getColumnSimpleDataSets(schemaViews.getGrid().getColumns());

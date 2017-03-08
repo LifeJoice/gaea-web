@@ -432,7 +432,12 @@ define([
                                 //        });
                                 //    });
                                 //};
-                            } else if (gaeaValid.isNotNull(buttonDef.actions)) {
+                            }
+                            /**
+                             * action和actions应该两者只有一个。
+                             * actions是更深入的action的定义。并且，设计上希望一个button能执行多个action（随未实现）
+                             */
+                            if (gaeaValid.isNotNull(buttonDef.actions)) {
                                 var data = _private.getSubmitData();
                                 data.buttonId = buttonDef.id;
                                 data.actionName = buttonDef.action;
@@ -454,7 +459,13 @@ define([
                                 //    data: data
                                 //});
                                 //});
-                            } else if (gaeaValid.isNotNull(buttonDef.action) && gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
+                            }
+
+                            /**
+                             * 通用action的处理。即action有值。
+                             * （TODO 上面的DELETE、ADD DIALOG等应该都放在这里，但历史遗留问题，后面慢慢重构吧）
+                             */
+                            if (gaeaValid.isNotNull(buttonDef.action) && gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
                                 var data = _private.getSubmitData();
                                 data.buttonId = buttonDef.id;
                                 data.actionName = buttonDef.action;

@@ -73,6 +73,13 @@
             <button id="btnUpload" name="btnUpload" html-value="测试上传文件" link-view-id="uploaderDialog"/>
             <button id="btnExcelExport2" name="btnExcelExport2" html-value="导出当前页面数据2" action="export-excel"
                     submit-type="formSubmit"/>
+            <button id="submitToSomeWhere" name="submitToSomeWhere" html-value="提交到某个地方"
+                    submit-url="/gaea/demo/submitAction">
+                <button-action method="submit">
+                    <param name="id" alias-name="class.id"/>
+                    <param name="className" alias-name="class.className"/>
+                </button-action>
+            </button>
             <!--按钮组定义。-->
             <!--text：就是按钮显示的文字。-->
             <!--msg: 是按钮操作的说明。会用在按钮触发后的提示信息(msg 成功...)。-->

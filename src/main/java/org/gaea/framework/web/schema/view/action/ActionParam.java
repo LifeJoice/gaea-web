@@ -1,4 +1,4 @@
-package org.gaea.framework.web.schema.view.domain;
+package org.gaea.framework.web.schema.view.action;
 
 import org.gaea.framework.web.schema.Param;
 
@@ -7,6 +7,7 @@ import org.gaea.framework.web.schema.Param;
  */
 public class ActionParam<T> implements Param<T> {
     private String name;
+    private String aliasName;
     private T value;
 
     @Override
@@ -16,6 +17,14 @@ public class ActionParam<T> implements Param<T> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
     }
 
     @Override

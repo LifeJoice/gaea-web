@@ -3,6 +3,7 @@ package org.gaea.framework.web.schema.utils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.view.SchemaButton;
@@ -168,7 +169,8 @@ public class GaeaSchemaUtils {
         if (button == null || CollectionUtils.isEmpty(button.getActions())) {
             return false;
         }
-        for (ExcelExportButtonAction action : button.getActions()) {
+        for (Object objAction : button.getActions()) {
+            Action action = (Action) objAction;
             if (method.equalsIgnoreCase(action.getMethod())) {
                 itsMe = true;
             }
