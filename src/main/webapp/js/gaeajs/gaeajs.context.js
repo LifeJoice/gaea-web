@@ -29,7 +29,7 @@ define([
                 gaeaValid.isNull({check: opts.id, exception: "绑定的id为空，无法初始化gaea context。"});
                 if (!isInit) {
                     var $context = $("#" + opts.id);
-                    gaeaEvent.registerListener(gaeaEvent.DEFINE.CONTEXT.PAGE.UPDATE, opts.id, function (event, data) {
+                    gaeaEvent.registerListener(gaeaEvent.DEFINE.CONTEXT.PAGE.UPDATE, "#" + opts.id, function (event, data) {
                         //$context.on(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, function (event, data) {
                         CONTEXT = _.extend(CONTEXT, data);
                         //});

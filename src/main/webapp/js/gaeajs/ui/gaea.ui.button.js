@@ -104,7 +104,7 @@ define([
                 // 则在最终调用gaeaDialog.init的时候，就不需要再初始化一次了
                 opts.initHtml = false;
 
-                $button.on("click", function () {
+                GAEA_EVENTS.registerListener("click", "#" + opts.id, function () {
                     //gaeaDialog.initCrudDialog();
                     gaeaDialog.init(opts);
                 });

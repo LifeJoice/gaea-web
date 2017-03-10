@@ -105,12 +105,14 @@ define([
                     url: SYS_URL.ACTION.DO_SIMPLE_ACTION,
                     data: data,
                     success: function (data) {
-                        gaeaNotify.message(button.msg + "操作成功。");
+                        gaeaNotify.success(gaeaString.builder.simpleBuild("%s 操作成功。", button.msg));
+                        //gaeaNotify.message(button.msg + "操作成功。");
                         // 刷新grid数据
                         $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                     },
                     fail: function (data) {
-                        gaeaNotify.error(button.msg + "操作失败！");
+                        gaeaNotify.fail(gaeaString.builder.simpleBuild("%s 操作失败！", button.msg));
+                        //gaeaNotify.error(button.msg + "操作失败！");
                     }
                 });
             }
@@ -123,7 +125,7 @@ define([
         actions.deleteSelected = {
             init: function (options) {
                 var buttonDef = options.button;
-                var $button = $("#" + buttonDef.htmlId);
+                //var $button = $("#" + buttonDef.htmlId);
                 // 默认伪删除
                 var deleteURL = SYS_URL.CRUD.PSEUDO_DELETE;
                 if (gaeaValid.isNotNull(options.url)) {
@@ -132,7 +134,7 @@ define([
                 /**
                  * 绑定按钮触发的删除事件。
                  */
-                $button.on(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, function (event, data) {
+                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, "#" + buttonDef.htmlId, function (event, data) {
                     var schemaId = $("#" + GAEA_UI_DEFINE.UI.SCHEMA.ID).val();
                     var gridId = $("#" + GAEA_UI_DEFINE.UI.GRID.ID).val();
                     var row = data.selectedRow;
@@ -146,18 +148,20 @@ define([
                             wfProcInstId: row.wfProcInstId
                         },
                         success: function () {
-                            gaeaNotify.message("删除成功！");
+                            gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
+                            //gaeaNotify.message("删除成功！");
                             $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                         },
                         // 返回内容如果为空，则即使status=200，也会进入fail方法
                         fail: function (jqXHR, textStatus, errorThrown) {
                             // 如果返回status=200，则还是当做成功！
                             if (jqXHR.status == 200) {
-                                gaeaNotify.message("删除成功！");
+                                gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
+                                //gaeaNotify.message("删除成功！");
                                 $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                             } else {
                                 var result = jqXHR.responseJSON;
-                                gaeaNotify.warn(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
+                                gaeaNotify.fail(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
                                     SIMPLE_MSG: "删除失败！",
                                     ERROR_MSG: result.RESULT_MSG
                                 }));
@@ -289,12 +293,13 @@ define([
                         url: submitUrl,
                         data: data,
                         success: function (data) {
-                            gaeaNotify.message(button.msg + "操作成功。");
+                            gaeaNotify.success(gaeaString.builder.simpleBuild("%s 操作成功。", button.msg));
                             // 刷新grid数据
                             $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                         },
                         fail: function (data) {
-                            gaeaNotify.error(button.msg + "操作失败！");
+                            gaeaNotify.fail(gaeaString.builder.simpleBuild("%s 操作失败！", button.msg));
+                            //gaeaNotify.error(button.msg + "操作失败！");
                         }
                     });
                 }

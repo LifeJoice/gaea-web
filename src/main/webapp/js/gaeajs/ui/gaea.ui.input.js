@@ -77,8 +77,8 @@ define([
                 _gaeaInput.initEventBinding(options);
             },
             initEventBinding: function (options) {
-                var $gaeaInput = $("#" + options.containerId);
-                $gaeaInput.on(GAEA_EVENTS.DEFINE.UI.INPUT.CHANGE, function (event, data) {
+                //var $gaeaInput = $("#" + options.containerId);
+                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.INPUT.CHANGE, "#" + options.containerId, function (event, data) {
                     var value = _gaeaInput.getValue(data.containerId);
                     // 回调函数
                     if (_.isFunction(options.change)) {

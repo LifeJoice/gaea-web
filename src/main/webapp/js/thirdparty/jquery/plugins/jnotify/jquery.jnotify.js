@@ -64,6 +64,8 @@
     jQuery.fn.jnotifyAddMessage = function(options) {
 
         var notifyWrapper = this;
+        // <<<<--------------- 先隐藏，为后面动画铺垫。 modify by Iverson 2017年3月8日19:30:06
+        //notifyWrapper.css("display","none");
 
         if (notifyWrapper.hasClass('notify-wrapper')) {
 
@@ -71,7 +73,7 @@
                 text: '',
                 type: 'message',
                 showIcon: true,
-                permanent: false,
+                permanent: true,
                 disappearTime: 3000
             };
 
@@ -82,9 +84,24 @@
             switch (options.type) {
                 case 'message':
                     {
-                        styleClass = 'ui-state-highlight';
-                        iconClass = 'ui-icon-info';
+                        // --------------->>>>
+                        //styleClass = 'ui-state-highlight';
+                        //iconClass = 'ui-icon-info';
+                        // <<<<--------------- 改为自己的“提醒消息”图标 modify by Iverson 2017年3月8日19:30:06
+                        iconClass = 'fa fa-info-circle fa-3x';
                     }
+                    break;
+                // add by Iverson 2017年3月9日09:24:30
+                case 'success':
+                {
+                    iconClass = 'fa fa-check-circle fa-3x';
+                }
+                    break;
+                // add by Iverson 2017年3月9日09:24:30
+                case 'fail':
+                {
+                    iconClass = 'fa fa-times-circle fa-3x';
+                }
                     break;
                 case 'error':
                     {
@@ -104,24 +121,40 @@
                 this.children().remove();
             }
 
-            var notifyItemWrapper = jQuery('<div class="jnotify-item-wrapper"></div>');
+            var notifyItemWrapper = jQuery('<div class="jnotify-item-wrapper" style="display: none;"></div>');
             var notifyItem = jQuery('<div class="ui-corner-all jnotify-item"></div>')
                                     .addClass(styleClass);
 
-            if (notifyWrapper.hasClass('notify-wrapper-prepend'))
+            if (notifyWrapper.hasClass('notify-wrapper-prepend')) {
                 notifyItem.prependTo(notifyWrapper);
-            else
+            } else {
                 notifyItem.appendTo(notifyWrapper);
+            }
 
             notifyItem.wrap(notifyItemWrapper);
 
-            if (options.showIcon)
-                jQuery('<span class="ui-icon" style="float:left; margin-right: .3em;" />')
-                                    .addClass(iconClass)
-                                    .appendTo(notifyItem);
+            // <<<<---------------
+            // 改为自己的图标（用font-awesome）.
+            // ui-icon -> jnotify-ui-icon
+            // modify by Iverson 2017年3月8日19:30:06
+            if (options.showIcon) {
+                var $uiIconCt = jQuery('<span class="jnotify-ui-icon" style="float:left; margin-right: .3em;" />');
+                var $icon = $('<i aria-hidden="true"></i>').addClass(iconClass).appendTo($uiIconCt);
+                $uiIconCt.appendTo(notifyItem);
+            }
 
-            jQuery('<span></span>').html(options.text).appendTo(notifyItem);
-            jQuery('<div class="jnotify-item-close"><span class="ui-icon ui-icon-circle-close"/></div>')
+            // 增加一个class，不然不好控制。 modify by Iverson 2017年3月8日19:30:06
+            jQuery('<span class="jnotify-content-detail"></span>').html(options.text).appendTo(notifyItem);
+
+            // <<<<--------------- 改为动画式展现.直接用上面的notifyWrapper好像不行。
+            // modify by Iverson 2017年3月8日19:30:06
+            $(".jnotify-item-wrapper:hidden").show("slide", {direction: "right"}, 300);
+            // --------------->>>>
+            //jQuery('<div class="jnotify-item-close"><span class="ui-icon ui-icon-circle-close"/></div>')
+            //                        .prependTo(notifyItem)
+            //                        .click(function() { remove(notifyItem) });
+            // <<<<--------------- 改为自己的图标 modify by Iverson 2017年3月8日19:30:06
+            jQuery('<div class="jnotify-item-close"><span><i class="fa fa-times" aria-hidden="true"></i></span></div>')
                                     .prependTo(notifyItem)
                                     .click(function() { remove(notifyItem) });
 

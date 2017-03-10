@@ -85,5 +85,63 @@ define([
             return name;
         }
     };
+    /**
+     * 字符串的构造器。主要是生成各种log、提示信息等。
+     */
+    stringUtils.builder = {
+        /**
+         * 一个重构方法，类似console.log功能。“%s”作为占位符。
+         * @param baseString
+         * @param replaceArgs           这个是可变参数
+         * @returns {*}
+         */
+        simpleBuild: function (baseString, replaceArgs/* ...argN */) {
+            var args = Array.prototype.slice.call(arguments);
+            if (_.isArray(args)) {
+                args[0] = {
+                    baseString: baseString
+                };
+            }
+            return stringUtils.builder.build.apply(null, args);
+        },
+        /**
+         * 类似console.log功能。“%s”作为占位符。
+         * @param {object} opts
+         * @param {string} opts.baseString              就是基础的一个字符串咯.
+         * @param {boolean} opts.convertNull            把null替换为''
+         * @param {string} replaceArgs                  这个是可变参数. 替换baseString里面占位符的字符串.
+         */
+        build: function (opts, replaceArgs) {
+            if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.baseString)) {
+                throw "没有baseString无法做字符串拼装工作。";
+            }
+            // 默认convertNull为true
+            if (gaeaValid.isNull(opts.convertNull)) {
+                opts.convertNull = true;
+            }
+            var result = opts.baseString;
+
+            // 替换字符串
+            if (_s.include(result, "%s")) {
+                $.each(arguments, function (i, iValue) {
+                    // 第一个参数是opts，忽略
+                    if (i > 0) {
+                        if (gaeaValid.isNotNull(iValue)) {
+                            result = result.replace(/%s/, iValue);
+                        } else {
+                            var newStr = iValue;
+                            // 如果要把null转换为''
+                            if (_.isBoolean(opts.convertNull) && opts.convertNull) {
+                                newStr = "";
+                            }
+                            result = result.replace(/%s/, newStr);
+                        }
+                    }
+                });
+            }
+            return result;
+        }
+    };
+
     return stringUtils;
 });

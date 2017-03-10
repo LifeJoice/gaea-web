@@ -178,7 +178,7 @@ define([
              */
             initClose: function (opts) {
                 gaeaValid.isNull({check: opts.id, exception: "dialog id为空，无法初始化dialog的关闭。"});
-                $("#" + opts.id).on(GAEA_EVENTS.DEFINE.UI.DIALOG.CLOSE, function (event, ui) {
+                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CLOSE, "#" + opts.id, function (event, ui) {
                     dialog.button.close(opts);
                 });
             },
@@ -463,7 +463,7 @@ define([
                 var $button = $("#" + buttonDef.htmlId);
                 var dlgFormName = dialogId + "-form";
                 var dlgSelector = "#" + dialogId;
-                $button.on(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, function (event, data) {
+                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, "#" + buttonDef.htmlId, function (event, data) {
 
                     crudDialog.openAddDialog({
                         id: dialogId,
@@ -628,7 +628,7 @@ define([
                 /**
                  * 点击“编辑”事件触发。
                  */
-                $button.on(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, function (event, data) {
+                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, "#" + buttonDef.htmlId, function (event, data) {
                     //var selectedRow = crudDialog.cache.selectedRow;
                     var selectedRow = gaeaContext.getValue("selectedRow");
                     console.log("row id: " + selectedRow.id +

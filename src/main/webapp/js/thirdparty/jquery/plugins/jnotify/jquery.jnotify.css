@@ -1,16 +1,80 @@
-.jnotify-item
-{
-    height: auto;
-    padding: 4px 4px 4px 4px;
+/* ****************************************************************************
+ * jnotify的CSS。
+ * 扩展了一下，增加了一些图标，调整了大小和阴影。和Gaea框架更匹配。
+ * modify by Iverson 2017年3月10日09:57:41
+**************************************************************************** */
+
+/*这个是消息框的顶级容器*/
+.jnotify-item-wrapper {
     margin: 0 0 5px 0;
-    display: block;
-    position: relative;
 }
 
-.jnotify-item-close
-{
+/*消息框的主体部分，包括头部的title、关闭*/
+.jnotify-item {
+    height: auto;
+    padding: 4px 4px 4px 4px;
+    /*margin: 0 0 5px 0;*/
+    display: block;
+    position: relative;
+    width: 300px;
+    min-height: 80px;
+    font-size: 14px;
+    box-shadow: 1px 1px 10px #b7b7b7;
+    background: #ffffff;
+    font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
+    border: 1px solid #ccc;
+}
+
+/*信息图标的区域*/
+.jnotify-ui-icon {
+    float: left;
+    padding: 0 10px;
+    display: block;
+    text-align: center;
+}
+
+/*消息内容明细*/
+.jnotify-content-detail {
+    display: block;
+    float: left;
+    /*padding-left: 5px;*/
+    /*font-size: 14px;*/
+}
+
+/*info图标的颜色*/
+.jnotify-ui-icon > .fa-info-circle {
+    color: #0070a3;
+}
+
+/*success图标的颜色*/
+.jnotify-ui-icon > .fa-check-circle {
+    color: #06a229;
+}
+
+/*fail图标的颜色*/
+.jnotify-ui-icon > .fa-times-circle {
+    color: #c72731;
+}
+
+/*整个窗体的上方关闭条*/
+.jnotify-item-close {
+    /*--------------->>>>*/
+    /*float: right;*/
+    /*margin-left: 2px;*/
+    /*<<<<--------------- modify by Iverson 2017年3月8日19:30:06*/
+    height: 20px;
+    width: 100%;
+}
+
+/*消息框的关闭按钮的容器*/
+.jnotify-item-close > span:last-child {
     float: right;
-    margin-left: 2px;
+}
+
+/*消息框的关闭按钮*/
+.jnotify-item-close > span > .fa-times {
+    margin: 3px;
+    font-size: 18px;
 }
 
 

@@ -14,6 +14,8 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
     };
     var msgDefaultType = {
         DEFAULT: "message",
+        SUCCESS: "success",
+        FAIL: "fail",
         WARN: "warn",
         ERROR: "error"
     };
@@ -25,39 +27,65 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
                 })
                 .css({
                     'position': 'absolute',
-//                            'marginTop': '20px',
-                    'right': '20px',
-                    "bottom": "10px",
-                    'width': '250px',
+                    'right': '5px',
+                    "bottom": "5px",
                     'z-index': '9999'
                 });
         },
         message: function (msg) {
-            gaeaNotify.show(msg, msgDefaultType.DEFAULT);
+            gaeaNotify.show({
+                msg: msg,
+                msgType: msgDefaultType.DEFAULT
+            });
+        },
+        success: function (msg) {
+            gaeaNotify.show({
+                msg: msg,
+                msgType: msgDefaultType.SUCCESS
+            });
+        },
+        fail: function (msg) {
+            gaeaNotify.show({
+                msg: msg,
+                msgType: msgDefaultType.FAIL
+            });
         },
         warn: function (msg) {
-            gaeaNotify.show(msg, msgDefaultType.WARN);
+            gaeaNotify.show({
+                msg: msg,
+                msgType: msgDefaultType.WARN
+            });
         },
         error: function (msg) {
-            gaeaNotify.show(msg, msgDefaultType.ERROR);
+            gaeaNotify.show({
+                msg: msg,
+                msgType: msgDefaultType.ERROR
+            });
         },
-        show: function (msg, msgType) {
-            //options = $.extend({},options,opt);
-            if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.DEFAULT, msgType)) {
+        /**
+         * 这个主要是做个映射。因为jnotify插件不一定能支持那么多类型。
+         * @param {object} opts
+         * @param {string} opts.msgType             消息类型。需要是gaeaNotify支持的。
+         * @param {string} opts.msg                 消息体
+         */
+        show: function (opts) {
+            if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.DEFAULT, opts.msgType)) {
                 $notify.jnotifyAddMessage({
-                    text: msg,
+                    text: opts.msg,
                     permanent: false,
                     type: 'message'
                 });
-            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.WARN, msgType)) {
+            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.SUCCESS, opts.msgType) ||
+                gaeaStringUtils.equalsIgnoreCase(msgDefaultType.FAIL, opts.msgType)) {
                 $notify.jnotifyAddMessage({
-                    text: msg,
+                    text: opts.msg,
                     permanent: false,
-                    type: 'error'
+                    type: opts.msgType
                 });
-            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.ERROR, msgType)) {
+            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.WARN, opts.msgType) ||
+                gaeaStringUtils.equalsIgnoreCase(msgDefaultType.ERROR, opts.msgType)) {
                 $notify.jnotifyAddMessage({
-                    text: msg,
+                    text: opts.msg,
                     permanent: false,
                     type: 'error'
                 });

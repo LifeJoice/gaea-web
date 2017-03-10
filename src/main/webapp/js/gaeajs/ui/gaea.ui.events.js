@@ -11,19 +11,27 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
         var events = {};
 
         /**
+         * !!!!!没用了。因为ajax刷新后，这个缓存就清空了。但实际上很多事件还是继续存在！
+         *
          * 事件注册中心。所有经过events.listen注册的事件都会记录在这里。
          * 其实也没啥用，主要是事件太多了，如果各个模块都随便注册事件，很难知道绑定的id、有什么事件等。
          * 这个方便debug用。
          * key: [bindId]:[eventName]
          * value: bind event function
          */
-        var eventRegisterCenter = {
-            // 放着当前页面各个注册了的事件和绑定的id
-            cache: {},
-            register: function (key, val) {
-                eventRegisterCenter[key] = val;
-            }
-        };
+        //var eventRegisterCenter = {
+        //    // 放着当前页面各个注册了的事件和绑定的id
+        //    cache: {},
+        //    register: function (key, val) {
+        //        eventRegisterCenter[key] = val;
+        //    },
+        //    isExists: function (key) {
+        //        if (gaeaValid.isNotNull(eventRegisterCenter[key])) {
+        //            return true;
+        //        }
+        //        return false;
+        //    }
+        //};
 
         /**
          * 事件名的统一定义
@@ -81,28 +89,40 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
          * 这个是个没有注册功能的注册器。只是给gaea框架统一调用后，可以记录当前页面注册了哪些事件，方便debug之类的。
          * eventFunction和defineFunction二选一。
          * @param eventName                 事件名
-         * @param bindId                    绑定的id（某容器）
+         * @param jqSelector                绑定的id（某容器）
          * @param eventFunction             事件对应处理方法。有这个就忽略下面的defineFunction.
-         * @param defineFunction            定义监听的方法，非event function。类似：function(){ $.on(...); }
+         //* @param defineFunction            【废弃！】定义监听的方法，非event function。类似：function(){ $.on(...); }
          */
-        events.registerListener = function (eventName, bindId, eventFunction, defineFunction) {
+        events.registerListener = function (eventName, jqSelector, eventFunction) {
             gaeaValid.isNull({check: eventName, exception: "事件名称为空，无法通过gaeaEvent注册监听事件！"});
-            gaeaValid.isNull({check: bindId, exception: "事件绑定的id为空，无法通过gaeaEvent注册监听事件！"});
-            var key = bindId + ":" + eventName;
+            gaeaValid.isNull({check: jqSelector, exception: "事件绑定的id为空，无法通过gaeaEvent注册监听事件！"});
+            // 构造唯一的对象和事件id，作为缓存事件列表的key
+            var key = jqSelector + ":" + eventName;
+            var debugStr = "";
+            var $bindObj = $(jqSelector);
 
             // eventFunction和defineFunction二选一
             if (_.isFunction(eventFunction)) {
-                console.debug("注册 %s 事件。", eventName);
-                $("#" + bindId).on(eventName, eventFunction);
+                debugStr = gaeaString.builder.simpleBuild("注册 %s 事件。", eventName);
+                if (_.isFunction($bindObj.data(key))) {
+                    debugStr += " 该事件已经存在！先进行解绑操作。";
+                }
+
+                // 解绑
+                $bindObj.off(eventName);
+
+                console.debug(debugStr);
+                // 绑定事件
+                $bindObj.on(eventName, eventFunction);
                 // 缓存当前已经注册的事件
-                eventRegisterCenter.register(key, eventFunction);
-            } else if (_.isFunction(defineFunction)) {
-                console.debug("注册 %s 事件。", eventName);
-                // 执行定义方法。
-                // 注意：不是由本方法来直接做事件绑定的！
-                defineFunction();
-                // 缓存当前已经注册的事件
-                eventRegisterCenter.register(key, defineFunction);
+                $bindObj.data(key, eventFunction);
+                //} else if (_.isFunction(defineFunction)) {
+                //    console.debug("注册 %s 事件。", eventName);
+                //    // 执行定义方法。
+                //    // 注意：不是由本方法来直接做事件绑定的！
+                //    defineFunction();
+                //    // 缓存当前已经注册的事件
+                //    eventRegisterCenter.register(key, defineFunction);
             }
         };
 

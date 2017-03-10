@@ -776,11 +776,11 @@ define([
                 var $grid = $("#" + gridId);
                 _grid.row.initSelect();
 
-                $grid.on(gaeaEvents.DEFINE.UI.GRID.RELOAD, function (event, data) {
+                gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.RELOAD, "#" + gridId, function (event, data) {
                     _query.doQuery({});
                 });
 
-                gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, gridId, function (event, data) {
+                gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + gridId, function (event, data) {
                     //$("#urgrid").on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
                     //console.log("trigger grid select event in gaeaUI dialog.");
                     //selectedRow = data.selectedRow;
@@ -1121,7 +1121,7 @@ define([
         _grid.row = {
             initSelect: function () {
                 // 绑定事件。点击行选中复选框。
-                $(".tb-body").on("click", "tr", function () {
+                gaeaEvents.registerListener("click", ".tb-body tr", function () {
                     //$(".tb-body").find("tr").click(function () {
                     var index = $(this).data("rowindex");
                     var i = index - 1;

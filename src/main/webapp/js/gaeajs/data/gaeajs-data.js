@@ -389,9 +389,9 @@ define([
              * @param eventName
              */
             listen: function (eventName, eventBindingDivId) {
-                var $bindingDiv = $("#" + eventBindingDivId);
+                //var $bindingDiv = $("#" + eventBindingDivId);
                 if (gaeaString.equalsIgnoreCase(eventName, GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE)) {
-                    $bindingDiv.on(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, function (event, data) {
+                    GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, "#" + eventBindingDivId, function (event, data) {
                         PAGE_CONTEXT = _.extend(PAGE_CONTEXT, data.PAGE_CONTEXT);
                     });
                 }
@@ -655,9 +655,9 @@ define([
                     // 监听事件. 当依赖的对象的值有变化的时候, 就触发重新查询结果集.
 
                     // 默认在依赖对象的gaeaUI_event_init_complete事件发生后，再进行自己的初始化
-                    $target.on(GAEA_EVENTS.DEFINE.UI.INIT_COMPLETE, function () {
+                    GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.INIT_COMPLETE, "#" + domId, function () {
                         // 依赖的对象触发change事件（一般），则发起请求刷新当前的组件。
-                        $target.on(triggerEvent, function (event, data) {
+                        GAEA_EVENTS.registerListener(triggerEvent, "#" + domId, function (event, data) {
                             var newCondition = queryCondition;
                             queryValues = new Array();
                             value = $(this).val();
