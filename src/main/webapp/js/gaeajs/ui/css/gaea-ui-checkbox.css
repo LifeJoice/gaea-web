@@ -5,6 +5,12 @@
  * by Iverson
  * 重构支持新的样式，原来的太炫效率不高 by Iverson 2016-2-22 11:28:32 copy from http://www.webdesigncrowd.com/custom-checkbox-borders/
  */
+
+.row-check {
+    /*绝对定位协助控制垂直居中*/
+    position: absolute;
+
+}
 /*不显示原生的复选框*/
 .row-check input[type=checkbox] {
     display: none;
@@ -18,7 +24,7 @@
 
 [type="checkbox"]:not(:checked) + label,
 [type="checkbox"]:checked + label {
-    position: relative;
+    /*position: relative;*/
     overflow: hidden;
     padding-left: 35px;
     cursor: pointer;

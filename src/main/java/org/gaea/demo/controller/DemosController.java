@@ -113,9 +113,11 @@ public class DemosController {
      */
     @RequestMapping(value = "/submitAction", produces = "plain/text; charset=UTF-8", method = RequestMethod.POST)
     @ResponseBody
-    public void submitAction(@RequestBean("class") DemoClassEntity classEntity) {
-        if (classEntity != null) {
-            System.out.println("id: " + classEntity.getId() + "class name: " + classEntity.getClassName());
+    public void submitAction(@RequestBean("selectedRows") List<DemoClassEntity> classEntityList) {
+        if (classEntityList != null) {
+            for (DemoClassEntity classEntity : classEntityList) {
+                System.out.println("id: " + classEntity.getId() + "class name: " + classEntity.getClassName());
+            }
         }
     }
 

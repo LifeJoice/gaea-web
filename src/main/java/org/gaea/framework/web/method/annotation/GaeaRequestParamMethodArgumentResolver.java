@@ -176,33 +176,85 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                     result.add(paramValues[0]);
                 }
             } else {                        // List是泛型的。需要把List元素转为对象。而且还可能存在对象内的List递归。
-                for (Integer i : indexList) {
-                    String paramName = prefix + PRE_SQUARE_BRACKETS + i + SFX_SQUARE_BRACKETS;
-                    Object requestBean = BeanUtils.instantiate(beanClass);
-                    // pvs负责把request的请求各值分解后变成值对象列表
-                    ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(servletRequest, paramName, SEPARATOR);
-                    // 如果值是多重嵌套数组，需要剔除并进一步递归。否则像roles[0].name注入bean的时候会出错。
-                    PropertyValue[] values = pvs.getPropertyValues();
-                    for (PropertyValue v : values) {
-                        // 如果属性名还有中括号，该值先剔除。
-                        if (StringUtils.contains(v.getName(), PRE_SQUARE_BRACKETS)) {
-                            pvs.removePropertyValue(v);
-                        }
-                    }
-                    WebDataBinder binder = new WebDataBinder(requestBean, paramName);
-                    binder.bind(pvs);
-                    // 检查List<User>中，User属性是否还有List或对象的，需要进一步递归处理。
-                    List<Field> unbindFields = unbindFields(beanClass);
-                    for (Field field : unbindFields) {
-                        field.setAccessible(true);
-                        field.getGenericType();
-                        // 递归调用
-                        Object bean = injectBeanValue(field.getType(), field.getGenericType(), paramName + SEPARATOR + field.getName(), webRequest);
-                        field.set(requestBean, bean);
-                    }
-                    result.add(requestBean);
+                result = parseIndexableList(webRequest, prefix, beanClass);
+//                for (Integer i : indexList) {
+//                    String paramName = prefix + PRE_SQUARE_BRACKETS + i + SFX_SQUARE_BRACKETS;
+//                    Object requestBean = BeanUtils.instantiate(beanClass);
+//                    // pvs负责把request的请求各值分解后变成值对象列表
+//                    ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(servletRequest, paramName, SEPARATOR);
+//                    // 如果值是多重嵌套数组，需要剔除并进一步递归。否则像roles[0].name注入bean的时候会出错。
+//                    PropertyValue[] values = pvs.getPropertyValues();
+//                    for (PropertyValue v : values) {
+//                        // 如果属性名还有中括号，该值先剔除。
+//                        if (StringUtils.contains(v.getName(), PRE_SQUARE_BRACKETS)) {
+//                            pvs.removePropertyValue(v);
+//                        }
+//                    }
+//                    WebDataBinder binder = new WebDataBinder(requestBean, paramName);
+//                    binder.bind(pvs);
+//                    // 检查List<User>中，User属性是否还有List或对象的，需要进一步递归处理。
+//                    List<Field> unbindFields = unbindFields(beanClass);
+//                    for (Field field : unbindFields) {
+//                        field.setAccessible(true);
+//                        field.getGenericType();
+//                        // 递归调用
+//                        Object bean = injectBeanValue(field.getType(), field.getGenericType(), paramName + SEPARATOR + field.getName(), webRequest);
+//                        field.set(requestBean, bean);
+//                    }
+//                    result.add(requestBean);
+//                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 负责转换有数组下标的请求数据（一般是post form data）为List返回。
+     * <p>
+     * 支持带下标的list有以下几种：
+     * <ul>
+     * <li>users[0].name</li>
+     * </ul>
+     * </p>
+     *
+     * @param webRequest
+     * @param prefix        请求的param name的前缀，例如：users[0]中的users就是前缀。
+     * @param genericsClass 返回List的泛型类
+     * @return
+     * @throws IllegalAccessException
+     */
+    private List parseIndexableList(NativeWebRequest webRequest, String prefix, Class genericsClass) throws IllegalAccessException, ValidationFailedException {
+        List result = new ArrayList();
+        ServletRequest servletRequest = (ServletRequest) webRequest.getNativeRequest();
+        // 获取请求中的List的下标并排序。即：users[0],users[1]...等的0,1等下标。
+        List<Integer> indexList = getSortedList(servletRequest, prefix);
+
+        for (Integer i : indexList) {
+            String paramName = prefix + PRE_SQUARE_BRACKETS + i + SFX_SQUARE_BRACKETS;
+            // 根据泛型类创建一个bean（ 假设是user = new User() )
+            Object requestBean = BeanUtils.instantiate(genericsClass);
+            // pvs负责把request的请求各值分解后变成值对象列表
+            ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(servletRequest, paramName, SEPARATOR);
+            // 如果值是多重嵌套数组，需要剔除并进一步递归。否则像roles[0].name注入bean的时候会出错。
+            PropertyValue[] values = pvs.getPropertyValues();
+            for (PropertyValue v : values) {
+                // 如果属性名还有中括号，该值先剔除。
+                if (StringUtils.contains(v.getName(), PRE_SQUARE_BRACKETS)) {
+                    pvs.removePropertyValue(v);
                 }
             }
+            WebDataBinder binder = new WebDataBinder(requestBean, paramName);
+            binder.bind(pvs);
+            // 检查List<User>中，User属性是否还有List或对象的，需要进一步递归处理。
+            List<Field> unbindFields = unbindFields(genericsClass);
+            for (Field field : unbindFields) {
+                field.setAccessible(true);
+                field.getGenericType();
+                // 递归调用
+                Object bean = injectBeanValue(field.getType(), field.getGenericType(), paramName + SEPARATOR + field.getName(), webRequest);
+                field.set(requestBean, bean);
+            }
+            result.add(requestBean);
         }
         return result;
     }

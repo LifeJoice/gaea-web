@@ -70,6 +70,12 @@ define([
                 CONTEXT[key] = value;
             },
             /**
+             * 清空整个上下文数据。
+             */
+            clear: function () {
+                CONTEXT = {};
+            },
+            /**
              * 检查某字符串是否gaea context可识别的表达式。主要就是否包含$pageContext，这是context默认的上下文对象。
              * @param str
              * @returns {boolean}

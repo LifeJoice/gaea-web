@@ -78,7 +78,14 @@ define(function () {
         },
         GAEA_CONTEXT: {
             // gaea context组件的默认绑定容器id
-            ID: "gaea-context-ct"
+            ID: "gaea-context-ct",
+            CACHE_KEY: {
+                SELECTED_ROW: "selectedRow", // 选中的行
+                SELECTED_ROWS: "selectedRows" // 选中的多行(也包括一行啦)
+            }
+        },
+        EVENT: {
+            ID: "gaea-event-ct" // 事件的绑定容器对象。因为事件总是需要依附某些元素，但如果全局事件，不好控制。就自己建一个元素专门用于绑定。
         }
     };
     var PAGE = {

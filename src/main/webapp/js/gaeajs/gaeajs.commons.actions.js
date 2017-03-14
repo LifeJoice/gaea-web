@@ -13,11 +13,13 @@
 define([
         "jquery", "underscore",
         'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaea-system-url",
-        "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-ui-notify", "gaeajs-ui-dialog", "gaeajs-context"
+        "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-ui-notify", "gaeajs-ui-dialog", "gaeajs-context",
+        "gaeajs-common-utils"
     ],
     function ($, _,
               gaeaAjax, gaeaValid, gaeaString, SYS_URL,
-              GAEA_EVENTS, GAEA_UI_DEFINE, gaeaNotify, gaeaDialog, gaeaContext) {
+              GAEA_EVENTS, GAEA_UI_DEFINE, gaeaNotify, gaeaDialog, gaeaContext,
+              gaeaUtils) {
         var actions = {};
 
         /**
@@ -47,6 +49,9 @@ define([
                     if (gaeaValid.isNull(action)) {
                         return;
                     }
+                    /**
+                     * 执行submit action。（action.method=submit）
+                     */
                     if (gaeaString.equalsIgnoreCase(methodName, GAEA_UI_DEFINE.ACTION.METHOD.SUBMIT)) {
                         if (gaeaValid.isNull(button.submitUrl)) {
                             throw "action.method=submit, submitUrl定义不允许为空！";
@@ -291,11 +296,13 @@ define([
                 } else {
                     gaeaAjax.post({
                         url: submitUrl,
-                        data: data,
+                        data: gaeaUtils.data.flattenData(data),
                         success: function (data) {
                             gaeaNotify.success(gaeaString.builder.simpleBuild("%s 操作成功。", button.msg));
                             // 刷新grid数据
                             $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                            // 触发通用的提交完成事件
+                            GAEA_EVENTS.publish(GAEA_EVENTS.DEFINE.ACTION.SUBMIT_FINISHED);
                         },
                         fail: function (data) {
                             gaeaNotify.fail(gaeaString.builder.simpleBuild("%s 操作失败！", button.msg));
@@ -327,29 +334,84 @@ define([
                         var params = action.params;
                         if (_.isArray(params)) {
 
+                            var fields = new Array();
                             // 遍历params
                             $.each(params, function (j, jObj) {
+                                // 这个是用于查询特定字段的数据用
+                                var field = {};
                                 var actionParam = this;
                                 if (gaeaValid.isNotNull(actionParam.name)) {
-                                    var name = gaeaValid.isNull(actionParam.aliasName) ? actionParam.name : actionParam.aliasName;
-                                    var row = gaeaContext.getValue("selectedRow");
                                     // 优先从定义读值
                                     var value = actionParam.value;
-                                    // 再从grid select row读值
-                                    if (gaeaValid.isNull(value)) {
-                                        value = gaeaValid.isNull(row) ? "" : row[actionParam.name];
-                                    }
-                                    // set value
-                                    extraData[name] = value;
+                                    field.name = actionParam.name;
+                                    field.aliasName = actionParam.aliasName;
+                                    field.value = value;
+                                    fields.push(field);
                                 } else {
                                     console.debug("action param name为空！action: %s", JSON.stringify(action));
                                 }
                             });
-                        }
 
+                            // 获取选中的所有行
+                            var rowDatas = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS);
+                            var selectedRows = _private.getFilterDatas({
+                                data: rowDatas,
+                                fields: fields
+                            });
+                            // 提交的param name和缓存的变量名一致吧
+                            extraData[GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS] = selectedRows;
+                        }
                         return extraData;
                     }
                 }
+            },
+            /**
+             * 获取过滤后的数据
+             * @param {object} opts
+             * @param {object[]} opts.data
+             * @param {object[]} opts.fields
+             * @param {string} opts.fields.name
+             * @param {string} opts.fields.aliasName
+             * @param {string} opts.fields.value
+             */
+            getFilterDatas: function (opts) {
+                var result = new Array();
+
+                if (gaeaValid.isNull(opts.data)) {
+                    return;
+                }
+                if (gaeaValid.isNull(opts.fields)) {
+                    return opts.data;
+                }
+                // 如果data是对象，转换成数组先
+                if (!_.isArray(opts.data)) {
+                    opts.data = [opts.data];
+                }
+
+                // 遍历数据
+                $.each(opts.data, function (i, iValue) {
+                    var eachData = iValue;
+                    var newData = {};
+                    if (_.isArray(opts.fields)) {
+                        // 遍历字段
+                        $.each(opts.fields, function (j, jValue) {
+                            var field = jValue;
+                            var name = field.name;
+                            var aliasName = field.aliasName;
+                            var value = field.value;
+                            // 如果有别名，就以别名定义字段; 否则就还是用原名.
+                            var newName = gaeaValid.isNull(aliasName) ? name : aliasName;
+                            // 再从grid select row读值
+                            if (gaeaValid.isNull(value)) {
+                                value = gaeaValid.isNull(eachData) ? "" : eachData[name];
+                            }
+                            newData[newName] = value;
+                        });
+                    }
+                    result.push(newData);
+                });
+
+                return result;
             }
         };
 

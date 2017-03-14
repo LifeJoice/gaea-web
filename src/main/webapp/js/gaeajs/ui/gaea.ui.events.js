@@ -74,7 +74,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * action操作。
              */
             ACTION: {
-                DELETE_SELECTED: "gaeaUI_event_action_delete_selected"
+                DELETE_SELECTED: "gaeaUI_event_action_delete_selected",
+                SUBMIT_FINISHED: "gaeaUI_event_action_submit_finished"
             },
             CONTEXT: {
                 PAGE: {
@@ -84,18 +85,22 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
         };
 
         /**
-         *
          * 注册监听事件。
          * 这个是个没有注册功能的注册器。只是给gaea框架统一调用后，可以记录当前页面注册了哪些事件，方便debug之类的。
          * eventFunction和defineFunction二选一。
-         * @param eventName                 事件名
-         * @param jqSelector                绑定的id（某容器）
-         * @param eventFunction             事件对应处理方法。有这个就忽略下面的defineFunction.
+         * @param {string} eventName                事件名
+         * @param {string|null} jqSelector               绑定的id（某容器）.为空即为全局事件！
+         * @param {function} eventFunction            事件对应处理方法。有这个就忽略下面的defineFunction.
+         * @param {object} [opts]                   暂时无用。配置项。
          //* @param defineFunction            【废弃！】定义监听的方法，非event function。类似：function(){ $.on(...); }
          */
-        events.registerListener = function (eventName, jqSelector, eventFunction) {
+        events.registerListener = function (eventName, jqSelector, eventFunction, opts) {
             gaeaValid.isNull({check: eventName, exception: "事件名称为空，无法通过gaeaEvent注册监听事件！"});
-            gaeaValid.isNull({check: jqSelector, exception: "事件绑定的id为空，无法通过gaeaEvent注册监听事件！"});
+            //gaeaValid.isNull({check: jqSelector, exception: "事件绑定的id为空，无法通过gaeaEvent注册监听事件！"});
+            // 如果没有指定jqSelector，则使用全局容器
+            if (gaeaValid.isNull(jqSelector)) {
+                jqSelector = "#gaea-event-ct";
+            }
             // 构造唯一的对象和事件id，作为缓存事件列表的key
             var key = jqSelector + ":" + eventName;
             var debugStr = "";
@@ -124,6 +129,24 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 //    // 缓存当前已经注册的事件
                 //    eventRegisterCenter.register(key, defineFunction);
             }
+        };
+
+        /**
+         * 发布（触发）全局事件。一般的事件，如果你知道对象id，就可以针对性的去触发。但全局的，需要自己有个框架去实现。
+         * <p>
+         *     我们定义了一个<span id="gaea-event-ct">在gaeaGrid.html专门作为绑定全局事件。
+         * </p>
+         *
+         * @param {string} eventName            事件名。
+         * @param {object} [data]               随事件传递的数据。
+         * @param {object} [opts]               暂时没用。
+         */
+        events.publish = function (eventName, data, opts) {
+            gaeaValid.isNull({
+                check: eventName,
+                exception: "gaea event不允许发布空的事件！"
+            });
+            $("#gaea-event-ct").trigger(eventName, data);
         };
 
         return events;

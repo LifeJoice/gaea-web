@@ -76,8 +76,8 @@
             <button id="submitToSomeWhere" name="submitToSomeWhere" html-value="提交到某个地方"
                     submit-url="/gaea/demo/submitAction">
                 <button-action method="submit">
-                    <param name="id" alias-name="class.id"/>
-                    <param name="className" alias-name="class.className"/>
+                    <param name="id"/>
+                    <param name="className"/>
                 </button-action>
             </button>
             <!--按钮组定义。-->

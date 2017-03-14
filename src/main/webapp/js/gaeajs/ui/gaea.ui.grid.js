@@ -12,8 +12,7 @@ define([
               gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
               GAEA_UI_DEFINE, gaeaContext, gaeaNotify) {
         /**
-         *
-         * @type {{VIEW: {GRID: {COLUMN: {DATA_TYPE_DATE: string, DATA_TYPE_TIME: string, DATA_TYPE_DATETIME: string}}}}}
+         * 一些静态的常量定义
          */
         var GRID_DEFINE = {
             COLUMN: {
@@ -39,6 +38,14 @@ define([
                 PARAM_NAME: "filters[<%= P_SEQ %>].propName", // 请求查询的属性名
                 PARAM_VALUE: "filters[<%= P_SEQ %>].propValue", // 请求查询的属性名
                 PARAM_OP: "filters[<%= P_SEQ %>].op" // 查询的比较符
+            },
+            GRID: {
+                // 这个是头部“选择全部”按钮区
+                HEAD_CHECK_ALL_DIV: '' +
+                '<div id="selectAll" class="select-all column-header"><div class="row-check">' +
+                '<input type="checkbox" id="checkAll" style="display: none;" >' +
+                '<label id="checkAllLabel" for="checkAll"></label>' +
+                '</div></div>'
             }
         };
         /**
@@ -197,18 +204,19 @@ define([
                     //    }
                     //})
                 });
-                // 【3】 点击列头，展示查询区。
-                $("#tb-head").find(".column-header").click(function () {
-                    var $queryDiv = $("#mars-tb-head-query");
-                    //console.log(" 选中的column： " + $(this).data("field-id"));
-                    //$("#mars-tb-head-query").css("display","block");
-                    // cool一点的方式
-                    if ($queryDiv.is(':visible')) {
-                        $queryDiv.slideUp("fast");
-                    } else {
-                        $queryDiv.slideDown("fast");
-                    }
-                })
+                // 【3】 点击列头，展示查询区。但忽略“选择全部”按钮区。
+                _private.event.bindShowSimpleQuery();
+                //$("#tb-head").find(".column-header").not("#selectAll").click(function () {
+                //    var $queryDiv = $("#mars-tb-head-query");
+                //    //console.log(" 选中的column： " + $(this).data("field-id"));
+                //    //$("#mars-tb-head-query").css("display","block");
+                //    // cool一点的方式
+                //    if ($queryDiv.is(':visible')) {
+                //        $queryDiv.slideUp("fast");
+                //    } else {
+                //        $queryDiv.slideDown("fast");
+                //    }
+                //})
             }
         };
         /**
@@ -587,7 +595,8 @@ define([
                     //if (i == 0) {
                     // 第一列，生成复选框。
                     if (j == 0) {
-                        $("#tb-head").append("<div id='selectAll' class='select-all column-header'><input type='checkbox' id='checkAll' class='checkAll' ></div>");
+                        //$("#tb-head").append("<div id='selectAll' class='select-all column-header'><input type='checkbox' id='checkAll' class='checkAll' ></div>");
+                        $("#tb-head").append(TEMPLATE.GRID.HEAD_CHECK_ALL_DIV);
                     }
                     $("#tb-head").append("<div id='" + columnHtmId + "' class='" + defaultClass + "' data-field-id='" + field.id + "'>" + tmpCol.text + "</div>");
                     //}
@@ -630,7 +639,7 @@ define([
                         //var tmpCol = columns[j];
                         var field = fields[j];
                         var column = columns[j];
-                        var genClsName = autoGenClassNamePrefix + field.id;
+                        //var genClsName = autoGenClassNamePrefix + field.id;
                         //var defaultClass = "column-header";
                         var columnHtmId = "gridcolumn-" + (j + 1); // column的序列化从1开始吧
                         var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
@@ -660,9 +669,9 @@ define([
                                 if (j == 0) {
                                     $(lastTRselector).append("<td class='checkbox'>" +
                                         "<div class=\"row-check\">" +
-                                        "<input type='checkbox' id='urgrid-chb-" + i + "' class='dark'>" +
+                                        "<input type='checkbox' id='gaea-grid-cbx-" + i + "' class='dark'>" +
                                             // Label里面的都是复选框的效果元素。
-                                        "<label id='urgrid-cb-label-" + i + "' for='urgrid-chb-" + i + "'>" +       // label的for和checkbox的id绑定
+                                        "<label id='gaea-cb-label-" + i + "' for='gaea-grid-cbx-" + i + "'>" +       // label的for和checkbox的id绑定
                                         "</label>" +
                                         "</div>" +
                                         "</td>");
@@ -774,12 +783,20 @@ define([
                 var that = this;
                 var gridId = options.renderTo;
                 var $grid = $("#" + gridId);
-                _grid.row.initSelect();
-
+                /**
+                 * 注册行选择事件
+                 */
+                    //_grid.row.initSelectEvent();
+                _private.event.bindSelectRow();
+                /**
+                 * 注册刷新grid数据事件
+                 */
                 gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.RELOAD, "#" + gridId, function (event, data) {
                     _query.doQuery({});
                 });
-
+                /**
+                 * 注册行选择缓存所选行数据事件
+                 */
                 gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + gridId, function (event, data) {
                     //$("#urgrid").on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
                     //console.log("trigger grid select event in gaeaUI dialog.");
@@ -789,11 +806,20 @@ define([
                     gaeaContext.setValue("id", data.selectedRow.id);
                     //});
                 });
+                /**
+                 * 注册选择全部事件
+                 */
+                _private.event.bindCheckAll();
                 //$grid.on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
                 //    console.log("trigger grid select event in gaeaUI dialog.");
                 //    selectedRow = data.selectedRow;
                 //    crudDialog.cache.selectedRow = selectedRow;
                 //});
+
+                /**
+                 * 监听重置事件。例如在提交某个action后，ajax回来需要重置grid。
+                 */
+                _private.event.bindGridReset();
 
                 // 初始化上下文插件（可以重复初始化，所以不怕）
                 gaeaContext.init({
@@ -1119,34 +1145,36 @@ define([
          * 和grid的行相关的一切
          */
         _grid.row = {
-            initSelect: function () {
-                // 绑定事件。点击行选中复选框。
-                gaeaEvents.registerListener("click", ".tb-body tr", function () {
-                    //$(".tb-body").find("tr").click(function () {
-                    var index = $(this).data("rowindex");
-                    var i = index - 1;
-                    // 选中行前复选框
-                    $(":checkbox[id^='urgrid-chb']").prop("checked", false);
-                    $(this).find("[id^='urgrid-chb']").prop("checked", "true");
-                    // 添加选中class
-                    $(".tb-body tr").removeClass("selected");
-                    $(this).addClass("selected");
-                    //console.log("rowindex: "+$(this).data("rowindex"));
-                    $(this).find("[id^='urgrid-chb']").val($(this).data("rowindex") - 1);
-                    var selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
-                    selectedRow.index = $(this).data("rowindex");
-                    _grid._setSelectRow(selectedRow);
-                    _grid.options.listeners.select(selectedRow);
-                    /**
-                     * 触发选中事件。基于事件去影响相关的其他组件或元素。
-                     * 例如：
-                     * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
-                     */
-                    $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
-                        selectedRow: selectedRow
-                    });
-                });
-            }
+            //initSelectEvent: function () {
+            //    // 绑定事件。点击行选中复选框。
+            //    gaeaEvents.registerListener("click", ".tb-body tr", function () {
+            //        //$(".tb-body").find("tr").click(function () {
+            //        var index = $(this).data("rowindex");
+            //        var i = index - 1;
+            //        // 选中行前复选框
+            //        $(":checkbox[id^='gaea-grid-cbx']").prop("checked", false);
+            //        $(this).find("[id^='gaea-grid-cbx']").prop("checked", "true");
+            //        // 添加选中class
+            //        $(".tb-body tr").removeClass("selected");
+            //        $(this).addClass("selected");
+            //        //console.log("rowindex: "+$(this).data("rowindex"));
+            //        $(this).find("[id^='gaea-grid-cbx']").val($(this).data("rowindex") - 1);
+            //        var selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
+            //        selectedRow.index = $(this).data("rowindex");
+            //        _grid._setSelectRow(selectedRow);
+            //        _grid.options.listeners.select(selectedRow);
+            //        /**
+            //         * 触发选中事件。基于事件去影响相关的其他组件或元素。
+            //         * 例如：
+            //         * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
+            //         */
+            //        $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
+            //            selectedRow: selectedRow
+            //        });
+            //        // 放入系统上下文
+            //        gaeaContext.setValue("selectedRows", [selectedRow]);
+            //    });
+            //}
         };
         /**
          * 以HTML table元素为基础创建的grid。
@@ -1186,6 +1214,65 @@ define([
          */
         var _private = {
             grid: {
+                /**
+                 * 获取grid缓存中行数据（的一部分）。
+                 * grid在初始化后，会把所有行数据的json保留。然后，你可以通过index等方式去获取完整的行数据。
+                 * @param {object} opts                     为空即获取全部。
+                 * @param {number} opts.index               第几行数据。以数组下标的方式，从0开始。
+                 * @param {number[]} opts.indexs            某些行数据。以数组下标的方式，从0开始。
+                 */
+                getRowDatas: function (opts) {
+                    var result = _grid.options.data;
+                    if (gaeaValid.isNull(opts)) {
+                        return result;
+                    }
+                    if (gaeaValid.isNotNull(opts.index)) {
+                        if (_.isNumber(opts.index)) {
+                            return result[opts.index];
+                        }
+                    }
+                    if (gaeaValid.isNotNull(opts.indexs)) {
+                        if (_.isArray(opts.indexs)) {
+                            var someRows = new Array();
+                            $.each(opts.indexs, function (i, iValue) {
+                                if (_.isNumber(iValue)) {
+                                    someRows.push(result[iValue]);
+                                }
+                            });
+                            return someRows;
+                        }
+                    }
+                },
+                /**
+                 * 把整个grid恢复到新打开的样子。这个，暂时只需要重置UI。后面再慢慢加即可。
+                 * @param {object} [opts]           配置项
+                 */
+                reset: function (opts) {
+                    // 重置UI
+                    _private.grid.resetUI();
+                    // 重置数据
+                    _private.grid.resetData();
+                },
+                /**
+                 * 数据的重置。
+                 * @param {object} [opts]           暂时没用。
+                 */
+                resetData: function (opts) {
+                    // 清空缓存上下文的数据。例如：选中的行数据等
+                    gaeaContext.clear();
+                },
+                /**
+                 * 把UI恢复原状。一般是在提交某操作后，回来需要重新刷新页面。
+                 * @param {object} [opts]           暂时没用
+                 */
+                resetUI: function (opts) {
+                    var $grid = $("#urgrid");
+                    // 如果已经选中，改为未选中
+                    $grid.find(".row-check").children(":checkbox").prop("checked", false);
+                    //if($grid.find(".row-check").children().prop("checked")) {
+                    //    $grid.find("#checkAllLabel").trigger("click");
+                    //}
+                },
                 head: {
                     getHeadJQ: function () {
                         return $("#tb-head");
@@ -1234,6 +1321,123 @@ define([
                         minPageNo++;
                     }
                     return resultArray;
+                }
+            },
+            event: {
+                /**
+                 * 绑定点击grid头部，"选择全部"按钮的事件。
+                 * @param opts
+                 */
+                bindCheckAll: function (opts) {
+                    gaeaEvents.registerListener("click", "#checkAllLabel", function () {
+                        // 这个是label，不是checkbox
+                        var $checkAll = $(this);
+                        // 这个是点击前的状态
+                        var isCheckAll = $checkAll.parent().children("input:checkbox").first().is(":checked");
+                        var $gridBody = $checkAll.parents(".gaea-grid").children(".gaea-grid-body");
+                        // 设为反状态
+                        $gridBody.find(".row-check input:checkbox").prop("checked", !isCheckAll);
+
+                        _private.event.triggerCacheSelect({
+                            id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
+                        });
+                    });
+                },
+                /**
+                 * 绑定点击头部，展示快捷查询区的事件。
+                 * @param opts
+                 */
+                bindShowSimpleQuery: function (opts) {
+                    $("#tb-head").find(".column-header").not("#selectAll").click(function () {
+                        var $queryDiv = $("#mars-tb-head-query");
+                        //console.log(" 选中的column： " + $(this).data("field-id"));
+                        //$("#mars-tb-head-query").css("display","block");
+                        // cool一点的方式
+                        if ($queryDiv.is(':visible')) {
+                            $queryDiv.slideUp("fast");
+                        } else {
+                            $queryDiv.slideDown("fast");
+                        }
+                    })
+                },
+                /**
+                 *
+                 * @param {object} [opts]           暂时没用。
+                 */
+                bindGridReset: function (opts) {
+                    // 在处理完submit action后，把grid恢复（例如，全选的按钮得恢复到可点状态）
+                    gaeaEvents.registerListener(gaeaEvents.DEFINE.ACTION.SUBMIT_FINISHED, null, function () {
+                        // 重置grid
+                        _private.grid.reset();
+                    });
+                },
+                /**
+                 *
+                 * @param {object} [opts]
+                 */
+                bindSelectRow: function (opts) {
+                    // 绑定事件。点击行选中复选框。
+                    gaeaEvents.registerListener("click", ".tb-body tr", function () {
+                        //$(".tb-body").find("tr").click(function () {
+                        var index = $(this).data("rowindex");
+                        var i = index - 1;
+                        // 选中行前复选框
+                        $(":checkbox[id^='gaea-grid-cbx']").prop("checked", false);
+                        $(this).find("[id^='gaea-grid-cbx']").prop("checked", "true");
+                        // 添加选中class
+                        $(".tb-body tr").removeClass("selected");
+                        $(this).addClass("selected");
+                        //console.log("rowindex: "+$(this).data("rowindex"));
+                        $(this).find("[id^='gaea-grid-cbx']").val($(this).data("rowindex") - 1);
+                        var selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
+                        selectedRow.index = $(this).data("rowindex");
+                        _grid._setSelectRow(selectedRow);
+                        _grid.options.listeners.select(selectedRow);
+                        /**
+                         * 触发选中事件。基于事件去影响相关的其他组件或元素。
+                         * 例如：
+                         * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
+                         */
+                        $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
+                            selectedRow: selectedRow
+                        });
+                        // 放入系统上下文
+                        gaeaContext.setValue("selectedRows", [selectedRow]);
+                    });
+                },
+                /**
+                 * 触发检查当前选中的记录，并把记录对应的数据缓存的功能。
+                 * @param {object} opts
+                 * @param {string} opts.id                  grid id
+                 */
+                triggerCacheSelect: function (opts) {
+                    gaeaValid.isNull({
+                        check: opts.id,
+                        exception: "缺少opts.id（grid id）参数，无法获知哪些行被选中。"
+                    });
+                    var rowIndexs = new Array();
+                    $("#" + opts.id).find(".row-check").children("input:checkbox").each(function (i, iValue) {
+                        // 忽略第一个。第一个是check all
+                        if (i > 0) {
+                            var $checkbox = $(this);
+                            if ($checkbox.is(":checked")) {
+                                var $tr = $checkbox.parents("tr").first();
+                                var rowIndex = $tr.data("rowindex");
+                                // grid缓存的row index是从1开始，要去获取row data需要从0开始
+                                rowIndexs.push(parseInt(rowIndex) - 1);
+                                //console.debug(rowIndex);
+                            }
+                        }
+                    });
+
+                    // 通过选择的index，获得行数据
+                    var selectedRows = _private.grid.getRowDatas({
+                        indexs: rowIndexs
+                    });
+                    console.info(JSON.stringify(selectedRows));
+
+                    // 缓存行数据
+                    gaeaContext.setValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, selectedRows);
                 }
             }
         };
