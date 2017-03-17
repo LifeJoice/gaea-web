@@ -220,7 +220,39 @@
 /*分页的1-20部分的css。放右下角*/
 .gaea-grid-footer .pagination .page-desc {
     position: fixed;
-    right: 10px;
+    /* 留出选择每页显示多少条的空间 */
+    right: 55px;
+    padding-right: 2px;
+}
+
+/* 每页多少条记录。放右下角 */
+.gaea-grid-footer .pagination .how-many-records {
+    position: fixed;
+    margin-right: 5px;
+    /*max-height:25px;*/
+    height: 25px;
+    width: 40px;
+    bottom: 6px;
+    right: 5px;
+    overflow: hidden;
+    border: 2px solid #2D3E50;
+    font-size: 14px;
+    transition: height 300ms;
+}
+
+/*每页多少条的一项*/
+.gaea-grid-footer .pagination .how-many-records span {
+    cursor: pointer;
+    display: block;
+    /*width: 30px;*/
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+}
+
+/*每页多少条的一项移上去的效果。*/
+.gaea-grid-footer .pagination .how-many-records span:hover {
+    background-color: #5D6D7D;
 }
 
 /*上一页、下一页等按钮*/

@@ -6,11 +6,11 @@ define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url',
         "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
-        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify"],
+        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaStringUtils, gaeaButton, SYS_URL,
               gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
-              GAEA_UI_DEFINE, gaeaContext, gaeaNotify) {
+              GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils) {
         /**
          * 一些静态的常量定义
          */
@@ -25,7 +25,11 @@ define([
             },
             PAGINATION: {
                 // 默认的分页，显示多少页码（1~7页）
-                DEFAULT_PAGE_LIST_LENGTH: 7
+                DEFAULT_PAGE_LIST_LENGTH: 7,
+                // 每页显示多少条选项，单项高度
+                PAGE_SIZE_ITEM_HEIGHT: 25,
+                // （每页多少条）选择列表
+                PAGE_SIZE_LIST: [25, 50, 100, 1000]
             }
         };
         /**
@@ -46,34 +50,62 @@ define([
                 '<input type="checkbox" id="checkAll" style="display: none;" >' +
                 '<label id="checkAllLabel" for="checkAll"></label>' +
                 '</div></div>'
+            },
+            PAGINATION: {
+                CT: '<div class="page-desc"><%=FIRST%> - <%=LAST%> 共 <%=ROW_COUNT%> 条数据. 每页</div>'
             }
         };
         /**
          * 查询相关的定义。高级查询的处理器。
-         * @type {{doQuery: _query.doQuery}}
-         * @private
          */
         var _query = {
-            doQuery: function (queryConditions) {
-                var that = this;
+            /**
+             * 执行查询，然后刷新grid数据区域。
+             * @param {object[]} queryConditions            查询条件。一般是快捷查询区的条件数组。
+             * @param {object} [pageCondition]              分页条件，可以为空。
+             */
+            doQuery: function (queryConditions, pageCondition) {
+                //var that = this;
+                // 拼凑最终的查询对象
+                var queryData = {
+                    urSchemaId: $("#urSchemaId").val(),
+                    filters: queryConditions,
+                    page: pageCondition
+                };
                 // 获取SchemaId。对于Grid查询必须。
-                queryConditions.urSchemaId = $("#urSchemaId").val();
+                //queryConditions.urSchemaId = $("#urSchemaId").val();
+
+                // 请求查询
                 gaeaAjax.post({
                     url: SYS_URL.QUERY.COMMON,
-                    data: queryConditions,
+                    data: gaeaUtils.data.flattenData(queryData),
                     success: function (data) {
-                        //var result = $.parseJSON(jqXHR.responseText);
                         // 用查询结果，刷新数据列表
                         _grid._refreshData(data.content);
+                        // 刷新当前的分页信息，和服务端一致
                         _grid.options.page.rowCount = data.totalElements;
                         _grid.options.page.page = data.page; // 当前第几页
+                        _grid.options.page.size = data.size; // 每页多少条
                         _grid.options.page.pageCount = data.totalPages; // 共多少页
+                        // 更新UI的footer（含分页）
                         _grid._createFooter();
                     },
                     fail: function (data) {
                         gaeaNotify.error("查询失败！\n" + JSON.stringify(data));
                     }
                 });
+            },
+            /**
+             * 最普通、标准模式查询。可以不需要参数。
+             * 会默认获取当前快捷查询的条件+分页参数，进行查询。
+             * @param {object} [opts]       暂时没用。
+             */
+            doSimpleQuery: function (opts) {
+                // 获取快捷查询条件
+                var queryConditions = _query.parser.getQueryConditions();
+                // 获取分页相关的信息
+                var pageCondition = _query.parser.getPageCondition();
+                _query.doQuery(queryConditions, pageCondition);
             },
             hide: function () {
                 // 收起查询区
@@ -235,7 +267,7 @@ define([
              * @returns Object 查询对象列表
              */
             getQueryConditions: function () {
-                var queryConditions = new Object();         // 查询请求数据
+                var queryConditions = new Array();         // 查询请求数据
                 // 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
                 var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
                 var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
@@ -245,14 +277,11 @@ define([
                 var i = 0;      // 查询条件数组的下标
                 //queryConditions.urSchemaId = $("#urSchemaId").val();
                 $("#mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
+                    var queryCondition = {};
                     var $gaeaInput = $(this);
                     var $input = $gaeaInput.find("input:first");
                     var inputValue = gaeaInput.getValue($gaeaInput.attr("id"));
-                    //$("#mars-headquery-inputs").find("input").each(function (index) {
-                    //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
-                    //console.log("input value: " + inputValue.value + " , op : " + inputValue.op);
                     var inputVal = inputValue.value; // 值
-                    //console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
                     /**
                      * if
                      *      value不为空 or
@@ -263,21 +292,31 @@ define([
                     //console.log(gaeaValid.isNull(inputVal) + "\n" + _query.utils.isNull(inputValue.op));
                     if (gaeaValid.isNotNull(inputVal) ||
                         (gaeaValid.isNull(inputVal) && (_query.utils.isNull(inputValue.op) || _query.utils.isNotNull(inputValue.op)))) {
-                        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
-                        var fieldKey = paramNameTemplate({P_SEQ: i});        // 不能用index。输入框为空的时候index也会递增。
-                        var fieldOpKey = paramOpTemplate({P_SEQ: i});           // 不能用index。输入框为空的时候index也会递增。
-                        //var fieldNameValue = $(this).data("field-id"); // 哪个字段
+                        //var fieldKey = paramNameTemplate({P_SEQ: i});        // 不能用index。输入框为空的时候index也会递增。
+                        //var fieldOpKey = paramOpTemplate({P_SEQ: i});           // 不能用index。输入框为空的时候index也会递增。
                         var fieldNameValue = $input.data("field-id"); // 哪个字段
-                        //var valKey = "filters[" + i + "].value";
-                        var fieldValueKey = paramValueTemplate({P_SEQ: i}); // 哪个值
-                        //var valValue = $(this).val();
-                        queryConditions[fieldKey] = fieldNameValue; // 字段
-                        queryConditions[fieldOpKey] = inputValue.op; // 比较符
-                        queryConditions[fieldValueKey] = inputValue.value; // 值
-                        i += 1;
+                        //var fieldValueKey = paramValueTemplate({P_SEQ: i}); // 哪个值
+                        //queryConditions[fieldKey] = fieldNameValue; // 字段
+                        //queryConditions[fieldOpKey] = inputValue.op; // 比较符
+                        //queryConditions[fieldValueKey] = inputValue.value; // 值
+                        queryCondition.propName = fieldNameValue; // 字段
+                        queryCondition.op = inputValue.op; // 比较符
+                        queryCondition.propValue = inputValue.value; // 值
+                        queryConditions.push(queryCondition);
+                        //i += 1;
                     }
                 });
                 return queryConditions;
+            },
+            /**
+             * 获取当前grid的分页查询条件。
+             * @param {object} [opts]       暂时没用
+             */
+            getPageCondition: function (opts) {
+                var pageCondition = {};
+                pageCondition.size = $("#pageSizeListCt #selected").text();
+                pageCondition.page = _grid.options.page.page;
+                return pageCondition;
             }
         };
         /**
@@ -780,7 +819,7 @@ define([
                 });
             },
             _bindingEvents: function (options) {
-                var that = this;
+                //var that = this;
                 var gridId = options.renderTo;
                 var $grid = $("#" + gridId);
                 /**
@@ -798,13 +837,22 @@ define([
                  * 注册行选择缓存所选行数据事件
                  */
                 gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + gridId, function (event, data) {
-                    //$("#urgrid").on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
-                    //console.log("trigger grid select event in gaeaUI dialog.");
-                    //selectedRow = data.selectedRow;
-                    //crudDialog.cache.selectedRow = selectedRow;
-                    gaeaContext.setValue("selectedRow", data.selectedRow);
-                    gaeaContext.setValue("id", data.selectedRow.id);
-                    //});
+                    // 【1】刷新selectedRows（每次覆盖）
+                    var rowIndexes = _private.grid.getSelectedIndexes({
+                        id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
+                    });
+                    // 通过选择的index，获得行数据
+                    var selectedRows = _private.grid.getRowDatas({
+                        indexes: rowIndexes
+                    });
+                    // 刷新上下文（缓存行数据）
+                    gaeaContext.setValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, selectedRows);
+
+                    // 【2】刷新selectedRow上下文
+                    if (gaeaValid.isNotNull(data.selectedRow)) {
+                        gaeaContext.setValue("selectedRow", data.selectedRow);
+                        gaeaContext.setValue("id", data.selectedRow.id);
+                    }
                 });
                 /**
                  * 注册选择全部事件
@@ -906,30 +954,43 @@ define([
                         pageDiv.find(".page-numbers").append("<span class=\"gaea-float-icon selected size-m\">" + tempPage + "</span>");
                     }
                 });
+
                 // 下一页
                 pageDiv.append("<div class='button'><span class=\"icon next\"><input type='hidden' value='" + (page + 1) + "'></span></div>");     // p在循环最后自加了，这里就不用加了。
+
                 // 最后一页
                 pageDiv.append("<div class='button'><span class=\"icon last\"><input type='hidden' value='" + (Math.ceil(rowCount / size)) + "'></span></div>");
+
+                // 页显示数量
+                pageDiv.append(_private.pagination.getHowManyRecordsHtml());
+
                 // 生成：显示第1条至第20条 当前第几页
                 var first = 1;
                 if (page > 1) {
                     first += (page - 1) * size;
                 }
                 var last = page * size;
-                pageDiv.append("<span class=\"page-desc\">" + first + " - " + last + " 共 " + rowCount + "条数据</span>");
-                /* 【2】点击页码事件 */
+                //pageDiv.append("<span class=\"page-desc\">" + first + " - " + last + " 共 " + rowCount + "条数据</span>");
+                // 生成html：1 - 20 共 2条数据
+                var pageDescTemplate = _.template(TEMPLATE.PAGINATION.CT);
+                pageDiv.append(pageDescTemplate({
+                    FIRST: first,
+                    LAST: last,
+                    ROW_COUNT: rowCount
+                }));
+
+                /* 【2】绑定事件 */
+                // 点击页码事件
                 pageDiv.find("span:has(input)").click(function () {
                     var pageVal = $(this).children("input").val();
                     that.options.page.page = pageVal;     // 先赋值。待会查询完成后可用于刷新页码。
                     // 查询（下一页 etc……）
-                    //that._query({
-                    //    "page.page": pageVal
-                    //});
-                    _query.doQuery({
-                        "page.page": pageVal
-                    });
+                    _query.doSimpleQuery();
                 });
-                //return html;
+                // 点击展示每页多少条区域
+                _private.event.pagination.bindPageSizeListClick();
+                // 点击每页多少条（某一项），触发后台查询。
+                _private.event.pagination.bindPageSizeListItemClick();
             },
             /**
              * 高级查询
@@ -1219,7 +1280,7 @@ define([
                  * grid在初始化后，会把所有行数据的json保留。然后，你可以通过index等方式去获取完整的行数据。
                  * @param {object} opts                     为空即获取全部。
                  * @param {number} opts.index               第几行数据。以数组下标的方式，从0开始。
-                 * @param {number[]} opts.indexs            某些行数据。以数组下标的方式，从0开始。
+                 * @param {number[]} opts.indexes           某些行数据。以数组下标的方式，从0开始。
                  */
                 getRowDatas: function (opts) {
                     var result = _grid.options.data;
@@ -1231,10 +1292,10 @@ define([
                             return result[opts.index];
                         }
                     }
-                    if (gaeaValid.isNotNull(opts.indexs)) {
-                        if (_.isArray(opts.indexs)) {
+                    if (gaeaValid.isNotNull(opts.indexes)) {
+                        if (_.isArray(opts.indexes)) {
                             var someRows = new Array();
-                            $.each(opts.indexs, function (i, iValue) {
+                            $.each(opts.indexes, function (i, iValue) {
                                 if (_.isNumber(iValue)) {
                                     someRows.push(result[iValue]);
                                 }
@@ -1242,6 +1303,29 @@ define([
                             return someRows;
                         }
                     }
+                },
+                /**
+                 * 获取某grid选中的所有行的index。index可以用于获取对应的行json数据。
+                 * @param {object} opts
+                 * @param {string} opts.id              grid id
+                 * @returns {int[]} indexes
+                 */
+                getSelectedIndexes: function (opts) {
+                    var rowIndexes = new Array();
+                    $("#" + opts.id).find(".row-check").children("input:checkbox").each(function (i, iValue) {
+                        // 忽略第一个。第一个是check all
+                        if (i > 0) {
+                            var $checkbox = $(this);
+                            if ($checkbox.is(":checked")) {
+                                var $tr = $checkbox.parents("tr").first();
+                                var rowIndex = $tr.data("rowindex");
+                                // grid缓存的row index是从1开始，要去获取row data需要从0开始
+                                rowIndexes.push(parseInt(rowIndex) - 1);
+                                //console.debug(rowIndex);
+                            }
+                        }
+                    });
+                    return rowIndexes;
                 },
                 /**
                  * 把整个grid恢复到新打开的样子。这个，暂时只需要重置UI。后面再慢慢加即可。
@@ -1321,6 +1405,28 @@ define([
                         minPageNo++;
                     }
                     return resultArray;
+                },
+                /**
+                 * 获取每页多少条记录的区域的html。
+                 * @param {object} [opts]
+                 */
+                getHowManyRecordsHtml: function (opts) {
+                    var $howManyRecordsCt = $('<div id="pageSizeListCt" class="how-many-records"><span id="selected"></span></div>');
+                    // 默认值。由服务端定义。
+                    var defaultSize = parseInt(_grid.options.page.size);
+                    // 找到当前默认页码，在整个（显示多少条）列表中的位置。（类似排序的意思）
+                    var index = _.sortedIndex(GRID_DEFINE.PAGINATION.PAGE_SIZE_LIST, defaultSize);
+
+                    // 遍历并构造可选的页显示数量列表
+                    $.each(GRID_DEFINE.PAGINATION.PAGE_SIZE_LIST, function (i, iValue) {
+                        // 如果遇到需要插入的默认值，且和当前遍历到的值不同（免得插两个一样）
+                        if (i == index && defaultSize != iValue) {
+                            $howManyRecordsCt.append('<span>' + defaultSize + '</span>');
+                        }
+                        $howManyRecordsCt.append('<span>' + iValue + '</span>');
+                    });
+                    $howManyRecordsCt.find("#selected").text(defaultSize);
+                    return $howManyRecordsCt;
                 }
             },
             event: {
@@ -1348,20 +1454,29 @@ define([
                  * @param opts
                  */
                 bindShowSimpleQuery: function (opts) {
+                    var $queryDiv = $("#mars-tb-head-query");
+                    var closeFunction = function () {
+                        $queryDiv.slideUp("fast");
+                    };
+
+                    // 点击头部，展开快捷查询栏。
                     $("#tb-head").find(".column-header").not("#selectAll").click(function () {
-                        var $queryDiv = $("#mars-tb-head-query");
-                        //console.log(" 选中的column： " + $(this).data("field-id"));
-                        //$("#mars-tb-head-query").css("display","block");
                         // cool一点的方式
                         if ($queryDiv.is(':visible')) {
-                            $queryDiv.slideUp("fast");
+                            closeFunction();
                         } else {
                             $queryDiv.slideDown("fast");
+                            // 设定自动关闭时，最近的操作
+                            gaeaEvents.autoClose.setMe({
+                                jqSelector: "#tb-head"
+                            });
                         }
-                    })
+                    });
+                    // 注册点击外部自动关闭。
+                    gaeaEvents.autoClose.registerAutoClose("#tb-head", closeFunction);
                 },
                 /**
-                 *
+                 * 注册表格重置事件。全局事件。会把表格和数据都恢复到刚进入页面的状态。
                  * @param {object} [opts]           暂时没用。
                  */
                 bindGridReset: function (opts) {
@@ -1372,27 +1487,40 @@ define([
                     });
                 },
                 /**
-                 *
+                 * 绑定点击grid行的事件。
                  * @param {object} [opts]
                  */
                 bindSelectRow: function (opts) {
                     // 绑定事件。点击行选中复选框。
-                    gaeaEvents.registerListener("click", ".tb-body tr", function () {
-                        //$(".tb-body").find("tr").click(function () {
-                        var index = $(this).data("rowindex");
-                        var i = index - 1;
-                        // 选中行前复选框
-                        $(":checkbox[id^='gaea-grid-cbx']").prop("checked", false);
-                        $(this).find("[id^='gaea-grid-cbx']").prop("checked", "true");
-                        // 添加选中class
-                        $(".tb-body tr").removeClass("selected");
-                        $(this).addClass("selected");
-                        //console.log("rowindex: "+$(this).data("rowindex"));
-                        $(this).find("[id^='gaea-grid-cbx']").val($(this).data("rowindex") - 1);
-                        var selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
-                        selectedRow.index = $(this).data("rowindex");
-                        _grid._setSelectRow(selectedRow);
-                        _grid.options.listeners.select(selectedRow);
+                    gaeaEvents.registerListener("click", ".tb-body tr", function (event) {
+                        var $tr = $(this);
+                        var $firstTd = $tr.children("td:first");
+                        var selectedRow;
+                        /**
+                         * if 选择的对象，不是行第一个td（的下级）
+                         *      当做行单选，则会把所有已选取消，只选择当前行
+                         * else 表示点击行第一个td（即直接点击复选按钮）
+                         *      当成行多选。可以随意选择任意多行。
+                         */
+                        if ($firstTd.has(event.target).length === 0) {
+                            //if(!$firstTd.is(event.target)) {
+
+                            var index = $(this).data("rowindex");
+                            var i = index - 1;
+                            // 去掉全部已选状态
+                            $(":checkbox[id^='gaea-grid-cbx']").prop("checked", false);
+                            // 选中当前行复选框
+                            $(this).find("[id^='gaea-grid-cbx']").prop("checked", "true");
+                            // 添加行选中class
+                            $(".tb-body tr").removeClass("selected");
+                            $(this).addClass("selected");
+                            // 获取选中行数据（selectedRow）
+                            $(this).find("[id^='gaea-grid-cbx']").val($(this).data("rowindex") - 1);
+                            selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
+                            selectedRow.index = $(this).data("rowindex");
+                            _grid._setSelectRow(selectedRow);
+                            //_grid.options.listeners.select(selectedRow);
+                        }
                         /**
                          * 触发选中事件。基于事件去影响相关的其他组件或元素。
                          * 例如：
@@ -1401,8 +1529,6 @@ define([
                         $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
                             selectedRow: selectedRow
                         });
-                        // 放入系统上下文
-                        gaeaContext.setValue("selectedRows", [selectedRow]);
                     });
                 },
                 /**
@@ -1415,29 +1541,77 @@ define([
                         check: opts.id,
                         exception: "缺少opts.id（grid id）参数，无法获知哪些行被选中。"
                     });
-                    var rowIndexs = new Array();
-                    $("#" + opts.id).find(".row-check").children("input:checkbox").each(function (i, iValue) {
-                        // 忽略第一个。第一个是check all
-                        if (i > 0) {
-                            var $checkbox = $(this);
-                            if ($checkbox.is(":checked")) {
-                                var $tr = $checkbox.parents("tr").first();
-                                var rowIndex = $tr.data("rowindex");
-                                // grid缓存的row index是从1开始，要去获取row data需要从0开始
-                                rowIndexs.push(parseInt(rowIndex) - 1);
-                                //console.debug(rowIndex);
-                            }
-                        }
+                    var rowIndexes = _private.grid.getSelectedIndexes({
+                        id: opts.id
                     });
 
                     // 通过选择的index，获得行数据
                     var selectedRows = _private.grid.getRowDatas({
-                        indexs: rowIndexs
+                        indexes: rowIndexes
                     });
-                    console.info(JSON.stringify(selectedRows));
 
                     // 缓存行数据
                     gaeaContext.setValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, selectedRows);
+                },
+                // 分页
+                pagination: {
+                    /**
+                     * 绑定点击了当前页显示多少条后的事件。
+                     * @param {object} [opts]
+                     */
+                    bindPageSizeListClick: function (opts) {
+                        var $howManyCt = $("#pageSizeListCt");
+                        var $selected = $howManyCt.children("#selected");
+                        var closeFunction = function () {
+                            // 如果当前是展开，则要回缩
+                            $howManyCt.css("height", GRID_DEFINE.PAGINATION.PAGE_SIZE_ITEM_HEIGHT);
+                            // 显示选中的项的值
+                            $selected.css("display", "block");
+                        };
+
+                        gaeaEvents.registerListener("click", "#pageSizeListCt", function () {
+                            var currentHeight = $howManyCt.height();
+                            // 是否已展开：当前高度>单项高度（表示展开状态）
+                            var isExpanded = currentHeight > GRID_DEFINE.PAGINATION.PAGE_SIZE_ITEM_HEIGHT;
+                            // 切换展示每页显示多少条的列表
+                            //$howManyCt.toggleClass("selected");
+
+                            if (isExpanded) {
+                                // 收缩（关闭）。
+                                closeFunction();
+                                // （在选好显示数量后）执行查询. 不能放到单个span点击处理因为那样还没搜索列表就提交了查询。
+                                _query.doSimpleQuery();
+                            } else {
+                                // 展开。
+                                // 一个item高度25
+                                // 高度需要计算。因为非固定高度无法使用css动画。
+                                // -1 是因为有一个id=selected，是特殊的
+                                var height = ($howManyCt.children("span").length - 1) * GRID_DEFINE.PAGINATION.PAGE_SIZE_ITEM_HEIGHT;
+                                $howManyCt.css("height", height);
+                                // 隐藏选中项
+                                $selected.hide();
+                                // 设定自动关闭时，最近的操作
+                                gaeaEvents.autoClose.setMe({
+                                    jqSelector: "#pageSizeListCt"
+                                });
+                            }
+                        });
+                        // 注册自动关闭
+                        gaeaEvents.autoClose.registerAutoClose("#pageSizeListCt", closeFunction);
+                    },
+                    /**
+                     * 绑定点击每页多少条列表里面的某项，例如：点击20，还是50，还是100等。
+                     * @param {object} [opts]           暂时没用
+                     */
+                    bindPageSizeListItemClick: function (opts) {
+                        var $howManyCt = $("#pageSizeListCt");
+                        var $selected = $howManyCt.children("#selected");
+
+                        gaeaEvents.registerListener("click", "#pageSizeListCt span", function () {
+                            var $howManyItem = $(this);
+                            $selected.text($howManyItem.text());
+                        });
+                    }
                 }
             }
         };

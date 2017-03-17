@@ -10,6 +10,14 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
     function ($, _, gaeaValid, gaeaString) {
         var events = {};
 
+        events.cache = {
+            // 是否已经注册了自动关闭事件。这个应该只需要初始化一次。
+            isRegisterAutoClose: false,
+            // jqSelector.最近一个操作组件的jqSelector。
+            lastOne: "",
+            // 已注册的自动关闭的列表。key: jqSelector value: closeFunction
+            autoCloseList: {}
+        };
         /**
          * !!!!!没用了。因为ajax刷新后，这个缓存就清空了。但实际上很多事件还是继续存在！
          *
@@ -147,6 +155,73 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 exception: "gaea event不允许发布空的事件！"
             });
             $("#gaea-event-ct").trigger(eventName, data);
+        };
+
+        /**
+         * 自动关闭功能。
+         */
+        events.autoClose = {
+            /**
+             * 注册一个东东，当你的鼠标不再点击它的时候，它就会自动关闭。
+             * 因为需要监听全局鼠标事件，就不想一个组件的关闭就加一个事件。
+             * 相反，通过维护一个最新点击的组件jqSelector，当鼠标离开该容器的时候，就自动关闭。
+             * @param {string} jqSelector               jq选择器。用于识别焦点是否离开了它，就触发关闭。
+             * @param {function} [closeFunction]        关闭的方法。例如有自定义的动画等。可以为空，则直接display=none.
+             * @param {object} opts                     暂时没用。
+             */
+            registerAutoClose: function (jqSelector, closeFunction, opts) {
+                gaeaValid.isNull({
+                    check: jqSelector,
+                    exception: "jqSelector不允许为空，"
+                });
+                // 还没注册，可以注册
+                if (!events.cache.isRegisterAutoClose) {
+                    // 这个把选择器定位在document可能会比较耗性能。还是定位在内容区比较好。
+                    //$(document).mouseup(function (e) {
+                    $(".main-right").mouseup(function (e) {
+
+                        // 检查当前
+                        if (gaeaValid.isNull(events.cache.lastOne)) {
+                            console.debug("没有注册最后操作的对象的jqSelector，无法关闭。");
+                            return;
+                        }
+                        var iJqSelector = events.cache.lastOne;
+                        var container = $(iJqSelector);
+                        var closeFunc = events.cache.autoCloseList[iJqSelector];
+
+                        if (!container.is(e.target) // if the target of the click isn't the container...
+                            && container.has(e.target).length === 0) // ... nor a descendant of the container
+                        {
+                            /**
+                             * if 有定义关闭方法（可能有特定的效果之类的）
+                             *      执行特定关闭方法
+                             * else
+                             *      display=none
+                             */
+                            if (_.isFunction(closeFunc)) {
+                                closeFunc();
+                            } else {
+                                container.hide();
+                            }
+                        }
+                    });
+                    // 置为已注册
+                    events.cache.isRegisterAutoClose = true;
+                }
+                // 缓存，同名即覆盖
+                events.cache.autoCloseList[jqSelector] = closeFunction;
+            },
+            /**
+             * 设定（缓存）最后点击的是什么东东，这样自动关闭才好去做。而不是把所有注册过的都关一遍。
+             * @param {object} opts
+             * @param {string} opts.jqSelector          一个JQ选择器，当焦点离开这个选择器的时候就关闭。
+             */
+            setMe: function (opts) {
+                if (gaeaValid.isNull(opts.jqSelector)) {
+                    return;
+                }
+                events.cache.lastOne = opts.jqSelector;
+            }
         };
 
         return events;

@@ -91,8 +91,11 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             // 根据XML SCHEMA的定义，把页面传过来的查询条件做一定处理
             rebuildQueryConditionBySchema(filters, grid);
             // 获取分页的信息
-            Integer pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : SchemaGrid.DEFAULT_PAGE_SIZE;
-            page.setSize(pageSize);
+            // 如果没有每页显示数量，则初始化
+            if (page != null && page.getSize() <= 0) {
+                Integer pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : SchemaGrid.DEFAULT_PAGE_SIZE;
+                page.setSize(pageSize);
+            }
             // 数据集权限校验
             ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
             // 如果权限校验，没有条件。可能是具有所有数据权限。创建一个空列表给后面用。
@@ -114,7 +117,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 
             // 设置翻页相关数据
             Long pageRowCount = dataSet.getTotalElements();                                                     // 总记录数
-            Double pageCount = Math.ceil(MathUtils.div(pageRowCount.doubleValue(), pageSize.doubleValue()));     // 多少页
+            Double pageCount = Math.ceil(MathUtils.div(pageRowCount.doubleValue(), Double.valueOf(page.getSize())));     // 多少页
             pageResult.setTotalElements(pageRowCount);
             pageResult.setTotalPages(pageCount.intValue());
             pageResult.setPage(page.getPage());
