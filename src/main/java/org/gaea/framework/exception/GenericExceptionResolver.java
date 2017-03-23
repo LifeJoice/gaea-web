@@ -88,6 +88,7 @@ public class GenericExceptionResolver implements HandlerExceptionResolver {
                 (ex instanceof DataIntegrityViolationException)
                 ) {
             logger.warn("校验异常。错误信息：  {}", ex.getMessage());
+            logger.trace("异常信息:\n", ex);
         } else {
             logger.error("捕捉到系统异常！", ex);
         }

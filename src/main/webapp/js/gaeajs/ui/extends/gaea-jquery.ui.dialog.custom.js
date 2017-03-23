@@ -63,6 +63,20 @@
             this.uiDialog.attr({
                 "aria-labelledby": uiDialogTitle.attr("id")
             });
+        },
+
+        /**
+         * hack select2 bug：在dialog中打开后下拉框中的input无法点中。
+         * by Iverson 2017-3-20 15:50:13
+         */
+        _allowInteraction: function( event ) {
+            if ( $( event.target ).closest( ".ui-dialog" ).length ) {
+                return true;
+            }
+
+            // TODO: Remove hack when datepicker implements
+            // the .ui-front logic (#8989)
+            return !!$( event.target ).closest( ".ui-datepicker, .select2-dropdown" ).length; // modify by Iverson
         }
     });
 }));

@@ -64,8 +64,10 @@
             <!--<button id="btnNew" name="btnNew" html-value="新增" type="maculaAction" href="admin/dis/shop/creat" />-->
             <!--<button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="newDialog" />-->
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
-            <button id="btnNewClass" name="btnNewClass" html-value="新增班级" link-view-id="classCrudDialog" action="add"/>
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
+            <button id="btnNewClass" name="btnNewClass" html-value="新增班级" link-view-id="classCrudDialog" action="add"/>
+            <button id="btnEditClass" name="btnEditClass" html-value="编辑班级" link-view-id="classEditDialog"
+                    action="update"/>
             <button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="wfDialog"/>
             <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
             <!--<button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />--><!-- 老的方式，不要了。重构采用action。 -->
@@ -132,10 +134,13 @@
         <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
         <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/demo/showCreateUpdateForm"
                      submit-url="/gaea/demo/add"/>
-        <crud-dialog id="classCrudDialog" html-id="classCrudDialog" content-url="/gaea/demo/class-crud-form"
-                     submit-url="/gaea/demo/add-class"/>
         <crud-dialog id="editDialog" html-id="createOrEditDialog" id-field="id"
                      content-url="/gaea/demo/showCreateUpdateForm" submit-url="/gaea/demo/add"/>
+        <crud-dialog id="classCrudDialog" html-id="classCrudDialog" content-url="/gaea/demo/class-crud-form"
+                     submit-url="/gaea/demo/add-class"/>
+        <crud-dialog id="classEditDialog" html-id="classEditDialog" id-field="id"
+                     content-url="/gaea/demo/class-crud-form" load-data-url="/gaea/demo/get-class"
+                     submit-url="/gaea/demo/add-class"/>
         <uploader-dialog id="uploaderDialog" html-id="uploaderDialog" content-url="" submit-url=""/>
         <!-- 这是新页面。一般意味着跳转。 -->
         <view id="newView" title=""/>

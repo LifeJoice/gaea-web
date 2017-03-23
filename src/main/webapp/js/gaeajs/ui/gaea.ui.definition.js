@@ -76,6 +76,9 @@ define(function () {
                 SUB_BUTTON_HTML: '<li id="<%= ID %>" data-url="<%= URL %>"><%=TEXT %></li>'
             }
         },
+        SELECT2:{
+            DEFINE:"gaea-ui-select2"
+        },
         GAEA_CONTEXT: {
             // gaea context组件的默认绑定容器id
             ID: "gaea-context-ct",

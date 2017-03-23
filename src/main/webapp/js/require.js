@@ -2165,6 +2165,7 @@ require.config({
         "gaeajs-ui-notify": '/js/gaeajs/ui/gaea.ui.notify',
         "gaeajs-ui-multiselect": '/js/gaeajs/ui/gaea.ui.multiselect',
         "gaeajs-ui-components": '/js/gaeajs/ui/gaea.ui.components',
+        "gaeajs-ui-select2": '/js/gaeajs/ui/gaea.ui.select2',
         /* Jquery-UI */
         "jquery-ui-core":'/js/thirdparty/jquery/ui/core',
         "jquery-ui-widget":'/js/thirdparty/jquery/ui/widget',
@@ -2184,6 +2185,7 @@ require.config({
         "datetimepicker":"/js/thirdparty/jquery/plugins/datetimepicker/gaea-jquery.datetimepicker",
         "jquery-mousewheel":"/js/thirdparty/jquery/plugins/jquery.mousewheel.min",
         "jquery-validate":"/js/thirdparty/jquery/plugins/validate/jquery.validate",
+        "jquery-select2":"/js/thirdparty/jquery/plugins/select2/js/select2.full.min",
         /* 上传组件 */
         "webuploader":'/js/thirdparty/upload/webuploader',
         "gaeajs-uploader":'/js/gaeajs/uploader/gaeajs-uploader',

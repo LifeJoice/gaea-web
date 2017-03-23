@@ -108,7 +108,7 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                 binder.bind(pvs);
             }
         } catch (Exception e) {
-            throw new ValidationFailedException(MessageFormat.format("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。inject to param name: {0}", prefix).toString(), e);
+            throw new ValidationFailedException(MessageFormat.format("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。inject to param name: {0} exception message: {1}", prefix, e.getMessage()).toString(), e);
         }
         return requestBean;
     }

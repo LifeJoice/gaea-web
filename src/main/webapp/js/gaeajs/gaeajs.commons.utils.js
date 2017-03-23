@@ -26,14 +26,14 @@ define([
              * @returns {*}
              */
             getValue: function (key, obj) {
-                if(gaeaValid.isNull(key) || gaeaValid.isNull(obj)){
+                if (gaeaValid.isNull(key) || gaeaValid.isNull(obj)) {
                     console.debug("key或object为空，无法从指定object获取指定key的值。");
                     return;
                 }
                 var result;
                 $.each(_.keys(obj), function (idx, eachKey) {
                     // 如果请求的key，和对象的某个key相等
-                    if(gaeaString.equalsIgnoreCase(key, eachKey)){
+                    if (gaeaString.equalsIgnoreCase(key, eachKey)) {
                         // 必须用遍历的key去获取值，因为可能大小写不一样，用请求的key去获取值会获取不到的
                         result = obj[eachKey];
                         return false;
@@ -65,6 +65,34 @@ define([
                         arr2 = [arr2];
                     }
                     result = result.concat(arr2);
+                }
+                return result;
+            },
+            /**
+             * 检查数组的值，是普通的值，非子数组或对象之类的。
+             * 考虑性能，只抽取第一个检查！除非第一个是空，则顺延下一个。
+             * @param value
+             */
+            isGenericValue: function (arr) {
+                if (gaeaValid.isNull(arr)) {
+                    throw "检查数组的值是否普通的值. 数组对象不允许为空！";
+                }
+                var result = false;
+                if (_.isArray(arr)) {
+                    $.each(arr, function (i, iObj) {
+                        // if null, continue.
+                        if (gaeaValid.isNull(iObj)) {
+                            return;
+                        }
+                        if (_.isArray(iObj) || _.isObject(iObj)) {
+                            // it's not generic value. break!
+                            return false;
+                        } else {
+                            // it's generic value. break.
+                            result = true;
+                            return false;
+                        }
+                    });
                 }
                 return result;
             }
@@ -225,6 +253,94 @@ define([
                     }
                 }
                 return result;
+            },
+            /**
+             * 数据填充工具类。把一个对象的值，按gaea框架命名方式，填充到页面。
+             * <p>
+             *     举例:
+             *     一个user对象: {user: { id: 1, name: 'Jack', roles: [{ id: 10, name: 'admin'}, {id: 11, name: 'CUSTOMER'}, address:{code: '10001', address:'GuangZhou' } ] }}
+             * </p>
+             * <p>
+             *     在填充过程中，会对select进行识别。如果是select[multiple]，则对于数组，可以直接填充，不需要进一步遍历，在逐个填充。
+             *     （那样可能也填充不到正确的，因为进一步就会按arr[0]...的方式去找目标填充）
+             * </p>
+             * <p>
+             *     暂时支持select, input, textarea这几类输入。
+             * </p>
+             * @param {object} opts
+             * @param {string} opts.id                  要填充入的容器（例如div）id
+             * @param {string} [opts.name]              父级的前缀。是一串按父级名字拼凑而成的。
+             * @param {object} opts.data                要填充的数据
+             */
+            fillData: function (opts) {
+                if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.id)) {
+                    throw "缺少要填充数据的目标容器id！";
+                }
+                if (gaeaValid.isNull(opts.name)) {
+                    opts.name = "";
+                }
+                var SEPERATOR = ".";
+                var jqIgnoreCaseFilter = function (argName) {
+                    return function () {
+                        var name = argName;
+                        var $this = $(this);
+                        return gaeaString.equalsIgnoreCase(name, $this.attr("name"));
+                    };
+                };
+                // array必须在前，因为_.isObject会把array也当object的
+                if (_.isArray(opts.data)) {
+                    /**
+                     * it's array
+                     */
+                    //var findTemplate = _.template("select[name='<%=NAME%>']");
+                    //var jqSelector = findTemplate({
+                    //    NAME: opts.name
+                    //});
+                    var $filterResult = $("#" + opts.id).find("select").filter(jqIgnoreCaseFilter(opts.name));
+                    if (utils.array.isGenericValue(opts.data) && $filterResult.length > 0) {
+                        // 目标对象是select，可以批量填充。不再需要遍历了。
+                        $filterResult.val(opts.data);
+                    } else {
+                        // 目标不是select，或者数组里面的是对象等其他复杂数据
+                        $.each(opts.data, function (i, iObj) {
+                            // 复制一个新的，否则会覆盖原来的某些值
+                            var newOpts = _.clone(opts);
+                            newOpts = _.extend(newOpts, opts);
+                            // 遍历array每一个值，并递归
+                            // 数组名称，roles[0], roles[1]...
+                            newOpts.name = gaeaString.builder.simpleBuild("%s[%s]", opts.name, i);
+                            newOpts.data = iObj;
+                            // 递归调用
+                            utils.data.fillData(newOpts);
+                        });
+                    }
+                } else if (_.isObject(opts.data)) {
+                    /**
+                     * it's object
+                     */
+                    $.each(opts.data, function (key, val) {
+                        // 复制一个新的，否则会覆盖原来的某些值
+                        var newOpts = _.clone(opts);
+                        newOpts = _.extend(newOpts, opts);
+                        // set new parent name
+                        // 例如：user.address | user.roles
+                        newOpts.name = gaeaValid.isNull(opts.name) ? key : opts.name + SEPERATOR + key;
+                        newOpts.data = val;
+                        // 递归调用
+                        utils.data.fillData(newOpts);
+                    });
+                } else {
+                    /**
+                     * it's value
+                     */
+                    //var findTemplate = _.template("[name='<%=NAME%>']");
+                    //var jqSelector = findTemplate({
+                    //    NAME: opts.name
+                    //});
+                    var $filterResult = $("#" + opts.id).find("input,select,textarea").filter(jqIgnoreCaseFilter(opts.name));
+                    // 设定值
+                    $filterResult.val(opts.data);
+                }
             }
         };
 

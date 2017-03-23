@@ -231,6 +231,7 @@ define([
                 $dialog.gaeaDialog("open");
             },
             /**
+             * 主要是为了动画效果，初始化容器。
              * 预初始化dialog的HTML。主要是为了一些交互的效果，需要先有HTML容器的初始化。
              * @param opts
              */
@@ -263,7 +264,8 @@ define([
                      * 声明这个数组的目的，是为了控制，后面的data-bind处理，要等这几个方法全部执行完。
                      */
                     var defferedFunctions = [
-                        gaeaData.dataSet.scanAndInit(options.id), gaeaUI.initGaeaUI(options.id), gaeaData.component.init(options.id)];
+                        gaeaData.dataSet.scanAndInit(options.id), gaeaData.component.init(options.id)];
+                    //gaeaData.dataSet.scanAndInit(options.id), gaeaUI.initGaeaUI(options.id), gaeaData.component.init(options.id)];
                     // defferedFunctions中的各个函数已经执行完一遍。
 
                     /* 初始化gaeaData的组件的数据 */
@@ -271,9 +273,11 @@ define([
                         // 初始化gaea-ui关联的gaea-data，即数据。例如：编辑页的子表
                         defferedFunctions.push(gaeaData.component.initData(options.id));
                     }
-                    if (gaeaValid.isNotNull(options.data)) {
-                        defferedFunctions.push(gaeaData.fieldData.init(options.id, options.data));
-                    }
+                    //if (gaeaValid.isNotNull(options.data)) {
+                    //    defferedFunctions.push(gaeaData.fieldData.init(options.id, options.data));
+                    //    // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
+                    //    $("#"+options.id).find("select").trigger("change");
+                    //}
                     /**
                      * 【重要】
                      * 至此！上面的方法都执行了。但！不代表上面的方法都执行完了！
@@ -285,11 +289,31 @@ define([
                         gaeaData.binding({
                             containerId: options.formId
                         }, function () {
-                            // 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
+                            /**
+                             * 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
+                             * 例如：对可编辑table里面的字段改名，需要binding后，KO才会生成整个table的DOM，这个时候才可以对里面的东东进行操作。
+                             */
                             gaeaData.component.initAfterBinding(options.id);
                             // 回调定制的函数
                             if (gaeaValid.isNotNull(options.callback) && _.isFunction(options.callback.afterBinding)) {
                                 options.callback.afterBinding();
+                            }
+                            /**
+                             * 初始化UI。
+                             * 这个只是纯粹UI的初始化，例如：button，或者数据已经存在的情况。
+                             */
+                            gaeaUI.initGaeaUI(options.id);
+                            /**
+                             * fill data
+                             * 必须在initGaeaUI后，甚至一切后，因为，得等数据集初始化完、KO binding后生成某些DOM、然后第三方插件初始化了（例如select2），再去改数据，这样KO、第三方插件才不会出错。
+                             * 例如select2，得初始化后，改数据还得调用trigger change，然后，未初始化前trigger change是没用的，也就改不了数据了。
+                             */
+                            if (gaeaValid.isNotNull(options.data)) {
+                                gaeaData.fieldData.init(options.id, options.data);
+                                // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
+                                gaeaUI.initGaeaUIAfterData({
+                                    containerId: options.id
+                                });
                             }
                         });
 
@@ -618,23 +642,23 @@ define([
              */
             initUpdateDialog: function (options) {
                 var dialogId = options.dialogOptions.id;
-                var $dialogDiv = $("#" + dialogId);
+                //var $dialogDiv = $("#" + dialogId);
                 var buttonDef = options.buttonDef;
                 var dialogDef = options.dialogOptions;
-                var $button = $("#" + buttonDef.htmlId);
+                //var $button = $("#" + buttonDef.htmlId);
                 var dlgFormName = dialogId + "-form";
-                var $dialogForm = $("#" + dlgFormName);
-                var dlgSelector = "#" + dialogId;
+                //var $dialogForm = $("#" + dlgFormName);
+                //var dlgSelector = "#" + dialogId;
                 /**
                  * 点击“编辑”事件触发。
                  */
                 GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, "#" + buttonDef.htmlId, function (event, data) {
                     //var selectedRow = crudDialog.cache.selectedRow;
                     var selectedRow = gaeaContext.getValue("selectedRow");
-                    console.log("row id: " + selectedRow.id +
-                        "\nschemaId: " + gaeaView.list.getSchemaId() +
-                        "\nschemaId: " + $("#urSchemaId").val()
-                    );
+                    //console.log("row id: " + selectedRow.id +
+                    //    "\nschemaId: " + gaeaView.list.getSchemaId() +
+                    //    "\nschemaId: " + $("#urSchemaId").val()
+                    //);
                     // 更新上下文的相关信息
                     //$dialogDiv.trigger(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, {
                     //    PAGE_CONTEXT: {
@@ -658,7 +682,29 @@ define([
                     var queryCondition = gaeaData.parseCondition({
                         id: 'byId', values: [{type: 'pageContext', value: 'id'}]
                     });
-                    var editData = crudDialog.getData(queryCondition);
+                    var editData;
+                    /**
+                     * if loadDataUrl为空
+                     *      通过通用查询+condition: byId获取编辑数据
+                     * else
+                     *      通过loadDataUrl获取数据
+                     */
+                    if (gaeaValid.isNull(dialogDef.loadDataUrl)) {
+                        editData = crudDialog.getData(queryCondition);
+                    } else {
+                        // 数据加载要求同步
+                        gaeaAjax.ajax({
+                            url: dialogDef.loadDataUrl,
+                            async: false, // 同步，否则后面加载内容还有数据集会乱的
+                            data: gaeaContext.getValue("selectedRow"),
+                            success: function (data) {
+                                editData = data;
+                            },
+                            fail: function (data) {
+                                gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
+                            }
+                        });
+                    }
                     //var afterBindingCallback = function (containerId) {
                     //    //// 获取要编辑的数据
                     //    //var editData = crudDialog.getData();
@@ -782,7 +828,8 @@ define([
                         //alert("成功");
                     },
                     fail: function (data) {
-                        alert("失败");
+                        //alert("失败");
+                        gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
                     }
                 });
                 return result;

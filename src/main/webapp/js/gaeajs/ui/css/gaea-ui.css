@@ -9,33 +9,38 @@
  * by Iverson 2016-7-25 10:03:16
  */
 
-.gaea-multi-select{
-    height:200px;
+.gaea-multi-select {
+    height: 200px;
 }
-.gaea-multi-select > div{
+
+.gaea-multi-select > div {
     float: left;
 
 }
-.gaea-multi-select ul{
-    list-style-type: none;/* 不要显示点点 */
-    padding-left:0px;
-    margin-top:0;
+
+.gaea-multi-select ul {
+    list-style-type: none; /* 不要显示点点 */
+    padding-left: 0px;
+    margin-top: 0;
 }
+
 /*选中的项的样式*/
-.gaea-multi-select li.select{
+.gaea-multi-select li.select {
     background-color: #70A0D0;
-    font-weight:bold;
+    font-weight: bold;
 }
+
 /*列表中的项*/
-.gaea-multi-select li:hover{
+.gaea-multi-select li:hover {
     background-color: #CDD3D9;
     cursor: pointer;
 }
+
 /*两个选择列表的样式*/
-.gaea-multi-select .select-list{
-    min-width:208px;
-    height:100%;
-    border:solid 1px #D0D0D0;
+.gaea-multi-select .select-list {
+    min-width: 208px;
+    height: 100%;
+    border: solid 1px #D0D0D0;
     /*overflow: scroll;*/
     /*以下几个配合滚动条插件 mCustomScrollbar */
     overflow: auto;
@@ -44,15 +49,18 @@
     box-sizing: border-box;
 
 }
+
 /* *-*-*-*-*-*-*-*-*-*-*-*-*-*   中间的命令选择区   *-*-*-*-*-*-*-*-*-*-*-*-*-* */
-.gaea-multi-select .choose-cmd{
-    padding:5px 15px;
+.gaea-multi-select .choose-cmd {
+    padding: 5px 15px;
 }
+
 /* 中间的操作按钮 */
-.gaea-multi-select .choose-cmd span{
+.gaea-multi-select .choose-cmd span {
     cursor: pointer;
 }
-.gaea-multi-select .choose-cmd span{
+
+.gaea-multi-select .choose-cmd span {
     display: block;
 }
 
@@ -68,4 +76,14 @@
     width: 165px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
 }
 
+/* ******************************************************************** 覆盖jquery-select2组件的样式 ******************************************************************** */
+/* 选中的边框颜色，不要黑色啦 */
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border: solid #D4D4D4 1px;
+    outline: 0;
+}
 
+/* 下拉框的字体 */
+.select2-container--default .select2-results > .select2-results__options {
+    font-size: 13px;
+}

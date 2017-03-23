@@ -23,4 +23,14 @@
             <data-element value="6" text="六年级"/>
         </data>
     </dataset>
+    <!-- ********************************************** 班角色 ********************************************** -->
+    <dataset id="DEMO_CLASS_ROLE" cache-type="static">
+        <data>
+            <data-element value="" text=""/>
+            <data-element value="1" text="班长"/>
+            <data-element value="2" text="语文代表"/>
+            <data-element value="3" text="数学代表"/>
+            <data-element value="4" text="英语代表"/>
+        </data>
+    </dataset>
 </dataset-definition>

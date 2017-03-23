@@ -252,8 +252,8 @@ define([
                     var $button = $("#" + opts.id);
                     if (gaeaString.equalsIgnoreCase(opts.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
                         var gaeaGrid = require("gaeajs-ui-grid"); // 加载grid模块
-                        var row = gaeaGrid.getSelected();
-                        opts.selectedRow = row;
+                        //var row = gaeaGrid.getSelected();
+                        //opts.selectedRow = row;
                         $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, opts);
                     }
                 }

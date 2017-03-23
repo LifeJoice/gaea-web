@@ -123,8 +123,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
 
                 // 解绑
                 $bindObj.off(eventName);
-
-                console.debug(debugStr);
+                // 如果需要debug已注册事件等信息，可以打开下面这个。
+                //console.debug(debugStr);
                 // 绑定事件
                 $bindObj.on(eventName, eventFunction);
                 // 缓存当前已经注册的事件

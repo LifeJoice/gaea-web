@@ -11,11 +11,11 @@
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
-        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils"
+        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
-              gaeaMultiSelect, gaeaButton, gaeaUtils) {
+              gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2) {
 
         var gaeaCommons = {
             initGaeaUI: function (containerId) {
@@ -26,8 +26,22 @@ define([
                 }
                 // 初始化按钮(在html中通过data-gaea-ui-button配置的)
                 _private.initGaeaButton(containerId);
+                // 初始化select2插件
+                _private.initSelect2(containerId);
 
                 return gaeaMultiSelect.init(containerId);
+            },
+            /**
+             * UI控件在数据完成后的一些初始化。
+             * 这只是对部分组件有用。不代表全部组件都需要。
+             * 例如：
+             * jQuery select2插件，就需要在数据、DOM都准备好后，然后初始化后，trigger change去使初始化数据正常显示。就需要在这里二次初始化。
+             * @param {object} opts
+             * @param {string} opts.containerId
+             */
+            initGaeaUIAfterData: function (opts) {
+                // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
+                $("#" + opts.containerId).find("select").trigger("change");
             }
         };
 
@@ -66,7 +80,45 @@ define([
                         parentDialogId: containerId
                     });
                 });
+                dfd.resolve();
+                return dfd.promise();
+            },
+            /**
+             * 初始化jQuery select2插件。
+             * @param containerId
+             * @returns {*}
+             */
+            initSelect2: function (containerId) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(containerId)) {
+                    dfd.resolve();
+                }
+                // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
+                var attrName = "data-" + GAEA_UI_DEFINE.UI.SELECT2.DEFINE;
+                // 找gaeaUI按钮的jq选择器条件( <select data-gaea-ui-select2=*** ...> )
+                var buttonFilterTemplate = _.template("select[<%= ATTR_NAME %>]");
+                // 查找所有按钮，遍历并初始化
+                $("#" + containerId).find(buttonFilterTemplate({
+                    ATTR_NAME: attrName
+                })).each(function (i, eachSelectObj) {
+                    var $select2 = $(eachSelectObj);
+                    var id = $select2.attr("id");
+                    /**
+                     * debug
+                     * 检查是否有重复元素！
+                     * 这个很重要。否则会有一些莫名其妙的问题。
+                     */
+                    if (!gaeaUtils.dom.checkUnique(id)) {
+                        console.debug("select2组件根据id查找不唯一。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
 
+                    // 请求gaea select2模块进行初始化
+                    gaeaSelect2.init({
+                        id: id
+                    });
+                });
+                dfd.resolve();
                 return dfd.promise();
             }
         };

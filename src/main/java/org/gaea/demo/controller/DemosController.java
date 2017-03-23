@@ -2,7 +2,9 @@ package org.gaea.demo.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
+import org.gaea.demo.dto.DemoClassDTO;
 import org.gaea.demo.entity.DemoClassEntity;
+import org.gaea.demo.repository.DemoClassRepository;
 import org.gaea.demo.service.DemoClassService;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.SysInitException;
@@ -20,9 +22,9 @@ import org.gaea.poi.ExcelReader;
 import org.gaea.poi.domain.Field;
 import org.gaea.poi.export.ExcelExport;
 import org.gaea.poi.reader.ExcelImportProcessor;
-import org.gaea.security.domain.Menu;
 import org.gaea.security.domain.Resource;
 import org.gaea.security.service.SystemResourcesService;
+import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +68,8 @@ public class DemosController {
     private ExcelService excelService;
     @Autowired
     private DemoClassService demoClassService;
+    @Autowired
+    private DemoClassRepository demoClassRepository;
 
     @RequestMapping("/management")
     public String list() {
@@ -121,9 +126,27 @@ public class DemosController {
         }
     }
 
+    /**
+     * 编辑班级的数据加载。
+     *
+     * @param id
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/get-class", method = RequestMethod.POST)
+    @ResponseBody
+    public DemoClassDTO loadClass(String id, HttpServletRequest request) {
+        DemoClassEntity classEntity = demoClassRepository.findOne(id);
+        DemoClassDTO demoClassDTO = new DemoClassDTO();
+        BeanUtils.copyProperties(classEntity, demoClassDTO, "students", "classRoles");
+        demoClassDTO.setClassRolesList(Arrays.asList(classEntity.getClassRoles().split(",")));
+        return demoClassDTO;
+    }
+
     @RequestMapping(value = "/add-class", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void saveClass(DemoClassEntity classEntity, @RequestBean Menu menu, HttpServletRequest request) {
+    public void saveClass(DemoClassEntity classEntity, HttpServletRequest request, @RequestBean("classRolesList") List<String> classRolesList) {
+        classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
         demoClassService.save(classEntity, GaeaWebSecuritySystem.getUserName(request));
     }
 

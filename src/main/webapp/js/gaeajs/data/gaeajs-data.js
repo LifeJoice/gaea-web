@@ -121,9 +121,11 @@ define([
                 /**
                  * 初始化下拉列表的KO 的模型对象，并且初始化该下拉列表的数据
                  *
-                 * @param options
-                 *              bindContainerId 搜索的整个binding区域（一般是某个div）的id. 例如：某个dataset的父容器。
-                 *              data
+                 * @param {object} options
+                 * @param {string} options.bindContainerId      搜索的整个binding区域（一般是某个div）的id. 例如：某个dataset的父容器。这个主要标识整个页面的viewModel。
+                 * @param {string} options.bindSelectId         一般就是下拉框的id
+                 * @param {string} options.dataset              数据集id
+                 * @param {object} options.data                 要填充的数据
                  * @returns {{}}
                  */
                 initModelAndData: function (options) {
@@ -157,11 +159,11 @@ define([
                  * 同时,创建一个隐藏的中间变量,存储选中的值. ( 如果其它组件要和选中的对象交互, 需要这个中间变量去找出对应的对象. )
                  * <p/>
                  * 以前通过中间变量找对应的对象的, 现在这部分代码移到gaeaData.ko.createComputeObj去.
-                 * @param options
-                 *              dataset
-                 *              bindSelectId
-                 *              bindFieldContainerId
-                 *              bindContainerId
+                 * @param {object} options
+                 * @param {string} options.dataset
+                 * @param {string} options.bindSelectId
+                 * @param {string} options.bindFieldContainerId
+                 * @param {string} options.bindContainerId
                  */
                 initModel: function (options) {
                     var root = this;
@@ -477,32 +479,47 @@ define([
          */
         gaeaData.dataSet = {
             /**
-             * 扫描容器下的所有配置了数据集的组件，进行数据集的初始化。（每个数据集都会单独发起请求获取数据）
+             * 扫描容器下的所有配置了数据集的组件，进行数据集的初始化。
+             * <p>
+             *     <b>重点</b>
+             *     <ul>
+             *         <li>同一个页面/容器(或者说标注data-gaea-data-bind-area=true的元素下的子元素), <b style='color: red'>应该统一只调用一次! </b>因为传入任意id都会往上找data-gaea-data-bind-area=true元素并遍历全部子元素.</li>
+             *     </ul>
+             * </p>
+             * <p><b>
+             *     【重要】
+             *     每个数据集都会单独发起请求获取数据. 并在所有数据集加载完、初始化完后再返回同步对象。
+             *     即全部完成后才会返回。
+             * </b></p>
              * @param divId
              */
             scanAndInit: function (divId) {
                 var dfd = $.Deferred();// JQuery同步对象
-                var $formDiv = $("#" + divId);
+                //var $formDiv = $("#" + divId);
                 var bindContainerId = gaeaData.dataBind.findBindingId(divId);
                 var $bindingContainer = $("#" + bindContainerId);
                 var dsLoadFunctions = new Array();
                 /**
-                 * 【1】遍历所有配置了data-gaea-data的元素
+                 * 【1】遍历所有配置了 data-gaea-data|data-gaea-ui-select2 的元素
                  * 【重要】暂时扫描下拉框select类的数据集。因为这个和KO的下拉框绑定强相关！以后DIV类的下拉数据集需要另外处理。
                  */
-                $bindingContainer.find("select[data-gaea-data]").each(function (index, element) {
+                $bindingContainer.find("select[data-gaea-data],select[data-gaea-ui-select2]").each(function (index, element) {
                     var $select = $(this);// 默认是下拉选择框，其实可能不是。
-                    var gaeaDataStr = $(this).data("gaea-data");
+                    var gaeaDataDefStr = $(this).data("gaea-data");
+                    // 可能是data-gaea-ui-select2
+                    if (gaeaValid.isNull(gaeaDataDefStr)) {
+                        gaeaDataDefStr = $(this).data("gaea-ui-select2");
+                    }
                     var thisId = $select.attr("id");
                     // 把元素的gaea-data配置转成对象，并和默认配置合并。
-                    var configOptions = gaeaString.parseJSON(gaeaDataStr);
+                    var configOptions = gaeaString.parseJSON(gaeaDataDefStr);
                     var dataSetId = configOptions.dataset;
-                    var bindPrefix = configOptions.bindPrefix;
+                    //var bindPrefix = configOptions.bindPrefix;
                     configOptions.bindSelectId = $select.attr("id");
                     configOptions.bindFieldContainerId = divId;
                     configOptions.bindContainerId = bindContainerId;
                     if (gaeaValid.isNotNull(configOptions.dataset)) {
-                        var newCondition = null;
+                        //var newCondition = null;
                         /**
                          * 【解析condition】
                          * 如果配置有condition，需要先解析condition
@@ -540,6 +557,7 @@ define([
                                         });
                                     }
                                     /**
+                                     * URGENT.TODO 这个应该拆分一个类似data-gaea-ui-dp-select之类的，当做另一个组件处理！而不是遍历条件的时候发现是个新组件又初始化组件。
                                      * 重要！
                                      * -------------------->>  级联（依赖）数据集  <<--------------------
                                      */
@@ -612,13 +630,19 @@ define([
             },
             /**
              * 初始化有依赖的数据集。
-             * @param options
-             *              id 当前这个对象的DOM id
-             *              dataset
-             *              condition.id
-             *              conditionValue
-             *              bindSelectId
-             *              bindFieldContainerId
+             * <p>
+             *     会注册两个事件：
+             *     <ul>
+             *         <li>gaeaUI_event_init_complete: 当父级对象数据初始化完后触发.</li>
+             *     </ul>
+             * </p>
+             * @param {object} options
+             * @param {string} options.id                       当前这个对象的DOM id
+             * @param {string} options.dataset                  数据集的id
+             * @param {string} options.condition.id
+             * @param {string} options.conditionValue
+             * @param {string} options.bindSelectId
+             * @param {string} options.bindFieldContainerId
              * @param successCallback
              */
             dependTriggerDataSetInit: function (options, successCallback) {
@@ -995,7 +1019,7 @@ define([
                     var $tbody = $("#" + containerId).find("tbody");
                     //var name = "testList";
                     $.each($tbody.children("tr"), function (trIdx, tr) {
-                        console.log("idx: " + trIdx);
+                        //console.log("idx: " + trIdx);
                         $.each($(tr).find("td input"), function (idx, val) {
                             var nameVal = $(this).attr("name");
                             gaeaData.component.table.resetName($(this), {
@@ -1143,6 +1167,8 @@ define([
                     return;
                 }
                 gaeaData.fieldData._setValue(divId, dataObj);
+                // 这里没有ajax，顺序执行到这里就resolve了
+                dfd.resolve();
                 return dfd.promise();
             },
             /**
@@ -1152,39 +1178,47 @@ define([
              * @private
              */
             _setValue: function (divId, dataObj) {
-                var $div = $("#" + divId);
-                // 遍历对象里的每一个属性和值
-                $.each(dataObj, function (key, fieldValue) {
-                    if (_.isArray(fieldValue)) {
-                        $.each(fieldValue, function (idx, val2) {
-                            gaeaData.fieldData._setValue(divId, val2);
-                        });
-                    } else {
-                        var value = fieldValue;
-                        // 如果是对象，则可能服务端给数据集转换过了。取其中的value作为值。
-                        if (_.isObject(fieldValue)) {
-                            value = fieldValue.value;
-                        }
-                        gaeaData.fieldData._setFieldValue($div, key, value);
-                    }
-                });
-            },
-            _setFieldValue: function ($div, objKey, objValue) {
-                if (gaeaValid.isNull(objKey) || gaeaValid.isNull(objValue)) {
-                    return;
-                }
-                // 遍历DIV下的所有field，查看是否有对应的可以设置值
-                $div.find("input,textarea").each(function (index, element) {
-                    var $thisElement = $(this);
-                    var attrNamVal = $thisElement.attr("name");// 元素的name属性值
-                    // 检查JSON数据中是否有该字段存在
-                    var hasDataKey = gaeaString.equalsIgnoreCase(attrNamVal, objKey);
-                    if (hasDataKey) {
-                        $thisElement.val(objValue);
-                        return false;// 跳出循环
-                    }
+                // 调用工具类的填充
+                gaeaCommonUtils.data.fillData({
+                    id: divId,
+                    name: "",
+                    data: dataObj
                 });
 
+
+                //var $div = $("#" + divId);
+                //// 遍历对象里的每一个属性和值
+                //$.each(dataObj, function (key, fieldValue) {
+                //    if (_.isArray(fieldValue)) {
+                //        $.each(fieldValue, function (idx, val2) {
+                //            gaeaData.fieldData._setValue(divId, val2);
+                //        });
+                //    } else {
+                //        var value = fieldValue;
+                //        // 如果是对象，则可能服务端给数据集转换过了。取其中的value作为值。
+                //        if (_.isObject(fieldValue)) {
+                //            value = fieldValue.value;
+                //        }
+                //        gaeaData.fieldData._setFieldValue($div, key, value);
+                //    }
+                //});
+                //},
+                //_setFieldValue: function ($div, objKey, objValue) {
+                //    if (gaeaValid.isNull(objKey) || gaeaValid.isNull(objValue)) {
+                //        return;
+                //    }
+                //    // 遍历DIV下的所有field，查看是否有对应的可以设置值
+                //    $div.find("input,textarea").each(function (index, element) {
+                //        var $thisElement = $(this);
+                //        var attrNamVal = $thisElement.attr("name");// 元素的name属性值
+                //        // 检查JSON数据中是否有该字段存在
+                //        var hasDataKey = gaeaString.equalsIgnoreCase(attrNamVal, objKey);
+                //        if (hasDataKey) {
+                //            $thisElement.val(objValue);
+                //            return false;// 跳出循环
+                //        }
+                //    });
+                //
             }
         };
         /**

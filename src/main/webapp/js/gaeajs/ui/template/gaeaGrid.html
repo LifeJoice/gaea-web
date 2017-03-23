@@ -28,8 +28,6 @@
     <!--按钮样式和效果。 -->
     <link href="/static/gaea/framework/gaea-ui-buttons.css" rel="stylesheet" type="text/css"/>
     <link href="/js/gaeajs/ui/css/gaea-ui-checkbox.css" rel="stylesheet" type="text/css"/>
-    <link href="/js/gaeajs/ui/css/gaea-ui-form.css" rel="stylesheet" type="text/css"/><!--通用表单样式-->
-    <link href="/js/gaeajs/ui/css/gaea-ui.css" rel="stylesheet" type="text/css"/><!--gaea ui组件样式（复选框、tabs等）-->
     <link href="/js/gaeajs/ui/css/gaea-ui-query.css" rel="stylesheet" type="text/css"/><!-- 查询组件样式 -->
     <!-- 上传组件 -->
     <link rel="stylesheet" href="/js/thirdparty/upload/webuploader.css">
@@ -37,6 +35,8 @@
     <link rel="stylesheet" href="/js/thirdparty/jquery/plugins/datetimepicker/gaea-jquery.datetimepicker.css">
     <!-- 滚动条组件 -->
     <link rel="stylesheet" href="/js/thirdparty/mCustomScrollbar/jquery.mCustomScrollbar.css">
+    <!-- select2组件 -->
+    <link rel="stylesheet" href="/js/thirdparty/jquery/plugins/select2/css/select2.min.css">
     <!-- loading效果 -->
     <link rel="stylesheet" href="/css/commons/loading-style.css">
     <!--导入Schema提供的js和css-->
@@ -44,6 +44,9 @@
     <!--下面的这两个js为了配合整个列表页框架的运作，所以放在最后。非列表页框架性的东西不要放在这里。-->
     <script src="/js/gaeajs/ui/template/gaea-grid.js" type="text/javascript"></script>
     <!UR_VIEW_SCHEMA IMPORT_CSS_HEADLAST>
+    <!-- 下面的两个CSS覆盖上面的CSS，特别是一些针对第三方组件的css的hack -->
+    <link href="/js/gaeajs/ui/css/gaea-ui-form.css" rel="stylesheet" type="text/css"/><!--通用表单样式-->
+    <link href="/js/gaeajs/ui/css/gaea-ui.css" rel="stylesheet" type="text/css"/><!--gaea ui组件样式（复选框、tabs等）-->
 </head>
 <body>
 <div class="gaea-ui-page">

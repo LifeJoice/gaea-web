@@ -1,8 +1,7 @@
-package org.gaea.demo.entity;
+package org.gaea.demo.dto;
 
-import org.hibernate.annotations.GenericGenerator;
+import org.gaea.demo.entity.DemoStudentEntity;
 
-import javax.persistence.*;
 import java.sql.Date;
 import java.util.List;
 
@@ -10,32 +9,17 @@ import java.util.List;
  * 演示功能的班级
  * Created by iverson on 2017/1/16.
  */
-@Entity
-@Table(name = "DEMO_CLASS")
-public class DemoClassEntity {
+public class DemoClassDTO {
     private static final long serialVersionUID = 1L;
-    @Id
-    @GenericGenerator(name = "gaeaDateTimeIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
-    @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
-    @Column(name = "ID")
     private String id;
-    @Column(name = "CLASS_NAME")
     private String className;
-    @Column(name = "TERM_YEAR")
     private Integer termYear; // 第几届
-    @Column(name = "CURRENT_YEAR")
     private Integer currentYear; // 几年级
-    @Column(name = "CLASS_NO")
     private String classNo; // 几班
-    // 和classRoleList对应的数据库字段。这个纯粹是为了测试写入获取、转换List存在。设计上不应该这样。
-    @Column(name = "CLASS_ROLES")
-    private String classRoles; // 班里角色，班长……
-    @Column(name = "CREATE_BY")
+    private List<String> classRolesList; // 班里角色，班长……
     private String createBy;
-    @Column(name = "CREATE_TIME")
     private Date createTime;
-    @OneToMany(mappedBy = "myClass", fetch = FetchType.LAZY)
-    private List<DemoStudentEntity> students;
+//    private List<DemoStudentEntity> students;
 
     public String getId() {
         return id;
@@ -93,19 +77,19 @@ public class DemoClassEntity {
         this.createTime = createTime;
     }
 
-    public List<DemoStudentEntity> getStudents() {
-        return students;
+//    public List<DemoStudentEntity> getStudents() {
+//        return students;
+//    }
+//
+//    public void setStudents(List<DemoStudentEntity> students) {
+//        this.students = students;
+//    }
+
+    public List<String> getClassRolesList() {
+        return classRolesList;
     }
 
-    public void setStudents(List<DemoStudentEntity> students) {
-        this.students = students;
-    }
-
-    public String getClassRoles() {
-        return classRoles;
-    }
-
-    public void setClassRoles(String classRoles) {
-        this.classRoles = classRoles;
+    public void setClassRolesList(List<String> classRolesList) {
+        this.classRolesList = classRolesList;
     }
 }
