@@ -59,7 +59,8 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
         error: function (msg) {
             gaeaNotify.show({
                 msg: msg,
-                msgType: msgDefaultType.ERROR
+                msgType: msgDefaultType.ERROR,
+                permanent: true
             });
         },
         /**
@@ -70,25 +71,18 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
          */
         show: function (opts) {
             if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.DEFAULT, opts.msgType)) {
-                $notify.jnotifyAddMessage({
-                    text: opts.msg,
-                    permanent: false,
-                    type: 'message'
-                });
+                opts.type = "message";
+                opts.permanent = false;
+                $notify.jnotifyAddMessage(opts);
             } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.SUCCESS, opts.msgType) ||
                 gaeaStringUtils.equalsIgnoreCase(msgDefaultType.FAIL, opts.msgType)) {
-                $notify.jnotifyAddMessage({
-                    text: opts.msg,
-                    permanent: false,
-                    type: opts.msgType
-                });
+                opts.type = opts.msgType;
+                opts.permanent = false;
+                $notify.jnotifyAddMessage(opts);
             } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.WARN, opts.msgType) ||
                 gaeaStringUtils.equalsIgnoreCase(msgDefaultType.ERROR, opts.msgType)) {
-                $notify.jnotifyAddMessage({
-                    text: opts.msg,
-                    permanent: false,
-                    type: 'error'
-                });
+                opts.type = "error";
+                $notify.jnotifyAddMessage(opts);
             }
         }
     };

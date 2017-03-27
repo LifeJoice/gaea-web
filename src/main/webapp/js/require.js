@@ -2156,6 +2156,7 @@ require.config({
         "gaeajs-ui-commons": '/js/gaeajs/ui/gaea.ui.commons',
         "gaeajs-ui-plugins": '/js/gaeajs/ui/gaea.ui.plugins',
         "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
+        "gaeajs-ui-grid-query": '/js/gaeajs/ui/gaea.ui.grid.query',
         "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',
         "gaeajs-ui-button": '/js/gaeajs/ui/gaea.ui.button',
         "gaeajs-ui-input": '/js/gaeajs/ui/gaea.ui.input',

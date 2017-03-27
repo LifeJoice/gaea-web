@@ -67,6 +67,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     CLOSE: "gaeaUI_event_dialog_close"                              // 对应jQuery dialog的close。主要是设定JQ的close会互相覆盖，干脆用自己的事件算了
                 },
                 GRID: {
+                    REFRESH_DATA: "gaeaUI_event_grid_refresh_data", // 刷新数据区事件
                     RELOAD: "gaeaUI_event_grid_reload", // 刷新grid数据的事件。无需参数。
                     SELECT: "gaeaUI_event_grid_select"  // 选中了grid的某一行的事件
                 },
@@ -185,6 +186,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                             console.debug("没有注册最后操作的对象的jqSelector，无法关闭。");
                             return;
                         }
+                        // 依赖setMe()寻找最后点击的对象，并关闭
                         var iJqSelector = events.cache.lastOne;
                         var container = $(iJqSelector);
                         var closeFunc = events.cache.autoCloseList[iJqSelector];
