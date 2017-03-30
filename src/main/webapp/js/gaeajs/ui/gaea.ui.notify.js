@@ -70,6 +70,9 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
          * @param {string} opts.msg                 消息体
          */
         show: function (opts) {
+            // 匹配jNotify的消息体
+            opts.text = opts.msg;
+            // 转换gaeaNotify和jNotify的类型
             if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.DEFAULT, opts.msgType)) {
                 opts.type = "message";
                 opts.permanent = false;

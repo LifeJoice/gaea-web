@@ -526,8 +526,8 @@ define([
                          */
                         if (gaeaValid.isNotNull(configOptions.condition)) {
                             var condition = configOptions.condition;
-                            var queryCondition = {};
-                            queryCondition.id = condition.id;
+                            //var queryCondition = {};
+                            //queryCondition.id = condition.id;
                             if (gaeaValid.isNotNull(condition.values) && _.isArray(condition.values)) {
                                 var queryValues = new Array();
                                 /**
@@ -537,24 +537,24 @@ define([
                                  * 复杂的value可能会关联着别的数据集之类的. 这个时候就需要用事件触发等方式实现.
                                  */
                                 $.each(condition.values, function (key, condValue) {
-                                    var value = null;
+                                    //var value = null;
                                     /**
                                      * 如果配置项要的是当前页面上下文的值，则需要从上下文取值。而不是页面配置的静态值。
                                      */
                                     if (gaeaString.equalsIgnoreCase(condValue.type, DEFINE.CONDITION.TYPE.PAGE_CONTEXT)) {
-                                        if (gaeaValid.isNotNull(condValue.value)) {
-                                            //value = gaeaData.utils.getPageContextValue(condValue.value);
-                                            value = gaeaContext.getValue(condValue.value);
-                                            queryValues.push({
-                                                type: condValue.type,
-                                                value: value
-                                            });
-                                        }
+                                        //if (gaeaValid.isNotNull(condValue.value)) {
+                                        //    //value = gaeaData.utils.getPageContextValue(condValue.value);
+                                        //    value = gaeaContext.getValue(condValue.value);
+                                        //    queryValues.push({
+                                        //        type: condValue.type,
+                                        //        value: value
+                                        //    });
+                                        //}
                                     } else if (gaeaString.equalsIgnoreCase(condValue.type, DEFINE.CONDITION.TYPE.STATIC)) {
-                                        queryValues.push({
-                                            type: condValue.type,
-                                            value: condValue.value
-                                        });
+                                        //queryValues.push({
+                                        //    type: condValue.type,
+                                        //    value: condValue.value
+                                        //});
                                     }
                                     /**
                                      * URGENT.TODO 这个应该拆分一个类似data-gaea-ui-dp-select之类的，当做另一个组件处理！而不是遍历条件的时候发现是个新组件又初始化组件。
@@ -587,7 +587,7 @@ define([
                                         });
                                     }
                                 });
-                                queryCondition.values = queryValues;
+                                //queryCondition.values = queryValues;
                             }
                         }
                         // 解析完condition后，把condition的值合并，统一发起查询。
@@ -726,13 +726,13 @@ define([
             },
             /**
              *
-             * @param options
-             *              url 请求的地址。默认是 SYS_URL.QUERY.BY_CONDITION
-             *              condition 对象。例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
-             *              isConditionParsed default false. condition是否已经解析过！重复解析会有问题！
-             *              dataset 数据集id
-             *              isAsync 是否异步调用。默认false，即同步调用。
-             *              success 完成后的回调
+             * @param {object} options
+             * @param {string} options.url                      请求的地址。默认是 SYS_URL.QUERY.BY_CONDITION
+             * @param {object} [options.condition]              例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
+             * @param {string} options.isConditionParsed=false  condition是否已经解析过！重复解析会有问题！
+             * @param {string} options.dataset                  数据集id
+             * @param {string} options.isAsync=false            是否异步调用。默认false，即同步调用。
+             * @param {string} options.success                  完成后的回调
              * @returns jqXHR
              *              gaeaData ajax返回的data放在这个属性中
              */
@@ -748,6 +748,8 @@ define([
                     queryCondition = options.condition;
                 }
                 options.conditions = JSON.stringify(queryCondition);
+                // 统一后台数据集获取接口
+                options.url = SYS_URL.DATA.DATASET.GET;
                 return gaeaData.getData(options);
             },
             /**
@@ -1235,10 +1237,11 @@ define([
         gaeaData.getData = function (options) {
             var result = null;
             var isAsync = false;
-            var url = SYS_URL.QUERY.BY_CONDITION;// default
-            if (gaeaValid.isNotNull(options.url)) {
-                url = options.url;
-            }
+            // default -> /sys/query/byCondition
+            var url = gaeaValid.isNull(options.url) ? SYS_URL.QUERY.BY_CONDITION : options.url;
+            //if (gaeaValid.isNotNull(options.url)) {
+            //    url = options.url;
+            //}
             if (gaeaValid.isNotNull(options.isAsync) && _.isBoolean(options.isAsync)) {
                 isAsync = options.isAsync;
             }

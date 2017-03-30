@@ -24,6 +24,7 @@ public class XmlSchemaDefinition {
     public static String DATA_DATASET_NAME = "dataset";
     /* *************************************************** GRID *************************************************** */
     public static String GRID_COLUMN_NAME = "column";
+    public static String GRID_COLUMN_QUERY_COND_NAME = "query-condition";
     /* *************************************************** ACTION *************************************************** */
     public static String ACTION_BUTTON_NAME = "button";
     public static String ACTION_BUTTON_GROUP_NAME = "button-group";

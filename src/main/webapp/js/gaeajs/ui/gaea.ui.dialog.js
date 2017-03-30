@@ -302,7 +302,7 @@ define([
                              * 初始化UI。
                              * 这个只是纯粹UI的初始化，例如：button，或者数据已经存在的情况。
                              */
-                            gaeaUI.initGaeaUI(options.id);
+                            gaeaUI.initGaeaUI("#"+options.id);
                             /**
                              * fill data
                              * 必须在initGaeaUI后，甚至一切后，因为，得等数据集初始化完、KO binding后生成某些DOM、然后第三方插件初始化了（例如select2），再去改数据，这样KO、第三方插件才不会出错。

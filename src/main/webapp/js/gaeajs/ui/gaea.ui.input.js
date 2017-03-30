@@ -33,83 +33,84 @@ define([
         var _gaeaInput = {
             /**
              *
-             * @param options
-             *              containerId 容器div id
-             *              inputId 组件中输入框的id
-             *              fieldId input的data-field-id
-             *              change 按钮组change事件的callback
+             * @param {object} options
+             * @param {object} options.jqSelector               容器选择器1
+             * @param {object} options.containerId 容器div id
+             * @param {object} options.inputId 组件中输入框的id
+             * @param {object} options.fieldId input的data-field-id
+             * @param {object} options.change 按钮组change事件的callback
              */
             init: function (options) {
                 var containerId = options.containerId;
                 //var defaultClass = options.defaultClass;
                 var inputId = options.inputId;
                 var fieldId = options.fieldId;
-                var $gaeaInput = $("#" + containerId);
+                var $gaeaInput = $(options.jqSelector);
                 if (gaeaValid.isNull($gaeaInput)) {
                     return;
                 }
                 /**
                  * 初始化查询的按钮（大于、等于、小于等），和对应的input框
                  */
-                var queryFieldTemplate = _.template(TEMPLATE.QUERY.DIV_FIELD);
-                $gaeaInput.html(queryFieldTemplate({
+                var queryFieldTemplate = _.template('<input id="<%= INPUT_ID %>" data-field-id="<%= FIELD_ID %>">');
+                $gaeaInput.append(queryFieldTemplate({
                     INPUT_ID: inputId,
                     FIELD_ID: fieldId
                 }));
                 /**
                  * 对通用表单的样式处理
                  */
-                var $queryButtons = $gaeaInput.find(".gaea-query-buttons");
-                $queryButtons.children("i").click(function () {
-                    var $clickButton = $(this);
-                    // 点击了某个按钮，例如'大于', 把按钮移到最前面去
-                    $queryButtons.prepend(this);
-                    // 触发事件
-                    var valueObj = _gaeaInput.getValue(containerId);
-                    if (gaeaValid.isNotNull(valueObj)) {
-                        options = _.extend(options, valueObj);
-                        $gaeaInput.trigger(GAEA_EVENTS.DEFINE.UI.INPUT.CHANGE, options);
-                    }
-                });
+                //var $queryButtons = $gaeaInput.find(".gaea-query-buttons");
+                //$queryButtons.children("i").click(function () {
+                //    var $clickButton = $(this);
+                //    // 点击了某个按钮，例如'大于', 把按钮移到最前面去
+                //    $queryButtons.prepend(this);
+                //    // 触发事件
+                //    var valueObj = _gaeaInput.getValue(containerId);
+                //    if (gaeaValid.isNotNull(valueObj)) {
+                //        options = _.extend(options, valueObj);
+                //        $gaeaInput.trigger(GAEA_EVENTS.DEFINE.UI.INPUT.CHANGE, options);
+                //    }
+                //});
                 /**
                  * 绑定相关事件
                  */
-                _gaeaInput.initEventBinding(options);
-            },
-            initEventBinding: function (options) {
-                //var $gaeaInput = $("#" + options.containerId);
-                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.INPUT.CHANGE, "#" + options.containerId, function (event, data) {
-                    var value = _gaeaInput.getValue(data.containerId);
-                    // 回调函数
-                    if (_.isFunction(options.change)) {
-                        options.change(data);
-                    }
-                });
-            },
+                //_gaeaInput.initEventBinding(options);
+            }
+            //initEventBinding: function (options) {
+            //    //var $gaeaInput = $("#" + options.containerId);
+            //    GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.INPUT.CHANGE, "#" + options.containerId, function (event, data) {
+            //        var value = _gaeaInput.getValue(data.containerId);
+            //        // 回调函数
+            //        if (_.isFunction(options.change)) {
+            //            options.change(data);
+            //        }
+            //    });
+            //},
             /**
-             *
+             * 重构到gaea.ui.grid.query中
              * @param containerId 整个gaeaInput的容器id. 例如：class= 'gaea-query-field head-query-column'
              * @returns gaeaInput里面的input的值
              */
-            getValue: function (containerId) {
-                var result = null;
-                var $gaeaInput = $("#" + containerId);// gaeaInput的容器。包含按钮组、输入框等
-                if (gaeaValid.isNotNull($gaeaInput)) {
-                    // 找到gaeaInput的输入框,获取其中的值
-                    var $input = $gaeaInput.find("input");
-                    if (gaeaValid.isNotNull($input)) {
-                        //result = $input.val();
-                        // 获取gaeaInput的按钮值
-                        var dataConfigStr = $gaeaInput.find(".gaea-query-buttons i:first").data("gaea-data");
-                        var dataConfig = gaeaString.parseJSON(dataConfigStr);
-                        result = {
-                            value: $input.val(),
-                            op: dataConfig.value
-                        };
-                    }
-                }
-                return result;
-            }
+            //getValue: function (containerId) {
+            //    var result = null;
+            //    var $gaeaInput = $("#" + containerId);// gaeaInput的容器。包含按钮组、输入框等
+            //    if (gaeaValid.isNotNull($gaeaInput)) {
+            //        // 找到gaeaInput的输入框,获取其中的值
+            //        var $input = $gaeaInput.find("input");
+            //        if (gaeaValid.isNotNull($input)) {
+            //            //result = $input.val();
+            //            // 获取gaeaInput的按钮值
+            //            var dataConfigStr = $gaeaInput.find(".gaea-query-buttons i:first").data("gaea-data");
+            //            var dataConfig = gaeaString.parseJSON(dataConfigStr);
+            //            result = {
+            //                value: $input.val(),
+            //                op: dataConfig.value
+            //            };
+            //        }
+            //    }
+            //    return result;
+            //}
         };
         return _gaeaInput;
     });

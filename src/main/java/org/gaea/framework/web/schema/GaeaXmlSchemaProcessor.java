@@ -207,7 +207,7 @@ public class GaeaXmlSchemaProcessor {
 
     /**
      * 把从XML SCHEMA中读取的各种信息，例如<data>, <views:actions>, <views:dialog>等汇总到一个map中。
-     *
+     * AI.TODO 急需把SchemaXXX和XXXJO分离。现在混在一起非常乱。
      * @param gaeaXmlSchema
      * @return
      */

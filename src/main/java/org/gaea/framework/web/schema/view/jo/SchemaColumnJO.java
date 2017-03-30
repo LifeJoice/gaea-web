@@ -29,8 +29,12 @@ public class SchemaColumnJO {
     private String dataType;
     // yyyy-mm-dd
     private String datetimeFormat = "yyyy-mm-dd";
+    // 数据集id。一般没有。有的话，会把该列的值按数据集对应的text:value作转换。
+    private String dataSetId;
     @JsonIgnore
     private List<SchemaColumn> columns = new ArrayList<SchemaColumn>();
+    // column对应的查询条件定义。非必须存在。grid列表头快捷查询区用。
+    private ColumnQueryConditionJO queryCondition;
 
     // 构造方法
 
@@ -151,11 +155,27 @@ public class SchemaColumnJO {
         this.datetimeFormat = datetimeFormat;
     }
 
+    public String getDataSetId() {
+        return dataSetId;
+    }
+
+    public void setDataSetId(String dataSetId) {
+        this.dataSetId = dataSetId;
+    }
+
     public List<SchemaColumn> getColumns() {
         return columns;
     }
 
     public void setColumns(List<SchemaColumn> columns) {
         this.columns = columns;
+    }
+
+    public ColumnQueryConditionJO getQueryCondition() {
+        return queryCondition;
+    }
+
+    public void setQueryCondition(ColumnQueryConditionJO queryCondition) {
+        this.queryCondition = queryCondition;
     }
 }

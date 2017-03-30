@@ -75,15 +75,3 @@
 .ui-tabs .gaea-form input, .ui-tabs .gaea-form select, .ui-tabs .gaea-form label.error {
     width: 165px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
 }
-
-/* ******************************************************************** 覆盖jquery-select2组件的样式 ******************************************************************** */
-/* 选中的边框颜色，不要黑色啦 */
-.select2-container--default.select2-container--focus .select2-selection--multiple {
-    border: solid #D4D4D4 1px;
-    outline: 0;
-}
-
-/* 下拉框的字体 */
-.select2-container--default .select2-results > .select2-results__options {
-    font-size: 13px;
-}

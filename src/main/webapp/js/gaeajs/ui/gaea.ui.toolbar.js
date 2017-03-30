@@ -616,7 +616,9 @@ define([
                 var schemaId = gaeaView.list.getSchemaId();
                 data.schemaId = schemaId;
                 // 获取页面快捷查询的条件
-                var queryConditions = gaeaGrid.query.getQueryConditions();
+                var queryConditions = gaeaGrid.query.getQueryConditions({
+                    id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
+                });
                 // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
                 var newRow = gaeaUtils.data.flattenData(row);
                 if (gaeaValid.isNotNull(opts) && gaeaValid.isNotNull(opts.rowParamName)) {

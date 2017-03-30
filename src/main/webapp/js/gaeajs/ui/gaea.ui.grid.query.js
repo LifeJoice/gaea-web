@@ -50,9 +50,9 @@ define([
                             size: data.size, // 每页多少条
                             pageCount: data.totalPages // 共多少页
                         };
-
+                        // 获取表格data中缓存的分页设置
                         $grid.data("options").page = page;
-
+                        // 触发数据刷新
                         $grid.trigger(gaeaEvent.DEFINE.UI.GRID.REFRESH_DATA, {
                             data: data.content,
                             page: page
@@ -70,7 +70,8 @@ define([
                         //_grid._createFooter();
                     },
                     fail: function (data) {
-                        gaeaNotify.error("查询失败！\n" + JSON.stringify(data));
+                        var result = JSON.parse(data.responseText);
+                        gaeaNotify.error("查询失败！\n" + result.message);
                     }
                 });
             },
@@ -106,9 +107,12 @@ define([
              * query[0].op=eq
              * query[0].value=1
              * 这表示包括 query[0].column 和 A 等都得动态拼凑。
+             *
+             * @param {object} opts
+             * @param {string} opts.id                  grid id
              * @returns Object 查询对象列表
              */
-            getQueryConditions: function () {
+            getQueryConditions: function (opts) {
                 var queryConditions = [];         // 查询请求数据
                 // 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
                 //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
@@ -118,11 +122,11 @@ define([
                 //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
                 //var i = 0;      // 查询条件数组的下标
                 //queryConditions.urSchemaId = $("#urSchemaId").val();
-                $("#mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
+                $("#" + opts.id + " #mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
                     var queryCondition = {};
                     var $gaeaInput = $(this);
-                    var $input = $gaeaInput.find("input:first");
-                    var inputValue = gaeaInput.getValue($gaeaInput.attr("id"));
+                    var $input = $gaeaInput.find("input,select").first();
+                    var inputValue = query.parser.getValue($gaeaInput.attr("id"));
                     var inputVal = inputValue.value; // 值
                     /**
                      * if
@@ -161,6 +165,35 @@ define([
                 //pageCondition.page = _grid.options.page.page;
                 pageCondition.page = $("#" + opts.id).data().options.page.page;
                 return pageCondition;
+            },
+            /**
+             *
+             * @param containerId 整个gaeaInput的容器id. 例如：class= 'gaea-query-field head-query-column'
+             * @returns gaeaInput里面的input的值
+             */
+            getValue: function (containerId) {
+                var result = null;
+                var $oneQueryCt = $("#" + containerId);// gaeaInput的容器。包含按钮组、输入框等
+                if (gaeaValid.isNotNull($oneQueryCt)) {
+                    // 找到gaeaInput的输入框,获取其中的值
+                    var $input = $oneQueryCt.find("input,select");
+                    if (gaeaValid.isNotNull($input)) {
+                        //result = $input.val();
+                        // 获取gaeaInput的按钮值
+                        var dataConfigStr = $oneQueryCt.find(".gaea-query-buttons i:first").data("gaea-data");
+                        var dataConfig = gaeaString.parseJSON(dataConfigStr);
+                        /**
+                         * @type {object}
+                         * @property {(string|string[])} value  查询条件的值
+                         * @property {string} op                关系操作符的值
+                         */
+                        result = {
+                            value: $input.val(),
+                            op: dataConfig.value
+                        };
+                    }
+                }
+                return result;
             }
         };
         /**

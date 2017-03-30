@@ -18,18 +18,23 @@ define([
               gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2) {
 
         var gaeaCommons = {
-            initGaeaUI: function (containerId) {
+            /**
+             *
+             * @param {string} ctSelector               容器的JQ选择器
+             * @returns {*}
+             */
+            initGaeaUI: function (ctSelector) {
                 var dfd = $.Deferred();// JQuery同步对象
                 // 没有相关的组件，也是需要resolve的
-                if (gaeaValid.isNull(containerId)) {
+                if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
                 }
                 // 初始化按钮(在html中通过data-gaea-ui-button配置的)
-                _private.initGaeaButton(containerId);
+                _private.initGaeaButton(ctSelector);
                 // 初始化select2插件
-                _private.initSelect2(containerId);
+                _private.initSelect2(ctSelector);
 
-                return gaeaMultiSelect.init(containerId);
+                return gaeaMultiSelect.init(ctSelector);
             },
             /**
              * UI控件在数据完成后的一些初始化。
@@ -50,10 +55,10 @@ define([
              * 初始化按钮。
              * 当前只初始化弹出框中页面的按钮，不负责初始化toolbar中的按钮。
              */
-            initGaeaButton: function (containerId) {
+            initGaeaButton: function (ctSelector) {
                 var dfd = $.Deferred();// JQuery同步对象
                 // 没有相关的组件，也是需要resolve的
-                if (gaeaValid.isNull(containerId)) {
+                if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
                 }
                 // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
@@ -61,7 +66,7 @@ define([
                 // 找gaeaUI按钮的jq选择器条件( <a data-gaea-ui-button=*** ...> )
                 var buttonFilterTemplate = _.template("a[<%= ATTR_NAME %>]");
                 // 查找所有按钮，遍历并初始化
-                $("#" + containerId).find(buttonFilterTemplate({
+                $(ctSelector).find(buttonFilterTemplate({
                     ATTR_NAME: attrName
                 })).each(function (idx, obj) {
                     var id = $(obj).attr("id");
@@ -77,7 +82,7 @@ define([
                     var gaeaButton = require("gaeajs-ui-button");
                     gaeaButton.initGaeaButton({
                         id: id,
-                        parentDialogId: containerId
+                        parentCtSelector: ctSelector
                     });
                 });
                 dfd.resolve();
@@ -85,13 +90,13 @@ define([
             },
             /**
              * 初始化jQuery select2插件。
-             * @param containerId
+             * @param ctSelector
              * @returns {*}
              */
-            initSelect2: function (containerId) {
+            initSelect2: function (ctSelector) {
                 var dfd = $.Deferred();// JQuery同步对象
                 // 没有相关的组件，也是需要resolve的
-                if (gaeaValid.isNull(containerId)) {
+                if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
                 }
                 // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
@@ -99,7 +104,7 @@ define([
                 // 找gaeaUI按钮的jq选择器条件( <select data-gaea-ui-select2=*** ...> )
                 var buttonFilterTemplate = _.template("select[<%= ATTR_NAME %>]");
                 // 查找所有按钮，遍历并初始化
-                $("#" + containerId).find(buttonFilterTemplate({
+                $(ctSelector).find(buttonFilterTemplate({
                     ATTR_NAME: attrName
                 })).each(function (i, eachSelectObj) {
                     var $select2 = $(eachSelectObj);
@@ -115,7 +120,7 @@ define([
 
                     // 请求gaea select2模块进行初始化
                     gaeaSelect2.init({
-                        id: id
+                        jqSelector: "#" + id
                     });
                 });
                 dfd.resolve();

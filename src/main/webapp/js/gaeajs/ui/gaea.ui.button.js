@@ -39,8 +39,8 @@ define([
              *      data-gaea-ui-button="newId:'classCrudDialog3', action:'new_dialog', openStyle:'inOne', submitAction:'writeback_in_one',refInputId:'test', contentUrl:'/gaea/demo/class-crud-form-3' "
              * </p>
              * @param {object} opts
-             * @param {string} opts.id
-             * @param {string} opts.parentDialogId
+             * @param {string} opts.id                      button id
+             * @param {string} opts.parentCtSelector        父级容器的jq选择器
              */
             initGaeaButton: function (opts) {
                 if (gaeaValid.isNull(opts.id)) {
@@ -48,6 +48,11 @@ define([
                 }
                 var $button = $("#" + opts.id);
                 var strButtonDef = $button.data(GAEA_UI_DEFINE.UI.BUTTON.DEFINE);
+                var $parentContainer = $(opts.parentCtSelector);
+                var parentDialogId;
+                if($parentContainer.length>0){
+                    parentDialogId = $parentContainer.attr("id");
+                }
                 /**
                  * 把HTML元素配置，转换成对象. 参考：
                  * data-gaea-ui-button="action:'new_dialog', submit-action='writeback_in_one', content-url='/gaea/demo/class-crud-form' "
@@ -62,7 +67,7 @@ define([
                  */
                 var buttonDef = gaeaString.parseJSON(strButtonDef);
                 buttonDef.id = opts.id;
-                buttonDef.parentDialogId = opts.parentDialogId;
+                buttonDef.parentDialogId = parentDialogId;
                 if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.ACTION.NEW_DIALOG, buttonDef.action)) {
                     if (gaeaValid.isNull(buttonDef.contentUrl)) {
                         throw "action=new_dialog, 内容加载的url的配置项（contentUrl）不允许为空！";
@@ -82,6 +87,7 @@ define([
             /**
              *
              * @param {object} opts
+             * @param {string} opts.id                              button id
              * @param {string} opts.newId                           看action的配置。如果是新弹出框，则这个值就是新弹出框的id。
              * @param {string} opts.parentDialogId
              * @param {string} opts.openStyle

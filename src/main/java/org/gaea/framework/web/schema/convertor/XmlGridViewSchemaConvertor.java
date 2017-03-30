@@ -5,6 +5,8 @@ import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.framework.web.schema.view.domain.SchemaColumnQueryCondition;
+import org.gaea.framework.web.schema.view.jo.ColumnQueryConditionJO;
 import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.framework.web.schema.view.jo.SchemaGridJO;
 import org.gaea.util.GaeaXmlUtils;
@@ -69,19 +71,25 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
         for (int i = 0; i < origGrid.getColumns().size(); i++) {
 //        for (SchemaColumn column:origGrid.getColumns()){
             SchemaColumn column = origGrid.getColumns().get(i);
-            SchemaColumnJO columnDTO = new SchemaColumnJO();
+            SchemaColumnJO columnJO = new SchemaColumnJO();
             // 复制column属性
-            BeanUtils.copyProperties(columnDTO, column);
-            // 转换DTO里的别名字段等
-            columnDTO.setText(column.getLabel());       // label即text
-            columnDTO.setWidth(column.getHtmlWidth());  // htmlWidth即width
-            columnDTO.setHidden(!column.getVisible());  // hidden和visible相反
-            // 生成dto.model
+            org.gaea.util.BeanUtils.copyProperties(column, columnJO, "queryCondition");
+            // 转换JO里的别名字段等
+            columnJO.setText(column.getLabel());       // label即text
+            columnJO.setWidth(column.getHtmlWidth());  // htmlWidth即width
+            columnJO.setHidden(!column.getVisible());  // hidden和visible相反
+            // 复制column queryCondition
+            ColumnQueryConditionJO queryConditionJO = new ColumnQueryConditionJO();
+            if (column.getQueryCondition() != null) {
+                BeanUtils.copyProperties(queryConditionJO, column.getQueryCondition());
+                columnJO.setQueryCondition(queryConditionJO);
+            }
+            // 生成jo.model
             if (column.getPrimaryKey()) {
                 model.setIdProperty(column.getHtmlId());    // 主键字段即model.idProperty
             }
             model.getFields().add(new GridModelFieldDTO(column.getHtmlId()));
-            gridDTO.getColumns().add(columnDTO);
+            gridDTO.getColumns().add(columnJO);
         }
         gridDTO.setModel(model);
         return gridDTO;
@@ -98,6 +106,26 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
         if (StringUtils.isBlank(column.getHtmlName()) && !StringUtils.isBlank(column.getName())) {
             column.setHtmlName(column.getName());
         }
+
+        // 转换{@code <query-condition>}
+        NodeList nodes = columnNode.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node queryCondNode = nodes.item(i);
+            // xml解析会把各种换行符等解析成元素。统统跳过。
+            if (!(queryCondNode instanceof Element)) {
+                continue;
+            }
+            if (XmlSchemaDefinition.GRID_COLUMN_QUERY_COND_NAME.equals(queryCondNode.getNodeName())) {
+                SchemaColumnQueryCondition columnQueryCond = covertToQueryCondition(queryCondNode);
+                column.setQueryCondition(columnQueryCond);
+            }
+        }
         return column;
+    }
+
+    private SchemaColumnQueryCondition covertToQueryCondition(Node queryCondNode) throws InvalidDataException {
+        SchemaColumnQueryCondition queryCondition = new SchemaColumnQueryCondition();
+        queryCondition = GaeaXmlUtils.copyAttributesToBean(queryCondNode, queryCondition, SchemaColumnQueryCondition.class);
+        return queryCondition;
     }
 }

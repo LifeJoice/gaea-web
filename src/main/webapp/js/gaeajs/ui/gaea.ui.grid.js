@@ -7,12 +7,12 @@ define([
         'gaeajs-common-utils-string', 'gaeajs-ui-button', 'gaea-system-url',
         "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
         "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils",
-        "gaeajs-ui-grid-query"],
+        "gaeajs-ui-grid-query", "gaeajs-ui-commons"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaStringUtils, gaeaButton, SYS_URL,
               gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
               GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils,
-              gridQuery) {
+              gridQuery, gaeaUI) {
         /**
          * 一些静态的常量定义
          */
@@ -109,9 +109,14 @@ define([
             //    var pageCondition = _query.parser.getPageCondition();
             //    _query.doQuery(queryConditions, pageCondition);
             //},
-            hide: function () {
+            /**
+             *
+             * @param {object} opts
+             * @param {string} opts.id                  grid id
+             */
+            hide: function (opts) {
                 // 收起查询区
-                $("#" + GRID_DEFINE.QUERY.FILTER_CONTAINER_ID).slideUp("fast");    // cool一点的方式
+                $("#" + opts.id + " #" + GRID_DEFINE.QUERY.FILTER_CONTAINER_ID).slideUp("fast");    // cool一点的方式
             }
         };
         /**
@@ -145,7 +150,7 @@ define([
                     if (gaeaValid.isNotNull(column.hidden) && !column.hidden) {
 
                         /**
-                         * 添加gaeaInput的容器
+                         * 添加快捷查询区的列（容器）
                          */
                         var queryFieldTemplate = _.template(TEMPLATE.QUERY.DIV_FIELD);
                         $("#mars-headquery-inputs").append(queryFieldTemplate({
@@ -154,23 +159,56 @@ define([
                             INPUT_ID: inputId,
                             FIELD_ID: field.id
                         }));
-                        /**
-                         * 初始化gaeaInput输入框（带按钮）
-                         */
-                        gaeaInput.init({
-                            containerId: columnHtmId,
-                            defaultClass: defaultClass,
-                            inputId: inputId,
-                            fieldId: field.id,
-                            change: function (data) {
-                                //alert("test\nop='"+data.op+"' value= "+data.value);
-                                var queryConditions = gridQuery.parser.getQueryConditions();
-                                gridQuery.doQuery({
-                                    id: opts.id,
-                                    queryConditions: queryConditions
+                        var $oneQueryCt = $("#" + columnHtmId);
+                        // 添加两个子容器（条件按钮区，和输入区）
+                        var oneQuerySubCtTemplate = _.template(
+                            '<div class="gaea-query-buttons">' +
+                            '<i class="iconfont icon-eq gaea-icon" data-gaea-data="value:\'eq\'"/>' +
+                            '<i class="iconfont icon-gt gaea-icon" data-gaea-data="value:\'gt\'" />' +
+                            '<i class="iconfont icon-ge gaea-icon" data-gaea-data="value:\'ge\'" />' +
+                            '<i class="iconfont icon-lt gaea-icon" data-gaea-data="value:\'lt\'" />' +
+                            '<i class="iconfont icon-le gaea-icon" data-gaea-data="value:\'le\'" />' +
+                            '<i class="iconfont icon-lk gaea-icon" data-gaea-data="value:\'lk\'" />' +
+                            '<i class="iconfont icon-ne gaea-icon" data-gaea-data="value:\'ne\'" />' +
+                            '<i class="gaea-icon" style="font-size: 12px;" data-gaea-data="value:\'na\'" >N/A</i>' + // style是临时的
+                            '<i class="gaea-icon" style="font-size: 12px;" data-gaea-data="value:\'nna\'" >nNA</i>' + // style是临时的
+                            '</div>' +
+                            '<div class="gaea-query-input-div"></div>' // 查询字段块（包括下拉按钮）
+                        );
+                        $oneQueryCt.append(oneQuerySubCtTemplate());
+                        var oneQueryInputCtSelector = "#" + opts.id + " #" + columnHtmId + " .gaea-query-input-div";
+                        var $oneQueryInputCt = $oneQueryCt.children(".gaea-query-input-div");
+
+                        if (gaeaValid.isNotNull(column.queryCondition)) {
+                            if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT, column.queryCondition.component)) {
+                                var gaeaSelect2 = require("gaeajs-ui-select2");
+                                gaeaSelect2.preInitHtmlAndData({
+                                    jqSelector: oneQueryInputCtSelector,
+                                    htmlId: inputId,
+                                    htmlName: inputId,
+                                    dataSetId: column.dataSetId,
+                                    fieldId: field.id
                                 });
                             }
-                        });
+                        } else {
+                            /**
+                             * 初始化gaeaInput输入框（带按钮）
+                             */
+                            gaeaInput.init({
+                                jqSelector: oneQueryInputCtSelector,
+                                //defaultClass: defaultClass,
+                                inputId: inputId,
+                                fieldId: field.id
+                                //change: function (data) {
+                                //    //alert("test\nop='"+data.op+"' value= "+data.value);
+                                //    var queryConditions = gridQuery.parser.getQueryConditions();
+                                //    gridQuery.doQuery({
+                                //        id: opts.id,
+                                //        queryConditions: queryConditions
+                                //    });
+                                //}
+                            });
+                        }
                         //$("#mars-headquery-inputs").append("<div id='" + columnHtmId + "' class='" + defaultClass + "'><span><input id='" + inputId + "' data-field-id='" + field.id + "' ></span></div>");
                         // +1是列头的列间边框宽度。
                         $("#" + columnHtmId).css("width", (parseInt(column.width)));
@@ -181,21 +219,21 @@ define([
                      * 例如：
                      * 日期类的字段，需要初始化日期控件。
                      */
-                    if (gaeaValid.isNotNull(column.datetimeFormat)) {
-                        if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_DATE)) {
-                            // 初始化日期控件
-                            gaeaPlugins.datePicker.init({
-                                renderTo: inputId
-                            });
-                        } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_TIME)) {
-                            // TODO
-                        } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_DATETIME)) {
-                            // 初始化日期时间控件
-                            gaeaPlugins.datetimePicker.init({
-                                renderTo: inputId
-                            });
-                        }
-                    }
+                    //if (gaeaValid.isNotNull(column.datetimeFormat)) {
+                    //    if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_DATE)) {
+                    //        // 初始化日期控件
+                    //        gaeaPlugins.datePicker.init({
+                    //            renderTo: inputId
+                    //        });
+                    //    } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_TIME)) {
+                    //        // TODO
+                    //    } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_DATETIME)) {
+                    //        // 初始化日期时间控件
+                    //        gaeaPlugins.datetimePicker.init({
+                    //            renderTo: inputId
+                    //        });
+                    //    }
+                    //}
                 }
                 // 组装按钮
                 $("#mars-headquery-actions").append(gaeaButton.create({
@@ -231,8 +269,8 @@ define([
                     //});
                     // ------------------>>>> 上面的都重构到getQueryConditions方法
                     // 收起查询区
-                    _query.hide();
-                    var queryConditions = gridQuery.parser.getQueryConditions();
+                    _query.hide(opts);
+                    var queryConditions = gridQuery.parser.getQueryConditions(opts);
                     gridQuery.doQuery({
                         id: opts.id,
                         queryConditions: queryConditions
@@ -253,6 +291,9 @@ define([
                 });
                 // 【3】 点击列头，展示查询区。但忽略“选择全部”按钮区。
                 _private.event.bindShowSimpleQuery();
+                // 设定查询区的比较符按钮点击操作，和相关的触发事件。
+                _query.view.event.setQueryCompareButtonTrigger(opts);
+                _query.view.event.bindQueryCompareButtonEvent(opts);
                 //$("#tb-head").find(".column-header").not("#selectAll").click(function () {
                 //    var $queryDiv = $("#mars-tb-head-query");
                 //    //console.log(" 选中的column： " + $(this).data("field-id"));
@@ -264,6 +305,121 @@ define([
                 //        $queryDiv.slideDown("fast");
                 //    }
                 //})
+                // 【4】 初始化快捷查询区的gaea UI组件（例如：select2等）
+                _query.view.initGaeaUI(opts);
+            },
+            /**
+             * 初始化query中的UI 组件（例如select2等）
+             * @param {object} opts
+             * @param {string} opts.id              grid id
+             */
+            initGaeaUI: function (opts) {
+                gaeaValid.isNull({
+                    check: opts.id,
+                    exception: "grid id为空，无法初始化查询区的Gaea UI组件！"
+                });
+                var $grid = $("#" + opts.id);
+                var gridOptions = $grid.data().options;
+                var fields = gridOptions.model.fields;
+                var columns = gridOptions.columns;
+                var $headQueryCt = $("#" + opts.id + " .gaea-grid-header .mars-tb-head-query");
+
+
+                for (var i = 0; i < fields.length; i++) {
+                    var field = fields[i];
+                    /**
+                     * @type {object}
+                     * @property {object} [queryCondition]              列的查询定义对象
+                     * @property {string} queryCondition.component      组件名
+                     * @property {boolean} queryCondition.multiple      是否支持多选
+                     */
+                    var column = columns[i];
+                    var columnHtmId = "mars-hq-column-" + (i + 1); // column的序列化从1开始吧
+                    var inputId = "mars-hq-" + field.id;
+
+
+                    /**
+                     * 根据系统返回的各个字段的类型定义，做相应的转化和初始化。
+                     * 例如：
+                     * 日期类的字段，需要初始化日期控件。
+                     */
+                    if (gaeaValid.isNotNull(column.datetimeFormat)) {
+                        if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_DATE)) {
+                            // 初始化日期控件
+                            gaeaPlugins.datePicker.init({
+                                renderTo: inputId
+                            });
+                        } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_TIME)) {
+                            // TODO
+                        } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GRID_DEFINE.COLUMN.DATA_TYPE_DATETIME)) {
+                            // 初始化日期时间控件
+                            gaeaPlugins.datetimePicker.init({
+                                renderTo: inputId
+                            });
+                        }
+                    }
+
+                    // 初始化各种插件
+                    if (gaeaValid.isNotNull(column.queryCondition)) {
+                        if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT, column.queryCondition.component)) {
+                            // 初始化jQuery select2插件
+                            var gaeaSelect2 = require("gaeajs-ui-select2");
+                            gaeaSelect2.init({
+                                jqSelector: "#" + opts.id + " .gaea-grid-header .mars-tb-head-query " + "#" + inputId,
+                                initDataSet: true,
+                                multiple: column.queryCondition.multiple,
+                                placeholder: "请选择..."
+                            });
+                        }
+                    }
+                }
+            },
+            event: {
+                /**
+                 * 初始化触发快捷查询区的比较按钮的功能。
+                 * @param {object} opts
+                 * @param {string} opts.id                  grid id
+                 */
+                setQueryCompareButtonTrigger: function (opts) {
+                    var $queryButtons = $("#" + opts.id).find(".gaea-query-buttons");
+                    var $queryCt = $("#" + opts.id).find(".mars-tb-head-query");
+                    $queryButtons.children("i").click(function () {
+                        //var $columnCt = $(this).parent().parent();
+                        var $buttonList = $(this).parent();
+                        //var $clickButton = $(this);
+                        // 点击了某个按钮，例如'大于', 把按钮移到最前面去
+                        $buttonList.prepend(this);
+                        // 触发事件
+                        //var valueObj = _gaeaInput.getValue(containerId);
+                        //if (gaeaValid.isNotNull(valueObj)) {
+                        //    options = _.extend(options, valueObj);
+                        $queryCt.trigger(gaeaEvents.DEFINE.UI.INPUT.CHANGE);
+                        //}
+                    });
+                },
+                /**
+                 * 注册快捷查询区的比较操作符按钮的监听。
+                 * 监听在整个头部快捷查询区。因为考虑，一旦改变，应该所有的查询条件和值都得遍历、汇总，而不只是当前点击这一个。
+                 * @param {object} opts
+                 * @param {string} opts.id              grid id
+                 */
+                bindQueryCompareButtonEvent: function (opts) {
+                    var queryCtSelector = "#" + opts.id + " .mars-tb-head-query";
+                    gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.INPUT.CHANGE, queryCtSelector, function (event, data) {
+                        //var value = _gaeaInput.getValue(data.containerId);
+                        // 回调函数
+                        //if (_.isFunction(opts.change)) {
+                        //    opts.change();
+                        //}
+                        var queryConditions = gridQuery.parser.getQueryConditions(opts);
+                        gridQuery.doQuery({
+                            id: opts.id,
+                            queryConditions: queryConditions
+                        });
+                        // 收起快捷查询
+                        _query.hide(opts);
+                    });
+                }
             }
         };
         ///**

@@ -1,5 +1,7 @@
 package org.gaea.framework.web.schema.domain.view;
 
+import org.gaea.framework.web.schema.view.domain.SchemaColumnQueryCondition;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,8 @@ public class SchemaColumn {
     private String datetimeFormat;
     private String dataSetId; // 数据集id。一般没有。有的话，会把该列的值按数据集对应的text:value作转换。
     private List<SchemaColumn> columns = new ArrayList<SchemaColumn>();
+    // column对应的查询条件定义。非必须存在。grid列表头快捷查询区用。
+    private SchemaColumnQueryCondition queryCondition;
 
     // 构造方法
 
@@ -165,5 +169,13 @@ public class SchemaColumn {
 
     public void setColumns(List<SchemaColumn> columns) {
         this.columns = columns;
+    }
+
+    public SchemaColumnQueryCondition getQueryCondition() {
+        return queryCondition;
+    }
+
+    public void setQueryCondition(SchemaColumnQueryCondition queryCondition) {
+        this.queryCondition = queryCondition;
     }
 }

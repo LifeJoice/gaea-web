@@ -65,7 +65,7 @@ public class GenericExceptionResolver implements HandlerExceptionResolver {
             isJson = acceptJson || xReqJson;
 //        mav.setViewName("MappingJacksonJsonView");
             Map<String, String> errorMsg = new HashMap<String, String>();
-            errorMsg.put("RESULT_MSG", ex.getMessage());
+            errorMsg.put("message", ex.getMessage());
             mav.addAllObjects(errorMsg);
             /**
              * 对请求类型进行区分: 1. 如果是json请求，将结果转换成json返回。 2. 如果不是json请求，则需要跳转页面。

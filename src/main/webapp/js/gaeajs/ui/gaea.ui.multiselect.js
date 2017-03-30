@@ -48,17 +48,17 @@ define([
         var _private = {};
         /**
          * 初始化(创建)gaea multiSelect.
-         * @param containerId
-         * @param options
+         * @param {string} ctSelector
+         * @param {object} [options]
          */
-        multiSelect.init = function (containerId, options) {
+        multiSelect.init = function (ctSelector, options) {
             var dfd = $.Deferred();// JQuery同步对象
             var that = this;
             // 没有相关的组件，也是需要resolve的
-            if (gaeaValid.isNull($("#" + containerId).find(".gaea-multi-select"))) {
+            if (gaeaValid.isNull($(ctSelector).find(".gaea-multi-select"))) {
                 dfd.resolve();
             }
-            $("#" + containerId).find(".gaea-multi-select").each(function (idx, val) {
+            $(ctSelector).find(".gaea-multi-select").each(function (idx, val) {
                 var $this = $(this);
                 var dataStr = $this.data("gaea-data");
                 var dataConfig = gaeaString.parseJSON(dataStr);

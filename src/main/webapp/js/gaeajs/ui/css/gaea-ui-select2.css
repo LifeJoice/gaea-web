@@ -1,0 +1,42 @@
+/**
+ * 这个是针对jQuery select2插件的一些样式重写。
+ *
+ * by Iverson 2017年3月29日15:54:53
+ */
+
+/* ******************************************************************** 在表单中的select2的样式 ******************************************************************** */
+/* 选中的边框颜色，不要黑色啦 */
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border: solid #D4D4D4 1px;
+    outline: 0;
+}
+
+/* 下拉框的字体 */
+.select2-container--default .select2-results > .select2-results__options {
+    font-size: 13px;
+}
+
+/* ******************************************************************** grid快捷查询区的select2样式 ******************************************************************** */
+
+/* 整个下拉框的容器 */
+.mars-headquery-inputs .select2-container .select2-selection--single {
+    overflow: hidden;
+    border-radius: 0;
+    font-size: 13px;
+}
+
+/* 下拉框里的内容（收起状态） */
+.mars-headquery-inputs .select2-container .select2-selection--single .select2-selection__rendered {
+    float: left;
+    padding-right: 0;
+    width: 65%;
+}
+
+/* 下拉的那个按钮 */
+.mars-headquery-inputs .select2-container--default .select2-selection--single .select2-selection__arrow {
+    float: left;
+    position: relative;
+    top: 0;
+    right: 0;
+    width: 16px;
+}
