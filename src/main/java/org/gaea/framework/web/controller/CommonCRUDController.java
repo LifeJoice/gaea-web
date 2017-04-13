@@ -1,5 +1,6 @@
 package org.gaea.framework.web.controller;
 
+import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
@@ -27,8 +28,8 @@ public class CommonCRUDController {
     CommonCRUDService commonCRUDService;
 
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
-    public void deleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
-                             String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException {
+    public void deleteById(String urSchemaId, String gridId, String id, String wfProcInstId,
+                           String deleteReason, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
         commonCRUDService.deleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);
     }
 
@@ -45,8 +46,8 @@ public class CommonCRUDController {
      * @throws SysLogicalException
      */
     @RequestMapping(value = "/pseudo-delete", produces = "plain/text; charset=UTF-8")
-    public void pseudoDeleteById(String urSchemaId,String gridId,String id,String wfProcInstId,
-                             String deleteReason,HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException {
+    public void pseudoDeleteById(String urSchemaId, String gridId, String id, String wfProcInstId,
+                                 String deleteReason, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
         commonCRUDService.pseudoDeleteById(urSchemaId, gridId, id,wfProcInstId,deleteReason);
     }
 }

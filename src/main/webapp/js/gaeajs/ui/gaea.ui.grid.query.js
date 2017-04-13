@@ -83,7 +83,7 @@ define([
              */
             doSimpleQuery: function (opts) {
                 // 获取快捷查询条件
-                var queryConditions = query.parser.getQueryConditions();
+                var queryConditions = query.parser.getQueryConditions(opts);
                 // 获取分页相关的信息
                 var pageCondition = query.parser.getPageCondition(opts);
                 query.doQuery({
@@ -114,6 +114,7 @@ define([
              */
             getQueryConditions: function (opts) {
                 var queryConditions = [];         // 查询请求数据
+                var $gridCt = $("#" + opts.id);
                 // 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
                 //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
                 //var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
@@ -122,11 +123,11 @@ define([
                 //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
                 //var i = 0;      // 查询条件数组的下标
                 //queryConditions.urSchemaId = $("#urSchemaId").val();
-                $("#" + opts.id + " #mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
+                $gridCt.find("#mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
                     var queryCondition = {};
                     var $gaeaInput = $(this);
                     var $input = $gaeaInput.find("input,select").first();
-                    var inputValue = query.parser.getValue($gaeaInput.attr("id"));
+                    var inputValue = query.parser.getValue($gaeaInput);
                     var inputVal = inputValue.value; // 值
                     /**
                      * if
@@ -160,20 +161,21 @@ define([
              * @param {string} opts.id                  grid id
              */
             getPageCondition: function (opts) {
+                var $gridCt = $("#" + opts.id);
                 var pageCondition = {};
-                pageCondition.size = $("#pageSizeListCt #selected").text();
+                pageCondition.size = $gridCt.find("#pageSizeListCt #selected").text();
                 //pageCondition.page = _grid.options.page.page;
-                pageCondition.page = $("#" + opts.id).data().options.page.page;
+                pageCondition.page = $gridCt.data().options.page.page;
                 return pageCondition;
             },
             /**
              *
-             * @param containerId 整个gaeaInput的容器id. 例如：class= 'gaea-query-field head-query-column'
+             * @param $oneQueryCt jq对象。整个gaeaInput的容器. 例如：class= 'gaea-query-field head-query-column'
              * @returns gaeaInput里面的input的值
              */
-            getValue: function (containerId) {
+            getValue: function ($oneQueryCt) {
                 var result = null;
-                var $oneQueryCt = $("#" + containerId);// gaeaInput的容器。包含按钮组、输入框等
+                //var $oneQueryCt = $("#" + containerId);// gaeaInput的容器。包含按钮组、输入框等
                 if (gaeaValid.isNotNull($oneQueryCt)) {
                     // 找到gaeaInput的输入框,获取其中的值
                     var $input = $oneQueryCt.find("input,select");

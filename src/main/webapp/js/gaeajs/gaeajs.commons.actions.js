@@ -58,7 +58,10 @@ define([
                         }
                         opts.submitUrl = button.submitUrl;
 
-                        extraData = _private.action.submit.getParamsData(action);
+                        extraData = _private.action.submit.getParamsData({
+                            id: "gaea-grid-ct", // AI.TODO 暂时写死。都是从列表页的grid获取数据。后面得思考一下，action和组件间交互获取数据的问题。
+                            action: action
+                        });
                     }
 
                     // 整合extra data（一般来自param定义），执行action
@@ -143,6 +146,8 @@ define([
                     var schemaId = $("#" + GAEA_UI_DEFINE.UI.SCHEMA.ID).val();
                     var gridId = $("#" + GAEA_UI_DEFINE.UI.GRID.ID).val();
                     var row = data.selectedRow;
+                    // button define
+                    var button = data.button;
                     // 通用删除！
                     gaeaAjax.ajax({
                         url: deleteURL,
@@ -155,7 +160,7 @@ define([
                         success: function () {
                             gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
                             //gaeaNotify.message("删除成功！");
-                            $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                            $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                         },
                         // 返回内容如果为空，则即使status=200，也会进入fail方法
                         fail: function (jqXHR, textStatus, errorThrown) {
@@ -163,7 +168,7 @@ define([
                             if (jqXHR.status == 200) {
                                 gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
                                 //gaeaNotify.message("删除成功！");
-                                $("#urgrid").trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                                $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                             } else {
                                 var result = jqXHR.responseJSON;
                                 gaeaNotify.fail(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
@@ -180,6 +185,7 @@ define([
              * 真删除
              * @param {object} opts
              * @param {string} opts.id
+             * @param {object} opts.button              button的服务端定义
              */
             doRealDelete: function (opts) {
                 gaeaValid.isNull({
@@ -192,9 +198,10 @@ define([
                     title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
                     content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
                 }, function () {
-                    var row = gaeaGrid.getSelected();
+                    var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
                     $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                        selectedRow: row
+                        selectedRow: row,
+                        button: opts.button
                     });
                 });
             },
@@ -202,6 +209,7 @@ define([
              * 伪删除
              * @param {object} opts
              * @param {string} opts.id
+             * @param {object} opts.button              button的服务端定义
              */
             doPseudoDelete: function () {
                 gaeaValid.isNull({
@@ -216,7 +224,8 @@ define([
                 }, function () {
                     var row = gaeaGrid.getSelected();
                     $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                        selectedRow: row
+                        selectedRow: row,
+                        button: opts.button
                     });
                 });
             }
@@ -241,7 +250,8 @@ define([
                 /**
                  *
                  * @param {object} opts
-                 * @param {string} opts.id
+                 * @param {string} opts.id              button id
+                 * @param {string} opts.gridId          grid id, to get selected row's id.
                  * @param {string} opts.action
                  */
                 do: function (opts) {
@@ -321,10 +331,13 @@ define([
                 submit: {
                     /**
                      * 负责转换/拼装action.params为json数据并返回。
-                     * @param {object} action
+                     * @param {object} opts
+                     * @param {string} opts.id
+                     * @param {object} opts.action
                      * @returns {json}
                      */
-                    getParamsData: function (action) {
+                    getParamsData: function (opts) {
+                        var action = opts.action;
                         var extraData = {};
 
                         /**
@@ -353,7 +366,7 @@ define([
                             });
 
                             // 获取选中的所有行
-                            var rowDatas = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS);
+                            var rowDatas = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, opts.id);
                             var selectedRows = _private.getFilterDatas({
                                 data: rowDatas,
                                 fields: fields

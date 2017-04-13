@@ -2,6 +2,7 @@ package org.gaea.framework.web.schema.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.SysInitException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.data.service.SystemDataSetService;
@@ -9,6 +10,7 @@ import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.convertor.list.GridPageTemplateHelper;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
+import org.gaea.framework.web.schema.service.GaeaXmlSchemaService;
 import org.gaea.framework.web.schema.service.GaeaXmlViewService;
 import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
@@ -37,6 +39,8 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
     private GaeaXmlSchemaProcessor gaeaXmlSchemaProcessor;
     @Autowired
     private SystemDataSetService systemDataSetService;
+    @Autowired
+    private GaeaXmlSchemaService gaeaXmlSchemaService;
 
     /**
      * 通过HTML模板，加上XML SCHEMA定义，获取最终完整的HTML页面。
@@ -54,7 +58,7 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
      */
     @Override
     public String getViewContent(ApplicationContext springApplicationContext, String viewSchemaLocation, String schemaName, String loginName)
-            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException {
+            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException {
         String viewSchemaPath = viewSchemaLocation + schemaName;
         return getViewContent(springApplicationContext, viewSchemaPath, loginName);
     }
@@ -86,7 +90,7 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
      */
     @Override
     public String getViewContent(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName)
-            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException {
+            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException {
         String htmlPage = "";
         String jsonData = "";
         GridPageTemplateHelper listSchemaHtml = null;
@@ -96,18 +100,19 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
             logger.debug(MessageFormat.format("准备开始解析Gaea xml模板 {0}.", "'" + viewSchemaPath + "'").toString());
             // 获得HTML模板混合XML SCHEMA的页面。
             GaeaXmlSchema gaeaXML = gaeaXmlSchemaProcessor.parseXml(viewSchemaPath, springApplicationContext);
-            // 根据DataSet查询并填充数据
-            if (gaeaXML.getSchemaData() != null && CollectionUtils.isNotEmpty(gaeaXML.getSchemaData().getDataSetList())) {
-//                DataSet ds = gaeaXmlSchemaProcessor.queryAndFillData(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(),loginName);
-                DataSet ds = systemDataSetService.queryDataAndTotalElement(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(), loginName);
-                gaeaXML.getSchemaData().getDataSetList().set(0, ds);
-                // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
-                Map<String, Object> dataMap = gaeaXmlSchemaProcessor.combineSchemaInfo(gaeaXML);
-                // 把最终结果转换为json字符串
-                jsonData = GaeaJacksonUtils.parse(dataMap);
-                // 把结果注入HTML页面
+//            // 根据DataSet查询并填充数据
+//            if (gaeaXML.getSchemaData() != null && CollectionUtils.isNotEmpty(gaeaXML.getSchemaData().getDataSetList())) {
+////                DataSet ds = gaeaXmlSchemaProcessor.queryAndFillData(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(),loginName);
+//                DataSet ds = systemDataSetService.queryDataAndTotalElement(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(), loginName);
+//                gaeaXML.getSchemaData().getDataSetList().set(0, ds);
+//                // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
+//                Map<String, Object> dataMap = gaeaXmlSchemaProcessor.combineSchemaInfo(gaeaXML);
+//                // 把最终结果转换为json字符串
+//                jsonData = GaeaJacksonUtils.parse(dataMap);
+            jsonData = gaeaXmlSchemaService.getJsonSchema(gaeaXML, loginName);
+//                // 把结果注入HTML页面
                 listSchemaHtml.replaceData(jsonData);
-            }
+//            }
             /**
              * 根据XML SCHEMA生成额外的信息. 直接修改gaeaXML里面的内容，所以没有返回。
              * 完善要返回前端的一些额外的内容。比如：

@@ -7,6 +7,7 @@
 
 /* ALL ------>> 所有的按钮class都必须加上"a."，否则会受macula样式影响。*/
 .gaea-ui-page a.button,
+a.gaea-ui-button,
 .gaea-button-group .title {
     cursor: pointer;
     display: inline-block;
@@ -39,24 +40,28 @@
     border-radius: 5px;
 }
 
-.gaea-ui-page a.button:hover {
+.gaea-ui-page a.button:hover,
+a.gaea-ui-button:hover {
     /*background-color: #111;*/
     color: white;
 }
 
-.gaea-ui-page a.button:active {
+.gaea-ui-page a.button:active,
+a.gaea-ui-button:active {
     top: 1px;
 }
 
 /*按钮大小效果*/
-.gaea-ui-page a.large.button {
+.gaea-ui-page a.large.button,
+a.large.gaea-ui-button {
     /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
     margin-right: 15px;
     font-size: 20px;
     padding: 8px 19px 9px;
 }
 
-.gaea-ui-page a.medium.button {
+.gaea-ui-page a.medium.button,
+a.medium.gaea-ui-button {
     /*每个按钮之间留出间隔，比较简单粗暴的方式。*/
     margin-right: 10px;
     font-size: 14px;
@@ -64,7 +69,8 @@
 }
 
 /*小按钮效果.不作为主按钮效果使用.*/
-.gaea-ui-page a.small.button {
+.gaea-ui-page a.small.button,
+a.small.gaea-ui-button {
     font-size: 10px;
     padding: 4px 10px 5px;
 }
@@ -159,6 +165,7 @@
     height: 30px;
     top: -30px;
 }
+
 /* 鼠标经过的效果，变半透明，并且圆从小变大。注意是移过gaea-icon元素的时候，修改gaea-button-bg的样式... */
 .gaea-icon:hover .gaea-button-bg, .gaea-float-icon:hover:after {
     opacity: 0.6;
@@ -207,12 +214,14 @@
 /*深蓝灰色效果*/
 .gaea-ui-page a.darkslategrey.button,
 .gaea-button-group .title,
-.gaea-button-group .detail {
+.gaea-button-group .detail,
+a.darkslategrey.gaea-ui-button {
     background-color: #5D6D7D;
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 86%, 1));*/
 }
 
-.gaea-ui-page a.darkslategrey.button:hover {
+.gaea-ui-page a.darkslategrey.button:hover,
+a.darkslategrey.gaea-ui-button:hover {
     /*background-image: radial-gradient(hsla(0, 0%, 92%, 1),hsla(0, 0%, 82%, 1));*/
     background-color: #2D3E50;
     /* 按钮渐变 */

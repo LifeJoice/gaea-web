@@ -4,12 +4,13 @@ import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.SchemaViewsComponent;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by Iverson on 2015/7/6.
  */
-public class SchemaButton implements SchemaViewsComponent {
+public class SchemaButton implements SchemaViewsComponent, Serializable {
     private String id;
     private String name;
     private String htmlName;

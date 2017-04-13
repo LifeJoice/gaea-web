@@ -3,13 +3,14 @@ package org.gaea.framework.web.schema.domain.view;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Iverson on 2015/6/29.
  */
-public class SchemaGrid {
+public class SchemaGrid implements Serializable {
     private String id;
     private String datasetId;                               // 对应的数据集id。
     @JsonIgnore

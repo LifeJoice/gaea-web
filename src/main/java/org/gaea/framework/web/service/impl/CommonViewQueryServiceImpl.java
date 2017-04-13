@@ -58,7 +58,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 
     @Override
     public PageResult query(GaeaXmlSchema gaeaXml, List<QueryCondition> filters,
-                            SchemaGridPage page, String loginName) throws ValidationFailedException, SysLogicalException, InvalidDataException {
+                            SchemaGridPage page, String loginName) throws ValidationFailedException, SysLogicalException, InvalidDataException, SysInitException {
         if (gaeaXml == null || StringUtils.isEmpty(gaeaXml.getId())) {
             return null;
         }
@@ -67,7 +67,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 
     @Override
     public PageResult query(String schemaId, List<QueryCondition> filters,
-                            SchemaGridPage page, String loginName) throws ValidationFailedException, SysLogicalException, InvalidDataException {
+                            SchemaGridPage page, String loginName) throws ValidationFailedException, SysLogicalException, InvalidDataException, SysInitException {
         PageResult pageResult = new PageResult();
         if (StringUtils.isBlank(schemaId)) {
             throw new ValidationFailedException("未能获取Schema id (in param schema id is null).无法查询！");
@@ -221,7 +221,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * @throws SysLogicalException
      */
     @Override
-    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException {
+    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException {
         GaeaXmlSchema gaeaXmlSchema = null;
         if (StringUtils.isNotEmpty(schemaId)) {
             gaeaXmlSchema = gaeaSchemaCache.get(schemaId);

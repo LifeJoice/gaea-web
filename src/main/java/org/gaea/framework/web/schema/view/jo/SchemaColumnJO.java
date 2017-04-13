@@ -3,13 +3,14 @@ package org.gaea.framework.web.schema.view.jo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Iverson on 2015/8/15.
  */
-public class SchemaColumnJO {
+public class SchemaColumnJO implements Serializable {
     private String id;
     // group
     private String type;

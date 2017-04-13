@@ -2,13 +2,14 @@ package org.gaea.framework.web.schema.domain;
 
 import org.gaea.data.dataset.domain.Where;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by Iverson on 2015/6/26.
  */
-public class DataSet {
+public class DataSet implements Serializable {
     private String id;
     private String sql;
     private String code;

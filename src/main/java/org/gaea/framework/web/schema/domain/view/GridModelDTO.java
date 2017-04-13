@@ -1,12 +1,13 @@
 package org.gaea.framework.web.schema.domain.view;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Iverson on 2015/8/15.
  */
-public class GridModelDTO {
+public class GridModelDTO implements Serializable {
     private String idProperty;
     private List<GridModelFieldDTO> fields = new ArrayList<GridModelFieldDTO>();
 

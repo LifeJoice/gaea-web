@@ -1271,7 +1271,13 @@ define([
                     jqXHR.gaeaData = result;
                 },
                 fail: function (data) {
-                    alert("加载数据集 '" + options.dsId + "' 失败.");
+                    var result = {
+                        message: ""
+                    };
+                    if (gaeaValid.isNotNull(data) && gaeaValid.isNotNull(data.responseText)) {
+                        result = JSON.parse(data.responseText);
+                    }
+                    gaeaNotify.error(gaeaString.builder.simpleBuild("加载数据集 '%s' 失败！错误：%s", options.dsId, result.message));
                 }
             });
             //return result;

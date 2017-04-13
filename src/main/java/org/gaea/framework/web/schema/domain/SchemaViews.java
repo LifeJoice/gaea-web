@@ -5,13 +5,14 @@ import org.gaea.framework.web.schema.domain.view.SchemaDialog;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.view.jo.SchemaGridJO;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Iverson on 2015/6/30.
  */
-public class SchemaViews {
+public class SchemaViews implements Serializable {
     private SchemaGrid grid;
     private SchemaGridJO gridJO;
     private List<SchemaDialog> dialogs;

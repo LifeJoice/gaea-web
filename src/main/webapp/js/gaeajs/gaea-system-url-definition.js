@@ -7,6 +7,9 @@
  */
 define(function () {
     var url = {
+        SCHEMA: {
+            GET: "/gaea/sys/schema/get" // 获取某个schema定义+数据
+        },
         DATA: {
             DATASET: {
                 GET: "/gaea/data/ds/get" // 获取数据集接口

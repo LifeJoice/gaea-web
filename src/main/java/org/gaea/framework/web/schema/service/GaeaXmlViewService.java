@@ -1,6 +1,7 @@
 package org.gaea.framework.web.schema.service;
 
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.SysInitException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.springframework.context.ApplicationContext;
@@ -13,8 +14,8 @@ import java.io.IOException;
  */
 public interface GaeaXmlViewService {
     String getViewContent(ApplicationContext springApplicationContext, String viewSchemaLocation, String schemaName, String loginName)
-            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException;
+            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException;
 
     String getViewContent(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName)
-            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException;
+            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException;
 }

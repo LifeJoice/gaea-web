@@ -8,9 +8,9 @@
 /*.hd-div{*/
 .tb-head {
     position: relative;
-    height: 40px;
+    height: 35px;
     font-size: 14px;
-    font-weight: bold;
+    /*font-weight: bold;*/
     /*表格列头字体为白色。*/
     color: white;
 }
@@ -54,7 +54,7 @@
     /*文字水平居中*/
     text-align: center;
     /*文字垂直居中。line-height和div高度一致即可。*/
-    line-height: 40px;
+    line-height: 35px;
 }
 
 /*列头最后一列。空列。填充满行的剩余部分。*/
@@ -91,6 +91,10 @@
 }
 
 /* 内容单元格 */
+
+.gaea-grid-body tbody td {
+    text-align: center;
+}
 
 .grid-td {
     padding: 0px;
@@ -149,9 +153,18 @@
 }
 
 /*查询条件的输入框的容器，和按钮的容器*/
-.mars-headquery-actions {
+.query-actions {
     width: 100%;
     height: 30px;
+    position: relative;
+}
+
+/* 查询区的按钮容器 */
+.query-actions > div {
+    width: 250px;
+    position: relative;
+    /* 里面的按钮居中 */
+    text-align: center;
 }
 
 .mars-headquery-inputs {
@@ -198,7 +211,8 @@
 
 /* *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*   分页   *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* */
 .gaea-grid-footer {
-    position: fixed;
+    /*position: fixed;*/
+    position: relative;
     bottom: 5px;
 }
 
@@ -219,20 +233,23 @@
 
 /*分页的1-20部分的css。放右下角*/
 .gaea-grid-footer .pagination .page-desc {
-    position: fixed;
+    /*position: fixed;*/
+    float: right;
     /* 留出选择每页显示多少条的空间 */
-    right: 55px;
+    right: 10px;
     padding-right: 2px;
 }
 
 /* 每页多少条记录。放右下角 */
 .gaea-grid-footer .pagination .how-many-records {
-    position: fixed;
+    /*position: fixed;*/
+    position: relative;
+    float: right;
     margin-right: 5px;
     /*max-height:25px;*/
     height: 25px;
     width: 40px;
-    bottom: 6px;
+    /*bottom: 6px;*/
     right: 5px;
     overflow: hidden;
     border: 2px solid #2D3E50;

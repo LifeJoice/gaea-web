@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.db.ibatis.jdbc.SQL;
+import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
@@ -64,7 +65,7 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
     @Override
     @Transactional
     public void deleteById(String urSchemaId, String gridId, String recordId, String wfProcInstId,
-                           String deleteReason) throws ValidationFailedException, SysLogicalException, SystemConfigException {
+                           String deleteReason) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
 
         // 真删除
         commonDeleteById(urSchemaId, gridId, recordId, wfProcInstId, deleteReason, DELETE_TYPE_REAL);
@@ -119,7 +120,7 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
     @Override
     @Transactional
     public void pseudoDeleteById(String urSchemaId, String gridId, String recordId, String wfProcInstId,
-                                 String deleteReason) throws ValidationFailedException, SysLogicalException, SystemConfigException {
+                                 String deleteReason) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
         // 伪删除
         commonDeleteById(urSchemaId, gridId, recordId, wfProcInstId, deleteReason, DELETE_TYPE_PSEUDO);
     }
@@ -140,7 +141,7 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
      */
     @Transactional
     private void commonDeleteById(String urSchemaId, String gridId, String recordId, String wfProcInstId,
-                                  String deleteReason, int deleteType) throws ValidationFailedException, SysLogicalException, SystemConfigException {
+                                  String deleteReason, int deleteType) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
         if (StringUtils.isBlank(urSchemaId)) {
             throw new ValidationFailedException("未能获取Schema id.无法删除操作！");
         }

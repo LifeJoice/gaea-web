@@ -28,7 +28,10 @@ define(function () {
         BUTTON: {
             DEFINE: "gaea-ui-button", // data-gaea-ui-button
             ACTION: {
-                NEW_DIALOG: "new_dialog" // 点击是新打开一个弹框
+                // 点击是新打开一个弹框
+                NEW_DIALOG: "new_dialog",
+                // 打开 data_filter_dialog
+                DATA_FILTER_DIALOG: "data_filter_dialog"
             },
             SUBMIT_ACTION: {
                 WRITEBACK_IN_ONE: "writeback_in_one",
@@ -46,9 +49,16 @@ define(function () {
             BUTTON: {
                 DEFAULT: "button",
                 BUTTON_GROUP: "button-group"
+            },
+            DIALOG: {
+                COMMON_DIALOG: "dialog",
+                WORKFLOW_DIALOG: "wf-dialog",
+                UPLOAD_DIALOG: "uploader-dialog",
+                DATA_FILTER_DIALOG: "data_filter_dialog"
             }
         },
         DIALOG: {
+            // todo 慢慢重构到component去
             TYPE: {
                 COMMON_DIALOG: "dialog",
                 WORKFLOW_DIALOG: "wf-dialog",
@@ -58,7 +68,7 @@ define(function () {
         },
         GRID: {
             ID: "gridId",
-            GAEA_GRID_DEFAULT_ID: "urgrid"
+            GAEA_GRID_DEFAULT_ID: "gaea-grid-ct"
         },
         SCHEMA: {
             ID: "urSchemaId"

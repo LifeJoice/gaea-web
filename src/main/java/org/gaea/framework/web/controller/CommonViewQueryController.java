@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
@@ -53,7 +54,7 @@ public class CommonViewQueryController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public PageResult page(@RequestBean SchemaGridPage page, String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
-                           HttpServletRequest request, HttpServletResponse response) throws InvalidDataException, SysLogicalException, ValidationFailedException {
+                           HttpServletRequest request, HttpServletResponse response) throws InvalidDataException, SysLogicalException, ValidationFailedException, SysInitException {
         PageResult result = commonViewQueryService.query(urSchemaId, filters, page, GaeaWebSecuritySystem.getUserName(request));
             return result;
     }
@@ -73,7 +74,7 @@ public class CommonViewQueryController {
     @RequestMapping(value = "/byCondition", method = RequestMethod.POST)
     @ResponseBody
     public List<Map<String, Object>> queryByConditions(String schemaId, String conditions,
-                                                       String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException {
+                                                       String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException {
         DataSetCommonQueryConditionDTO queryConditionDTO = null;
         if (StringUtils.isNotEmpty(conditions)) {
             try {

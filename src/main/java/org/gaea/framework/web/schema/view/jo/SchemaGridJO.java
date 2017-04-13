@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.view.GridModelDTO;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * Created by Iverson on 2015/8/15.
  */
-public class SchemaGridJO {
+public class SchemaGridJO implements Serializable {
     private String id;
     @JsonIgnore
     private String datasetId;                               // 对应的数据集id。

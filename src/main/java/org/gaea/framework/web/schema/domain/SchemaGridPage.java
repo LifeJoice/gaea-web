@@ -1,10 +1,12 @@
 package org.gaea.framework.web.schema.domain;
 
+import java.io.Serializable;
+
 /**
  * 针对XML Schema Grid的分页对象。也可用于一般的分页。实现Pageable是为了和Spring Data的分页兼容。
  * Created by Iverson on 2015/10/13.
  */
-public class SchemaGridPage {
+public class SchemaGridPage implements Serializable {
 
     public SchemaGridPage() {
     }

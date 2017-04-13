@@ -1,7 +1,9 @@
 package org.gaea.framework.web.schema.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,7 @@ import java.util.List;
  * Created by Iverson on 2015/7/24.
  */
 @Component
-public class SchemaImport {
+public class SchemaImport implements Serializable {
 
     private List<Import> headFirstImportList = null;
     private List<Import> headLastImportList = null;
@@ -39,9 +41,12 @@ public class SchemaImport {
         getCssImportList().add(imp);
     }
 
+    @JsonIgnore
     public String getStrHeadFirstJsImport(){
         return getStrJsImport(getHeadFirstImportList());
     }
+
+    @JsonIgnore
     public String getStrheadLastImport(){
         StringBuilder result = new StringBuilder("");
         // 把headLastList转换为js import
@@ -52,10 +57,12 @@ public class SchemaImport {
         return result.toString();
     }
 
+    @JsonIgnore
     public String getStrBodyendImport(){
         return getStrJsImport(getBodyendImportList());
     }
 
+    @JsonIgnore
     public String getStrCssImport(List<Import> importList){
         StringBuilder result = new StringBuilder("");
         for(Import imp: importList){
@@ -64,6 +71,7 @@ public class SchemaImport {
         return result.toString();
     }
 
+    @JsonIgnore
     protected String getStrJsImport(List<Import> importList){
         StringBuilder result = new StringBuilder("");
         for(Import imp:importList){

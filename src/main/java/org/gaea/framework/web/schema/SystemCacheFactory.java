@@ -57,7 +57,7 @@ public class SystemCacheFactory implements ApplicationContextAware, CacheFactory
      * @param schemaId
      * @return
      */
-    public static GaeaXmlSchema getGaeaSchema(String schemaId) {
+    public static GaeaXmlSchema getGaeaSchema(String schemaId) throws SysInitException {
         GaeaXmlSchema gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
         return gaeaXmlSchema;
     }

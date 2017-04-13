@@ -12,8 +12,8 @@
             <span class="fieldvalue">
                 <div id="userIds" class="gaea-multi-select"
                      data-gaea-data="name: 'authIds',
-                selectable:{dataset:'DS_ROLE_AUTHORITIES_MGR',condition:{id:'selectable',values:[{ type:'pageContext',value:'id' },{ type:'pageContext',value:'id' }]} },
-                selected:{dataset:'DS_ROLE_AUTHORITIES_MGR',condition:{id:'selected',values:[{ type:'pageContext',value:'id' }]} }"></div>
+                selectable:{dataset:'DS_ROLE_AUTHORITIES_MGR',condition:{id:'selectable',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][id]' },{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][id]' }]} },
+                selected:{dataset:'DS_ROLE_AUTHORITIES_MGR',condition:{id:'selected',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][id]' }]} }"></div>
             </span>
         </div>
     </div>

@@ -369,7 +369,8 @@ define([
                             //var buttonDef = opts.button;
                             //var $button = $("#" + buttonDef.htmlId);
                             if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
-
+                                // 定义grid id，方便获取selected row的数据（编辑）。
+                                opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
                                 gaeaActions.crudDialog.update.do(opts);
 
 

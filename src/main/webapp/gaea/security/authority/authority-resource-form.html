@@ -11,8 +11,8 @@
             <span class="fieldvalue">
                 <div id="resourceIds" class="gaea-multi-select"
                 data-gaea-data="name: 'resourceIds',
-                selectable:{dataset:'DS_AUTH_RESOURCE',condition:{id:'selectable',values:[{ type:'pageContext',value:'id' }]} },
-                selected:{dataset:'DS_AUTH_RESOURCE',condition:{id:'selected',values:[{ type:'pageContext',value:'id' }]} }"></div>
+                selectable:{dataset:'DS_AUTH_RESOURCE',condition:{id:'selectable',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][id]' }]} },
+                selected:{dataset:'DS_AUTH_RESOURCE',condition:{id:'selected',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][id]' }]} }"></div>
             </span>
         </div>
     </div>

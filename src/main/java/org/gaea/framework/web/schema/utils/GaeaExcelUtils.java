@@ -2,6 +2,7 @@ package org.gaea.framework.web.schema.utils;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.SysInitException;
 import org.gaea.framework.web.schema.SystemCacheFactory;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
@@ -30,7 +31,7 @@ public class GaeaExcelUtils {
      * @param schemaId
      * @return Map < column.name，Field对象 >
      */
-    public static Map<String, Field> getFields(String schemaId) {
+    public static Map<String, Field> getFields(String schemaId) throws SysInitException {
         if (StringUtils.isEmpty(schemaId)) {
             return null;
         }
