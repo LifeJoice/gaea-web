@@ -11,6 +11,8 @@
     overflow: hidden;
     float: left;
     position: relative;
+    /* 这个得覆盖下面那个命令区，否则会被遮挡 */
+    z-index: 1;
 }
 
 .gaea-query-buttons:hover {
