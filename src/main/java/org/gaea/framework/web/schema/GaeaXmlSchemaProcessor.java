@@ -412,7 +412,7 @@ public class GaeaXmlSchemaProcessor {
                     if (dsDatas != null) {
                         // 遍历数据集
                         for (DataItem dataItem : dsDatas) {
-                            if (dataItem.getValue().equalsIgnoreCase(String.valueOf(value))) {
+                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(value))) {
                                 newValue = dataItem;
                             }
                         }
