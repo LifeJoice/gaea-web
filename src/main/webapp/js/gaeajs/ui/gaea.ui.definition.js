@@ -43,6 +43,7 @@ define(function () {
          */
         COMPONENT: {
             GRID: "grid",
+            CRUD_GRID: "crud-grid",
             TABLE: "table",
             SELECT: "select",
             TABS: "tabs",
@@ -67,6 +68,7 @@ define(function () {
             COMMON_CONFIG_DIALOG_ID: "gaeaUI_common_config_dialog" // 通用的确认弹框的默认id.因为很多地方用弹框但并不关系弹框是什么, 只是要用弹框显示点信息而已. 就共用这个就好了. 确保名字别重复就好.
         },
         GRID: {
+            CRUD_GRID_DEFINE: "gaea-ui-crud-grid",
             ID: "gridId",
             GAEA_GRID_DEFAULT_ID: "gaea-grid-ct"
         },
@@ -86,8 +88,8 @@ define(function () {
                 SUB_BUTTON_HTML: '<li id="<%= ID %>" data-url="<%= URL %>"><%=TEXT %></li>'
             }
         },
-        SELECT2:{
-            DEFINE:"gaea-ui-select2"
+        SELECT2: {
+            DEFINE: "gaea-ui-select2"
         },
         GAEA_CONTEXT: {
             // gaea context组件的默认绑定容器id
@@ -99,6 +101,11 @@ define(function () {
         },
         EVENT: {
             ID: "gaea-event-ct" // 事件的绑定容器对象。因为事件总是需要依附某些元素，但如果全局事件，不好控制。就自己建一个元素专门用于绑定。
+        },
+        DATA: {
+            DATA_TYPE_DATE: "date",
+            DATA_TYPE_TIME: "time",
+            DATA_TYPE_DATETIME: "datetime"
         }
     };
     var PAGE = {
@@ -140,6 +147,21 @@ define(function () {
             }
         }
     };
+
+    // 查询相关的
+    var QUERY = {
+        OP: {
+            EQ: "eq",
+            GT: "gt",
+            GE: "ge",
+            LT: "lt",
+            LE: "le",
+            LK: "lk",
+            NE: "ne",
+            NA: "na",
+            NNA: "nna"
+        }
+    }
     /**
      * gaea-data框架定义
      * 针对< html data-gaea-data='' >
@@ -156,6 +178,7 @@ define(function () {
         ACTION: ACTION,
         TEMPLATE: TEMPLATE,
         TEXT: TEXT,
-        GAEA_DATA: GAEA_DATA
+        GAEA_DATA: GAEA_DATA,
+        QUERY: QUERY
     };
 });

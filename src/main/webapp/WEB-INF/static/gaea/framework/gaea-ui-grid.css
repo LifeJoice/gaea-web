@@ -104,7 +104,7 @@
 .grid-td-div {
     /*控制块内文字不换行，不超出。*/
     overflow: hidden;
-    height: 25px;
+    min-height: 25px;
     /*超出则显示省略号……*/
     text-overflow: ellipsis;
     /*不换行*/
@@ -433,3 +433,34 @@ span.icon.last::after {
 /*border-radius: 100%;*/
 /*}*/
 
+/* ************************************************************** crud grid（可编辑grid） ************************************************************** */
+/* 单元格容器 */
+.crud-grid .grid-td-div {
+    /* 因为有input框，可编辑grid的行会高点 */
+    min-height: 30px;
+}
+
+/* 单元格 */
+.crud-grid td {
+    border: 1px solid #ddd;
+}
+
+/*输入框。和form里面的不一样，宽度由外面容器控制。*/
+input.crud-grid-input {
+    width: 100%;
+    height: 30px;
+    /* 不需要点中high light边框 */
+    /*outline:1px solid #D4D4D4;*/
+    border: none;
+    font-family: 微软雅黑 light;
+    font-size: 13px;
+}
+
+input.crud-grid-input:focus {
+    /*outline: 1px solid #D4D4D4;*/
+    outline: none;
+}
+
+.non-editable {
+    background-color: #D4D4D4;
+}

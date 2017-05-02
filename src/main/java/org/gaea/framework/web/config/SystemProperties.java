@@ -2,6 +2,7 @@ package org.gaea.framework.web.config;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.ValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -67,6 +68,15 @@ public class SystemProperties {
         } catch (IOException e) {
             logger.error("系统初始化，无法加载对应的配置文件。可能影响系统的运作。", e);
         }
+    }
+
+    public static Integer getInteger(String key) {
+        String value = get(key);
+        if (!StringUtils.isNumeric(value)) {
+            logger.error("获取配置文件 key：{} 的值 value：{} 非数值！", key, value);
+            throw new NumberFormatException("获取配置文件的值非数值！");
+        }
+        return Integer.parseInt(value);
     }
 
     public static String get(String key) {

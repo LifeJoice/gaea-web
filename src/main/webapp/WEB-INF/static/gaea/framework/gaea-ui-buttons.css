@@ -34,10 +34,9 @@ a.gaea-ui-button,
     -o-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     /*box-shadow: 3px 3px 5px #E4E4E4,-1px 3px 5px #E4E4E4;*/
     /*圆角矩形*/
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -o-border-radius: 5px;
-    border-radius: 5px;
+    border-radius: 4px;
+    /* 按钮间间隔 */
+    margin-right: 5px;
 }
 
 .gaea-ui-page a.button:hover,

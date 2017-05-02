@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
 import org.gaea.demo.dto.DemoClassDTO;
 import org.gaea.demo.entity.DemoClassEntity;
+import org.gaea.demo.entity.DemoStudentEntity;
 import org.gaea.demo.repository.DemoClassRepository;
 import org.gaea.demo.service.DemoClassService;
 import org.gaea.exception.ProcessFailedException;
@@ -145,9 +146,9 @@ public class DemosController {
 
     @RequestMapping(value = "/add-class", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void saveClass(DemoClassEntity classEntity, HttpServletRequest request, @RequestBean("classRolesList") List<String> classRolesList) {
+    public void saveClass(@RequestBean DemoClassEntity classEntity, HttpServletRequest request, @RequestBean("classRolesList") List<String> classRolesList, @RequestBean("students") List<DemoStudentEntity> studentList) {
         classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
-        demoClassService.save(classEntity, GaeaWebSecuritySystem.getUserName(request));
+//        demoClassService.save(classEntity, GaeaWebSecuritySystem.getUserName(request));
     }
 
     @RequestMapping(value = "/test", produces = "plain/text; charset=UTF-8")

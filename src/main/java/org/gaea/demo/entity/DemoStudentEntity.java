@@ -4,6 +4,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * Created by iverson on 2017/1/16.
@@ -19,6 +20,16 @@ public class DemoStudentEntity {
     private String id;
     @Column(name = "NAME")
     private String name;
+    @Column(name = "SEX")
+    private int sex = 1; // 默认男
+    @Column(name = "STU_NO")
+    private String stuNo; // 学号
+    @Column(name = "ENTRANCE_TIME")
+    private Timestamp entranceTime; // 入学时间
+    @Column(name = "BIRTHDAY")
+    private Date birthday; // 出生日期
+    @Column(name = "ADDRESS")
+    private String address; // 地址
     @Column(name = "CREATE_BY")
     private String createBy;
     @Column(name = "CREATE_TIME")
@@ -41,6 +52,46 @@ public class DemoStudentEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getSex() {
+        return sex;
+    }
+
+    public void setSex(int sex) {
+        this.sex = sex;
+    }
+
+    public String getStuNo() {
+        return stuNo;
+    }
+
+    public void setStuNo(String stuNo) {
+        this.stuNo = stuNo;
+    }
+
+    public Timestamp getEntranceTime() {
+        return entranceTime;
+    }
+
+    public void setEntranceTime(Timestamp entranceTime) {
+        this.entranceTime = entranceTime;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getCreateBy() {

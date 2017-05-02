@@ -22,12 +22,16 @@ define([
             options: {
                 renderTo: null
             },
+            /**
+             *
+             * @param {object} options
+             * @param {jqSelector|jqObject} options.target
+             */
             init: function (options) {
-                if (gaeaValid.isNull(options.renderTo)) {
-                    console.log("renderTo属性不允许为空！");
-                    return;
+                if (gaeaValid.isNull(options.target)) {
+                    throw "target为空，无法创建dateTimePicker！";
                 }
-                var $datePicker = $("#" + options.renderTo);
+                var $datePicker = $(options.target);
                 $datePicker.datetimepicker({
                     yearStart: 2015,
                     dayOfWeekStart: 1,
@@ -61,14 +65,18 @@ define([
          */
         var datetimePicker = {
             options: {
-                renderTo: null
+                target: null
             },
+            /**
+             *
+             * @param {object} options
+             * @param {jqSelector|jqObject} options.target
+             */
             init: function (options) {
-                if (gaeaValid.isNull(options.renderTo)) {
-                    console.log("renderTo属性不允许为空！");
-                    return;
+                if (gaeaValid.isNull(options.target)) {
+                    throw "target为空，无法创建dateTimePicker！";
                 }
-                var $datetimePicker = $("#" + options.renderTo);
+                var $datetimePicker = $(options.target);
                 $datetimePicker.datetimepicker({
                     yearStart: 2015,
                     dayOfWeekStart: 1,
@@ -83,6 +91,34 @@ define([
                     defaultTime: '09:00',
                     step: 10
                 });
+            },
+            /**
+             * 这个是DatePicker和DateTimePicker通用的。
+             *
+             * @param {object} options
+             * @param {jqSelector|jqObject} options.target
+             * @param {string|number} options.value
+             */
+            setValue: function (options) {
+                gaeaValid.isNull({
+                    check: options.target,
+                    exception: "目标对象（target）为空，无法设定datetimepicker的值。"
+                });
+                if (gaeaValid.isNotNull(options.value)) {
+                    // 如果是数值，就用new Date
+                    if (_.isNumber(options.value)) {
+                        $(options.target).datetimepicker({
+                            value: new Date(options.value)
+                        });
+                    } else if (_.isString(options.value)) {
+                        /**
+                         * 如果是字符串，要求和datetimepicker的格式一致的字符串，例如：2017-1-1
+                         */
+                        $(options.target).datetimepicker({
+                            value: options.value
+                        });
+                    }
+                }
             }
 
         };

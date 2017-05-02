@@ -10,9 +10,10 @@ define([
         var button = {
             /**
              * 创建个按钮的html。简单的HTML拼凑而已。
-             * btnOptions
-             * @param btnOptions
-             *              size    要生成大按钮，还是小按钮。默认medium. value: small |
+             * @param {object} btnOptions
+             * @param {object} btnOptions.htmlId    html id
+             * @param {object} btnOptions.text      按钮的文本
+             * @param {object} btnOptions.size      要生成大按钮，还是小按钮。默认medium. value: small |
              */
             create: function (btnOptions) {
                 var buttonHtml = "";

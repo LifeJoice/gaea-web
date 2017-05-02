@@ -6,11 +6,11 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
         "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils",
-        "gaeajs-ui-view", "gaea-system-url"],
+        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
               GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils,
-              gaeaView, SYS_URL) {
+              gaeaView, SYS_URL, gaeaButton) {
         var toolbar = {
             options: {
                 renderTo: null,
@@ -50,7 +50,7 @@ define([
                 // 遍历按钮配置(views.actions.buttons)
                 $.each(this.options.buttons, function (key, val) {
                     var thisButton = this;
-                    var $button = $("#" + this.htmlId);
+                    //var $button = $("#" + this.htmlId);
                     var dialogDef = null;
                     /**
                      * if 是按钮组
@@ -76,6 +76,8 @@ define([
                     } else {
                         throw "不可识别的toolbar component类型: " + thisButton.componentName;
                     }
+
+                    var $button = $("#" + this.htmlId);
                     /**
                      * [2] 处理button的关联组件
                      * 【 生成各种组件 】 根据action的linkId找到对应的组件并构造它
@@ -208,18 +210,24 @@ define([
                     }
                     /**
                      * [3] 处理页面自定义的接口
+                     *
+                     * 这个应该重构没有了 by Iverson 2017-4-18 15:48:17
                      */
-                    if (gaeaValid.isNotNull(this.interfaceAction)) {
-                        that._createInterfaceActions(thisButton);
-                    }
+                    //if (gaeaValid.isNotNull(this.interfaceAction)) {
+                    //    that._createInterfaceActions(thisButton);
+                    //}
                     /**
                      * [3] 触发事件框架，去寻找有没有对应的系统功能要处理之类的。
                      */
                     toolbar.button._initAction({
                         button: thisButton,
-                        dialog: dialogDef,
-                        selectedRow: row
+                        dialog: dialogDef
                     });
+
+                    // 绑定事件
+                    if (_.isFunction(thisButton.onClick)) {
+                        $button.on("click", thisButton.onClick);
+                    }
                 });
             },
             /**
@@ -270,12 +278,19 @@ define([
                     return inViews;
                 },
                 _create: function (btnOptions) {
-                    var html = "<span><a id='" + btnOptions.htmlId + "'" +
-                        " class=\"medium darkslategrey button\"" +
-                        "><span>" +
-                        btnOptions.text +
-                        "</span>" +
-                        "</a></span>";
+                    //var html = "<span><a id='" + btnOptions.htmlId + "'" +
+                    //    " class=\"medium darkslategrey button\"" +
+                    //    "><span>" +
+                    //    btnOptions.text +
+                    //    "</span>" +
+                    //    "</a></span>";
+                    var html = '<span>' +
+                        gaeaButton.create({
+                            "htmlId": btnOptions.htmlId,
+                            "text": btnOptions.text,
+                            "size": btnOptions.size
+                        }) +
+                        '</span>';
                     return html;
                 },
                 /**
@@ -357,8 +372,11 @@ define([
                     }
                     /**
                      * 按钮点击的事件
+                     * 老的方式，是通过isBindOnClick配置项控制，但会比较繁琐。
+                     * 新的都是通过直接检查回调函数即可。
+                     * TODO 这个后面全部重构为基于onClick
                      */
-                    if (gaeaValid.isNull(opts.isBindOnClick) || opts.isBindOnClick) {
+                    if ((gaeaValid.isNull(opts.isBindOnClick) || opts.isBindOnClick) && !_.isFunction(buttonDef.onClick)) {
                         $button.click(function () {
                             /**
                              * 创建按钮点击的对应处理。并执行。

@@ -68,6 +68,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 },
                 GRID: {
                     REFRESH_DATA: "gaeaUI_event_grid_refresh_data", // 刷新数据区事件
+                    SYNC_GRID_DATA: "gaeaUI_event_grid_sync_grid_data", // 同步数据区的数据事件。一般crud grid需要，因为数据区是可编辑的。
                     RELOAD: "gaeaUI_event_grid_reload", // 刷新grid数据的事件。无需参数。
                     SELECT: "gaeaUI_event_grid_select"  // 选中了grid的某一行的事件
                 },

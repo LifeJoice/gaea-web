@@ -341,6 +341,144 @@ define([
                     // 设定值
                     $filterResult.val(opts.data);
                 }
+            },
+            /**
+             * 提供对某数据数组，以传入的条件进行过滤，并返回过滤后的结果集。并且在每个结果集单个元素中，植入原数组的位置（origIndex）。
+             * 这个基本上，就等同于crud-grid的查询功能。
+             * @param {object} opts
+             * @param {object[]} opts.data
+             * @param {QueryCondition[]} opts.conditions
+             */
+            filterData: function (opts) {
+                var filterData = [];
+                if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.data)) {
+                    throw "data为空，filterData无法执行数据过滤。";
+                }
+                if (gaeaValid.isNull(opts.conditions)) {
+                    return opts.data;
+                }
+                if (_.isArray(opts.data)) {
+                    if (!_.isArray(opts.conditions)) {
+                        opts.conditions = [opts.conditions];
+                    }
+                    // 遍历条件，这样比较少点
+                    $.each(opts.conditions, function (i, cond) {
+
+                        // 遍历数据，并过滤
+                        $.each(opts.data, function (j, dataItem) {
+                            if (gaeaValid.isNull(cond.propName) || gaeaValid.isNull(cond.op)) {
+                                console.debug("filterData里的条件格式不完整。%s", JSON.stringify(cond));
+                                return;
+                            }
+                            // 只有"是否空"检查，才允许条件的propValue为空。否则跳过。
+                            if(gaeaValid.isNull(cond.propValue) &&
+                                !gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NNA, cond.op) &&
+                                !gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NA, cond.op)){
+                                console.debug("filterData里的条件格式不完整。%s", JSON.stringify(cond));
+                                return;
+                            }
+                            // 要比较的值
+                            var value = dataItem[cond.propName];
+                            // 根据关系比较符，进行比较匹配
+                            if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.EQ, cond.op)) {
+                                // 等于
+                                // 大小写敏感
+                                if (_.isEqual(value, cond.propValue)) {
+                                    // 设定在原数组的位置，这个对grid会有用
+                                    dataItem.origIndex = j;
+                                    filterData.push(dataItem);
+                                    return;
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.GE, cond.op)) {
+                                // 大于等于
+                                if (_.isNumber(value) && _.isNumber(cond.propValue)) {
+                                    if (value >= cond.propValue) {
+                                        // 设定在原数组的位置，这个对grid会有用
+                                        dataItem.origIndex = j;
+                                        filterData.push(dataItem);
+                                        return;
+                                    }
+                                } else {
+                                    console.debug("filterData比较大小对象不为数值，无法比较。");
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.GT, cond.op)) {
+                                // 大于
+                                if (_.isNumber(value) && _.isNumber(cond.propValue)) {
+                                    if (value > cond.propValue) {
+                                        // 设定在原数组的位置，这个对grid会有用
+                                        dataItem.origIndex = j;
+                                        filterData.push(dataItem);
+                                        return;
+                                    }
+                                } else {
+                                    console.debug("filterData比较大小对象不为数值，无法比较。");
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.LE, cond.op)) {
+                                // 小于等于
+                                if (_.isNumber(value) && _.isNumber(cond.propValue)) {
+                                    if (value <= cond.propValue) {
+                                        // 设定在原数组的位置，这个对grid会有用
+                                        dataItem.origIndex = j;
+                                        filterData.push(dataItem);
+                                        return;
+                                    }
+                                } else {
+                                    console.debug("filterData比较大小对象不为数值，无法比较。");
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.LT, cond.op)) {
+                                // 小于
+                                if (_.isNumber(value) && _.isNumber(cond.propValue)) {
+                                    if (value < cond.propValue) {
+                                        // 设定在原数组的位置，这个对grid会有用
+                                        dataItem.origIndex = j;
+                                        filterData.push(dataItem);
+                                        return;
+                                    }
+                                } else {
+                                    console.debug("filterData比较大小对象不为数值，无法比较。");
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.LK, cond.op)) {
+                                // Like
+                                if (gaeaString.containIgnoreCase(value, cond.propValue)) {
+                                    // 设定在原数组的位置，这个对grid会有用
+                                    dataItem.origIndex = j;
+                                    filterData.push(dataItem);
+                                    return;
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NE, cond.op)) {
+                                // 不等于
+                                if (!_.isEqual(value, cond.propValue)) {
+                                    // 设定在原数组的位置，这个对grid会有用
+                                    dataItem.origIndex = j;
+                                    filterData.push(dataItem);
+                                    return;
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NA, cond.op)) {
+                                // is Null
+                                if (gaeaValid.isNull(value)) {
+                                    // 设定在原数组的位置，这个对grid会有用
+                                    dataItem.origIndex = j;
+                                    filterData.push(dataItem);
+                                    return;
+                                }
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NNA, cond.op)) {
+                                // is Not null
+                                if (gaeaValid.isNotNull(value)) {
+                                    // 设定在原数组的位置，这个对grid会有用
+                                    dataItem.origIndex = j;
+                                    filterData.push(dataItem);
+                                    return;
+                                }
+                            }
+                        });
+                        // 每过滤一次条件，就只留过滤下的数据
+                        opts.data = filterData;
+                        // 清空过滤后的数据
+                        filterData = [];
+
+                    });
+                }
+                return opts.data;
             }
         };
 

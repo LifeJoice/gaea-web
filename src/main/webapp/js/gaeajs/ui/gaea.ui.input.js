@@ -7,9 +7,9 @@
  */
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
-        "gaeajs-ui-events", "gaeajs-common-utils-string", "gaeajs-ui-definition"],
+        "gaeajs-ui-events", "gaeajs-common-utils-string", "gaeajs-ui-definition", "gaeajs-ui-plugins"],
     function ($, _, gaeaAjax, gaeaValid,
-              GAEA_EVENTS, gaeaString, GAEA_UI_DEFINE) {
+              gaeaEvents, gaeaString, GAEA_UI_DEFINE, gaeaPlugins) {
 
         var TEMPLATE = {
             QUERY: {
@@ -26,6 +26,110 @@ define([
                 '<i class="gaea-icon" style="font-size: 12px;" data-gaea-data="value:\'nna\'" >nNA</i>' + // style是临时的
                 '</div>' +
                 '<div class="gaea-query-input-div"><input id="<%= INPUT_ID %>" data-field-id="<%= FIELD_ID %>"></div>' // 查询字段块（包括下拉按钮）
+            }
+        };
+
+        var gaeaInput = {
+            defaultOpts: {
+                class: ""
+            },
+            /**
+             *
+             * 在一个容器中创建一个新的input，并返回这个input的jq对象。
+             * @param {object} opts
+             * @param {string} opts.containerId                 input的容器（div）id
+             * @param {string} opts.id                          input的id
+             * @param {string} opts.name                        input的name
+             * @param {string} opts.class                       input的class
+             * @param {string} opts.value                       input的value
+             * @param {string} opts.dataType                    数据的类型：string|date|time|datetime|...
+             * @param {GaeaColumnValidator} opts.validator      gaea的crud grid的编辑列的校验定义
+             * @param {function} opts.onChange                  onChange事件
+             * @returns {*|jQuery|HTMLElement}
+             */
+            create: function (opts) {
+                opts = _.extend(_.clone(gaeaInput.defaultOpts), opts);
+                var $inputDiv = $("#" + opts.containerId);
+                var inputTemplate = _.template('<input type="text" id="<%=ID%>" name="<%=NAME%>" class="<%=CLASS%>" value="" <%= VALIDATOR_HTML %> >');
+                // 这个input有没有验证。有，生成相关的HTML验证属性。
+                var inputValidateAttr = gaeaValid.isNull(opts.validator) ? "" : gaeaValid.getHtml(opts.validator);
+                // create input jq object
+                var $input = $(inputTemplate({
+                    ID: opts.id,
+                    NAME: opts.name,
+                    CLASS: opts.class,
+                    VALIDATOR_HTML: inputValidateAttr
+                }));
+                // 缓存配置信息
+                $input.data("gaea-options", opts);
+                /**
+                 * 根据系统返回的各个字段的类型定义，做相应的转化和初始化。
+                 * 例如：
+                 * 日期类的字段，需要初始化日期控件。
+                 */
+                //if (gaeaValid.isNotNull(opts.datetimeFormat)) {
+                if (gaeaString.equalsIgnoreCase(opts.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
+                    // 初始化日期控件
+                    gaeaPlugins.datePicker.init({
+                        target: $input
+                    });
+                } else if (gaeaString.equalsIgnoreCase(opts.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_TIME)) {
+                    // TODO
+                } else if (gaeaString.equalsIgnoreCase(opts.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME)) {
+                    // 初始化日期时间控件
+                    gaeaPlugins.datetimePicker.init({
+                        target: $input
+                    });
+                }
+                //}
+
+                if (gaeaValid.isNotNull(opts.containerId) && $inputDiv.length > 0) {
+                    $inputDiv.append($input);
+                }
+                // set value
+                if (gaeaValid.isNotNull(opts.value)) {
+                    gaeaInput.setValue({
+                        target: $input,
+                        value: opts.value
+                    });
+                }
+                // 绑定事件
+                if (_.isFunction(opts.onChange)) {
+                    gaeaEvents.registerListener("change", $input, opts.onChange);
+                }
+                return $input;
+            },
+            /**
+             * 设定input的值。
+             * 会自动去检查，是个普通input框，还是某个组件（例如datetimepicker）
+             * @param {object} opts
+             * @param {jqSelector|jqObject} opts.target
+             * @param {string|number} opts.value
+             */
+            setValue: function (opts) {
+                gaeaValid.isNull({
+                    check: opts.target,
+                    exception: "目标对象（target）为空，无法设定input的值。"
+                });
+                var $input = $(opts.target);
+                var cacheOpts = $input.data("gaea-options");
+
+                if (gaeaString.equalsIgnoreCase(cacheOpts.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE) ||
+                    gaeaString.equalsIgnoreCase(cacheOpts.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME)) {
+                    /**
+                     * 设定日期控件的值。
+                     */
+                        // 初始化日期控件
+                    gaeaPlugins.datetimePicker.setValue({
+                        target: $input,
+                        value: opts.value
+                    });
+                } else {
+                    /**
+                     * 普通input的值
+                     */
+                    $input.val(opts.value);
+                }
             }
         };
 
@@ -112,5 +216,8 @@ define([
             //    return result;
             //}
         };
-        return _gaeaInput;
+        return {
+            init: _gaeaInput.init,
+            create: gaeaInput.create
+        };
     });

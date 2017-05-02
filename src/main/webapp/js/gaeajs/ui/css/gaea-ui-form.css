@@ -67,7 +67,7 @@
 
 /* 输入框 */
 /* hack select2插件 */
-.gaea-form input, .gaea-form textarea, .gaea-form select, .select2-container--default .select2-selection--multiple {
+.gaea-form .fieldvalue input, .gaea-form .fieldvalue textarea, .gaea-form .fieldvalue select, .select2-container--default .select2-selection--multiple {
     border-style: solid;
     border-radius: 2px;
     border-color: #D4D4D4;
@@ -78,12 +78,12 @@
     font-size: 13px;
 }
 
-.gaea-form input, .gaea-form select {
+.gaea-form .fieldvalue input, .gaea-form .fieldvalue select {
     height: 30px;
     /*width:160px;*/
 }
 
-.gaea-form input, .gaea-form select, .gaea-form label.error {
+.gaea-form .fieldvalue input, .gaea-form .fieldvalue select, .gaea-form label.error {
     /*height:30px;*/
     width: 172px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
     -webkit-box-sizing: border-box;

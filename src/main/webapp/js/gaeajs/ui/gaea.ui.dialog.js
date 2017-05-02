@@ -57,7 +57,25 @@ define([
          * @property {string} actions
          */
 
-        var _private = {};
+        var _private = {
+            /**
+             * 触发grid刷新。
+             * 从data-filter-dialog回到上级dialog的时候需要。
+             * @param {string} gridId       grid容器id
+             * @param {object} data         要刷新的数据
+             */
+            triggerGridRefresh: function (gridId, data) {
+                var $gridCt = $("#" + gridId);
+                //var gridOptions = $gridCt.data("options");
+                //var allData = gridOptions.data;
+                // 触发刷新
+                $gridCt.trigger(GAEA_EVENTS.DEFINE.UI.GRID.REFRESH_DATA, {
+                    data: data,
+                    // 全部数据替换刷新
+                    isNewData: false
+                });
+            }
+        };
 
         var TEMPLATE = {
             NEW_DIALOG_INNER_CONTAINER: '<div><form id="<%= FORM_ID %>" action="<%= ACTION %>"></form></div>',
@@ -1525,7 +1543,7 @@ define([
         _private.inOne = {
             /**
              * 打开方式（openStyle）为inOne的确定按钮的处理。
-             * 把新打开的dialog的所有值，填充到父级dialog的某个字段去。
+             * 把新打开的dialog的所有值，填充到父级dialog的某个字段去，或者目标是某个组件（当前支持crud-grid），则做组件的装填。
              * @param {object} opts
              * @param {string} opts.formId
              * @param {string} opts.submitAction
@@ -1534,7 +1552,8 @@ define([
             writeBackInOne: function (opts) {
                 var $dialogForm = $("#" + opts.formId);
                 if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.SUBMIT_ACTION.WRITEBACK_IN_ONE, opts.submitAction)) {
-                    var $parentInput = $("#" + opts.refInputId);
+                    // 要填充数据的目标对象
+                    var $target = $("#" + opts.refInputId);
                     var data = "";
                     /**
                      * 如果是dataFilterDialog组件，则里面的是grid，不是form。直接把grid data返回即可。
@@ -1548,8 +1567,19 @@ define([
                     } else {
                         data = $dialogForm.serializeObject();
                     }
-                    // 保存时得json转一下，否则变成[ Object object ]这样了
-                    $parentInput.val(JSON.stringify(data));
+                    /**
+                     * if 目标对象是crud grid
+                     *      按crud grid的方式填充数据
+                     * else （都当是普通input之流）
+                     *      set value
+                     */
+                    if ($target.find(".gaea-grid").hasClass("crud-grid")) {
+                        var gridCtId = $target.find(".gaea-grid-ct").attr("id");
+                        _private.triggerGridRefresh(gridCtId, data);
+                    } else {
+                        // 保存时得json转一下，否则变成[ Object object ]这样了
+                        $target.val(JSON.stringify(data));
+                    }
                 }
             },
             /**

@@ -75,3 +75,13 @@
 .ui-tabs .gaea-form input, .ui-tabs .gaea-form select, .ui-tabs .gaea-form label.error {
     width: 165px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
 }
+
+/* ******************************************************************** validate组件的样式 ******************************************************************** */
+/* 在可编辑grid中错误的显示样式 */
+.crud-grid label.error {
+    float: left;
+    width: 100%;
+    display: inline;
+    /* 自动换行 */
+    white-space: normal;
+}

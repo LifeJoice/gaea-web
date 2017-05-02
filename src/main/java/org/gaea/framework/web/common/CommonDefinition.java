@@ -31,4 +31,8 @@ public class CommonDefinition {
     /* ***************************************** 以下是REDIS的key在.properties的定义 ***************************************** */
     // 缓存的key：schema定义
     public static final String PROP_KEY_REDIS_GAEA_SCHEMA_DEF = "gaea.schema.def";
+
+    /* ***************************************** Exception异常相关 ***************************************** */
+    // Gaea通用异常处理HandlerExceptionResolver在Spring框架中的顺序
+    public static final String PROP_KEY_EXCEPTION_RESOLVER_ORDER = "system.exception.resolver.order";
 }

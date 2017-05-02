@@ -108,6 +108,36 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
         }
         return isNotNull;
     };
+
+    /**
+     * gaea校验器插件。
+     */
+    var gaeaValidator = {
+        /**
+         * 获取gaea validator配置项，对应validator的html对象。该对象其实是跟html代码一一匹配的。
+         * 就是直接把该对象转换为字符串，拼接在元素（例如input）中就可以立马使用。
+         * 例如：
+         * crud-grid中的列配置项，有validator对象：
+         * {name:"stuNo",text:"学号", width:60, validator: { html: {type:"number","data-msg":"非空。输入要求是数值。",required:"required" } }
+         * @param {object} opts
+         * @param {GaeaColumnValidatorHtml} opts.html
+         * @returns {string} 合并后的字符串。
+         */
+        getHtml: function (opts) {
+            var htmlStr = "";
+            if (isNotNull(opts) && isNotNull(opts.html)) {
+                // 遍历每一个属性
+                $.each(opts.html, function (key, val) {
+                    // 不是undefined|null|NaN, 但可以是""
+                    if (!_.isNaN(val) && !_.isNull(val)) {
+                        htmlStr += ' ' + key + '="' + val + '" ';
+                    }
+                });
+            }
+            return htmlStr;
+        }
+    };
+
     /**
      * 返回（暴露）的接口
      */
@@ -115,6 +145,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
         isNull: isNull,
         isNotNull: isNotNull,
         isNotNullArray: isNotNullArray,
-        isNotNullMultiple: isNotNullMultiple
+        isNotNullMultiple: isNotNullMultiple,
+        getHtml: gaeaValidator.getHtml
     }
-})
+});

@@ -11,11 +11,11 @@
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
-        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2"
+        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid'
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
-              gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2) {
+              gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid) {
 
         var gaeaCommons = {
             /**
@@ -33,6 +33,10 @@ define([
                 _private.initGaeaButton(ctSelector);
                 // 初始化select2插件
                 _private.initSelect2(ctSelector);
+                // 初始化crud grid
+                _private.crudGrid.init({
+                    target: ctSelector
+                });
 
                 return gaeaMultiSelect.init(ctSelector);
             },
@@ -60,6 +64,7 @@ define([
                 // 没有相关的组件，也是需要resolve的
                 if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
+                    return dfd.promise();
                 }
                 // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
                 var attrName = "data-" + GAEA_UI_DEFINE.UI.BUTTON.DEFINE;
@@ -98,6 +103,7 @@ define([
                 // 没有相关的组件，也是需要resolve的
                 if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
+                    return dfd.promise();
                 }
                 // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
                 var attrName = "data-" + GAEA_UI_DEFINE.UI.SELECT2.DEFINE;
@@ -125,6 +131,142 @@ define([
                 });
                 dfd.resolve();
                 return dfd.promise();
+            }
+        };
+
+        /**
+         * 初始化crud grid.
+         * @param {object} opts
+         * @param {jqObject|jqSelector} opts.target
+         */
+        _private.crudGrid = {
+            init: function (opts) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(opts.target)) {
+                    dfd.resolve();
+                    return dfd.promise();
+                }
+
+                // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
+                var attrName = "data-" + GAEA_UI_DEFINE.UI.GRID.CRUD_GRID_DEFINE;
+                // 找gaeaUI按钮的jq选择器条件( <a data-gaea-ui-button=*** ...> )
+                var gridPluginTemplate = _.template("div[<%= ATTR_NAME %>]");
+                // 查找所有按钮，遍历并初始化
+                $(opts.target).find(gridPluginTemplate({
+                    ATTR_NAME: attrName
+                })).each(function (idx, obj) {
+                    var id = $(obj).attr("id");
+                    var $this = $(this);
+                    gaeaValid.isNull({
+                        check: id,
+                        exception: "创建crud grid的div id不允许为空！"
+                    });
+                    /**
+                     * debug
+                     * 检查是否有重复元素！
+                     * 这个很重要。否则会有一些莫名其妙的问题。
+                     */
+                    if (!gaeaUtils.dom.checkUnique(id)) {
+                        console.debug("某元素根据id查找不唯一。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
+
+                    //var gaeaButton = require("gaeajs-ui-button");
+                    _private.crudGrid.initOne({
+                        id: id,
+                        target: this
+                    });
+                });
+                dfd.resolve();
+                return dfd.promise();
+            },
+            /**
+             * 这个是初始化一个grid的方法。
+             * @param {object} opts
+             * @param {string} opts.id                          crud grid容器。这个是最外层的容器，里面应该还有toolbar和真正grid的容器。
+             * @param {jqSelector|jqObject} opts.target
+             */
+            initOne: function (opts) {
+                var $rootCrudGridCt = $(opts.target);
+                var rootCrudGridCtId = $rootCrudGridCt.attr("id");
+                var crudGridToolbarId = rootCrudGridCtId + "-toolbar";
+                var crudGridCtId = rootCrudGridCtId + "-grid-ct";
+                // create HTML
+                $rootCrudGridCt.append('<div id="' + crudGridToolbarId + '"></div><div id="' + crudGridCtId + '"></div>');
+                //var $crudGridCt = $("#" + crudGridCtId);
+                //var $toolbarCt = $("#" + crudGridToolbarId);
+
+                var configStr = $rootCrudGridCt.data(GAEA_UI_DEFINE.UI.GRID.CRUD_GRID_DEFINE); // = data-gaea-ui-crud-grid
+                var name = $rootCrudGridCt.data("gaea-ui-name"); // UI组件名，一般也就是组件需要的数据名（例如crud-grid，里面的input的base name就是它）
+                var gridOptions = gaeaString.parseJSON(configStr);
+                // set name
+                gridOptions.name = name;
+
+                // ******************* create grid *******************
+                gaeaGrid = require("gaeajs-ui-grid"); // 经常拿不到模块，为什么
+                // set grid id
+                gridOptions.id = crudGridCtId;
+                // set component
+                gridOptions.component = GAEA_UI_DEFINE.UI.COMPONENT.CRUD_GRID;
+                gaeaGrid.create(gridOptions);
+
+                // ******************* create toolbar *******************
+                _private.crudGrid.initToolbar({
+                    id: crudGridToolbarId,
+                    gridOptions: gridOptions
+                });
+            },
+            /**
+             * 初始化一个grid对应的toolbar。
+             * @param {object} opts
+             * @param {string} opts.id              toolbar containerId
+             * @param {object} opts.gridOptions     grid options
+             */
+            initToolbar: function (opts) {
+
+                var btnAddOneId = opts.id + "-btnAddOne";
+                var btnDelId = opts.id + "-btnDel";
+                gaeaGrid = require("gaeajs-ui-grid"); // 经常拿不到模块，为什么
+
+                // 初始化 TOOLBAR
+                var gaeaToolbar = require("gaeajs-ui-toolbar");
+                gaeaToolbar.create({
+                    renderTo: opts.id,
+                    buttons: [{
+                        "id": btnAddOneId,
+                        "name": btnAddOneId,
+                        "htmlName": btnAddOneId,
+                        "htmlId": btnAddOneId,
+                        "htmlValue": "添加",
+                        "type": null,
+                        "href": null,
+                        "linkViewId": null,
+                        "linkComponent": null,
+                        "componentName": "button", // 定义组件
+                        "action": null,
+                        "size": "small",
+                        onClick: function () {
+                            gaeaGrid.crudGrid.addNewOne(opts.gridOptions)
+                        }
+                    },
+                        {
+                            "id": btnDelId,
+                            "name": btnDelId,
+                            "htmlName": btnDelId,
+                            "htmlId": btnDelId,
+                            "htmlValue": "删除",
+                            "type": null,
+                            "href": null,
+                            "linkViewId": null,
+                            "linkComponent": null,
+                            "componentName": "button", // 定义组件
+                            "action": null,
+                            "size": "small",
+                            onClick: function () {
+                                gaeaGrid.crudGrid.deleteSelected(opts.gridOptions)
+                            }
+                        }]
+                });
             }
         };
 

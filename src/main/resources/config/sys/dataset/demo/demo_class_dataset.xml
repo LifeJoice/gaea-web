@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
 <dataset-definition>
+    <!--
+    authority-type
+    数据校验方式。 0：不校验 1：校验,无对应的当没权限. 2：校验,无对应的当有权限.
+    -->
     <dataset id="DEMO_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="1">
         <data-sql>
             <![CDATA[SELECT c.* FROM demo_class c]]>
@@ -10,6 +14,17 @@
                 <and propName="id" op="eq"></and>
             </condition-set>
         </where>
+    </dataset>
+    <!-- ********************************************** 学生 ********************************************** -->
+    <dataset id="DEMO_STUDENT_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="0">
+        <data-sql>
+            <![CDATA[SELECT stu.* FROM demo_student stu]]>
+        </data-sql>
+        <!--<where>-->
+        <!--<condition-set id="byId">-->
+        <!--<and propName="id" op="eq"></and>-->
+        <!--</condition-set>-->
+        <!--</where>-->
     </dataset>
 
     <!-- ********************************************** 小学年级 ********************************************** -->
@@ -31,6 +46,14 @@
             <data-element value="2" text="语文代表"/>
             <data-element value="3" text="数学代表"/>
             <data-element value="4" text="英语代表"/>
+        </data>
+    </dataset>
+    <!-- ********************************************** 性别 ********************************************** -->
+    <dataset id="DEMO_STUDENT_SEX" cache-type="static">
+        <data>
+            <data-element value="" text=""/>
+            <data-element value="1" text="男"/>
+            <data-element value="2" text="女"/>
         </data>
     </dataset>
 </dataset-definition>

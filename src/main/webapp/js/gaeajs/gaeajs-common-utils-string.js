@@ -27,6 +27,23 @@ define([
             return false;
         },
         /**
+         * A字符串是否含有B字符串。无视大小写。
+         * @param baseStr
+         * @param subStr
+         * @returns {boolean}
+         */
+        containIgnoreCase: function (baseStr, subStr) {
+            if (gaeaValid.isNull(baseStr) || gaeaValid.isNull(subStr)) {
+                return false;
+            }
+            var compStr1 = new String(baseStr).valueOf().toUpperCase();
+            var compStr2 = new String(subStr).valueOf().toUpperCase();
+            if (_s.include(compStr1, compStr2)) {
+                return true;
+            }
+            return false;
+        },
+        /**
          * 把一个字符串转换为json对象。主要是为了支持非严格的格式。
          * @param jsonStr 不带大括号的json对象字符串。例如：options:users,optionsText:'username',optionsValue:'username',value:userValue
          * @returns {{}}
