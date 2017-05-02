@@ -9,34 +9,50 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.gaea.exception.*;
+import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 
 /**
  * 统一的Controller的异常处理。
  * <p>统一拦截后，做个区分</p>
- *
+ * <p>
+ *     继承AbstractHandlerExceptionResolver,为了设定exception resolver的顺序, 确保在DefaultHandlerExceptionResolver之前.<br/>
+ *     否则一些系统抛出的异常,例如DispatchServlet抛出的异常,会被DefaultHandlerExceptionResolver处理掉, 不好控制.<br/>
+ *     by Iverson 2017-4-27
+ * </p>
  * @author Iverson 2014-5-5 星期一
  */
 @Component
-public class GenericExceptionResolver implements HandlerExceptionResolver {
+public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
 
     final Logger logger = LoggerFactory.getLogger(GenericExceptionResolver.class);
+    private final int ORDER_BEFORE_SPRING_DEFAULT_HANDLER = SystemProperties.getInteger(CommonDefinition.PROP_KEY_EXCEPTION_RESOLVER_ORDER);
+
+    public GenericExceptionResolver() {
+        /**
+         * 这个确保介乎ResponseStatusExceptionResolver( order=1) 和 DefaultHandlerExceptionResolver( order=2 )之间。
+         * 压制DefaultHandlerExceptionResolver。
+         */
+        setOrder(ORDER_BEFORE_SPRING_DEFAULT_HANDLER);
+    }
 
     /**
      * 可能并不是最佳实践。
-     *
+     * 这个是实现HandlerExceptionResolver的。不过后来改为继承AbstractHandlerExceptionResolver后，这个就变成内部调用了。
      * @param request
      * @param response
      * @param handler
      * @param ex
      * @return
      */
-    @Override
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         ModelAndView mav = new ModelAndView();
         /* 先对异常进行日志处理,避免丢失. */
@@ -79,6 +95,11 @@ public class GenericExceptionResolver implements HandlerExceptionResolver {
             logger.error("自定义的Spring MVC的异常拦截器发生异常！", iox);
         }
         return mav;
+    }
+
+    @Override
+    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        return resolveException(request, response, handler, ex);
     }
 
     private void logException(Exception ex) {
