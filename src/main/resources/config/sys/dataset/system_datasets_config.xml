@@ -103,10 +103,20 @@
     <!-- ++++++++++++++++++++++++++++++++++++  TEST  ++++++++++++++++++++++++++++++++++++ -->
     <dataset id="DS_EXCEL_EXPORT_DEMO" table="TEST" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
-            <![CDATA[SELECT
-  menu.ID m_id,menu.LEVEL m_level,menu.NAME m_name,menu.PARENT_ID m_parentid,menu.RESOURCE_ID m_res_id,menu.STATUS m_status,res.description r_desc,res.ID r_id,res.LEVEL r_level,res.NAME r_name,res.ORDER_SEQ r_order,res.PARENT_ID r_parent_id,res.RESOURCE_URL r_res
-FROM
-  gaea_sys_menus menu
+            <![CDATA[SELECT menu.ID          m_id,
+       menu.LEVEL_NUM   m_level,
+       menu.NAME        m_name,
+       menu.PARENT_ID   m_parentid,
+       menu.RESOURCE_ID m_res_id,
+       menu.STATUS      m_status,
+       res.description  r_desc,
+       res.ID           r_id,
+       res.LEVEL_NUM    r_level,
+       res.NAME         r_name,
+       res.ORDER_SEQ    r_order,
+       res.PARENT_ID    r_parent_id,
+       res.RESOURCE_URL r_res
+  FROM gaea_sys_menus menu
   LEFT JOIN gaea_sys_menus pmenu
     ON menu.PARENT_ID = pmenu.ID
   LEFT JOIN gaea_sys_resources res

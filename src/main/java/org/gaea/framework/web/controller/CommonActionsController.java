@@ -4,6 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
@@ -48,7 +49,7 @@ public class CommonActionsController {
      */
     @RequestMapping(value = "/doAction")
     public void doAction(String method, String schemaId, String buttonId, String actionName,
-                         HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysInitException {
+                         HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysInitException, ProcessFailedException {
         if (StringUtils.isEmpty(schemaId)) {
             throw new ValidationFailedException("获取不到Schema id。无法进行导出操作。");
         }

@@ -65,7 +65,7 @@ public class ExcelExportButtonAction implements Action<File> {
     }
 
     @Override
-    public File doAction(String loginName) throws ValidationFailedException {
+    public File doAction(String loginName) throws ValidationFailedException, ProcessFailedException {
         File file = null;
         Map<String, ActionParam> actionParamMap = getActionParamMap();
         ActionParam<String> dataSetParam = actionParamMap.get("dataSetId");
@@ -87,6 +87,9 @@ public class ExcelExportButtonAction implements Action<File> {
             if (withDataParam == null || BooleanUtils.toBooleanObject(withDataParam.getValue()) == null || BooleanUtils.toBooleanObject(withDataParam.getValue())) {
                 GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
                 data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), excelTemplateParam.getValue(), defaultDsContext); // 默认导出1000条
+                if (data == null) {
+                    throw new ProcessFailedException("数据为空，无法执行导出操作。");
+                }
             }
             file = excelExport.export(excelTemplateParam.getValue(), data, SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
         } catch (SysLogicalException e) {
@@ -94,8 +97,6 @@ public class ExcelExportButtonAction implements Action<File> {
             throw new ValidationFailedException("系统逻辑错误！请联系管理员处理。");
         } catch (SysInitException e) {
             logger.error("系统初始化异常！", e);
-        } catch (ProcessFailedException e) {
-            logger.error(e.getMessage(), e);
         }
         return file;
     }

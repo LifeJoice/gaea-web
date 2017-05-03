@@ -4,6 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.SchemaActionDefinition;
@@ -47,7 +48,7 @@ public class ActionsService {
      * @param request     获取用户登录信息
      * @throws ValidationFailedException
      */
-    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request) throws ValidationFailedException {
+    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request) throws ValidationFailedException, ProcessFailedException {
         if (action == null) {
             logger.warn("传入参数是一个空action。无法执行！");
             return;

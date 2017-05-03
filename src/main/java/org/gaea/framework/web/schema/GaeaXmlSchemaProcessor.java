@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -356,15 +357,19 @@ public class GaeaXmlSchemaProcessor {
      * @param dataList               sql查询的数据列表。一行 = Map < 字段名 ： 字段值 >
      * @param columnMap              Map< db_column_name : schemaColumn >
      * @param displayUndefinedColumn 是否显示XML Schema中未定义的列。如果是，则key以数据库字段名返回。
-     * @return
+     * @return Map. key: 大写的column name.
      */
     public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, Map<String, SchemaColumn> columnMap, boolean displayUndefinedColumn) {
-//        List<SchemaColumn> columns = grid.getColumns();
-//        List<Map<String, Object>> origResults = dataSet.getSqlResult();
+        if (dataList == null) {
+            return null;
+        }
         List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
         // 遍历所有记录
         for (Map<String, Object> rowDataMap : dataList) {
-            Map<String, Object> oneResultMap = new HashMap<String, Object>();
+            // 必须判断传入的map类型，然后构造同一类型的返回。
+            // 注意!
+            // Spring namedParameterJdbcTemplate.queryForList返回的是LinkedCaseInsensitiveMap，这样对于key（数据库列）是大小写不敏感的。如果变成HashMap就会大小写敏感了。
+            Map<String, Object> oneResultMap = rowDataMap instanceof LinkedCaseInsensitiveMap ? new LinkedCaseInsensitiveMap<Object>() : new HashMap<String, Object>();
             // 遍历一条记录的所有字段
             Set<String> keys = rowDataMap.keySet();
             for (String key : keys) {
@@ -386,7 +391,8 @@ public class GaeaXmlSchemaProcessor {
                  * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
                  */
                 Object newValue = getValueFromDS(rowDataMap.get(key), column.getDataSetId());
-                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
+                // 放入的key统一大写吧
+                oneResultMap.put(column.getName().toUpperCase(), newValue);   // 按新名字放入原值
             }
             newResultMapList.add(oneResultMap);
         }

@@ -1,6 +1,7 @@
 package org.gaea.framework.web.schema;
 
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.view.action.ActionParam;
 
@@ -40,5 +41,5 @@ public interface Action<T> {
      * @return
      * @param loginName
      */
-    T doAction(String loginName) throws ValidationFailedException, InvalidDataException;
+    T doAction(String loginName) throws ValidationFailedException, InvalidDataException, ProcessFailedException;
 }

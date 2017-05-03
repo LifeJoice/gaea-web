@@ -97,14 +97,20 @@ define([
                     '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
                     '</form>';
                 var formHtmlTemplate = _.template(submitFormHtml);
-                var jqHtmlSelector = formHtmlTemplate({
+                var $form = $(formHtmlTemplate({
                     ACTION: SYS_URL.ACTION.DO_SIMPLE_ACTION,
                     ACTION_NAME: data.actionName,
                     SCHEMA_ID: data.schemaId,
                     BUTTON_ID: button.id
-                });
+                }));
+                // create form
+                // 必须append到body中，否则报错：Form submission canceled because the form is not connected
+                // 原因：According to the HTML standards, if the form is not associated browsing context(document), form submission will be aborted.
+                $("#" + button.id).parents("body:first").append($form);
                 // 提交form
-                $(jqHtmlSelector).submit();
+                $form.submit();
+                // remove form
+                $form.remove();
             } else {
                 /**
                  * 走ajax提交路线。
@@ -296,13 +302,20 @@ define([
                         '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
                         '</form>';
                     var formHtmlTemplate = _.template(submitFormHtml);
-                    var jqHtmlSelector = formHtmlTemplate({
+                    var $form = $(formHtmlTemplate({
                         ACTION: submitUrl,
                         METHOD: data.method,
                         SCHEMA_ID: data.schemaId,
                         BUTTON_ID: button.id
-                    });
-                    $(jqHtmlSelector).submit();
+                    }));
+                    // create form
+                    // 必须append到body中，否则报错：Form submission canceled because the form is not connected
+                    // 原因：According to the HTML standards, if the form is not associated browsing context(document), form submission will be aborted.
+                    $("#" + button.id).parents("body:first").append($form);
+                    // 提交form
+                    $form.submit();
+                    // 移除form
+                    $form.remove();
                 } else {
                     gaeaAjax.post({
                         url: submitUrl,
