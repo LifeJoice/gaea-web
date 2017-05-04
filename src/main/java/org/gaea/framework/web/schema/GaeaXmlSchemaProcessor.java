@@ -391,8 +391,7 @@ public class GaeaXmlSchemaProcessor {
                  * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
                  */
                 Object newValue = getValueFromDS(rowDataMap.get(key), column.getDataSetId());
-                // 放入的key统一大写吧
-                oneResultMap.put(column.getName().toUpperCase(), newValue);   // 按新名字放入原值
+                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
             }
             newResultMapList.add(oneResultMap);
         }
