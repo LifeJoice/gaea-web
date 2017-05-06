@@ -62,8 +62,10 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 DIALOG: {
                     INIT: "gaeaUI_event_dialog_init",// 初始化dialog
                     OPEN: "gaeaUI_event_dialog_open",// 打开dialog
-                    CRUD_ADD_OPEN: "gaeaUI_event_crud_dialog_add_open",// 打开“新增”dialog
-                    CRUD_UPDATE_OPEN: "gaeaUI_event_crud_dialog_update_open",// 打开“编辑”dialog
+                    // 没有了，给下面的替代了
+                    //CRUD_ADD_OPEN: "gaeaUI_event_crud_dialog_add_open",// 打开“新增”dialog
+                    //CRUD_UPDATE_OPEN: "gaeaUI_event_crud_dialog_update_open",// 打开“编辑”dialog
+                    CRUD_OPEN: "gaeaUI_event_crud_dialog_open",// 打开“新增编辑”dialog
                     CLOSE: "gaeaUI_event_dialog_close"                              // 对应jQuery dialog的close。主要是设定JQ的close会互相覆盖，干脆用自己的事件算了
                 },
                 GRID: {

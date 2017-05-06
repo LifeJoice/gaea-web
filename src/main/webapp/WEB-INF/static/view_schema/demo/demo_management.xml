@@ -60,7 +60,7 @@
             <!--type设计变更一下。具体的动作很多时候是不同组件间交互的动作。因此不要用type去定义，改为用interface-action。定义动作名称，但具体实现放在各个模板页。-->
             <!--interface-action(替换原来的type) :  接口action，只定义，后台框架无实现。定义的内容由具体模板页(例如公用列表页等）去实现，而不由XML SCHEMA解析框架处理。-->
             <!-- type改为action合理一点 -->
-            <!--interface-action="submit|goto|deleteSelected|maculaAction"-->z
+            <!--interface-action="submit|goto|deleteSelected|maculaAction"-->
             <!--<button id="btnNew" name="btnNew" html-value="新增" type="maculaAction" href="admin/dis/shop/creat" />-->
             <!--<button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="newDialog" />-->
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>

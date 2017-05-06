@@ -249,7 +249,8 @@ define([
                         exception: "按钮id为空，无法打开更新弹出框。"
                     });
                     var $button = $("#" + opts.id);
-                    $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, opts);
+                    //$button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_ADD_OPEN, opts);
+                    $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, opts);
                 }
             },
             update: {
@@ -270,7 +271,8 @@ define([
                         var gaeaGrid = require("gaeajs-ui-grid"); // 加载grid模块
                         //var row = gaeaGrid.getSelected();
                         //opts.selectedRow = row;
-                        $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, opts);
+                        //$button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, opts);
+                        $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, opts);
                     }
                 }
             }

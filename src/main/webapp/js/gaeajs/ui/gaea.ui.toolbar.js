@@ -87,6 +87,11 @@ define([
                      */
                     if (gaeaValid.isNotNull(this.linkViewId)) {
                         var linkObj = gaeaDialog.findDialog(inViews, this.linkViewId);
+                        // linkObj = dialog options
+                        var dialogOpts = _.clone(linkObj);
+                        // dialog id
+                        dialogOpts.id = linkObj.htmlId;
+
                         if ("wf-dialog" == linkObj.componentName) {
                             dialogDef = linkObj;
                             gaeaWF.dialog.create(linkObj, this);
@@ -113,21 +118,24 @@ define([
                          */
                         else if (gaeaString.equalsIgnoreCase("uploader-dialog", linkObj.componentName)) {
                             console.log("初始化uploader-dialog");
-                            dialogDef = linkObj;
-                            gaeaUploader.uploader(null, linkObj, this);
+                            //dialogDef = linkObj;
+                            gaeaUploader.uploader(null, dialogOpts, this);
                         }
                         /**
                          * 处理增删改dialog。
                          */
                         else if ("crud-dialog" == linkObj.componentName) {
-                            //var $button = $("#" + button.htmlId);
-                            var row = gaeaGrid.getSelected();
-                            var options = {
-                                button: thisButton,
-                                dialog: linkObj,
-                                selectedRow: row
-                            };
-                            gaeaDialog.initCrudDialog(options);
+                            ////var $button = $("#" + button.htmlId);
+                            //var row = gaeaGrid.getSelected();
+                            //var options = {
+                            //    button: thisButton,
+                            //    dialog: linkObj,
+                            //    selectedRow: row
+                            //};
+                            // toolbar button id
+                            dialogOpts.buttonId = thisButton.htmlId;
+                            dialogOpts.action = thisButton.action;
+                            gaeaDialog.initCrudDialog(dialogOpts);
                         }
                         /**
                          * 最后，处理普通dialog。
@@ -139,73 +147,83 @@ define([
                             var dialogOption = linkObj;
                             // 用htmlId作为创建dialog的DIV ID。
                             dialogOption.id = linkObj.htmlId;
-                            var dlgSelector = "#" + dialogOption.id;
-                            var $dialogDiv = $("#" + dialogOption.id);
-                            var dlgFormName = dialogOption.id + "-form";
-                            // 给dialog中的表单，外包一层form
-                            $dialogDiv.html("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
-                            var $dialogForm = $("#" + dlgFormName);
-                            // 初始化dialog选项
-                            var dialogPosition = {my: "left+310 top+95", at: "left top", of: window};// dialog默认弹出位置。
-                            dialogOption.autoOpen = false;
-                            dialogOption.width = 940;// 默认弹出框的宽度
-                            dialogOption.buttons = {
-                                "确定": function () {
-                                    $dialogForm.submit();
-                                    //var queryConditions = new Object();         // 查询请求数据
-                                    //queryConditions.urSchemaId = $("#urSchemaId").val();
-                                    //ur.utils.ajax.post({
-                                    //    url: "/admin/common/query.do",
-                                    //    data: queryConditions,
-                                    //    success: function (data) {
-                                    //        //alert("成功。id: " + data[0].id);
-                                    //        // 用查询结果，刷新数据列表
-                                    //        ur.component.bridge.grid.refreshData(data);
-                                    //    },
-                                    //    fail: function (data) {
-                                    //        alert("失败");
-                                    //    }
-                                    //})
-                                    //// 刷新数据，其实这里应该优化一下，不该不关三七二十一就刷新
-                                    gaeaDialog.close(dlgSelector);
-                                },
-                                "取消": function () {
-                                    gaeaDialog.close(dlgSelector);
-                                    // 取消数据绑定
-                                    gaeaData.unbind(dialogOption.id);
-                                    // 清空表单内容
-                                    $dialogForm.html("");
-                                }
-                            };
+
+                            if (gaeaValid.isNotNull(dialogOption.htmlWidth)) {
+                                dialogOption.width = dialogOption.htmlWidth;
+                            }
+                            if (gaeaValid.isNotNull(dialogOption.htmlHeight)) {
+                                dialogOption.height = dialogOption.htmlHeight;
+                            }
+
+
+                            //var dlgSelector = "#" + dialogOption.id;
+                            //var $dialogDiv = $("#" + dialogOption.id);
+                            //var dlgFormName = dialogOption.id + "-form";
+                            //// 给dialog中的表单，外包一层form
+                            //$dialogDiv.html("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
+                            //var $dialogForm = $("#" + dlgFormName);
+                            //// 初始化dialog选项
+                            //var dialogPosition = {my: "left+310 top+95", at: "left top", of: window};// dialog默认弹出位置。
+                            //dialogOption.autoOpen = false;
+                            //dialogOption.width = 940;// 默认弹出框的宽度
+                            //dialogOption.buttons = {
+                            //    "确定": function () {
+                            //        $dialogForm.submit();
+                            //        //var queryConditions = new Object();         // 查询请求数据
+                            //        //queryConditions.urSchemaId = $("#urSchemaId").val();
+                            //        //ur.utils.ajax.post({
+                            //        //    url: "/admin/common/query.do",
+                            //        //    data: queryConditions,
+                            //        //    success: function (data) {
+                            //        //        //alert("成功。id: " + data[0].id);
+                            //        //        // 用查询结果，刷新数据列表
+                            //        //        ur.component.bridge.grid.refreshData(data);
+                            //        //    },
+                            //        //    fail: function (data) {
+                            //        //        alert("失败");
+                            //        //    }
+                            //        //})
+                            //        //// 刷新数据，其实这里应该优化一下，不该不关三七二十一就刷新
+                            //        gaeaDialog.close(dlgSelector);
+                            //    },
+                            //    "取消": function () {
+                            //        gaeaDialog.close(dlgSelector);
+                            //        // 取消数据绑定
+                            //        gaeaData.unbind(dialogOption.id);
+                            //        // 清空表单内容
+                            //        $dialogForm.html("");
+                            //    }
+                            //};
                             // 为按钮添加事件（加载内容）
                             $("#" + this.htmlId).click(function () {
-                                //console.log("Go. Open dialog.");
-                                //$dialogDiv.html("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
-                                // afterLoadInClick，必须放在callback中，才能触发里面的一些初始化脚本（特别跟load的内容相关的）
-                                $dialogForm.load(dialogOption.contentUrl, function () {
-                                    if (gaeaValid.isNotNull(thisButton.listeners)) {
-                                        thisButton.listeners.afterLoadInClick();
-                                    }
-                                    // 初始化表单的样式（load过来的表单）
-                                    gaeaForm.init({
-                                        containerClass: "gaea-form"
-                                    });
-                                    // 初始化数据相关的（数据集，MVVM等）
-                                    gaeaData.scanAndInit(dialogOption.id);
-                                });
+                                ////console.log("Go. Open dialog.");
+                                ////$dialogDiv.html("<form id=\"" + dlgFormName + "\" action=\"" + dialogOption.submitUrl + "\"></form>");
+                                //// afterLoadInClick，必须放在callback中，才能触发里面的一些初始化脚本（特别跟load的内容相关的）
+                                //$dialogForm.load(dialogOption.contentUrl, function () {
+                                //    if (gaeaValid.isNotNull(thisButton.listeners)) {
+                                //        thisButton.listeners.afterLoadInClick();
+                                //    }
+                                //    // 初始化表单的样式（load过来的表单）
+                                //    gaeaForm.init({
+                                //        containerClass: "gaea-form"
+                                //    });
+                                //    // 初始化数据相关的（数据集，MVVM等）
+                                //    gaeaData.scanAndInit(dialogOption.id);
+                                //});
                                 //// 初始化Dialog参数
                                 //gaeaDialog.create(dialogOption);
                                 // 打开dialog
                                 gaeaDialog.open({
-                                        id: dialogOption.id,
-                                        position: dialogPosition,
-                                        submitUrl: dialogOption.submitUrl
+                                        id: dialogOption.id
+                                        //position: dialogPosition,
+                                        //submitUrl: dialogOption.submitUrl
                                     }
                                     //dlgSelector, dialogPosition
                                 );
                             });
                             // 创建弹出框
                             //gaeaDialog.create(dialogOption);
+                            gaeaDialog.init(dialogOption);
                         }
                     }
                     /**
@@ -221,7 +239,7 @@ define([
                      */
                     toolbar.button._initAction({
                         button: thisButton,
-                        dialog: dialogDef
+                        dialog: dialogOpts
                     });
 
                     // 绑定事件
@@ -258,25 +276,25 @@ define([
                  * @param onClick
                  * @returns {*}
                  */
-                afterLoadInClick: function (inViews, buttonId, onClick) {
-                    if (gaeaValid.isNotNullMultiple(inViews, ["actions", "buttons"])) {
-                        //&& ur.utils.validate.isNotNull(inViews.actions)
-                        //    && ur.utils.validate.isNotNull(inViews.actions.buttons)){
-                        $.each(inViews.actions.buttons, function (key, val) {
-                            if (this.id == buttonId) {
-                                if (gaeaValid.isNotNull(this.listeners)) {
-                                    this.listeners.afterLoadInClick = onClick;
-                                } else {
-                                    this.listeners = {
-                                        afterLoadInClick: onClick
-                                    }
-                                }
-                                return false;   // 跳出循环。
-                            }
-                        })
-                    }
-                    return inViews;
-                },
+                //afterLoadInClick: function (inViews, buttonId, onClick) {
+                //    if (gaeaValid.isNotNullMultiple(inViews, ["actions", "buttons"])) {
+                //        //&& ur.utils.validate.isNotNull(inViews.actions)
+                //        //    && ur.utils.validate.isNotNull(inViews.actions.buttons)){
+                //        $.each(inViews.actions.buttons, function (key, val) {
+                //            if (this.id == buttonId) {
+                //                if (gaeaValid.isNotNull(this.listeners)) {
+                //                    this.listeners.afterLoadInClick = onClick;
+                //                } else {
+                //                    this.listeners = {
+                //                        afterLoadInClick: onClick
+                //                    }
+                //                }
+                //                return false;   // 跳出循环。
+                //            }
+                //        })
+                //    }
+                //    return inViews;
+                //},
                 _create: function (btnOptions) {
                     //var html = "<span><a id='" + btnOptions.htmlId + "'" +
                     //    " class=\"medium darkslategrey button\"" +

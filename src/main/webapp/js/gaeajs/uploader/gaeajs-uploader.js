@@ -25,10 +25,16 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
              * @param buttonOptions
              */
             uploader: function (options, dialogOptions, buttonOptions) {
-                var that = this;
-                var $list = $("#thelist");// test
+                //var that = this;
+                //var $list = $("#thelist");// test
                 /* 初始化上传组件的dialog */
-                var dialog = that._initDialog(dialogOptions);
+                uploader._initDialog(dialogOptions);
+                // get dialog container
+                var $dialog = $("#" + dialogOptions.id);
+                // init uploader HTML
+                var $list = $('<div id="thelist" class="uploader-list"></div>');
+                $dialog.append($list);
+                $dialog.append('<div id="filePicker"></div>');
 
                 $("#" + buttonOptions.htmlId).click(function () {
                     //console.log("Go. Open dialog.");
@@ -40,9 +46,6 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                     );
                 });
 
-
-                this.options = _.extend(this.options, options);
-                //this.options = options;
                 _uploader = new webuploader.Uploader({
                     // swf文件路径
                     swf: '/js/thirdparty/upload/Uploader.swf',
@@ -62,7 +65,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 });
                 // 当有文件被添加进队列的时候
                 _uploader.on('fileQueued', function (file) {
-                    console.log("file queued.file id: " + file.id + " file name: " + file.name);
+                    console.debug("file queued.file id: " + file.id + " file name: " + file.name);
                     $list.append('<div id="' + file.id + '" class="item">' +
                         '<h4 class="info">' + file.name + '</h4>' +
                         '<p class="state">等待上传...</p>' +
@@ -91,34 +94,17 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
              * @private
              */
             _initDialog: function (dialogOptions) {
-                var that = this;
+                //var that = this;
                 dialogOptions.id = dialogOptions.htmlId;   // 用htmlId作为创建dialog的DIV ID。
 
-
-                //this.cache.options = inOptions;
-                dialogOptions.autoOpen = false;
-                var dlgSelector = null;
-                // 指定工作流审批dialog要注入的DIV
-                if (gaeaValid.isNull(dialogOptions.renderTo)) {
-                    dialogOptions.renderTo = "uploaderDialog";
-                }
-                dialogOptions.id = dialogOptions.renderTo;
-                dlgSelector = "#" + dialogOptions.id;
-                var $dialog = $(dlgSelector);
-                var dlgFormId = dialogOptions.id + "-form";
-                //this.cache.options.formId = dlgFormId;
                 if (gaeaValid.isNotNull(dialogOptions.htmlWidth)) {
                     dialogOptions.width = dialogOptions.htmlWidth;
                 }
                 if (gaeaValid.isNotNull(dialogOptions.htmlHeight)) {
                     dialogOptions.height = dialogOptions.htmlHeight;
                 }
-                //if(ur.utils.validate.isNotNull(inOptions.htmlId)){
-                //    inOptions.htmlId = "workflow-approval-dialog";
-                //}
 
                 // 设定按钮
-                //var buttons = this._createButtons();
                 dialogOptions.buttons = {
                     "chooseFile": {
                         text: "选择文件",
@@ -149,8 +135,9 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 //var dlgContent = "<form id=\"" + dlgFormId + "\" action=\"" + dialogOptions.submitUrl + "\">" + $(dlgSelector).html() + "</form>";
                 //$(dlgSelector).html(dlgContent);
                 // 初始化DIALOG
-                var dialog = gaeaDialog.create(dialogOptions);
-                return dialog;
+                //var dialog = gaeaDialog.create(dialogOptions);
+                gaeaDialog.init(dialogOptions);
+                //return dialog;
             },
             _initUploader: function () {
 

@@ -48,7 +48,7 @@ define([
                 if (gaeaValid.isNull(key)) {
                     return null;
                 }
-                //var $pageContext = CONTEXT;
+                var $pageContext = CONTEXT;
                 var value = null;
                 // 如果符合gaea context的取值表达式规范，就可以直接读取值
                 if (gaeaContext.isGaeaContextEL(key)) {

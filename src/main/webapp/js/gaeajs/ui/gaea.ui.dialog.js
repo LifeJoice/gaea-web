@@ -101,9 +101,9 @@ define([
             modal: true,
             isInit: false,                      // 是否已经初始化，控制同一个组件不被重复初始化
             injectHtmlId: null,
-            formId: null,
-            okText: null,                       // 确认按钮文字
-            cancelText: null,                   // 取消按钮文字
+            //formId: null,
+            okText: '确定',                       // 确认按钮文字
+            cancelText: '取消',                   // 取消按钮文字
             autoOpen: false,
             resizable: true,
             // callback
@@ -129,24 +129,27 @@ define([
              * @param {string} [opts.component]                     子组件名。有才提供，没有可以为空。value= data_filter_dialog|
              */
             init: function (opts) {
+                // init
+                opts = _.defaults(_.clone(opts), _options);
                 if (gaeaValid.isNull(opts.id)) {
                     throw "id为空，无法创建dialog。";
                 }
                 var $dialog = $("#" + opts.id);
-                // 缓存当前dialog的配置
-                $dialog.data("options", opts);
+                // create form id
+                opts.formId = dialog.utils.getFormId(opts.id);
 
-                // initOption
-                opts.buttons = dialog.button.initButtons({
-                    id: opts.id,
-                    submitUrl: opts.submitUrl,
-                    submitAction: opts.submitAction,
-                    refInputId: opts.refInputId
-                });
+                // init buttons
+                if (gaeaValid.isNull(opts.buttons) || _.keys(opts.buttons) <= 0) {
+                    opts.buttons = dialog.button.initButtons(opts);
+                }
                 //var dialogOpts = _private.getInitOption(opts);
                 //opts.dialogOptions = dialogOpts;
 
+                // 缓存当前dialog的配置
+                $dialog.data("gaea-options", opts);
+
                 // 加入弹出框链
+                // cache options in chain
                 _private.chain.add({
                     id: opts.id,
                     parentId: opts.parentId,
@@ -155,57 +158,71 @@ define([
 
                 // init HTML
                 if (gaeaValid.isNull(opts.initHtml) || opts.initHtml) {
+                    if ($("#" + opts.formId).length > 0) {
+                        console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + opts.formId);
+                    }
                     _private.initHtml(opts);
                     // 只有init了html才有form，才能验证form id是否唯一
-                    var formId = dialog.utils.getFormId(opts.id);
+                    //var formId = dialog.utils.getFormId(opts.id);
                     /**
                      * 简单初始化jQuery.validate，并不是进行校验。
                      * 创建了dialog html后，对里面的form也得做validate的初始化。否则jQuery.validate插件会报错：
                      * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
                      * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                      */
-                    if (!gaeaCommonUtils.dom.checkUnique(formId)) {
-                        throw "form id不唯一，jQuery validate插件可能会无法处理。id: " + formId;
-                    }
                     // 只是简单初始化，避免抛出undefined错误
-                    $("#" + formId).validate();
+                    $("#" + opts.formId).validate();
                 }
 
-                // loadContent
-                var loadContent = function () {
-                    /**
-                     * 根据component定义，调用不同组件的loadContent。
-                     * 如果没有component，就走默认的loadContent。
-                     */
-                    if (gaeaValid.isNotNull(opts.component)) {
-
-                        if (gaeaString.equalsIgnoreCase(opts.component, GAEA_UI_DEFINE.UI.COMPONENT.DIALOG.DATA_FILTER_DIALOG)) {
-                            /**
-                             * *********************** data filter dialog ***********************
-                             */
-                            var newOpts = _.extend(opts, {
-                                formId: dialog.utils.getFormId(opts.id)
-                            });
-                            return gaeaDataFilterDialog.loadContent(newOpts);
-                        }
-                    } else {
-                        /**
-                         * 普通的dialog处理。就按通用配置加载内容了
-                         */
-                        return dialog.loadContent({
-                            formId: dialog.utils.getFormId(opts.id),
-                            id: opts.id,
-                            contentUrl: opts.contentUrl
-                        });
-                    }
-                };
                 /**
-                 * 加载HTML内容，初始化里面的数据集、复选框组件、按钮等，包括按钮相关的进一步打开弹出框等
+                 * if contentUrl不为空 或 是data filter dialog的时候，才做加载内容工作
+                 * else （像上传弹出框、工作流弹出框等）
+                 *      手动初始化dialog内容
                  */
-                $.when(loadContent()).done(function () {
-                    // 打开dialog
-                    dialog.open(opts);
-                });
+                if (
+                    (gaeaValid.isNotNull(opts.contentUrl) || gaeaString.equalsIgnoreCase(opts.component, GAEA_UI_DEFINE.UI.COMPONENT.DIALOG.DATA_FILTER_DIALOG))
+                ) {
+                    // loadContent
+                    var loadContent = function () {
+                        /**
+                         * 根据component定义，调用不同组件的loadContent。
+                         * 如果没有component，就走默认的loadContent。
+                         */
+                        if (gaeaValid.isNotNull(opts.component)) {
+
+                            if (gaeaString.equalsIgnoreCase(opts.component, GAEA_UI_DEFINE.UI.COMPONENT.DIALOG.DATA_FILTER_DIALOG)) {
+                                /**
+                                 * *********************** data filter dialog ***********************
+                                 */
+                                //var newOpts = _.extend(opts, {
+                                //    formId: opts.formId
+                                //});
+                                return gaeaDataFilterDialog.loadContent(opts);
+                            }
+                        } else {
+                            /**
+                             * 普通的dialog处理。就按通用配置加载内容了
+                             */
+                            return dialog.loadContent(opts);
+                            //return dialog.loadContent({
+                            //    formId: opts.formId,
+                            //    id: opts.id,
+                            //    contentUrl: opts.contentUrl
+                            //});
+                        }
+                    };
+                    /**
+                     * 加载HTML内容，初始化里面的数据集、复选框组件、按钮等，包括按钮相关的进一步打开弹出框等
+                     */
+                    $.when(loadContent()).done(function () {
+                        // 打开dialog
+                        //dialog.open(opts);
+                        dialog.createAndOpen(opts);
+                    });
+                } else {
+                    // 手工初始化。由第三方调用决定所有细节。
+                    _private.createDialog(opts);
+                }
 
             },
             /**
@@ -235,6 +252,20 @@ define([
                 return dialog;
             },
             /**
+             * 创建并打开dialog。
+             * @param {object} opts
+             */
+            createAndOpen: function (opts) {
+                // 初始化Dialog
+                // openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
+                if (gaeaValid.isNull(opts.openStyle) || gaeaString.equalsIgnoreCase(opts.openStyle, "new")) {
+                    //dialog.create(opts);
+                    _private.createDialog(opts);
+                }
+                // open
+                dialog.open(opts);
+            },
+            /**
              *
              * @param {Object} opts
              * @param {string} opts.id                          要打开的dialog的id
@@ -250,14 +281,15 @@ define([
                 }
                 var $dialog = $("#" + opts.id);
                 // TODO 这个_options好像extend了好多次，看看前面的extend可否去掉
-                opts = _.extend(_options, opts);
+                //opts = _.extend(_options, opts);
+                var opts = $dialog.data("gaea-options");
 
-                // 初始化Dialog
-                // openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
-                if (gaeaValid.isNull(opts.openStyle) || gaeaString.equalsIgnoreCase(opts.openStyle, "new")) {
-                    //dialog.create(opts);
-                    _private.createDialog(opts);
-                }
+                //// 初始化Dialog
+                //// openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
+                //if (gaeaValid.isNull(opts.openStyle) || gaeaString.equalsIgnoreCase(opts.openStyle, "new")) {
+                //    //dialog.create(opts);
+                //    _private.createDialog(opts);
+                //}
 
                 // 初始化dialog打开位置
                 //if (gaeaValid.isNotNull(opts.position)) {
@@ -275,8 +307,8 @@ define([
                     throw "不能识别的dialog配置。无法打开dialog。dialog配置：" + JSON.stringify(opts);
                 }
 
-                // 初始化关闭
-                dialog.initClose(opts);
+                //// 初始化关闭
+                //dialog.initClose(opts);
             },
             /**
              * 初始化dialog的关闭。因为jQuery dialog的关闭有几种方式，例如按Esc，所以需要分别初始化。而不是只是初始化一个关闭按钮。
@@ -378,11 +410,14 @@ define([
              * @param callback 回调方法
              */
             loadContent: function (options, callback) {
-
                 var dfd = $.Deferred();// JQuery同步对象
 
+                var $dialog = $("#" + options.id);
+                var $dialogForm = $dialog.find("form:first");
+                var formId = $dialogForm.attr("id");
+
                 $.when(_private.loadContent({
-                    containerId: options.formId,
+                    containerId: formId,
                     contentUrl: options.contentUrl
                 })).done(function () {
                     /**
@@ -413,7 +448,7 @@ define([
                     /* 待defferedFunctions数组的各个函数都运行完(其实声明数组的时候已经执行了), 才执行done的回调方法. */
                     $.when.apply($, defferedFunctions).done(function () {
                         gaeaData.binding({
-                            containerId: options.formId
+                            containerId: formId
                         }, function () {
                             /**
                              * 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
@@ -473,7 +508,9 @@ define([
         var crudDialog = {
             options: {
                 // 在数据集加载完后，再填充要编辑的数据？（编辑数据覆盖数据集数据）
-                fillAfterDsLoading: true
+                fillAfterDsLoading: true,
+                // 是否需要初始化data。对于新增弹出框不需要，编辑弹出框就需要咯
+                initComponentData: false
             },
             cache: {
                 update: {
@@ -484,40 +521,51 @@ define([
             /**
              *
              * @param {Object} options
-             * @param {ServerDialog} options.dialog
-             * @param {Object} options.button
+             * @param {string} options.id           dialog id
+             //* @param {ServerDialog} options.dialog 不用了
+             //* @param {Object} options.button 不用了
+             * @param {string} options.buttonId
+             * @param {string} options.action               一般是按钮定义的action
+             * @param {string} options.submitUrl
              * @param {string} options.openStyle   new | inOne 打开的方式。弹出一个新的，还是整合进当前的弹框。
              * @param {string} options.parentId
              * @param {string} options.submitAction         提交方式。这个是关系嵌入式dialog的打开方式。
              * @param {string} options.refInputId           和submitAction有关，如果是回写的话，这个关联input id就会有所用。
              */
-            init: function (options) {
+            init: function (dialogOpts) {
 
-                var dialogId = options.dialog.htmlId;
-                //var dialogOption = _.clone(linkObj);
-                //// 整合创建dialog option和系统默认的dialog option
-                //dialogOption = _.extend(_options, dialogOption);
-                //// 整合传入的options参数和创建dialog的options
-                //dialogOption = _.extend(dialogOption, options);
-                //dialogOption.triggerOpenJqSelector = "#" + buttonDef.htmlId;
-                //// 用htmlId作为创建dialog的DIV ID。
-                //dialogOption.id = linkObj.htmlId;
+                //var dialogId = options.dialog.htmlId;
+                ////var dialogOption = _.clone(linkObj);
+                ////// 整合创建dialog option和系统默认的dialog option
+                ////dialogOption = _.extend(_options, dialogOption);
+                ////// 整合传入的options参数和创建dialog的options
+                ////dialogOption = _.extend(dialogOption, options);
+                ////dialogOption.triggerOpenJqSelector = "#" + buttonDef.htmlId;
+                ////// 用htmlId作为创建dialog的DIV ID。
+                ////dialogOption.id = linkObj.htmlId;
 
 
                 // initOption
-                var dialogOpts = options.dialog;
-                dialogOpts = _.extend(_options, dialogOpts);
+                //var dialogOpts = options.dialog;
+                //dialogOpts = _.extend(_options, dialogOpts);
+
+                // init default
+                //var dialogOpts = _.defaults(options, _options);
+                _.defaults(dialogOpts, _options);
+                _.defaults(dialogOpts, crudDialog.options);
+
                 // 整合传入的options参数和创建dialog的options
-                dialogOpts = _.extend(dialogOpts, options);
-                dialogOpts.triggerOpenJqSelector = "#" + options.button.htmlId;
+                //var dialogOpts = _.extend(dialogOpts, options);
+                //dialogOpts.triggerOpenJqSelector = "#" + options.button.htmlId;
+                dialogOpts.triggerOpenJqSelector = "#" + dialogOpts.buttonId;
                 // 用htmlId作为创建dialog的DIV ID。
-                dialogOpts.id = dialogId;
+                //dialogOpts.id = dialogId;
 
                 dialogOpts.buttons = dialog.button.initButtons({
-                    id: dialogId,
-                    submitUrl: options.dialog.submitUrl,
-                    submitAction: options.submitAction,
-                    refInputId: options.refInputId
+                    id: dialogOpts.id,
+                    submitUrl: dialogOpts.submitUrl,
+                    submitAction: dialogOpts.submitAction,
+                    refInputId: dialogOpts.refInputId
                 });
                 //var dialogOpts = _private.getInitOption({
                 //    id: options.dialog.htmlId,
@@ -528,21 +576,27 @@ define([
 
                 // 加入弹出框链
                 _private.chain.add({
-                    id: dialogId,
+                    id: dialogOpts.id,
                     //parentId:opts.parentId,
                     options: dialogOpts
                 });
 
 
-                options = _.extend(crudDialog.options, options);
-                var linkObj = options.dialog;
-                var buttonDef = options.button;
-                // 获取某grid选中的行
-                var selectedRow = gaeaContext.getValue("selectedRow", dialogId);
-                crudDialog.cache.selectedRow = selectedRow;
-                if (gaeaValid.isNull(linkObj.htmlId)) {
+                //options = _.extend(_.clone(crudDialog.options), options);
+                //var linkObj = options.dialog;
+                //var buttonDef = options.button;
+                //// 获取某grid选中的行
+                //var selectedRow = gaeaContext.getValue("selectedRow", options.id);
+                //crudDialog.cache.selectedRow = selectedRow;
+                if (gaeaValid.isNull(dialogOpts.id)) {
                     throw "没有htmlId(对于页面DIV ID)，无法创建Dialog。";
                 }
+
+                var formId = dialog.utils.getFormId(dialogOpts.id);
+                if ($("#" + formId).length > 0) {
+                    console.error("form id已存在！如果有多个同名form id，jQuery validate插件可能会无法处理。id: " + formId);
+                }
+                dialogOpts.formId = formId;
                 ////dialogDef = linkObj;
                 //var dialogOption = _.clone(linkObj);
                 //// 用htmlId作为创建dialog的DIV ID。
@@ -550,9 +604,10 @@ define([
                 //var dlgSelector = "#" + dialogOption.id;
                 _private.initHtml({
                     id: dialogOpts.id,
-                    parentId: options.parentId,
-                    openStyle: options.openStyle,
-                    submitUrl: options.dialog.submitUrl
+                    parentId: dialogOpts.parentId,
+                    formId: formId,
+                    openStyle: dialogOpts.openStyle,
+                    submitUrl: dialogOpts.submitUrl
                 });
 
                 /**
@@ -560,11 +615,11 @@ define([
                  * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
                  * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                  */
-                var formId = dialog.utils.getFormId(dialogOpts.id);
-                if (!gaeaCommonUtils.dom.checkUnique(formId)) {
-                    throw "form id不唯一，jQuery validate插件可能会无法处理。id: " + formId;
-                }
-                dialogOpts.formId = formId;
+                    //var formId = dialog.utils.getFormId(dialogOpts.id);
+                    //if (!gaeaCommonUtils.dom.checkUnique(formId)) {
+                    //    console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + formId);
+                    //}
+                    //dialogOpts.formId = formId;
                 // 只是简单初始化，避免抛出undefined错误
                 $("#" + formId).validate();
                 // 检查当前页面有没有对应的DIV，没有创建一个。
@@ -605,7 +660,7 @@ define([
                 //});
 
                 //var $button = $("#" + buttonDef.htmlId);
-                if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
+                if (gaeaString.equalsIgnoreCase(dialogOpts.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
                     // 创建CRUD dialog的时候，初始化监听（上下文数据的变化）。
                     // 其中包含当前编辑框的id、数据等。如果没有监听，则点击编辑的时候，就不会根据选择的数据行刷新数据了。
                     //GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, dialogOption.id, null,  function () {
@@ -619,8 +674,9 @@ define([
                         //    buttonDef: buttonDef,
                         //    dialogOptions: dialogOption
                         //});
-                    crudDialog.initUpdateDialog(dialogOpts);
-                } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
+                    dialogOpts.initComponentData = true;
+                    crudDialog.bindOpenEvent(dialogOpts);
+                } else if (gaeaString.equalsIgnoreCase(dialogOpts.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
                     // 初始化新增弹出框。包括点击触发。
                     //crudDialog.initAddDialog({
                     //    buttonDef: buttonDef,
@@ -630,7 +686,8 @@ define([
                     //});
 
 
-                    crudDialog.initAddDialog(dialogOpts);
+                    //crudDialog.initAddDialog(dialogOpts);
+                    crudDialog.bindOpenEvent(dialogOpts);
                 }
             },
             /**
@@ -643,7 +700,7 @@ define([
                 // 克隆一下，否则由于指针的关系会不确定。
                 var opts = _.clone(options);
                 //var dialogId = options.id;
-                options.initComponentData = false;
+                //options.initComponentData = false;
                 //var buttonDef = options.buttonDef;
                 //var $button = $("#" + buttonDef.htmlId);
                 //var dlgFormName = dialogId + "-form";
@@ -777,7 +834,8 @@ define([
                     //// 初始化Dialog参数
                     //dialog.create(options.dialogOptions);
                     // 打开dialog
-                    dialog.open(opts);
+                    //dialog.open(opts);
+                    dialog.createAndOpen(opts);
                     //dialog.open({
                     //        id: opts.id,
                     //        position: options.dialogOptions.dialogPosition,
@@ -796,8 +854,9 @@ define([
              * 加载要编辑的数据（包括对应的子表数据）、提交的时候需要带上主表的id等
              * @param {object} options
              * @param {string} options.id
-             * @param {string} options.idField
+             //* @param {string} options.idField 没用了
              * @param {string} options.formId
+             * @param {boolean} options.initComponentData               是否需要初始化数据（update就需要，新增就不需要）。
              * @param {string} options.parentDialogId
              * 去掉了 {string} options.dialogOptions
              * @param {string} options.submitUrl
@@ -808,7 +867,7 @@ define([
              * @param {string} options.triggerOpenJqSelector
              * @param {string} options.position
              */
-            initUpdateDialog: function (options) {
+            bindOpenEvent: function (options) {
                 // 克隆一下，否则由于指针的关系会不确定。
                 options = _.clone(options);
                 //var dialogId = options.id;
@@ -822,13 +881,14 @@ define([
                 /**
                  * 点击“编辑”事件触发。
                  */
-                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options.triggerOpenJqSelector, function (event, data) {
+                    //GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options.triggerOpenJqSelector, function (event, data) {
+                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, options.triggerOpenJqSelector, function (event, data) {
                     //var selectedRow = crudDialog.cache.selectedRow;
-                    var gridId = data.gridId;
-                    if (gaeaValid.isNull(gridId)) {
-                        gaeaNotify.error("grid id为空，无法执行编辑操作。");
-                    }
-                    var selectedRow = gaeaContext.getValue("selectedRow", gridId);
+                    //var gridId = data.gridId;
+                    //if (gaeaValid.isNull(gridId)) {
+                    //    gaeaNotify.error("grid id为空，无法执行编辑操作。");
+                    //}
+                    //var selectedRow = gaeaContext.getValue("selectedRow", gridId);
                     //console.log("row id: " + selectedRow.id +
                     //    "\nschemaId: " + gaeaView.list.getSchemaId() +
                     //    "\nschemaId: " + $("#urSchemaId").val()
@@ -840,10 +900,27 @@ define([
                     //        selectedRow: selectedRow
                     //    }
                     //});
+                    // 应该是没用了！！
                     // 因为是update弹出框，设置整个编辑的对象的id
-                    if (gaeaValid.isNotNull(options.idField)) {
-                        // 设定编辑数据的总id
-                        crudDialog.cache.update.submitData[options.idField] = selectedRow.id;
+                    //if (gaeaValid.isNotNull(options.idField)) {
+                    //    // 设定编辑数据的总id
+                    //    crudDialog.cache.update.submitData[options.idField] = selectedRow.id;
+                    //}
+
+                    if (options.initComponentData) {
+
+                        var gridId = data.gridId;
+                        if (gaeaValid.isNull(gridId)) {
+                            gaeaNotify.error("grid id为空，无法执行编辑操作。");
+                        }
+
+                        editData = crudDialog.getData({
+                            id: options.id,
+                            gridId: gridId,
+                            loadDataUrl: options.loadDataUrl
+                        });
+
+                        options.data = editData;
                     }
 
 
@@ -854,36 +931,36 @@ define([
                     // TODO 下面这几个要重构一下。感觉loadContent这个方法封装得不太好。整个思路要重新捋一捋。
                     // 获取要编辑的数据，关联id在js的缓存中。
                     // 通过gaea上下文表达式获取。因为condition的方式，暂时没能支持gaeaContext的(key, id)获取的方式.
-                    var queryCondition = gaeaData.parseCondition({
-                        id: 'byId',
-                        values: [{
-                            type: 'pageContext',
-                            value: gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", gridId)
-                        }]
-                    });
-                    var editData;
-                    /**
-                     * if loadDataUrl为空
-                     *      通过通用查询+condition: byId获取编辑数据
-                     * else
-                     *      通过loadDataUrl获取数据
-                     */
-                    if (gaeaValid.isNull(options.loadDataUrl)) {
-                        editData = crudDialog.getData(queryCondition);
-                    } else {
-                        // 数据加载要求同步
-                        gaeaAjax.ajax({
-                            url: options.loadDataUrl,
-                            async: false, // 同步，否则后面加载内容还有数据集会乱的
-                            data: gaeaContext.getValue("selectedRow", options.id),
-                            success: function (data) {
-                                editData = data;
-                            },
-                            fail: function (data) {
-                                gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
-                            }
-                        });
-                    }
+                    //var queryCondition = gaeaData.parseCondition({
+                    //    id: 'byId',
+                    //    values: [{
+                    //        type: 'pageContext',
+                    //        value: gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", gridId)
+                    //    }]
+                    //});
+                    //var editData;
+                    ///**
+                    // * if loadDataUrl为空
+                    // *      通过通用查询+condition: byId获取编辑数据
+                    // * else
+                    // *      通过loadDataUrl获取数据
+                    // */
+                    //if (gaeaValid.isNull(options.loadDataUrl)) {
+                    //    editData = crudDialog.getData(queryCondition);
+                    //} else {
+                    //    // 数据加载要求同步
+                    //    gaeaAjax.ajax({
+                    //        url: options.loadDataUrl,
+                    //        async: false, // 同步，否则后面加载内容还有数据集会乱的
+                    //        data: gaeaContext.getValue("selectedRow", options.id),
+                    //        success: function (data) {
+                    //            editData = data;
+                    //        },
+                    //        fail: function (data) {
+                    //            gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
+                    //        }
+                    //    });
+                    //}
                     //var afterBindingCallback = function (containerId) {
                     //    //// 获取要编辑的数据
                     //    //var editData = crudDialog.getData();
@@ -895,8 +972,8 @@ define([
                     //if (options.fillAfterDsLoading) {
                     //    atLastAfterLoadCallback = null;
                     //}
-                    options.data = editData;
-                    options.initComponentData = true;
+                    //options.data = editData;
+                    //options.initComponentData = true;
 
                     /**
                      * 对于dialog、crudDialog来说，加载内容和数据集是共同的。所以这部分是公用的。
@@ -925,7 +1002,8 @@ define([
                     //    }
                     //    //dlgSelector, options.dialogOptions.dialogPosition
                     //);
-                    dialog.open(options);
+                    //dialog.open(options);
+                    dialog.createAndOpen(options);
                 });
             },
             /**
@@ -993,28 +1071,63 @@ define([
             //
             //
             //},
-            getData: function (condition) {
-                var result = null;
+            /**
+             *
+             * @param {object} opts
+             * @param {string} opts.gridId          grid的容器id
+             * @returns {*}
+             */
+            getData: function (opts) {
+                var result;
                 var conditions = {};
                 //conditions.id = selectedRow.id;
                 conditions.schemaId = gaeaView.list.getSchemaId();
-                conditions.conditions = JSON.stringify(condition);
-                // 数据加载要求同步
-                gaeaAjax.ajax({
-                    url: SYS_URL.QUERY.BY_CONDITION,
-                    async: false,
-                    data: conditions,
-                    success: function (data) {
-                        result = data[0];
-                        // 用查询结果，刷新数据列表
-                        //ur.component.bridge.grid.refreshData(data);
-                        //alert("成功");
-                    },
-                    fail: function (data) {
-                        //alert("失败");
-                        gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
-                    }
+
+                // 获取要编辑的数据，关联id在js的缓存中。
+                // 通过gaea上下文表达式获取。因为condition的方式，暂时没能支持gaeaContext的(key, id)获取的方式.
+                var queryCondition = gaeaData.parseCondition({
+                    id: 'byId',
+                    values: [{
+                        type: 'pageContext',
+                        value: gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", opts.gridId)
+                    }]
                 });
+                conditions.conditions = JSON.stringify(queryCondition);
+
+                /**
+                 * if loadDataUrl为空
+                 *      通过通用查询+condition: byId获取编辑数据
+                 * else
+                 *      通过loadDataUrl获取数据
+                 */
+                if (gaeaValid.isNull(opts.loadDataUrl)) {
+                    // 数据加载要求同步
+                    gaeaAjax.ajax({
+                        url: SYS_URL.QUERY.BY_CONDITION,
+                        async: false,
+                        data: conditions,
+                        success: function (data) {
+                            result = data[0];
+                        },
+                        fail: function (data) {
+                            //alert("失败");
+                            gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
+                        }
+                    });
+                } else {
+                    // 数据加载要求同步
+                    gaeaAjax.ajax({
+                        url: opts.loadDataUrl,
+                        async: false, // 同步，否则后面加载内容还有数据集会乱的
+                        data: gaeaContext.getValue("selectedRow", opts.id),
+                        success: function (data) {
+                            result = data;
+                        },
+                        fail: function (data) {
+                            gaeaNotify.warn(gaeaString.builder.simpleBuild("dialog加载数据失败！\n%s", JSON.stringify(data)));
+                        }
+                    });
+                }
                 return result;
             }
             /**
@@ -1090,22 +1203,26 @@ define([
              * 取消：由于crud dialog还有data-bind，所以还涉及到解绑，然后把dialog HTML清空（因为编辑过会有残留数据）。然后才关闭dialog。
              *
              * @param {object} options
+             * @param {string} options.id                           dialog id
+             * @param {string} options.formId
              * @param {string} options.submitUrl
              * @param {string} options.submitAction                 点击确定提交的方式。为空则直接提交到submitUrl. writeback_in_one: 回写到上一个dialog（根据弹出框链，需要openStyle=inOne才行）的某字段（refInputId）。
              * @param {object} options.writeBack                    按字段名回写的具体配置项. writeback_by_field需要。
-             * @param {string} options.id
              * @param {string} options.refInputId                   关联的父级dialog的输入框id
              * @param {string} options.data                         form之外的数据，如果和form里面的同名则会覆盖。
+             * @param {string} options.component                    组件名。例如，对于data_filter_dialog，确定按钮的功能又不一样。
              * @returns {{确定: buttons."确定", 取消: buttons."取消"}}
              */
             initButtons: function (options) {
                 var $dialog = $("#" + options.id);
-                var cacheOptions = $dialog.data("options");
-                if (gaeaValid.isNotNull(cacheOptions)) {
-                    options = _.extend(cacheOptions, options);
-                }
+                var $dialogForm = $dialog.find("form:first");
+                var formId = $dialogForm.attr("id");
+                //var cacheOptions = $dialog.data("gaea-options");
+                //if (gaeaValid.isNotNull(cacheOptions)) {
+                //    options = _.extend(cacheOptions, options);
+                //}
 
-                options.formId = dialog.utils.getFormId(options.id);
+                //options.formId = dialog.utils.getFormId(options.id);
                 //var $dialogForm = $("#" + options.formId);
                 var okFunction = null; // 确定按钮的方法
 
@@ -1125,7 +1242,7 @@ define([
                         okFunction = function () {
                             // 调用校验框架，校验ok才继续。
                             gaeaCommon.gaeaValidate.validate({
-                                containerId: options.formId,// 校验的范围（某表单）
+                                containerId: formId,// 校验的范围（某表单）
                                 // 成功回调
                                 success: function () {
                                     // 执行业务逻辑
@@ -1146,7 +1263,7 @@ define([
                     okFunction = function () {
                         // 调用校验框架，校验ok才继续。
                         gaeaCommon.gaeaValidate.validate({
-                            containerId: options.formId,// 校验的范围（某表单）
+                            containerId: formId,// 校验的范围（某表单）
                             // 成功回调
                             success: function () {
                                 // 执行业务逻辑, 按字段名回填。
@@ -1218,15 +1335,18 @@ define([
                  * @param options
                  */
                 submit: function (options) {
-                    var $dialogForm = $("#" + options.formId);
+                    var $dialog = $("#" + options.id);
+                    var $dialogForm = $dialog.find("form:first");
+                    var formId = $dialogForm.attr("id");
                     // 调用校验框架，校验ok才提交。
                     gaeaCommon.gaeaValidate.validate({
-                        containerId: options.formId,// 校验的范围（某表单）
+                        containerId: formId,// 校验的范围（某表单）
                         // 成功回调
                         success: function () {
                             // 把extra的data合并（覆盖）form的data
-                            var formData = $("#" + options.formId).serializeObject();
-                            var requestData = _.extend(formData, crudDialog.cache.update.submitData);
+                            //var formData = $("#" + options.formId).serializeObject();
+                            var requestData = $("#" + formId).serializeObject();
+                            //var requestData = _.extend(formData, crudDialog.cache.update.submitData);
                             // 提交
                             gaeaAjax.post({
                                 url: options.submitUrl,
@@ -1350,7 +1470,7 @@ define([
              *
              * @param {object} opts
              * @param {string} opts.id
-             * @param {string} opts.parentId
+             * @param {string} [opts.parentId]                          如果没有父级弹框id, 我就是第一个
              * @param {object} opts.options                             要缓存的对象。一般是当前弹框的一些配置项，例如：按钮
              */
             add: function (opts) {
@@ -1545,12 +1665,14 @@ define([
              * 打开方式（openStyle）为inOne的确定按钮的处理。
              * 把新打开的dialog的所有值，填充到父级dialog的某个字段去，或者目标是某个组件（当前支持crud-grid），则做组件的装填。
              * @param {object} opts
-             * @param {string} opts.formId
+             //* @param {string} opts.formId
              * @param {string} opts.submitAction
              * @param {string} opts.refInputId
              */
             writeBackInOne: function (opts) {
-                var $dialogForm = $("#" + opts.formId);
+                var $dialog = $("#" + opts.id);
+                var $dialogForm = $dialog.find("form:first");
+                //var $dialogForm = $("#" + opts.formId);
                 if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.SUBMIT_ACTION.WRITEBACK_IN_ONE, opts.submitAction)) {
                     // 要填充数据的目标对象
                     var $target = $("#" + opts.refInputId);
@@ -1836,7 +1958,11 @@ define([
 
         /**
          * 创建dialog的div，和里面的form。
-         * 无论div还是form，都会进行id检查，确保不会重复创建。
+         * <ul>
+         *     <li>这里只创建HTML，没有逻辑处理！</li>
+         *     <li>无论div还是form，都会进行id检查，确保不会重复创建。</li>
+         * </ul>
+         *
          * @param {object} opts
          * @param {string} opts.id                              就是dialog id
          * @param {string} opts.parentId
@@ -1847,6 +1973,7 @@ define([
             if (gaeaValid.isNull(opts.id)) {
                 throw "没有 id，无法创建Dialog。";
             }
+            // 生成form id
             var formId = dialog.utils.getFormId(opts.id);
 
             //if(_private.chain.exist(opts.id)){
@@ -1887,19 +2014,21 @@ define([
          */
         _private.preInitHtml = function (opts) {
             if (gaeaString.equalsIgnoreCase(opts.openStyle, "inOne") && gaeaValid.isNotNull(opts.parentId)) {
-                _private.initHtml(opts);
-
                 // 对form进行简单处理
                 var formId = dialog.utils.getFormId(opts.id);
+
+                opts.formId = formId;
+                if ($("#" + formId).length > 0) {
+                    console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + formId);
+                }
+                _private.initHtml(opts);
+
                 /**
                  * 简单初始化jQuery.validate，并不是进行校验。
                  * 创建了dialog html后，对里面的form也得做validate的初始化。否则jQuery.validate插件会报错：
                  * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
                  * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                  */
-                if (!gaeaCommonUtils.dom.checkUnique(formId)) {
-                    throw "form id不唯一，jQuery validate插件可能会无法处理。id: " + formId;
-                }
                 // 只是简单初始化，避免抛出undefined错误
                 $("#" + formId).validate();
             } else {
@@ -1931,10 +2060,11 @@ define([
         _private.createDialog = function (opts) {
             //var that = this;
             //var dialogDivSelector = "#" + _options.id;
-            // 克隆一下，否则由于指针的关系会不确定。
-            var newOpts = _.clone(opts);
-
             var $dialog = $("#" + opts.id);
+            // 克隆一下，否则由于指针的关系会不确定。
+            var newOpts = _.defaults(_.clone(opts), _options);
+            //var newOpts = $dialog.data("gaea-options");
+
             // 定义close事件
             newOpts.close = function (event, ui) {
                 // 默认先调用一遍用户定义的close事件
@@ -1946,7 +2076,9 @@ define([
                 $dialog.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CLOSE, ui);
             };
             //初始化弹出框
-            var dialog = $dialog.gaeaDialog(newOpts);
+            var jqDialog = $dialog.gaeaDialog(newOpts);
+            // cache options
+            $dialog.data("gaea-options", newOpts);
             //var dialog = $dialog.gaeaDialog({
             //    autoOpen: _options.autoOpen,
             //    resizable: _options.resizable,
@@ -1965,7 +2097,11 @@ define([
             //        $dialog.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CLOSE, ui);
             //    }
             //});
-            return dialog;
+
+            // 初始化关闭
+            dialog.initClose(opts);
+
+            return jqDialog;
         };
 
         _private.dialog = {
@@ -1991,7 +2127,7 @@ define([
             init: dialog.init,
             initCrudDialog: crudDialog.init,
             findDialog: dialog.findDialog,
-            create: _private.createDialog,
+            //create: _private.createDialog, 已过时！
             open: dialog.open,
             close: dialog.close,
             confirmDialog: dialog.confirmDialog,
