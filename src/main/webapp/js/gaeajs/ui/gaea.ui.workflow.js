@@ -3,8 +3,10 @@
  * 封装工作流相关的组件。
  * Created by iverson on 2016-2-17 11:48:52.
  */
-define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-validate','gaeajs-ui-grid','gaeajs-ui-dialog','gaea-jqui-dialog'],
-    function ($,_,gaeaAjax,gaeaValid,gaeaGrid,gaeaDialog) {
+define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaea-jqui-dialog',
+        "gaeajs-context", "gaeajs-ui-notify", "gaeajs-ui-definition"],
+    function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog,
+              gaeaContext, gaeaNotify, GAEA_UI_DEFINE) {
     var workflow = {
         dialog: {
             cache: {
@@ -19,16 +21,21 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 this.createNormalApprovalDialogAndBinding(dialogOptions, buttonOptions);
                 //$("#"+this.htmlId).click(function(){
                 $("#" + buttonOptions.htmlId).click(function () {
-                    var row = gaeaGrid.getSelected();
-                    console.log("在workflow.dialog.create中，能否获得当前选中的行？row is null? "+gaeaValid.isNull(row));
-                    if(gaeaValid.isNotNull(row)) {
+                    //var row = gaeaGrid.getSelected();
+                    //console.log("在workflow.dialog.create中，能否获得当前选中的行？row is null? "+gaeaValid.isNull(row));
+                    // 获取默认的一个grid的选中行。这个代码会有点不太灵活。
+                    var row = gaeaContext.getValue("selectedRow", GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                    if (gaeaValid.isNull(row)) {
+                        gaeaNotify.warn("未选择行数据，无法执行对应的工作流操作！");
+                        return;
+                    }
                         if (gaeaValid.isNotNull(row.wfProcInstId)) {
                             $("#wfProcInstId").val(row.wfProcInstId);
-                            that.open(row);
+                            workflow.dialog.open(dialogOptions);
                         } else {
                             alert("该记录还未启动流程，无法进行流程操作。");
                         }
-                    }
+                    //}
                 });
                 //})
             },
@@ -61,8 +68,9 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 var dlgContent = "<form id=\"" + dlgFormId + "\" action=\"" + inOptions.submitUrl + "\">" + $(dlgSelector).html() + "</form>";
                 $(dlgSelector).html(dlgContent);
                 // 初始化DIALOG
-                var dialog = gaeaDialog.create(inOptions);
-                this.cache.me = dialog;
+                //var dialog = gaeaDialog.create(inOptions);
+                gaeaDialog.init(inOptions);
+                //this.cache.me = dialog;
                 return this;
                 //if (ur.utils.validate.isNotNull(linkAction) && ur.utils.validate.isNotNull(linkAction.htmlId)) {
                 //    $("#" + linkAction.htmlId).click(function () {
@@ -71,15 +79,19 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 //    })
                 //}
             },
-            open: function (row) {
+            open: function (dialogOptions) {
+                var row = gaeaContext.getValue("selectedRow", GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
                 if (gaeaValid.isNull(row.wfProcInstId)) {
                     throw "没有procInstId，无法创建工作流审批Dialog。";
                 }
                 //console.log("open wf-dialog");
-                this.cache.selectedRow = row;
+                //this.cache.selectedRow = row;
                 var buttons = this._createButtons();
                 //this.cache.me.gaeaDialog({buttons:buttons});
-                this.cache.me.gaeaDialog("open");
+                //this.cache.me.gaeaDialog("open");
+                gaeaDialog.open({
+                    id: dialogOptions.id
+                });
             },
             /**
              * 创建审批dialog相关的按钮。例如：批准、不批准、取消等。并且绑定相关事件。
@@ -94,10 +106,11 @@ define(["jquery","underscore",'gaeajs-common-utils-ajax','gaeajs-common-utils-va
                 var hasApproveButton = false;
                 var hasNotApproveButton = false;
                 var hasCancelButton = false;
-                var row = this.cache.selectedRow;
+                //var row = this.cache.selectedRow;
                 var defaultApproveFunc = function () {
-                    console.log("submit. row id: "+that.cache.selectedRow.id);
-                    var row = that.cache.selectedRow;
+                    //console.log("submit. row id: "+that.cache.selectedRow.id);
+                    //var row = that.cache.selectedRow;
+                    var row = gaeaContext.getValue("selectedRow", GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
                     var form = $("#" + that.cache.options.formId);
                     var formFields = form.serializeObject();
                     formFields.id=row.id;
