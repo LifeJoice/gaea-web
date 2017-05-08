@@ -90,6 +90,9 @@ require([
         menulist.find(".selected").removeClass("selected");
         // 选中当前点击的
         $(this).addClass("selected");
+        // 加载内容前做一些清理. 把.gaea-main的同级的其他元素（jQuery dialog，datetimepicker）都移除。
+        // 像jQuery dialog的一些插件，会在初始化后把一些信息放在body中，这个超出了框架的内容区，会导致加载下一个页面的时候，这些内容会残留，从而和下一个页面冲突。
+        $(".gaea-main").siblings(".xdsoft_datetimepicker, .ui-dialog").remove();
         // 加载对应的功能页面到内容块。
         if (gaeaValid.isNotNull($(this).data("href"))) {
             $(".gaea-sys-content").load($(this).data("href"));
