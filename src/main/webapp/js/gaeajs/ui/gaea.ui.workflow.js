@@ -41,16 +41,17 @@ define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils
             },
             createNormalApprovalDialogAndBinding: function (inOptions, linkAction) {
                 this.cache.options = inOptions;
-                inOptions.autoOpen = false;
+                //inOptions.autoOpen = false;
                 var dlgSelector = null;
                 // 指定工作流审批dialog要注入的DIV
-                if (gaeaValid.isNull(inOptions.renderTo)) {
-                    inOptions.renderTo = "workflow-approval-dialog";
+                if (gaeaValid.isNull(inOptions.id)) {
+                    inOptions.id = "workflow-approval-dialog";
                 }
-                inOptions.id = inOptions.renderTo;
-                dlgSelector = "#" + inOptions.id;
-                var dlgFormId = inOptions.id + "-form";
-                this.cache.options.formId = dlgFormId;
+                //inOptions.id = inOptions.renderTo;
+                var $dialog = $("#" + inOptions.id);
+                //dlgSelector = "#" + inOptions.id;
+                //var dlgFormId = inOptions.id + "-form";
+                //this.cache.options.formId = dlgFormId;
                 if (gaeaValid.isNotNull(inOptions.htmlWidth)) {
                     inOptions.width = inOptions.htmlWidth;
                 }
@@ -65,11 +66,15 @@ define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils
                 var buttons = this._createButtons();
                 inOptions.buttons = buttons;
                 // 外面嵌入form
-                var dlgContent = "<form id=\"" + dlgFormId + "\" action=\"" + inOptions.submitUrl + "\">" + $(dlgSelector).html() + "</form>";
-                $(dlgSelector).html(dlgContent);
+                //var dlgContent = "<form id=\"" + dlgFormId + "\" action=\"" + inOptions.submitUrl + "\">" + $(dlgSelector).html() + "</form>";
+                //$(dlgSelector).html(dlgContent);
                 // 初始化DIALOG
                 //var dialog = gaeaDialog.create(inOptions);
                 gaeaDialog.init(inOptions);
+                // 填充workflow dialog的内容
+                $dialog.find("form:first").append('<input type="hidden" id="wfProcInstId" name="wfProcInstId" value="">' +
+                    '<input type="hidden" id="wfActName" name="wfActName" value="">' +
+                    '<span><label>审批意见</label><textarea id="wfApprovalReason" name="wfApprovalReason" ></textarea></span>');
                 //this.cache.me = dialog;
                 return this;
                 //if (ur.utils.validate.isNotNull(linkAction) && ur.utils.validate.isNotNull(linkAction.htmlId)) {
