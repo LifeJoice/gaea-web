@@ -42,5 +42,6 @@
     <!-- ************************************************************************************************************
                     公用的ObjectMapper。每次创建比较浪费资源。线程安全的。
          ************************************************************************************************************ -->
-    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+    <!--移到CommonUtilsConfiguration初始化了-->
+    <!--<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />-->
 </beans>

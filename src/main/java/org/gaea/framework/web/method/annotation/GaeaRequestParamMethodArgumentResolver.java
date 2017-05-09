@@ -1,10 +1,15 @@
 package org.gaea.framework.web.method.annotation;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.comparators.ComparableComparator;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -12,9 +17,11 @@ import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.*;
 
+import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.ServletRequestParameterPropertyValues;
@@ -41,6 +48,12 @@ import javax.servlet.ServletRequest;
  * </p>
  * <p><b>未能实现对Map的注入。不知道为什么触发不了map类型。</b></p>
  *
+ * <p>
+ *     增加对Json数据的支持。2017年5月9日10:35:15<br/>
+ *     通过 @RequestBean(value = "testJsonData", dataType = RequestBeanDataType.JSON)
+ *     的RequestBeanDataType.JSON，指定传入的是json格式。则通过objectMapper进行类型转换，而不是利用Java反射转换。
+ * </p>
+ *
  * @author Iverson 2014-5-20 星期二
  */
 @Component
@@ -53,6 +66,9 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
     private final int ISINDEXABLE_NONE = 0;
     private final int ISINDEXABLE_EMPTY_SQUARE_BRACKETS = 1;
     private final int ISINDEXABLE_YES = 2;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -86,13 +102,34 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         String prefix = getPrefix(parameter);
         Class paramClass = parameter.getParameterType();
-        // 获取RequestBean注解的参数类的所有属性（field）。例如：@RequestBean("dept") Department department，即获取Department.class的所有属性。
-        Object requestBean = injectBeanValue(paramClass, parameter.getGenericParameterType(), prefix, webRequest);
-        return requestBean;
+        RequestBeanDataType dataType = getAnnotationDataType(parameter);
+        Object convertedBean = null;
+        /**
+         * if request的格式的json的，直接用Json插件的ObjectMapper转换就好了
+         * else
+         * 手动转换
+         */
+        if (RequestBeanDataType.JSON.equals(dataType)) {
+            convertedBean = convertJsonRequest(paramClass, parameter.getGenericParameterType(), prefix, webRequest);
+        } else {
+            // 获取RequestBean注解的参数类的所有属性（field）。例如：@RequestBean("dept") Department department，即获取Department.class的所有属性。
+            convertedBean = convertRequest(paramClass, parameter.getGenericParameterType(), prefix, webRequest);
+        }
+        return convertedBean;
     }
 
-    // 这个是手动获取值注入的。暂时不用。但如果是涉及到对象的子对象，还是可以用的。
-    private Object injectBeanValue(Class paramClass, Type genericType, String prefix, NativeWebRequest webRequest) throws ValidationFailedException {
+    /**
+     * 把Request中的string，根据@RequestBean的注解转换成对象/List等。
+     * 这个是手动获取值注入的。暂时不用。但如果是涉及到对象的子对象，还是可以用的。
+     *
+     * @param paramClass
+     * @param genericType
+     * @param prefix
+     * @param webRequest
+     * @return
+     * @throws ValidationFailedException
+     */
+    private Object convertRequest(Class paramClass, Type genericType, String prefix, NativeWebRequest webRequest) throws ValidationFailedException {
         Object requestBean = null;
         try {
             if (Collection.class.isAssignableFrom(paramClass) || paramClass.isArray()) {
@@ -111,6 +148,37 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
             throw new ValidationFailedException(MessageFormat.format("页面请求值转换为bean时出错。可能值与对应的Bean属性的类型不匹配。inject to param name: {0} exception message: {1}", prefix, e.getMessage()).toString(), e);
         }
         return requestBean;
+    }
+
+    private Object convertJsonRequest(Class paramClass, Type genericType, String requestParamName, NativeWebRequest webRequest) throws ValidationFailedException, ProcessFailedException {
+        Object convertedBean = null;
+        ServletRequest servletRequest = (ServletRequest) webRequest.getNativeRequest();
+        // json data
+        String data = servletRequest.getParameter(requestParamName);
+        if (StringUtils.isEmpty(data)) {
+            return null;
+        }
+        try {
+            /**
+             * if 要转换成List的
+             * else 普通POJO bean的
+             */
+            if (Collection.class.isAssignableFrom(paramClass) || paramClass.isArray()) {
+                Class beanClass = null;
+                // 获取泛型类
+                if (genericType instanceof ParameterizedType) {
+                    ParameterizedType pt = (ParameterizedType) genericType;
+                    beanClass = (Class<?>) pt.getActualTypeArguments()[0];
+                }
+                JavaType javaType = objectMapper.getTypeFactory().constructParametrizedType(ArrayList.class, List.class, beanClass);
+                List convertedBeanList = objectMapper.readValue(data, javaType);
+                return convertedBeanList;
+            } else {
+                return objectMapper.readValue(data, paramClass);
+            }
+        } catch (IOException e) {
+            throw new ProcessFailedException("转换数据集的dsData为List<DataItem>失败！dsData：" + data, e);
+        }
     }
 
     /**
@@ -251,7 +319,7 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                 field.setAccessible(true);
                 field.getGenericType();
                 // 递归调用
-                Object bean = injectBeanValue(field.getType(), field.getGenericType(), paramName + SEPARATOR + field.getName(), webRequest);
+                Object bean = convertRequest(field.getType(), field.getGenericType(), paramName + SEPARATOR + field.getName(), webRequest);
                 field.set(requestBean, bean);
             }
             result.add(requestBean);
@@ -361,6 +429,23 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
             }
         }
         return "";
+    }
+
+    /**
+     * 获取注解 @RequestBean 的DataType.
+     *
+     * @param parameter
+     * @return 如果没有注解@RequestBean，则返回null
+     */
+    private RequestBeanDataType getAnnotationDataType(MethodParameter parameter) {
+        for (Annotation annotation : parameter.getParameterAnnotations()) {
+            if (annotation instanceof RequestBean) {
+                // ParameterName,其实是指Java传入参数的变量名。例如：xxx(@RequestBean("dept") Department department) 这个例子中，parameter.getParameterName()指的就是department，而不是dept
+                RequestBeanDataType dataType = ((RequestBean) annotation).dataType();
+                return dataType;
+            }
+        }
+        return null;
     }
 
     /**

@@ -18,4 +18,6 @@ import java.lang.annotation.Target;
 @Documented
 public @interface RequestBean {
     String value() default "";
+
+    RequestBeanDataType dataType() default RequestBeanDataType.DEFAULT;
 }
