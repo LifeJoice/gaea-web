@@ -150,6 +150,17 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
         return requestBean;
     }
 
+    /**
+     * 负责转换request的某param是json的，用ObjectMapper进行转换。
+     *
+     * @param paramClass
+     * @param genericType
+     * @param requestParamName
+     * @param webRequest
+     * @return
+     * @throws ValidationFailedException
+     * @throws ProcessFailedException
+     */
     private Object convertJsonRequest(Class paramClass, Type genericType, String requestParamName, NativeWebRequest webRequest) throws ValidationFailedException, ProcessFailedException {
         Object convertedBean = null;
         ServletRequest servletRequest = (ServletRequest) webRequest.getNativeRequest();
@@ -170,8 +181,18 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                     ParameterizedType pt = (ParameterizedType) genericType;
                     beanClass = (Class<?>) pt.getActualTypeArguments()[0];
                 }
-                JavaType javaType = objectMapper.getTypeFactory().constructParametrizedType(ArrayList.class, List.class, beanClass);
-                List convertedBeanList = objectMapper.readValue(data, javaType);
+                List convertedBeanList = null;
+                /**
+                 * if 注解的目标是List<Map>>这种的，不能用JavaType去转换，Jackson会报错，用默认的List转换即可
+                 * else 是List<SomeClass>的
+                 *      用JavaType转换
+                 */
+                if (beanClass.isAssignableFrom(Map.class)) {
+                    convertedBeanList = objectMapper.readValue(data, List.class);
+                } else {
+                    JavaType javaType = objectMapper.getTypeFactory().constructParametrizedType(ArrayList.class, List.class, beanClass);
+                    convertedBeanList = objectMapper.readValue(data, javaType);
+                }
                 return convertedBeanList;
             } else {
                 return objectMapper.readValue(data, paramClass);
