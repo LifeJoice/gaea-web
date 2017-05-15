@@ -128,6 +128,10 @@ define(function () {
         },
         METHOD: {
             SUBMIT: "SUBMIT"
+        },
+        CRUD_GRID: {
+            EXCEL_IMPORT: "crudGridExcelImport",
+            EXCEL_EXPORT: "crudGridExcelExport"
         }
     };
     var TEMPLATE = {

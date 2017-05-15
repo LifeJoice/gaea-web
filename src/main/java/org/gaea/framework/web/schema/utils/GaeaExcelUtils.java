@@ -1,12 +1,15 @@
 package org.gaea.framework.web.schema.utils;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.SysInitException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.SystemCacheFactory;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
+import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.poi.domain.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +55,40 @@ public class GaeaExcelUtils {
             }
         }
         return fieldsMap;
+    }
+
+    /**
+     * 根据schemaId，获取里面的view.grid.columns，转换成key=column.name，value=Field对象的map返回。
+     * 例如：
+     * 导出excel可以用Schema定义的Column来拼凑excel的title等。
+     *
+     * @param gridColumnsDefine
+     * @return Map < column.name，Field对象 >
+     */
+    public static Map<String, Field> getFields(List<SchemaColumnJO> gridColumnsDefine) throws SysInitException, ValidationFailedException {
+        if (CollectionUtils.isEmpty(gridColumnsDefine)) {
+            return null;
+        }
+//        GaeaXmlSchema gaeaXmlSchema = SystemCacheFactory.getGaeaSchema(schemaId);
+        Map<String, Field> resultMap = null;
+//        if (gaeaXmlSchema != null && gaeaXmlSchema.getSchemaViews() != null) {
+        resultMap = new HashMap<String, Field>();
+//            SchemaGrid grid = gaeaXmlSchema.getSchemaViews().getGrid();
+//            if (grid != null && grid.getColumns() != null) {
+        for (SchemaColumnJO col : gridColumnsDefine) {
+            if (StringUtils.isEmpty(col.getName())) {
+                throw new ValidationFailedException("要转换为Excel field定义，name不允许为空！");
+            }
+            Field field = new Field();
+            field.setName(col.getName());
+            field.setTitle(col.getText());
+            field.setDataType(col.getDataType());
+            field.setDatetimeFormat(col.getDatetimeFormat());
+            resultMap.put(col.getName(), field);
+        }
+//            }
+//        }
+        return resultMap;
     }
 
     /**

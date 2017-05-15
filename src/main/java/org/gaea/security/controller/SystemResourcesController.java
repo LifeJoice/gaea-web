@@ -5,6 +5,8 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
+import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.poi.ExcelReader;
 import org.gaea.poi.domain.Workbook;
 import org.gaea.poi.reader.ExcelImportProcessor;
@@ -114,13 +116,14 @@ public class SystemResourcesController {
         }
     }
 
-//    @RequestMapping(value = "/upload")
-//    public void testImportExcel(@RequestParam("file") MultipartFile[] files, HttpServletRequest request, HttpServletResponse response) {
-//        //上传文件过程
-//        String test = "";
-//        if(files==null){
-//            System.out.println("file is null.");
-//        }else{
+    @RequestMapping(value = "/upload")
+    public void testImportExcel(@RequestParam("file") MultipartFile[] files, HttpServletRequest request, HttpServletResponse response,
+                                @RequestBean(value = "testJsonData", dataType = RequestBeanDataType.JSON) List<SchemaColumnJO> testJsonData) {
+        //上传文件过程
+        String test = "";
+        if (files == null) {
+            System.out.println("file is null.");
+        } else {
 //            try {
 //                List<Attendance> datas = excelReader.getData(files[0].getInputStream(),Attendance.class);
 ////                Workbook workbook = excelReader.getWorkbook(files[0].getInputStream());
@@ -232,27 +235,27 @@ public class SystemResourcesController {
 //            } catch (ParseException e) {
 //                e.printStackTrace();
 //            }
+        }
+//        for (MultipartFile file : files) {
+//            String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+////            int length = getAllowSuffix().indexOf(suffix);
+////            if (length == -1) {
+////                throw new Exception("请上传允许格式的文件");
+////            }
+////            destDir = "staticResource/user/picture/" + user.getId();
+////            File destFile = new File(uploadPath + destDir);
+////            if (!destFile.exists()) {
+////                destFile.mkdirs();
+////            }
+////            String fileNameNew = getFileNameNew() + "." + suffix;//
+////            File f = new File(destFile.getAbsoluteFile() + File.separator + fileNameNew);
+////            //如果当前文件已经存在了，就跳过。
+////            if(f.exists()){
+////                continue;
+////            }
+////            file.transferTo(f);
+////            f.createNewFile();
+////            fileNames[index++] = basePath + destDir + fileNameNew;
 //        }
-////        for (MultipartFile file : files) {
-////            String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
-//////            int length = getAllowSuffix().indexOf(suffix);
-//////            if (length == -1) {
-//////                throw new Exception("请上传允许格式的文件");
-//////            }
-//////            destDir = "staticResource/user/picture/" + user.getId();
-//////            File destFile = new File(uploadPath + destDir);
-//////            if (!destFile.exists()) {
-//////                destFile.mkdirs();
-//////            }
-//////            String fileNameNew = getFileNameNew() + "." + suffix;//
-//////            File f = new File(destFile.getAbsoluteFile() + File.separator + fileNameNew);
-//////            //如果当前文件已经存在了，就跳过。
-//////            if(f.exists()){
-//////                continue;
-//////            }
-//////            file.transferTo(f);
-//////            f.createNewFile();
-//////            fileNames[index++] = basePath + destDir + fileNameNew;
-////        }
-//    }
+    }
 }

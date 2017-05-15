@@ -1,6 +1,7 @@
 package org.gaea.framework.web.controller;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.InvalidDataException;
@@ -8,23 +9,34 @@ import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.SystemCacheFactory;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.view.SchemaButton;
+import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.framework.web.schema.view.action.ExcelExportSimpleButtonAction;
+import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.framework.web.schema.view.service.ActionsService;
+import org.gaea.poi.ExcelReader;
+import org.gaea.poi.domain.Field;
+import org.gaea.poi.domain.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 页面各种内置action的处理。例如：导出当前页excel、按模板导出excel等。
@@ -36,6 +48,8 @@ public class CommonActionsController {
     private final Logger logger = LoggerFactory.getLogger(CommonActionsController.class);
     @Autowired
     private ActionsService actionsService;
+    @Autowired
+    private ExcelReader excelReader;
 
     /**
      * 系统公用的button action处理。
@@ -92,6 +106,60 @@ public class CommonActionsController {
         ExcelExportSimpleButtonAction excelSimpleAction = new ExcelExportSimpleButtonAction(actionName, schemaId, queryConditionList);
         // 执行action定义的方法
         actionsService.doSimpleAction(excelSimpleAction, response, request);
+
+    }
+
+    /**
+     * 可编辑表格（crud grid）的默认excel导入功能。
+     * 通过提供的gridColumnsDefine转换为Excel定义，然后和Excel里面的定义匹配，把Excel数据转换后返回，刷新grid。
+     * <p>
+     * 注意:Excel中未定义的,或者和grid定义不匹配的数据,是不会返回的.
+     * </p>
+     *
+     * @param gridColumnsDefine
+     * @param files
+     * @param request
+     * @param response
+     * @throws ValidationFailedException
+     * @throws InvalidDataException
+     */
+    @RequestMapping(value = "/crud-grid/excel-import")
+    @ResponseBody
+    public List crudGridExcelImportAction(@RequestBean(value = "columns", dataType = RequestBeanDataType.JSON) List<SchemaColumnJO> gridColumnsDefine,
+                                          @RequestParam("file") MultipartFile[] files, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, InvalidDataException, ProcessFailedException, SysInitException {
+        List data = null;
+        if (files == null) {
+            throw new ValidationFailedException("获取不到文件！");
+        } else if (files.length != 1) {
+            throw new ValidationFailedException("可编辑表格的excel导入一次只支持一个文件！");
+        } else {
+            if (CollectionUtils.isEmpty(gridColumnsDefine)) {
+                throw new ValidationFailedException("Grid的定义为空，无法执行通用导入！");
+            }
+            try {
+                Map<String, Field> fieldDefMap = GaeaExcelUtils.getFields(gridColumnsDefine);
+                data = excelReader.getData(files[0].getInputStream(), fieldDefMap);
+            } catch (IOException e) {
+                throw new ProcessFailedException("对文件读写错误！请联系管理员！");
+            }
+        }
+        return data;
+    }
+
+
+    @RequestMapping(value = "/crud-grid/excel-export")
+    public void crudGridExcelExportAction(String schemaId, String buttonId, String actionName, @RequestBean("filters") List<QueryCondition> queryConditionList,
+                                          HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, InvalidDataException {
+        throw new NotImplementedException("正准备做呢");
+//        if (StringUtils.isEmpty(schemaId)) {
+//            throw new ValidationFailedException("获取不到Schema id。无法进行导出操作。");
+//        }
+//        if (StringUtils.isEmpty(actionName)) {
+//            throw new ValidationFailedException("缺少操作名（actionName）,无法执行doSimpleAction操作。");
+//        }
+//        ExcelExportSimpleButtonAction excelSimpleAction = new ExcelExportSimpleButtonAction(actionName, schemaId, queryConditionList);
+//        // 执行action定义的方法
+//        actionsService.doSimpleAction(excelSimpleAction, response, request);
 
     }
 }

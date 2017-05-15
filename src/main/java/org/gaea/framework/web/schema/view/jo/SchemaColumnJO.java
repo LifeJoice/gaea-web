@@ -15,7 +15,6 @@ public class SchemaColumnJO implements Serializable {
     // group
     private String type;
     private String text;                            // 对应label
-    @JsonIgnore
     private String name;
     @JsonIgnore
     private String dbColumnName;
@@ -25,6 +24,7 @@ public class SchemaColumnJO implements Serializable {
     private String htmlId;
     private Boolean hidden = true;                  // 和visible相反
     private Boolean sortable = false;
+    private boolean editable = false;               // 是否可编辑
     private String width;                           // 对应htmlWidth
     private Boolean primaryKey = false;             // 是否主键
     private String dataType;
@@ -36,6 +36,7 @@ public class SchemaColumnJO implements Serializable {
     private List<SchemaColumn> columns = new ArrayList<SchemaColumn>();
     // column对应的查询条件定义。非必须存在。grid列表头快捷查询区用。
     private ColumnQueryConditionJO queryCondition;
+    private String value;
 
     // 构造方法
 
@@ -178,5 +179,21 @@ public class SchemaColumnJO implements Serializable {
 
     public void setQueryCondition(ColumnQueryConditionJO queryCondition) {
         this.queryCondition = queryCondition;
+    }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

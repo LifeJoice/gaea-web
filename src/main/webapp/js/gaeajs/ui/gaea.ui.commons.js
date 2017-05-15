@@ -226,6 +226,8 @@ define([
 
                 var btnAddOneId = opts.id + "-btnAddOne";
                 var btnDelId = opts.id + "-btnDel";
+                var btnExcelImportId = opts.id + "-btnExcelImport"; // 通用导入
+                var btnExcelExportId = opts.id + "-btnExcelExport"; // 通用导出
                 gaeaGrid = require("gaeajs-ui-grid"); // 经常拿不到模块，为什么
 
                 // 初始化 TOOLBAR
@@ -248,8 +250,7 @@ define([
                         onClick: function () {
                             gaeaGrid.crudGrid.addNewOne(opts.gridOptions)
                         }
-                    },
-                        {
+                    }, {
                             "id": btnDelId,
                             "name": btnDelId,
                             "htmlName": btnDelId,
@@ -265,6 +266,42 @@ define([
                             onClick: function () {
                                 gaeaGrid.crudGrid.deleteSelected(opts.gridOptions)
                             }
+                    },
+                        {
+                            "id": btnExcelImportId,
+                            "name": btnExcelImportId,
+                            "htmlName": btnExcelImportId,
+                            "htmlId": btnExcelImportId,
+                            "htmlValue": "导入数据",
+                            "type": null,
+                            "href": null,
+                            "linkViewId": null,
+                            "linkComponent": null,
+                            "componentName": "button", // 定义组件
+                            "action": {
+                                // 定义了这是一个通用的Excel导入按钮
+                                name: GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT,
+                                gridId: opts.gridOptions.id
+                            },
+                            "size": "small"
+                        },
+                        {
+                            "id": btnExcelExportId,
+                            "name": btnExcelExportId,
+                            "htmlName": btnExcelExportId,
+                            "htmlId": btnExcelExportId,
+                            "htmlValue": "导出数据",
+                            "type": null,
+                            "href": null,
+                            "linkViewId": null,
+                            "linkComponent": null,
+                            "componentName": "button", // 定义组件
+                            "action": {
+                                // 定义了这是一个通用的Excel导入按钮
+                                name: GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_EXPORT,
+                                gridId: opts.gridOptions.id
+                            },
+                            "size": "small"
                         }]
                 });
             }

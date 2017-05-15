@@ -39,7 +39,7 @@
     <link rel="stylesheet" href="/js/thirdparty/jquery/plugins/select2/css/select2.min.css">
     <link href="/js/gaeajs/ui/css/gaea-ui-select2.css" rel="stylesheet" type="text/css"/><!-- select2的样式重写 -->
     <!-- loading效果 -->
-    <link rel="stylesheet" href="/css/commons/loading-style.css">
+    <!--<link rel="stylesheet" href="/css/commons/loading-style.css">-->
     <!--导入Schema提供的js和css-->
     <!UR_VIEW_SCHEMA IMPORT_HEADLAST>
     <!--下面的这两个js为了配合整个列表页框架的运作，所以放在最后。非列表页框架性的东西不要放在这里。-->
@@ -47,18 +47,18 @@
     <!UR_VIEW_SCHEMA IMPORT_CSS_HEADLAST>
     <!-- 下面的两个CSS覆盖上面的CSS，特别是一些针对第三方组件的css的hack -->
     <link href="/js/gaeajs/ui/css/gaea-ui-form.css" rel="stylesheet" type="text/css"/><!--通用表单样式-->
-    <link href="/js/gaeajs/ui/css/gaea-ui.css" rel="stylesheet" type="text/css"/><!--gaea ui组件样式（复选框、tabs等）-->
+    <link href="/js/gaeajs/ui/css/gaea-ui.css" rel="stylesheet" type="text/css"/><!--gaea ui组件样式（复选框、tabs、loading等）-->
 </head>
 <body>
 <div class="gaea-ui-page">
     <div id="view-title" class="view title"></div>
     <div id='gaea-toolbar' class='gaea-toolbar'></div>
     <div id="gaea-grid-ct"></div>
-    <div id="workflow-approval-dialog" style="display: none">
-        <input type="hidden" id="wfProcInstId" name="wfProcInstId" value="">
-        <input type="hidden" id="wfActName" name="wfActName" value="">
-        <span><label>审批意见</label><textarea id="wfApprovalReason" name="wfApprovalReason" ></textarea></span>
-    </div>
+    <!--<div id="workflow-approval-dialog" style="display: none">-->
+    <!--<input type="hidden" id="wfProcInstId" name="wfProcInstId" value="">-->
+    <!--<input type="hidden" id="wfActName" name="wfActName" value="">-->
+    <!--<span><label>审批意见</label><textarea id="wfApprovalReason" name="wfApprovalReason" ></textarea></span>-->
+    <!--</div>-->
     <div id="createOrEditDialog"></div>
     <!--<div id="uploaderDialog">-->
     <!--<div id="thelist" class="uploader-list"></div>-->

@@ -2,6 +2,7 @@
 <!--file-name为空，自动生成带日期的文件名。-->
 <excel-template id="EXCEL_EXPORT_DEMO" file-name="">
     <block dataset-id="DS_EXCEL_EXPORT_DEMO">
+        <!--name相当于id，在Block范围内必须唯一！-->
         <!--width
         是为字符数。不是像素或其他。而且，这个和字体还有关系。不同字体会导致同样的width，实际效果却不一样。-->
         <!--cellValueTransferBy

@@ -6,11 +6,20 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
         "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils",
-        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button"],
+        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button", "gaeajs-ui-crud-grid"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
               GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils,
-              gaeaView, SYS_URL, gaeaButton) {
+              gaeaView, SYS_URL, gaeaButton, gaeaCrudGrid) {
+
+        /**
+         * Gaea UI（按钮）的action
+         *
+         * @typedef {object} GaeaUIAction
+         * @property {string} name                  唯一key。定义action。
+         * @property {string} [gridId]              目标grid容器id。action=crudGridExcelImport 有用
+         */
+
         var toolbar = {
             options: {
                 renderTo: null,
@@ -119,7 +128,10 @@ define([
                         else if (gaeaString.equalsIgnoreCase("uploader-dialog", linkObj.componentName)) {
                             console.log("初始化uploader-dialog");
                             //dialogDef = linkObj;
-                            gaeaUploader.uploader(null, dialogOpts, this);
+                            gaeaUploader.init({
+                                dialog: dialogOpts,
+                                button: this
+                            });
                         }
                         /**
                          * 处理增删改dialog。
@@ -387,6 +399,21 @@ define([
                     } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
                         // 初始化通用删除功能（绑定点击事件等）
                         gaeaActions.deleteSelected.init(opts);// options默认伪删除
+                    }
+                    // 由于历史是用buttonDef.action, 而新的是用buttonDef.action.name
+                    // TODO 整合buttonDef.action.name和buttonDef.action. 整合下面的if和上面的if
+                    if (_.isObject(buttonDef.action)) {
+                        if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT)) {
+                            /**
+                             * 初始化可编辑表格的导入
+                             */
+                            gaeaCrudGrid.action.excelImport.init({
+                                sourceId: buttonDef.id,
+                                action: buttonDef.action
+                            });
+                        } else if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT)) {
+
+                        }
                     }
                     /**
                      * 按钮点击的事件

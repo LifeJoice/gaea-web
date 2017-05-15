@@ -2157,6 +2157,7 @@ require.config({
         "gaeajs-ui-plugins": '/js/gaeajs/ui/gaea.ui.plugins',
         "gaeajs-ui-grid": '/js/gaeajs/ui/gaea.ui.grid',
         "gaeajs-ui-grid-query": '/js/gaeajs/ui/gaea.ui.grid.query',
+        "gaeajs-ui-crud-grid": '/js/gaeajs/ui/gaea.ui.grid.crudGrid', /* 可编辑表格模块 */
         "gaeajs-ui-dialog": '/js/gaeajs/ui/gaea.ui.dialog',
         "gaeajs-ui-dataFilterDialog": '/js/gaeajs/ui/gaea.ui.dialog.dataFilterDialog',
         "gaeajs-ui-button": '/js/gaeajs/ui/gaea.ui.button',

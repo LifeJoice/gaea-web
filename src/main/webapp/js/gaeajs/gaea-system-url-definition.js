@@ -25,6 +25,10 @@ define(function () {
             DELETE: "/gaea/common/crud/delete",
             PSEUDO_DELETE: "/gaea/common/crud/pseudo-delete"// 伪删除
         },
+        CRUD_GRID: {
+            EXCEL_IMPORT: "/gaea/actions/crud-grid/excel-import", // 可编辑表格的excel导入
+            EXCEL_IMPORT: "/gaea/actions/crud-grid/excel-export" // 可编辑表格的excel导出
+        },
         MENU: {
             FIND_ALL: "/gaea/security/menu/find-all"// 查找所有的菜单
         },

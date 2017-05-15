@@ -7,24 +7,50 @@
  * RequireJS,JQuery,重写的Date.format
  */
 define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-dialog"
-        , 'gaeajs-common-utils-validate','gaeajs-common'],
+        , 'gaeajs-common-utils-validate', 'gaeajs-common', "gaeajs-ui-notify"],
     function ($, _, webuploader, _s, gaeaDialog,
-              gaeaValid,gaeaCommon) {
-        var options = {
-            url: null,
-            data: null,
-            success: null,
-            fail: null
+              gaeaValid, gaeaCommon, gaeaNotify) {
+        // default options
+        var _options = {
+            // swf文件路径
+            swf: '/js/thirdparty/upload/Uploader.swf',
+            // 文件接收服务端。like this: /gaea/security/resource/upload
+            server: '',
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+            // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+            resize: false,
+            // 并发线程
+            threads: 1,
+            // 限制大小.2M
+            fileSingleSizeLimit: 2 * 1024 * 1024,
+            // 是否允许选择多文件
+            multiple: false
         };
         var _uploader;
+
         var uploader = {
             /**
              * 构造方法。初始化和uploader相关的一切。
-             * @param options
-             * @param dialogOptions
-             * @param buttonOptions
+             * @param {object} opts
+             * @param {object} opts.dialog
+             * @param {string} opts.dialog.id           dialog的id
+             * @param {object} opts.button
+             * @param {string} opts.button.id           触发上传控件打开的按钮的id
+             * @param {object} opts.data                要随文件一并提交的相关form data。例如：schemaId之类的
+             * @param {string} [opts.submitUrl]         目标url. 为空就默认都丢到同一个地方去了。
+             * @param {function} [opts.callback]        提交后回来的回调函数
              */
-            uploader: function (options, dialogOptions, buttonOptions) {
+            init: function (opts) {
+                var dialogOptions = opts.dialog;
+                var buttonOptions = opts.button;
+                var filePickerId = dialogOptions.id + "-filePicker";
+                var uploaderOpts = _.defaults({
+                    pick: "#" + filePickerId,
+                    server: opts.submitUrl,
+                    formData: opts.data
+                }, _options);
                 //var that = this;
                 //var $list = $("#thelist");// test
                 /* 初始化上传组件的dialog */
@@ -34,35 +60,38 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 // init uploader HTML
                 var $list = $('<div id="thelist" class="uploader-list"></div>');
                 $dialog.append($list);
-                $dialog.append('<div id="filePicker"></div>');
+                $dialog.append('<div id="' + filePickerId + '"></div>');
 
-                $("#" + buttonOptions.htmlId).click(function () {
+                // 注册点击处理
+                gaeaEvents.registerListener("click", "#" + buttonOptions.id, function (event, ui) {
+                    //$("#" + buttonOptions.id).click(function () {
                     //console.log("Go. Open dialog.");
                     // 打开dialog
                     gaeaDialog.open({
-                        id:dialogOptions.htmlId
+                            id: dialogOptions.id
                     }
                     //"#" + dialogOptions.htmlId
                     );
                 });
 
-                _uploader = new webuploader.Uploader({
-                    // swf文件路径
-                    swf: '/js/thirdparty/upload/Uploader.swf',
-                    // 文件接收服务端。
-                    server: '/gaea/security/resource/upload',
-                    // 选择文件的按钮。可选。
-                    // 内部根据当前运行是创建，可能是input元素，也可能是flash.
-                    pick: '#filePicker',
-                    // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
-                    resize: false,
-                    // 并发线程
-                    threads:1,
-                    // 限制大小.2M
-                    fileSingleSizeLimit: 2*1024*1024,
-                    // 是否允许选择多文件
-                    multiple: false
-                });
+                //_uploader = new webuploader.Uploader({
+                //    // swf文件路径
+                //    swf: '/js/thirdparty/upload/Uploader.swf',
+                //    // 文件接收服务端。
+                //    server: '/gaea/security/resource/upload',
+                //    // 选择文件的按钮。可选。
+                //    // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+                //    pick: '#filePicker',
+                //    // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+                //    resize: false,
+                //    // 并发线程
+                //    threads:1,
+                //    // 限制大小.2M
+                //    fileSingleSizeLimit: 2*1024*1024,
+                //    // 是否允许选择多文件
+                //    multiple: false
+                //});
+                _uploader = new webuploader.Uploader(uploaderOpts);
                 // 当有文件被添加进队列的时候
                 _uploader.on('fileQueued', function (file) {
                     console.debug("file queued.file id: " + file.id + " file name: " + file.name);
@@ -74,14 +103,21 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 /**
                  * 监听上传完成.进行上传完成后的处理.
                  */
-                _uploader.on('uploadSuccess', function (file) {
+                _uploader.on('uploadSuccess', function (file, response) {
                     $('#' + file.id).find('p.state').text('已上传');
+                    // callback
+                    if (_.isFunction(opts.callback)) {
+                        opts.callback(file, response);
+                    }
                     // 关闭遮罩层
                     gaeaCommon.loading.off();
                 });
 
                 _uploader.on('uploadError', function (file) {
                     $('#' + file.id).find('p.state').text('上传出错');
+                    gaeaNotify.error("上传处理失败！");
+                    // 关闭遮罩层
+                    gaeaCommon.loading.off();
                 });
 
                 _uploader.on('uploadComplete', function (file) {
@@ -94,8 +130,6 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
              * @private
              */
             _initDialog: function (dialogOptions) {
-                //var that = this;
-                dialogOptions.id = dialogOptions.htmlId;   // 用htmlId作为创建dialog的DIV ID。
 
                 if (gaeaValid.isNotNull(dialogOptions.htmlWidth)) {
                     dialogOptions.width = dialogOptions.htmlWidth;
@@ -108,14 +142,15 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 dialogOptions.buttons = {
                     "chooseFile": {
                         text: "选择文件",
-                        id: "chooseFile",
+                        id: dialogOptions + "-chooseFile",
                         click: function () {
-                            $(":file").trigger('click');
+                            var $dialog = $("#" + dialogOptions.id);
+                            $dialog.find(":file").trigger('click');
                         }
                     },
                     "upload": {
                         text: "上传",
-                        id: "upload",
+                        id: dialogOptions + "-upload",
                         click: function () {
                             // 打开遮罩层
                             gaeaCommon.loading.on();
@@ -125,7 +160,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                     },
                     "cancel": {
                         text: "取消",
-                        id: "cancel",
+                        id: dialogOptions + "-cancel",
                         click: function () {
                             $(this).gaeaDialog("close");
                         }
@@ -146,5 +181,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
         /**
          * 返回（暴露）的接口
          */
-        return uploader;
+        return {
+            init: uploader.init
+        };
     })
