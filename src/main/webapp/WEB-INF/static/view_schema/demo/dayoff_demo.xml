@@ -58,7 +58,8 @@
         <!-- 改一下：type改为描述dialog子类型的，而不是像workflow-dialog|macula-dialog这么大范围的。而是描述<wf-dialog>中，有哪几种。
              default(approve-or-not)| -->
         <!--button的type会关系到页面生成按钮的样式-->
-        <wf-dialog id="wfDialog" title="流程审批" html-width="500" html-height="500" submit-url="/admin/wf-demo/new-dayoff/complete.do" >
+        <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
+                   submit-url="/admin/wf-demo/new-dayoff/complete.do">
             <button id="btnApproved" name="btnApproved" html-value="批准" type="approve" />
             <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove" />
             <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel" />

@@ -26,7 +26,7 @@
             <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
         </actions>
 
-        <wf-dialog id="wfDialog" title="流程审批" html-width="500" html-height="500"
+        <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
                    submit-url="/admin/wf-demo/new-dayoff/complete.do">
             <button id="btnApproved" name="btnApproved" html-value="批准" type="approve"/>
             <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove"/>
