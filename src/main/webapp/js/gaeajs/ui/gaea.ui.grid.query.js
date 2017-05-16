@@ -242,7 +242,7 @@ define([
                      * 例如：
                      * 日期类的字段，需要初始化日期控件。
                      */
-                    if (gaeaValid.isNotNull(column.datetimeFormat)) {
+                    if (gaeaValid.isNotNull(column.dataType)) {
                         if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
                             // 初始化日期控件
                             gaeaPlugins.datePicker.init({
