@@ -11,13 +11,12 @@ import org.gaea.framework.web.bind.annotation.RequestBean;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.text.MessageFormat;
 import java.util.*;
 
 import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
+import org.gaea.util.GaeaClassUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -176,10 +175,12 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
              */
             if (Collection.class.isAssignableFrom(paramClass) || paramClass.isArray()) {
                 Class beanClass = null;
-                // 获取泛型类
+                /**
+                 * 获取泛型对应的Class
+                 * 例如：List<User>则得到User.class；List<Map<String,String>>则得到Map.class。
+                 */
                 if (genericType instanceof ParameterizedType) {
-                    ParameterizedType pt = (ParameterizedType) genericType;
-                    beanClass = (Class<?>) pt.getActualTypeArguments()[0];
+                    beanClass = GaeaClassUtils.getClass(genericType, 0);
                 }
                 List convertedBeanList = null;
                 /**
