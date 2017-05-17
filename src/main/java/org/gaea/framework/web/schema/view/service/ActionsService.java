@@ -19,6 +19,7 @@ import org.gaea.framework.web.schema.view.jo.SchemaActionsJO;
 import org.gaea.framework.web.schema.view.jo.SchemaButtonGroupJO;
 import org.gaea.framework.web.schema.view.jo.SchemaButtonJO;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
+import org.gaea.framework.web.utils.GaeaWebUtils;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class ActionsService {
              */
             String loginName = GaeaWebSecuritySystem.getUserName(request);
             File file = ((ExcelExportButtonAction) action).doAction(loginName);
-            writeFileToResponse(file, response);
+            GaeaWebUtils.writeFileToResponse(file, response);
 //            response.reset();
 //            response.setCharacterEncoding("utf-8");
 //            response.setContentType("application/vnd.ms-excel");
@@ -98,7 +99,7 @@ public class ActionsService {
     /**
      * 普通action的处理。
      * <p>普通action，即一般是XML定义中，没有定义< button-action >的。</p>
-     *
+     * TODO refactor to ExcelService
      * @param action
      * @param response    利用流回写文件
      * @param request     获取用户登录信息
@@ -123,42 +124,42 @@ public class ActionsService {
 
 
             File file = ((ExcelExportSimpleButtonAction) action).doAction(loginName);
-            writeFileToResponse(file, response);
+            GaeaWebUtils.writeFileToResponse(file, response);
 
         }
     }
 
-    private void writeFileToResponse(File file, HttpServletResponse response) {
-        response.reset();
-        response.setCharacterEncoding("utf-8");
-        response.setContentType("application/vnd.ms-excel");
-        // 这个可能有助于服务器和客户端直接分块传输
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
-        try {
-            bis = new BufferedInputStream(new FileInputStream(file));
-            bos = new BufferedOutputStream(response.getOutputStream());
-
-
-            byte[] buff = new byte[4096];
-            int bytesRead;
-            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
-                bos.write(buff, 0, bytesRead);
-            }
-        } catch (FileNotFoundException e) {
-            logger.debug("读取缓存excel文件失败！");
-        } catch (IOException e) {
-            logger.debug("获取输出流失败！");
-        } finally {
-            try {
-                bis.close();
-                bos.close();
-            } catch (IOException e) {
-                logger.error("输入输出流关闭失败！", e);
-            }
-        }
-    }
+//    private void writeFileToResponse(File file, HttpServletResponse response) {
+//        response.reset();
+//        response.setCharacterEncoding("utf-8");
+//        response.setContentType("application/vnd.ms-excel");
+//        // 这个可能有助于服务器和客户端直接分块传输
+//        response.setHeader("Content-Length", String.valueOf(file.length()));
+//        BufferedInputStream bis = null;
+//        BufferedOutputStream bos = null;
+//        try {
+//            bis = new BufferedInputStream(new FileInputStream(file));
+//            bos = new BufferedOutputStream(response.getOutputStream());
+//
+//
+//            byte[] buff = new byte[4096];
+//            int bytesRead;
+//            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+//                bos.write(buff, 0, bytesRead);
+//            }
+//        } catch (FileNotFoundException e) {
+//            logger.debug("读取缓存excel文件失败！");
+//        } catch (IOException e) {
+//            logger.debug("获取输出流失败！");
+//        } finally {
+//            try {
+//                bis.close();
+//                bos.close();
+//            } catch (IOException e) {
+//                logger.error("输入输出流关闭失败！", e);
+//            }
+//        }
+//    }
 
     /**
      * 把SchemaActions对象转换为JO对象，方便返回给前端。同时也可以把一些信息过滤掉不要返回。

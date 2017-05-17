@@ -90,6 +90,7 @@ define([
                     var $rootCrudGridCt = $gridCt.parent();
                     var configStr = $rootCrudGridCt.data(GAEA_UI_DEFINE.UI.GRID.CRUD_GRID_DEFINE); // = data-gaea-ui-crud-grid
                     var gridConfig = gaeaString.parseJSON(configStr);
+                    // 压扁它。以对象提交会有问题。
                     result.columns = JSON.stringify(gridConfig.columns);
                     return result;
                 }
@@ -98,8 +99,62 @@ define([
              * 可编辑列表的导出按钮操作。
              */
             excelExport: {
+                /**
+                 * 初始化通用导入功能。
+                 * @param {object} opts
+                 * @param {string} opts.sourceId
+                 * @param {GaeaUIAction} opts.action
+                 * @param {object[]} [opts.data]                    要被导出的数据. 为空，会自动根据sourceId找寻对应的平级grid的数据。
+                 */
                 init: function (opts) {
+                    if (gaeaValid.isNull(opts.sourceId)) {
+                        throw "id/sourceId为空，无法初始化crud grid的导出功能！";
+                    }
 
+                    gaeaEvents.registerListener("click", "#" + opts.sourceId, function (event, data) {
+                        // get grid ct
+                        var $gridCt = $("#" + opts.sourceId).parents("[data-gaea-ui-crud-grid]").children(".gaea-grid-ct");
+                        // init data
+                        var data = opts.data;
+                        if (gaeaValid.isNull(data)) {
+                            data = $gridCt.data("options").data;
+                            if (gaeaValid.isNull(data)) {
+                                gaeaNotify.message("没有数据，无法执行导出！");
+                                return;
+                            }
+                        }
+                        data = JSON.stringify(data);
+                        // check data
+                        if (data.indexOf("'") >= 0) {
+                            gaeaNotify.warn("数据中包含特殊字符(')，无法提交！");
+                            return;
+                        }
+                        // get extra data
+                        // 获取要一并提交的数据，例如：grid定义等
+                        var extraData = grid.action.excelImport._getData(opts);
+                        // 构建一个临时的form，来用于提交。
+                        var submitFormHtml = '' +
+                            '<form action="<%= ACTION %>" method="post">' +
+                            "<input type='hidden' name='data' value='<%= DATA %>'>" +
+                            "<input type='hidden' name='columns' value='<%= COLUMNS %>'>" +
+                                //'<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
+                            '</form>';
+                        var formHtmlTemplate = _.template(submitFormHtml);
+                        var $form = $(formHtmlTemplate({
+                            ACTION: SYS_URL.CRUD_GRID.EXCEL_EXPORT,
+                            //ACTION_NAME: data.actionName,
+                            COLUMNS: extraData.columns,
+                            DATA: data
+                        }));
+                        // create form
+                        // 必须append到body中，否则报错：Form submission canceled because the form is not connected
+                        // 原因：According to the HTML standards, if the form is not associated browsing context(document), form submission will be aborted.
+                        $("body:first").append($form);
+                        // 提交form
+                        $form.submit();
+                        // remove form
+                        $form.remove();
+                    });
                 }
             }
         };
@@ -111,6 +166,9 @@ define([
             action: {
                 excelImport: {
                     init: grid.action.excelImport.init
+                },
+                excelExport: {
+                    init: grid.action.excelExport.init
                 }
             }
         };

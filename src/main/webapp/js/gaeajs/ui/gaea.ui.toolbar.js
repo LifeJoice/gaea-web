@@ -405,14 +405,20 @@ define([
                     if (_.isObject(buttonDef.action)) {
                         if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT)) {
                             /**
-                             * 初始化可编辑表格的导入
+                             * 可编辑表格的导入
                              */
                             gaeaCrudGrid.action.excelImport.init({
                                 sourceId: buttonDef.id,
                                 action: buttonDef.action
                             });
-                        } else if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT)) {
-
+                        } else if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_EXPORT)) {
+                            /**
+                             * 可编辑表格的导出
+                             */
+                            gaeaCrudGrid.action.excelExport.init({
+                                sourceId: buttonDef.id,
+                                action: buttonDef.action
+                            });
                         }
                     }
                     /**

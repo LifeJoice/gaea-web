@@ -7,9 +7,9 @@
  * RequireJS,JQuery,重写的Date.format
  */
 define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-dialog"
-        , 'gaeajs-common-utils-validate', 'gaeajs-common', "gaeajs-ui-notify"],
+        , 'gaeajs-common-utils-validate', 'gaeajs-common', "gaeajs-ui-notify", "gaeajs-ui-events"],
     function ($, _, webuploader, _s, gaeaDialog,
-              gaeaValid, gaeaCommon, gaeaNotify) {
+              gaeaValid, gaeaCommon, gaeaNotify, gaeaEvents) {
         // default options
         var _options = {
             // swf文件路径

@@ -65,16 +65,12 @@ public class GaeaExcelUtils {
      * @param gridColumnsDefine
      * @return Map < column.name，Field对象 >
      */
-    public static Map<String, Field> getFields(List<SchemaColumnJO> gridColumnsDefine) throws SysInitException, ValidationFailedException {
+    public static Map<String, Field> getFields(List<SchemaColumnJO> gridColumnsDefine) throws ValidationFailedException {
         if (CollectionUtils.isEmpty(gridColumnsDefine)) {
             return null;
         }
-//        GaeaXmlSchema gaeaXmlSchema = SystemCacheFactory.getGaeaSchema(schemaId);
         Map<String, Field> resultMap = null;
-//        if (gaeaXmlSchema != null && gaeaXmlSchema.getSchemaViews() != null) {
         resultMap = new HashMap<String, Field>();
-//            SchemaGrid grid = gaeaXmlSchema.getSchemaViews().getGrid();
-//            if (grid != null && grid.getColumns() != null) {
         for (SchemaColumnJO col : gridColumnsDefine) {
             if (StringUtils.isEmpty(col.getName())) {
                 throw new ValidationFailedException("要转换为Excel field定义，name不允许为空！");
@@ -86,8 +82,6 @@ public class GaeaExcelUtils {
             field.setDatetimeFormat(col.getDatetimeFormat());
             resultMap.put(col.getName(), field);
         }
-//            }
-//        }
         return resultMap;
     }
 

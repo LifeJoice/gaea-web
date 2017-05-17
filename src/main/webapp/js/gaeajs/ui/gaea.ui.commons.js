@@ -281,6 +281,7 @@ define([
                             "action": {
                                 // 定义了这是一个通用的Excel导入按钮
                                 name: GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT,
+                                // 设定这个导入对应哪个grid
                                 gridId: opts.gridOptions.id
                             },
                             "size": "small"
@@ -299,6 +300,7 @@ define([
                             "action": {
                                 // 定义了这是一个通用的Excel导入按钮
                                 name: GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_EXPORT,
+                                // 设定这个导出对应哪个grid
                                 gridId: opts.gridOptions.id
                             },
                             "size": "small"
