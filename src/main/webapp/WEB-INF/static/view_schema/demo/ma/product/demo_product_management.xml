@@ -119,6 +119,10 @@
                     visible="true" sortable="false" html-width="120" data-type="string"/>
             <column id="newProduct" name="newProduct" label="新产品" db-column-name="newproduct"
                     visible="true" sortable="false" html-width="80" data-type="string"/>
+            <column id="photos" name="photos" label="缩略图" db-column-name="PHOTOS"
+                    visible="true" sortable="false" html-width="300" data-type="img"
+                    img-src-prefix="https://manager.modernavenue.com" img-src-suffix=""
+                    img-thumbnail-suffix="_120x.jpg"/>
             <column id="createBy" name="createBy" label="创建人" db-column-name="CREATE_BY"
                     visible="true" sortable="false" html-width="220" data-type="string"/>
             <column id="createTime" name="createTime" label="创建时间" db-column-name="createTime"

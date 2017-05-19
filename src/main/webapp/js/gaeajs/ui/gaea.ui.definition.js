@@ -105,7 +105,8 @@ define(function () {
         DATA: {
             DATA_TYPE_DATE: "date",
             DATA_TYPE_TIME: "time",
-            DATA_TYPE_DATETIME: "datetime"
+            DATA_TYPE_DATETIME: "datetime",
+            DATA_TYPE_IMG: "img"
         }
     };
     var PAGE = {

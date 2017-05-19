@@ -117,6 +117,16 @@
     padding: 1px;
 }
 
+/* 单元格是图片 */
+.grid-td-div.img-cell {
+    height: 40px;
+}
+
+/* grid的图片的高度，这样才能自动缩放大小。 */
+.grid-td-div.img-cell img {
+    height: 40px;
+}
+
 /*行前复选框*/
 .tb-body td.checkbox {
     width: 35px;

@@ -9,7 +9,10 @@
  * @property {string} GaeaColumn.text                   列头文本
  * @property {boolean} GaeaColumn.editable              是否可编辑
  * @property {int} GaeaColumn.width                     宽度
- * @property {string} GaeaColumn.dataType               数据类型。string|date|datetime|...
+ * @property {string} GaeaColumn.dataType               数据类型。string|date|datetime|img|...
+ * @property {string} GaeaColumn.imgSrcPrefix           图片列，自动为<img>标签的src加上的前缀
+ * @property {string} GaeaColumn.imgSrcSuffix           图片列，自动为<img>标签的src加上的后缀
+ * @property {string} GaeaColumn.imgThumbnailSuffix     缩略图的后缀。图片列，自动为<img>标签的src加上的后缀
  * @property {GaeaColumnValidator} GaeaColumn.validator 列可编辑字段的校验定义. 适配jQuery.validate
  */
 /**
@@ -32,7 +35,7 @@ define([
         'gaeajs-ui-button', 'gaea-system-url', "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
         "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils",
         "gaeajs-ui-grid-query", "gaeajs-ui-commons",
-        "jquery-mCustomScrollbar"],
+        "jquery-mCustomScrollbar", "jquery-lightGallery"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaButton, SYS_URL, gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
               GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils,
@@ -627,6 +630,11 @@ define([
                 _private.grid.createFooter(options);
                 // 绑定各种事件
                 _private.grid.bindingEvents(options);
+                /**
+                 * 初始化各种grid相关插件。放在全部数据初始化完成后，不需要每行都调用一次初始化。
+                 * 例如：lightGallery图片浏览插件等
+                 */
+                _private.grid.initGridPlugins(options);
                 //_grid._bindingEvents(options);
                 /**
                  * 高级查询
@@ -692,6 +700,11 @@ define([
                 // 创建行操作区
                 //_grid._createRowActions(opts);
                 _private.grid.row.createActions(opts);
+                /**
+                 * 初始化各种grid相关插件。放在全部数据初始化完成后，不需要每行都调用一次初始化。
+                 * 例如：lightGallery图片浏览插件等
+                 */
+                _private.grid.initGridPlugins(options);
             },
             /**
              * 生成列头的HTML，包括'选择全部'按钮。
@@ -1271,68 +1284,47 @@ define([
         /**
          * 和grid的行相关的一切
          */
-        _grid.row = {
-            //initSelectEvent: function () {
-            //    // 绑定事件。点击行选中复选框。
-            //    gaeaEvents.registerListener("click", ".tb-body tr", function () {
-            //        //$(".tb-body").find("tr").click(function () {
-            //        var index = $(this).data("rowindex");
-            //        var i = index - 1;
-            //        // 选中行前复选框
-            //        $(":checkbox[id^='gaea-grid-cbx']").prop("checked", false);
-            //        $(this).find("[id^='gaea-grid-cbx']").prop("checked", "true");
-            //        // 添加选中class
-            //        $(".tb-body tr").removeClass("selected");
-            //        $(this).addClass("selected");
-            //        //console.log("rowindex: "+$(this).data("rowindex"));
-            //        $(this).find("[id^='gaea-grid-cbx']").val($(this).data("rowindex") - 1);
-            //        var selectedRow = _grid.options.data[($(this).data("rowindex") - 1)];
-            //        selectedRow.index = $(this).data("rowindex");
-            //        _grid._setSelectRow(selectedRow);
-            //        _grid.options.listeners.select(selectedRow);
-            //        /**
-            //         * 触发选中事件。基于事件去影响相关的其他组件或元素。
-            //         * 例如：
-            //         * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
-            //         */
-            //        $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
-            //            selectedRow: selectedRow
-            //        });
-            //        // 放入系统上下文
-            //        gaeaContext.setValue("selectedRows", [selectedRow]);
-            //    });
-            //}
-        };
-        /**
-         * 以HTML table元素为基础创建的grid。
-         * 一般用在新增、编辑页等不需要太复杂grid功能的地方。
-         * @constructor
-         */
-        _grid.tableGrid = {
+        _grid.html = {
             /**
-             * 从HTML页面获取列定义（例如：宽度，是否隐藏，等）。
-             * 一般是js或后台定义的。但现在也可以直接在HTML的元素属性上定义。
-             * 方法：
-             * 扫描容器下的TH[data-gaea-ui]的定义。
-             * @param containerId 要去扫描的容器
+             *
+             * @param {jqObject} $td
+             * @param {object} opts
+             * @param {string} opts.id                  grid容器id
+             * @param {string} opts.inputId             生成的input框的id和name（共用）
+             * @param {string} opts.inputValue
+             * @param {GaeaColumn} opts.column
+             * @private
              */
-            getColumnDefine: function (containerId) {
-                var $container = $("#" + containerId);
-                var columns = null;
-                var result = {};
-                $container.find("th[data-gaea-ui]").each(function (index, element) {
-                    var $this = $(this);
-                    var gaeaUIStr = $this.data("gaea-ui");
-                    var thisUI = gaeaString.parseJSON(gaeaUIStr);
-                    if (gaeaValid.isNull(columns)) {
-                        columns = new Array();
-                    }
-                    if (gaeaValid.isNotNull(thisUI.column)) {
-                        columns.push(thisUI.column);
-                    }
-                });
-                result.columns = columns;
-                return result;
+            createTdContent: function ($td, opts) {
+                // init img column
+                if (gaeaString.equalsIgnoreCase(opts.column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
+                    var $cellCt = $td.children(".grid-td-div");
+                    // add img tag class
+                    $cellCt.addClass("img-cell");
+
+                    $cellCt.find("img").each(function (i, element) {
+                        var $img = $(this);
+                        // 原图链接
+                        var src = $img.attr("src");
+                        var thumbnailSrc = src; // 缩略图src
+                        // 加前缀
+                        if (gaeaValid.isNotNull(opts.column.imgSrcPrefix)) {
+                            src = opts.column.imgSrcPrefix + src;
+                        }
+                        // 加后缀
+                        if (gaeaValid.isNotNull(opts.column.imgSrcSuffix)) {
+                            src = src + opts.column.imgSrcSuffix;
+                        }
+                        // 缩略图, 叠加一般性后缀
+                        if (gaeaValid.isNotNull(opts.column.imgThumbnailSuffix)) {
+                            thumbnailSrc = src + opts.column.imgThumbnailSuffix;
+                        }
+                        // 修改src为缩略图
+                        $img.attr("src", thumbnailSrc);
+                        // 包上<a>标签, lightGallery控件需要
+                        $img.wrap('<a href="' + src + '">');
+                    });
+                }
             }
         };
 
@@ -1542,8 +1534,14 @@ define([
                                     if (gaeaValid.isNotNull(cellText) && gaeaValid.isNotNull(column.datetimeFormat)) {
                                         cellText = gaeaDT.getDate(cellText, {format: column.datetimeFormat});
                                     }
-                                    $tbBody.find("tr:last").append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
-                                        "<div class=\"grid-td-div\">" + cellText + "</div></td>");
+                                    // create td
+                                    var $td = $("<td class='grid-td' data-columnid='" + columnHtmId + "'><div class=\"grid-td-div\">" + cellText + "</div></td>");
+                                    // append td
+                                    $tbBody.find("tr:last").append($td);
+                                    // create td content
+                                    _grid.html.createTdContent($td, {
+                                        column: column
+                                    });
                                 }
                             });
                             // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
@@ -1608,6 +1606,20 @@ define([
                     } else {
                         _grid._bindingEvents(opts);
                     }
+                },
+                /**
+                 * 初始化各种grid相关插件。放在全部数据初始化完成后，不需要每行都调用一次初始化。
+                 * 例如：lightGallery图片浏览插件等
+                 *
+                 * @param {object} opts
+                 * @param {string} opts.id          grid 容器id
+                 */
+                initGridPlugins: function (opts) {
+                    var $gridCt = $("#" + opts.id);
+                    // When you use AMD make sure that lightgallery.js is loaded before lightgallery modules.
+                    require(["jquery-lightGallery-zoom", "jquery-lightGallery-thumbnail"], function () {
+                        $gridCt.find(".img-cell").lightGallery();
+                    });
                 },
                 row: {
                     /**
@@ -2218,6 +2230,8 @@ define([
                                 if (gaeaString.equalsIgnoreCase(field.id, key)) {
                                     hasNotMatchedField = false; // 找到对应的列单元格数据项
                                     var $td = $("<td class='grid-td' data-columnid='" + columnHtmId + "'></td>");
+                                    // create input div
+                                    var $inputDiv = $('<div class="grid-td-div"></div>');
                                     // 第一列，生成复选框。
                                     if (i == 0) {
                                         $tbBody.find("tr:last").append("<td class='checkbox'>" +
@@ -2229,44 +2243,51 @@ define([
                                             "</div>" +
                                             "</td>");
                                     }
+                                    // 先初始化DOM，插入单元格容器。这样可以用更多jQuery的功能，例如find, wrap等。
+                                    $td.append($inputDiv);
+                                    $tbBody.find("tr:last").append($td);
                                     // 转换日期格式
                                     //if (gaeaValid.isNotNull(cellText) && gaeaValid.isNotNull(column.datetimeFormat)) {
                                     //    cellText = gaeaDT.getDate(cellText, {format: column.datetimeFormat});
                                     //}
                                     // create input 'name'
                                     var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
-                                    // create input div
-                                    var $inputDiv = $('<div class="grid-td-div"></div>');
-                                    /**
-                                     * if 字段可编辑
-                                     *      构造input
-                                     * else
-                                     *      只是显示文字
-                                     */
-                                    if (column.editable) {
-                                        // create input box
-                                        $inputDiv.append(gaeaInput.create({
-                                            id: inputName,
-                                            name: inputName,
-                                            class: "crud-grid-input",
-                                            dataType: column.dataType,
-                                            value: val,
-                                            validator: column.validator,// 校验定义
-                                            onChange: function (event) {
-                                                // 刷新缓存的值
-                                                _private.crudGrid.data.refreshOneField({
-                                                    id: opts.id,
-                                                    target: this
-                                                });
-                                            }
-                                        }));
-                                    } else {
-                                        $td.addClass("non-editable");
-                                        $inputDiv.append(gaeaContext.getValue(column.value));
-                                    }
+                                    ///**
+                                    // * if 字段可编辑
+                                    // *      构造input
+                                    // * else
+                                    // *      只是显示文字
+                                    // */
+                                    //if (column.editable) {
+                                    //    // create input box
+                                    //    $inputDiv.append(gaeaInput.create({
+                                    //        id: inputName,
+                                    //        name: inputName,
+                                    //        class: "crud-grid-input",
+                                    //        dataType: column.dataType,
+                                    //        value: val,
+                                    //        validator: column.validator,// 校验定义
+                                    //        onChange: function (event) {
+                                    //            // 刷新缓存的值
+                                    //            _private.crudGrid.data.refreshOneField({
+                                    //                id: opts.id,
+                                    //                target: this
+                                    //            });
+                                    //        }
+                                    //    }));
+                                    //} else {
+                                    //    $td.addClass("non-editable");
+                                    //    $inputDiv.append(gaeaContext.getValue(column.value));
+                                    //}
+                                    _private.crudGrid.html.createTdContent($td, {
+                                        id: opts.id,
+                                        inputId: inputName,
+                                        column: column,
+                                        inputValue: val
+                                    });
 
-                                    $td.append($inputDiv);
-                                    $tbBody.find("tr:last").append($td);
+                                    //$td.append($inputDiv);
+                                    //$tbBody.find("tr:last").append($td);
                                 }
                             });
                             // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
@@ -2301,6 +2322,77 @@ define([
                         }
 
                         $tbBody.append("</tr>");
+                    },
+                    /**
+                     * 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
+                     * @param {jqObject} $td
+                     * @param {object} opts
+                     * @param {string} opts.id                  grid容器id
+                     * @param {string} opts.inputId             生成的input框的id和name（共用）
+                     * @param {string} opts.inputValue
+                     * @param {GaeaColumn} opts.column
+                     * @private
+                     */
+                    createTdContent: function ($td, opts) {
+                        var $cellCt = $td.children(".grid-td-div");
+                        /**
+                         * if 字段可编辑
+                         *      构造input
+                         * else
+                         *      只是显示文字
+                         */
+                        if (opts.column.editable) {
+                            // create input box
+                            $cellCt.append(gaeaInput.create({
+                                id: opts.inputId,
+                                name: opts.inputId,
+                                class: "crud-grid-input",
+                                dataType: opts.column.dataType,
+                                value: opts.inputValue,
+                                validator: opts.column.validator,// 校验定义
+                                onChange: function (event) {
+                                    // 刷新缓存的值
+                                    _private.crudGrid.data.refreshOneField({
+                                        id: opts.id,
+                                        target: this // 当前change的对象
+                                    });
+                                }
+                            }));
+                        } else {
+                            $td.addClass("non-editable");
+                            // init Html first
+                            $cellCt.append(gaeaContext.getValue(opts.column.value));
+                            /**
+                             * if 是图片的话，处理图片。
+                             * 初始化lightGallery图片查看插件放到整个table初始化完成后。
+                             */
+                            if (gaeaString.equalsIgnoreCase(opts.column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
+                                //$td.addClass("");
+
+                                $cellCt.find("img").each(function (i, element) {
+                                    var $img = $(this);
+                                    // 原图链接
+                                    var src = $img.attr("src");
+                                    var thumbnailSrc = src; // 缩略图src
+                                    // 加前缀
+                                    if (gaeaValid.isNotNull(opts.column.imgSrcPrefix)) {
+                                        src = opts.column.imgSrcPrefix + src;
+                                    }
+                                    // 加后缀
+                                    if (gaeaValid.isNotNull(opts.column.imgSrcSuffix)) {
+                                        src = src + opts.column.imgSrcSuffix;
+                                    }
+                                    // 缩略图, 叠加一般性后缀
+                                    if (gaeaValid.isNotNull(opts.column.imgThumbnailSuffix)) {
+                                        thumbnailSrc = src + opts.column.imgSrcSuffix;
+                                    }
+                                    // 修改src为缩略图
+                                    $img.attr("src", thumbnailSrc);
+                                    // 包上<a>标签, lightGallery控件需要
+                                    $img.wrap('<a href="' + src + '">');
+                                });
+                            }
+                        }
                     }
                 }
             },

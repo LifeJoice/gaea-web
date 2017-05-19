@@ -2189,6 +2189,10 @@ require.config({
         "jquery-mousewheel":"/js/thirdparty/jquery/plugins/jquery.mousewheel.min",
         "jquery-validate":"/js/thirdparty/jquery/plugins/validate/jquery.validate",
         "jquery-select2":"/js/thirdparty/jquery/plugins/select2/js/select2.full.min",
+        /* sachinchoolur-lightGallery图片查看插件 */
+        "jquery-lightGallery": "/js/thirdparty/jquery/plugins/lightgallery/js/lightgallery.min",
+        "jquery-lightGallery-zoom": "/js/thirdparty/jquery/plugins/lightgallery/js/lg-zoom.min",
+        "jquery-lightGallery-thumbnail": "/js/thirdparty/jquery/plugins/lightgallery/js/lg-thumbnail.min",
         /* 上传组件 */
         "webuploader":'/js/thirdparty/upload/webuploader',
         "gaeajs-uploader":'/js/gaeajs/uploader/gaeajs-uploader',

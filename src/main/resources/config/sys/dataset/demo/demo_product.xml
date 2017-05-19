@@ -37,7 +37,7 @@
        decode(pi.newproduct, 1, '是', 0, '否') newproduct,
        pi.createtime,
        usr.name create_by,
-       (SELECT listagg('<img width=''12%'' src=''http://localhost/data' || url ||
+       (SELECT listagg('<img src=''' || url ||
                        '''>',
                        '') within GROUP(order by platform, seq)
           FROM PRODUCT_PHOTO

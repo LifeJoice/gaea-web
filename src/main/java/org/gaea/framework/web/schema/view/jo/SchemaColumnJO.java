@@ -38,6 +38,11 @@ public class SchemaColumnJO implements Serializable {
     private ColumnQueryConditionJO queryCondition;
     private String value;
 
+    /* 图片列相关 */
+    private String imgSrcPrefix; // 图片列，自动为<img>标签的src加上的前缀
+    private String imgSrcSuffix; // 图片列，自动为<img>标签的src加上的后缀
+    private String imgThumbnailSuffix; // 缩略图后缀。图片列，自动为<img>标签的src加上的后缀作为缩略图。
+
     // 构造方法
 
     public SchemaColumnJO() {
@@ -195,5 +200,29 @@ public class SchemaColumnJO implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getImgSrcPrefix() {
+        return imgSrcPrefix;
+    }
+
+    public void setImgSrcPrefix(String imgSrcPrefix) {
+        this.imgSrcPrefix = imgSrcPrefix;
+    }
+
+    public String getImgSrcSuffix() {
+        return imgSrcSuffix;
+    }
+
+    public void setImgSrcSuffix(String imgSrcSuffix) {
+        this.imgSrcSuffix = imgSrcSuffix;
+    }
+
+    public String getImgThumbnailSuffix() {
+        return imgThumbnailSuffix;
+    }
+
+    public void setImgThumbnailSuffix(String imgThumbnailSuffix) {
+        this.imgThumbnailSuffix = imgThumbnailSuffix;
     }
 }

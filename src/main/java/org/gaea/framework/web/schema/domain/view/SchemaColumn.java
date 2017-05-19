@@ -27,12 +27,17 @@ public class SchemaColumn {
     public static final String DATA_TYPE_DATE = "date";
     public static final String DATA_TYPE_TIME = "time";
     public static final String DATA_TYPE_DATETIME = "datetime";
+    public static final String DATA_TYPE_IMG = "img"; // 这个主要是给前端用的。后端基本没用。
     // yyyy-mm-dd
     private String datetimeFormat;
     private String dataSetId; // 数据集id。一般没有。有的话，会把该列的值按数据集对应的text:value作转换。
     private List<SchemaColumn> columns = new ArrayList<SchemaColumn>();
     // column对应的查询条件定义。非必须存在。grid列表头快捷查询区用。
     private SchemaColumnQueryCondition queryCondition;
+    /* 图片列相关 */
+    private String imgSrcPrefix; // 图片列，自动为<img>标签的src加上的前缀
+    private String imgSrcSuffix; // 图片列，自动为<img>标签的src加上的后缀
+    private String imgThumbnailSuffix; // 缩略图后缀。图片列，自动为<img>标签的src加上的后缀作为缩略图。
 
     // 构造方法
 
@@ -177,5 +182,29 @@ public class SchemaColumn {
 
     public void setQueryCondition(SchemaColumnQueryCondition queryCondition) {
         this.queryCondition = queryCondition;
+    }
+
+    public String getImgSrcSuffix() {
+        return imgSrcSuffix;
+    }
+
+    public void setImgSrcSuffix(String imgSrcSuffix) {
+        this.imgSrcSuffix = imgSrcSuffix;
+    }
+
+    public String getImgSrcPrefix() {
+        return imgSrcPrefix;
+    }
+
+    public void setImgSrcPrefix(String imgSrcPrefix) {
+        this.imgSrcPrefix = imgSrcPrefix;
+    }
+
+    public String getImgThumbnailSuffix() {
+        return imgThumbnailSuffix;
+    }
+
+    public void setImgThumbnailSuffix(String imgThumbnailSuffix) {
+        this.imgThumbnailSuffix = imgThumbnailSuffix;
     }
 }
