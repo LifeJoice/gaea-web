@@ -23,6 +23,7 @@
     background: #ffffff;
     font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
     border: 1px solid #ccc;
+    overflow: hidden;
 }
 
 /*信息图标的区域*/
