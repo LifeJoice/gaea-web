@@ -168,9 +168,29 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
          * 后面的方法获取的时候，就会获取到一个dsAuthorities=null的DataSetEntity
          */
         BeanUtils.copyProperties(newDataSetEntity, dbDsEntity, "id", "dsConditionSetEntities", "dsAuthorities");
+        /**
+         * if 数据库的DataSet.ConditionSet不为空
+         *      合并新（可能是XML）的ConditionSet
+         * else if 新的ConditionSet不为空（且，经过上一个if，潜台词数据库的DataSet.ConditionSet为空）
+         *      直接赋值
+         */
         if (CollectionUtils.isNotEmpty(dbDsEntity.getDsConditionSetEntities())) {
             // 合并XML和数据库的ConditionSet list
+            // 【重要】只是合并！不处理新增的！
             copyConditionSet(newDataSetEntity.getDsConditionSetEntities(), dbDsEntity.getDsConditionSetEntities());
+            // 获取新增的ConditionSet
+            List<DsConditionSetEntity> toAddCondSets = getNewConditionSets(newDataSetEntity.getDsConditionSetEntities(), dbDsEntity);
+            // 加入：XML有的，数据库没有的DataSet。
+            dbDsEntity.getDsConditionSetEntities().addAll(toAddCondSets);
+        } else if (CollectionUtils.isNotEmpty(newDataSetEntity.getDsConditionSetEntities())) {
+            /**
+             * 经过上一个if，即数据库的DataSet.ConditionSet是空
+             * 而，新的（XML）的DataSet.ConditionSet不为空
+             * 直接赋值！
+             */
+            if (dbDsEntity.getDsConditionSetEntities() == null) {
+                dbDsEntity.setDsConditionSetEntities(new ArrayList<DsConditionSetEntity>());
+            }
             // 获取新增的ConditionSet
             List<DsConditionSetEntity> toAddCondSets = getNewConditionSets(newDataSetEntity.getDsConditionSetEntities(), dbDsEntity);
             // 加入：XML有的，数据库没有的DataSet。
@@ -248,7 +268,8 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * 合并两个ConditionSet列表. 包括:
      * - ConditionSet的name一样的, 当做同一个. 新的值覆盖旧的, 更新操作.
      * - 如果origConditionSets不包含, 则移除.
-     * <p>
+     * <p style='color: red'>
+     *     不处理新增的，这里只是合并！
      * 不包括处理新增的(origConditionSets 有的而 targetConditionSets没有). 另外处理.
      * </p>
      * <p>
