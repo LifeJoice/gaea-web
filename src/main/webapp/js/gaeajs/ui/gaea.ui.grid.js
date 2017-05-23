@@ -704,7 +704,7 @@ define([
                  * 初始化各种grid相关插件。放在全部数据初始化完成后，不需要每行都调用一次初始化。
                  * 例如：lightGallery图片浏览插件等
                  */
-                _private.grid.initGridPlugins(options);
+                _private.grid.initGridPlugins(opts);
             },
             /**
              * 生成列头的HTML，包括'选择全部'按钮。
