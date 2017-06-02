@@ -1,14 +1,17 @@
 package org.gaea.data.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.dataset.domain.GaeaDsResultConfig;
 import org.gaea.data.dataset.service.GaeaDataSetService;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.controller.CommonViewQueryController;
+import org.gaea.framework.web.service.CommonViewQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +36,10 @@ public class SystemDataSetController {
     private GaeaDataSetService gaeaDataSetService;
     @Autowired
     private CommonViewQueryController commonViewQueryController;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private CommonViewQueryService commonViewQueryService;
 
     /**
      * 暂时来说，整合了CommonViewQueryController的查询。通过数据集定义SQL是否为空，来确定走哪一个查询。
@@ -62,7 +70,22 @@ public class SystemDataSetController {
         if (StringUtils.isEmpty(dataSetDef.getSql())) {
             results = gaeaDataSetService.getCommonResults(resultConfig);
         } else {
-            results = commonViewQueryController.queryByConditions(schemaId, conditions, resultConfig.getDsId(), request, response);
+            boolean isDsTranslate = true;
+            // 如果没有schemaId，也就没有字段定义了，转换也没意义了
+            if (StringUtils.isEmpty(schemaId)) {
+                isDsTranslate = false;
+            }
+            DataSetCommonQueryConditionDTO queryConditionDTO = null;
+            if (StringUtils.isNotEmpty(conditions)) {
+                try {
+                    queryConditionDTO = objectMapper.readValue(conditions, DataSetCommonQueryConditionDTO.class);
+                } catch (IOException e) {
+                    logger.debug("转换查询条件失败！", e);
+                    throw new ValidationFailedException("转换查询条件失败！");
+                }
+            }
+            // 默认需要对结果的每个字段做数据集转换
+            results = commonViewQueryService.queryByConditions(schemaId, resultConfig.getDsId(), null, queryConditionDTO, isDsTranslate);
         }
         return results;
     }

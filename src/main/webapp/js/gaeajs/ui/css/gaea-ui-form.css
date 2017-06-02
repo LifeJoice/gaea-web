@@ -17,6 +17,7 @@
 .gaea-form .row {
     width: 100%;
     min-height: 40px;
+    display: flex; /* 解决输入框等不能随着窗体大小变化 */
 }
 
 /* 在后面清除float的效果，让里面div可以撑开外面div */
@@ -29,40 +30,59 @@
     visibility: hidden;
 }
 
+.field-block {
+    /* 一行三项的块，一块就是33%宽度。这样可以随着宽度变化而变化。 */
+    width: 33%;
+}
+
+.field-block:last-child {
+    width: 34%; /* 最后一块是34%，保证全部就是100% */
+}
+
 /* 表单行下第一级DIV，都是field块（包括字段名和输入框） */
 .field-block, .one-field-block {
     position: relative;
     float: left;
     min-height: 30px;
+    display: flex;
 }
 
 /* field块里面的字段名或输入框部分 */
 .field-block .fieldname, .field-block .fieldvalue,
-.one-field-block .fieldname, .one-field-block .fieldvalue {
+.one-field-block .fieldname, .one-field-block .fieldvalue,
+.grid-field-block .field-name {
     display: block;
     float: left;
 }
 
-.field-block .fieldname, .one-field-block .fieldname {
-    box-sizing: border-box;
-    padding-right: 10px;
+/*.field-block .fieldname, .one-field-block .fieldname {*/
+/*box-sizing: border-box;*/
+/*padding-right: 10px;*/
+/*}*/
+.grid-field-block > div {
+    width: 100%;
+    display: inline-block;
+}
+
+.grid-field-block div.field-value {
+    width: 100%;
 }
 
 /*字段名，label部分*/
-.gaea-form .row .fieldname {
+.gaea-form .row .fieldname, .gaea-form .field-name {
     /*display: block;*/
     min-width: 120px; /* 这个宽度是8个中文。 */
     max-width: 150px;
     text-align: right;
     line-height: 30px;
     font-size: 13px;
+    box-sizing: border-box;
+    padding-right: 10px;
 }
 
 /* 字段输入部分 */
 .gaea-form .row .fieldvalue {
-    /*position: absolute;*/
-    /*margin:auto;*/
-    /*top: 0; left: 0; bottom: 0; right: 0;*/
+    width: 100%;
 }
 
 /* 输入框 */
@@ -83,9 +103,9 @@
     /*width:160px;*/
 }
 
-.gaea-form .fieldvalue input, .gaea-form .fieldvalue select, .gaea-form label.error {
+.gaea-form .fieldvalue input, .gaea-form textarea, .gaea-form .fieldvalue select, .gaea-form label.error {
     /*height:30px;*/
-    width: 172px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
+    width: 100%; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box; /* 宽度应该是总体宽度。包括padding和border。否则像input和select的宽度就会不一样。 */
@@ -119,17 +139,17 @@ label.error {
 /*如果一行只有一个字段的块*/
 .one-field-block {
     width: 100%;
-    padding: 0 10px 0 0;
+    /*padding: 0 10px 0 0;*/
 }
 
 /*一行只有一个字段的输入框，填充满*/
 .one-field-block .fieldvalue {
     float: none;
     position: relative;
-    display: block;
-    padding-right: 10px;
+    display: flex;
+    /*padding-right: 10px;*/
 }
 
-input.one-field, textarea.one-field {
-    width: 100%;
-}
+/*input.one-field, textarea.one-field {*/
+/*width: 100%;*/
+/*}*/

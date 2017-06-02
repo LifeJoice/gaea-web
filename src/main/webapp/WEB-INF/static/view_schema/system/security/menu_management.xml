@@ -24,7 +24,7 @@
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add" />
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update" />
             <!--<button id="btnEditAuthRes" name="btnEditAuthRes" html-value="编辑权限资源" link-view-id="editAuthResDialog" action="update" />-->
-            <button id="btnDel" name="btnDel" html-value="删除" action="pseudoDeleteSelected" />
+            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
         </actions>
 
         <!--viewName: 即dialog的元素名。-->
@@ -57,7 +57,7 @@
             <column id="name" name="name" label="名称" db-column-name="name"
                     visible="true" sortable="false" html-width="120" data-type="String" />
             <column id="level" name="level" label="层级" db-column-name="LEVEL_NUM"
-                    visible="true" sortable="false" html-width="120" data-type="String" />
+                    visible="true" sortable="false" html-width="120" data-type="String" dataset-id="DS_MENU_LEVELS"/>
             <column id="parentMenuName" name="parentMenuName" label="父级菜单名" db-column-name="parentMenuName"
                     visible="true" sortable="false" html-width="300" data-type="String" />
             <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->

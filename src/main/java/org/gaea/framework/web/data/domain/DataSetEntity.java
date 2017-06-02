@@ -40,12 +40,12 @@ public class DataSetEntity implements Serializable {
     private String sql;
     @Column(name = "DS_DATA", length = 2000)
     private String dsData;
-    @Column(name = "CACHE_TYPE", length = 20)
-    private String cacheType;
+    @Column(name = "CACHE_TYPE", length = 20, nullable = false)
+    private String cacheType = GaeaDataSet.CACHE_TYPE_NONE; // 默认不缓存
     /**
      * 校验方式。 0：不校验 1：校验,无对应的当没权限. 2：校验,无对应的当有权限.
      */
-    @Column(name = "AUTHORITY_TYPE")
+    @Column(name = "AUTHORITY_TYPE", nullable = false)
     private Integer authorityType = 0; // 默认不校验
     public static final Integer DATASET_AUTHORITY_TYPE_NONE = 0;
     public static final Integer DATASET_AUTHORITY_TYPE_NO_ROLE_NO_PERMIT = 1;

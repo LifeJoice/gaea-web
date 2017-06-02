@@ -32,12 +32,12 @@ define([
                     // 如果是一行就一个输入项，则自动把输入框延展到最后
                     if (fieldsCount == 1) {
                         fieldBlocks.removeClass("field-block").addClass("one-field-block");
-                        fieldBlocks.children(".fieldvalue").addClass("one-field");
-                        fieldBlocks.find("input").addClass("one-field");
-                        fieldBlocks.find("textarea").addClass("one-field");
+                        //fieldBlocks.children(".fieldvalue").addClass("one-field");
+                        //fieldBlocks.find("input").addClass("one-field");
+                        //fieldBlocks.find("textarea").addClass("one-field");
                         // 加上margin，避免输入框过长挤到下面了
-                        var width = fieldBlocks.find(".fieldname").css("width");
-                        fieldBlocks.find(".fieldvalue").css("margin-left", width);
+                        //var width = fieldBlocks.find(".fieldname").css("width");
+                        //fieldBlocks.find(".fieldvalue").css("margin-left", width);
                     }
                 });
                 /**

@@ -1,15 +1,19 @@
 package org.gaea.security.controller;
 
+import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.security.domain.Menu;
 import org.gaea.security.repository.SystemMenusRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,6 +38,15 @@ public class SystemLoginController {
             username = ((UserDetails) principal).getUsername();
         } else {
             username = principal.toString();
+        }
+        return "redirect:/main";
+    }
+
+    @RequestMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            GaeaWebSecuritySystem.logout(request, response, auth);
         }
         return "redirect:/main";
     }

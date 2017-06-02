@@ -8,6 +8,7 @@ import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
 import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
 import org.gaea.framework.web.schema.domain.DataSet;
@@ -15,7 +16,6 @@ import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.SchemaData;
 import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
-import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.schema.view.service.ActionsService;
 import org.gaea.util.GaeaXmlUtils;
 import org.gaea.util.MathUtils;
@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -53,6 +52,8 @@ public class GaeaXmlSchemaProcessor {
     private GaeaSchemaCache gaeaSchemaCache;
     @Autowired
     private ActionsService actionsService;
+    @Autowired
+    public SystemDataSetService systemDataSetService;
 
     /**
      * 解析Gaea框架的XML页面描述文件。
@@ -304,7 +305,7 @@ public class GaeaXmlSchemaProcessor {
             dataSet = schemaData.getDataSetList().get(0);
         }
         // 拼装数据，转换结果集中的数据库字段名。
-        List<Map<String, Object>> dataList = changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid());
+        List<Map<String, Object>> dataList = systemDataSetService.changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid(), true);
         schemaViews.getGridJO().setData(dataList);
         // 设置翻页相关数据
         Integer pageSize = schemaViews.getGridJO().getPage().getSize();                                     // 每页多少条
@@ -326,107 +327,107 @@ public class GaeaXmlSchemaProcessor {
         return root;
     }
 
-    /**
-     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
-     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
-     * 所以需要把结果集中的数据库字段名改为别名，即column.name
-     *
-     * @param dataList
-     * @param grid
-     * @return
-     * @throws ValidationFailedException
-     */
-    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid) throws ValidationFailedException {
-        if (grid == null) {
-            throw new ValidationFailedException("XML Schema grid定义为空。无法执行转换操作！");
-        }
-        // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
-        Map<String, SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
-        return changeDbColumnNameInData(dataList, columnMap, grid.getDisplayUndefinedColumn());
-    }
-
-    /**
-     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
-     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
-     * 所以需要把结果集中的数据库字段名改为别名，即column.name
-     * <p>
-     * columnMap的key之所以为DB-COLUMN-NAME，是因为这个方法本身就是把data的key，从数据库字段名改为xml column name的。<br/>
-     * 在转换之前,无法通过data的key(这时候还是db column name),去找column(如果key是xml column name的话).
-     * </p>
-     *
-     * @param dataList               sql查询的数据列表。一行 = Map < 字段名 ： 字段值 >
-     * @param columnMap              Map< db_column_name : schemaColumn >
-     * @param displayUndefinedColumn 是否显示XML Schema中未定义的列。如果是，则key以数据库字段名返回。
-     * @return Map. key: 大写的column name.
-     */
-    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, Map<String, SchemaColumn> columnMap, boolean displayUndefinedColumn) {
-        if (dataList == null) {
-            return null;
-        }
-        List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
-        // 遍历所有记录
-        for (Map<String, Object> rowDataMap : dataList) {
-            // 必须判断传入的map类型，然后构造同一类型的返回。
-            // 注意!
-            // Spring namedParameterJdbcTemplate.queryForList返回的是LinkedCaseInsensitiveMap，这样对于key（数据库列）是大小写不敏感的。如果变成HashMap就会大小写敏感了。
-            Map<String, Object> oneResultMap = rowDataMap instanceof LinkedCaseInsensitiveMap ? new LinkedCaseInsensitiveMap<Object>() : new HashMap<String, Object>();
-            // 遍历一条记录的所有字段
-            Set<String> keys = rowDataMap.keySet();
-            for (String key : keys) {
-                SchemaColumn column = columnMap.get(key);
-                // 如果XML SCHEMA没有定义该字段的column元素，而且又设置了display-undefined-column=true，就把该值传到前端。
-                if (column == null && displayUndefinedColumn) {
-                    oneResultMap.put(key, rowDataMap.get(key));
-                }
-                if (column == null) {
-                    continue;
-                }
-                // 遍历SCHEMA的“column”元素，对数据库字段名重命名
-//                for (SchemaColumn column : columns) {
-                // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
-//                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
-                /**
-                 * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
-                 * 例如：
-                 * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
-                 */
-                Object newValue = getValueFromDS(rowDataMap.get(key), column.getDataSetId());
-                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
-            }
-            newResultMapList.add(oneResultMap);
-        }
-        return newResultMapList;
-    }
-
-    /**
-     * 把value处理一下，根据对应的数据集，看有没有对应value的text。有，则作转换。
-     * 例如：
-     * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
-     *
-     * @param value
-     * @param dataSetId
-     * @return
-     */
-    private Object getValueFromDS(Object value, String dataSetId) {
-        Object newValue = value;
-        if (value != null) {
-            if (StringUtils.isNotEmpty(dataSetId)) {
-                GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSetId);
-                if (gaeaDataSet != null) {
-                    List<DataItem> dsDatas = gaeaDataSet.getStaticResults();
-                    if (dsDatas != null) {
-                        // 遍历数据集
-                        for (DataItem dataItem : dsDatas) {
-                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(value))) {
-                                newValue = dataItem;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return newValue;
-    }
+//    /**
+//     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
+//     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
+//     * 所以需要把结果集中的数据库字段名改为别名，即column.name
+//     *
+//     * @param dataList
+//     * @param grid
+//     * @return
+//     * @throws ValidationFailedException
+//     */
+//    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid) throws ValidationFailedException {
+//        if (grid == null) {
+//            throw new ValidationFailedException("XML Schema grid定义为空。无法执行转换操作！");
+//        }
+//        // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
+//        Map<String, SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
+//        return changeDbColumnNameInData(dataList, columnMap, grid.getDisplayUndefinedColumn());
+//    }
+//
+//    /**
+//     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
+//     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
+//     * 所以需要把结果集中的数据库字段名改为别名，即column.name
+//     * <p>
+//     * columnMap的key之所以为DB-COLUMN-NAME，是因为这个方法本身就是把data的key，从数据库字段名改为xml column name的。<br/>
+//     * 在转换之前,无法通过data的key(这时候还是db column name),去找column(如果key是xml column name的话).
+//     * </p>
+//     *
+//     * @param dataList               sql查询的数据列表。一行 = Map < 字段名 ： 字段值 >
+//     * @param columnMap              Map< db_column_name : schemaColumn >
+//     * @param displayUndefinedColumn 是否显示XML Schema中未定义的列。如果是，则key以数据库字段名返回。
+//     * @return Map. key: 大写的column name.
+//     */
+//    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, Map<String, SchemaColumn> columnMap, boolean displayUndefinedColumn) {
+//        if (dataList == null) {
+//            return null;
+//        }
+//        List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
+//        // 遍历所有记录
+//        for (Map<String, Object> rowDataMap : dataList) {
+//            // 必须判断传入的map类型，然后构造同一类型的返回。
+//            // 注意!
+//            // Spring namedParameterJdbcTemplate.queryForList返回的是LinkedCaseInsensitiveMap，这样对于key（数据库列）是大小写不敏感的。如果变成HashMap就会大小写敏感了。
+//            Map<String, Object> oneResultMap = rowDataMap instanceof LinkedCaseInsensitiveMap ? new LinkedCaseInsensitiveMap<Object>() : new HashMap<String, Object>();
+//            // 遍历一条记录的所有字段
+//            Set<String> keys = rowDataMap.keySet();
+//            for (String key : keys) {
+//                SchemaColumn column = columnMap.get(key);
+//                // 如果XML SCHEMA没有定义该字段的column元素，而且又设置了display-undefined-column=true，就把该值传到前端。
+//                if (column == null && displayUndefinedColumn) {
+//                    oneResultMap.put(key, rowDataMap.get(key));
+//                }
+//                if (column == null) {
+//                    continue;
+//                }
+//                // 遍历SCHEMA的“column”元素，对数据库字段名重命名
+////                for (SchemaColumn column : columns) {
+//                // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
+////                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
+//                /**
+//                 * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
+//                 * 例如：
+//                 * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
+//                 */
+//                Object newValue = getValueFromDS(rowDataMap.get(key), column.getDataSetId());
+//                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
+//            }
+//            newResultMapList.add(oneResultMap);
+//        }
+//        return newResultMapList;
+//    }
+//
+//    /**
+//     * 把value处理一下，根据对应的数据集，看有没有对应value的text。有，则作转换。
+//     * 例如：
+//     * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
+//     *
+//     * @param value
+//     * @param dataSetId
+//     * @return
+//     */
+//    private Object getValueFromDS(Object value, String dataSetId) {
+//        Object newValue = value;
+//        if (value != null) {
+//            if (StringUtils.isNotEmpty(dataSetId)) {
+//                GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSetId);
+//                if (gaeaDataSet != null) {
+//                    List<DataItem> dsDatas = gaeaDataSet.getStaticResults();
+//                    if (dsDatas != null) {
+//                        // 遍历数据集
+//                        for (DataItem dataItem : dsDatas) {
+//                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(value))) {
+//                                newValue = dataItem;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return newValue;
+//    }
 
     /**
      * 获取grid.column对应的数据集的集合。

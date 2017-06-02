@@ -1,7 +1,9 @@
 package org.gaea.framework.web.schema.utils;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.GaeaColumn;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.DataSet;
@@ -14,6 +16,7 @@ import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +115,24 @@ public class GaeaSchemaUtils {
                 columnMap.put(column.getDbColumnName(), column);
             }
             return columnMap;
+        }
+        return null;
+    }
+
+    /**
+     * 把GaeaDataSet里面的GaeaColumn map转换为SchemaColumn map.
+     * @param columnDefineMap
+     * @return
+     */
+    public static LinkedCaseInsensitiveMap<SchemaColumn> convertToSchemaColumnMap(Map<String, GaeaColumn> columnDefineMap) {
+        if(MapUtils.isNotEmpty(columnDefineMap)){
+            LinkedCaseInsensitiveMap<SchemaColumn> newColumnDefineMap = new LinkedCaseInsensitiveMap<SchemaColumn>();
+            for(String key: columnDefineMap.keySet()){
+                SchemaColumn schemaColumn = new SchemaColumn();
+                BeanUtils.copyProperties(columnDefineMap.get(key), schemaColumn);
+                newColumnDefineMap.put(schemaColumn.getDbColumnName(), schemaColumn);
+            }
+            return newColumnDefineMap;
         }
         return null;
     }

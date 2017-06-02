@@ -1,8 +1,10 @@
 package org.gaea.security.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.security.domain.Resource;
 import org.gaea.security.repository.SystemResourcesRepository;
 import org.gaea.security.service.SystemResourcesService;
+import org.gaea.util.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -48,7 +50,17 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
     }
 
     @Override
-    public void save(Resource resource) {
-        resourcesRepository.save(resource);
+    public void save(Resource newResource) {
+        if(StringUtils.isNotEmpty(newResource.getId())) {
+            // update
+            Resource resource = resourcesRepository.findOne(newResource.getId());
+            // 不覆盖资源权限的配置关系
+            BeanUtils.copyProperties(newResource, resource, "authorities");
+            resourcesRepository.save(resource);
+        }else{
+            // add
+            resourcesRepository.save(newResource);
+        }
+
     }
 }

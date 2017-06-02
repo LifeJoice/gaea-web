@@ -18,10 +18,11 @@ public interface SchemaDataService {
      *
      * @param origResults
      * @param grid
+     * @param isDsTranslate    是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
      * @return
      * @throws SysLogicalException
      */
-    public List<Map<String, Object>> transformViewData(List<Map<String, Object>> origResults, SchemaGrid grid) throws SysLogicalException, ValidationFailedException;
+    public List<Map<String, Object>> transformViewData(List<Map<String, Object>> origResults, SchemaGrid grid, boolean isDsTranslate) throws SysLogicalException, ValidationFailedException;
 
     List<Map<String, Object>> transformViewData(List<Map<String, Object>> origResults, String excelTemplateId) throws SysLogicalException, ValidationFailedException, SysInitException;
 }

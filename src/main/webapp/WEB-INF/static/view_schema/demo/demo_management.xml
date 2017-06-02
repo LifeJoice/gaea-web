@@ -110,8 +110,8 @@
                         <param name="withData" value="false"/>
                     </button-action>
                 </button>
-                <button id="btnImport11" name="btnImport11" html-value="提交到某个Controller"
-                        submit-url="/gaea/demo/button-group-hello1" msg="提交到某个Controller"/>
+                <button id="btnImport11" name="btnImport11" html-value="提交到某个地方"
+                        submit-url="/gaea/demo/submitAction" msg="提交到某个地方"/>
                 <button id="btnImport5" name="btnImport5" html-value="测试按钮组5" submit-url="/gaea/demo/test5"/>
                 <button id="btnDel2" name="btnDel2" html-value="删除2" action="deleteSelected"/>
             </button-group>

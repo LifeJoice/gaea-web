@@ -6,11 +6,29 @@ define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
         "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils",
-        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button", "gaeajs-ui-crud-grid"],
+        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button", "gaeajs-ui-crud-grid", "gaeajs-context"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
               GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils,
-              gaeaView, SYS_URL, gaeaButton, gaeaCrudGrid) {
+              gaeaView, SYS_URL, gaeaButton, gaeaCrudGrid, gaeaContext) {
+
+        /**
+         * 初始化Button后缓存在button.data中的options。
+         *
+         * @typedef {object} ButtonGaeaOptions
+         * @property {string} id                            button id
+         * @property {string} name                          button name, 一般和id一样
+         * @property {string} htmlName                      html的button name，一般和id一样
+         * @property {string} htmlId                        html的button id，一般和id一样
+         * @property {string} action
+         * @property {string} htmlValue                     按钮的文本
+         * @property {string} text                          按钮的文本
+         * @property {string} linkViewId                    链接对象的id
+         * @property {object} linkViewObj                   链接对象（一般是dialog）的options
+         * @property {string} submitType                    ajax|...
+         * @property {string} submitUrl                     点确定提交的url
+         * @property {string} msg                           提交后的提示信息的base部分
+         */
 
         /**
          * Gaea UI（按钮）的action
@@ -81,7 +99,19 @@ define([
                          */
                             // [1] 生成按钮的基础html。例如：<a>新增</a>
                         thisButton.text = thisButton.htmlValue;     // 按钮的名称，即htmlValue属性。
-                        $container.append(that.button._create(thisButton));
+                        // create button container
+                        var $buttonCt = $("<span></span>");
+                        //$container.append(that.button._create(thisButton));
+                        $container.append($buttonCt);
+                        // create and append button
+                        gaeaButton.create({
+                            jqContainer: $buttonCt,
+                            htmlId: thisButton.htmlId,
+                            text: thisButton.text,
+                            size: thisButton.size
+                        });
+                        // cache options
+                        $("#" + this.htmlId).data("gaeaOptions", thisButton);
                     } else {
                         throw "不可识别的toolbar component类型: " + thisButton.componentName;
                     }
@@ -98,11 +128,15 @@ define([
                         var linkObj = gaeaDialog.findDialog(inViews, this.linkViewId);
                         // linkObj = dialog options
                         var dialogOpts = _.clone(linkObj);
+                        // cache link object
+                        if (gaeaValid.isNotNull(linkObj)) {
+                            $button.data("gaeaOptions").linkViewObj = dialogOpts;
+                        }
                         // dialog id
                         dialogOpts.id = linkObj.htmlId;
 
                         if ("wf-dialog" == linkObj.componentName) {
-                            dialogDef = linkObj;
+                            //dialogDef = linkObj;
                             gaeaWF.dialog.create(linkObj, this);
                             //var dialogOption = linkObj;
                             //dialogOption.id = linkObj.htmlId;   // 用htmlId作为创建dialog的DIV ID。
@@ -126,7 +160,7 @@ define([
                          * 如果有上传组件的dialog，则初始化上传组件。
                          */
                         else if (gaeaString.equalsIgnoreCase("uploader-dialog", linkObj.componentName)) {
-                            console.log("初始化uploader-dialog");
+                            //console.log("初始化uploader-dialog");
                             //dialogDef = linkObj;
                             gaeaUploader.init({
                                 dialog: dialogOpts,
@@ -258,6 +292,12 @@ define([
                     if (_.isFunction(thisButton.onClick)) {
                         $button.on("click", thisButton.onClick);
                     }
+
+                    // 最后初始化submitUrl
+                    // 理论上，一个button不应该同时有linkViewId、submitUrl
+                    _private.button.initSubmit({
+                        id: thisButton.htmlId
+                    });
                 });
             },
             /**
@@ -325,6 +365,7 @@ define([
                 },
                 /**
                  * 创建按钮组。
+                 * TODO BUG. 这个按钮组，应该在之前重构的时候，导致不支持弹出框类的。需要修复。
                  * @param opts
                  *              buttonDef 按钮组定义
                  *              containerId 整个按钮组的容器id
@@ -363,6 +404,9 @@ define([
                         }));
                         // 要把DOM先构建出来，否则后面依附不了事件。
                         $buttonsPanel.children("ul").append($li);
+
+                        // cache options
+                        $("#" + this.htmlId).data("gaeaOptions", button);
                         /**
                          * [3] 点击事件，和触发事件等。
                          * isBindOnClick为false。因为这里
@@ -373,6 +417,12 @@ define([
                             button: button,
                             //jqButton: $li,
                             isBindOnClick: true // 是否绑定onclick
+                        });
+
+                        // 最后初始化submitUrl
+                        // 理论上，一个button不应该同时有linkViewId、submitUrl
+                        _private.button.initSubmit({
+                            id: button.htmlId
                         });
                     });
                 },
@@ -564,6 +614,53 @@ define([
 
         var _private = {
             button: {
+                /**
+                 * 初始化按钮本身的提交功能。（submitUrl和msg等）
+                 * 【重要】要求button已经初始化，并且已经缓存在data了！
+                 * @param {object} opts
+                 * @param {object} opts.id          button id
+                 */
+                initSubmit: function (opts) {
+                    if (gaeaValid.isNull(opts.id)) {
+                        throw "id为空，无法初始化按钮submit功能！";
+                    }
+                    var $button = $("#" + opts.id);
+                    /**
+                     * @type ButtonGaeaOptions
+                     */
+                    var gaeaOptions = $button.data("gaeaOptions");
+                    var submitUrl = gaeaOptions.submitUrl;
+                    var msg = gaeaValid.isNull(gaeaOptions.msg) ? "" : gaeaOptions.msg;
+                    if (gaeaValid.isNotNull(submitUrl)) {
+                        /**
+                         * 添加点击事件
+                         */
+                        GAEA_EVENTS.registerListener("click", "#" + opts.id, function (event, ui) {
+                            //if (gaeaValid.isNull(submitUrl)) {
+                            //    throw "按钮对应的请求地址为空(可能是缺少配置)。";
+                            //}
+                            //var row = gaeaGrid.getSelected();
+                            var selectedRows = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                            // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
+                            var newRow = gaeaUtils.data.flattenData({
+                                selectedRows: selectedRows
+                            });
+                            // 提交
+                            gaeaAjax.post({
+                                url: submitUrl,
+                                data: newRow,
+                                success: function (data) {
+                                    gaeaNotify.message(msg + "操作成功。");
+                                    // 刷新grid数据
+                                    $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                                },
+                                fail: function (data) {
+                                    gaeaNotify.error(msg + "操作失败！");
+                                }
+                            });
+                        });
+                    }
+                }
                 /**
                  *
                  * @param opts

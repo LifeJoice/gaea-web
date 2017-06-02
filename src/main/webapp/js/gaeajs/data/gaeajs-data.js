@@ -5,7 +5,6 @@
  * 2016-6-1 16:50:02
  * input，在代码注释中是个代表关键字，首先代表一个DOM元素，其实是一个输入元素（包括TEXTAREA等）。
  * 因为注释方便描述。
- * TODO 考虑把PAGE_CONTEXT独立成一个包
  *
  * DEPENDENCE:
  * RequireJS,JQuery
@@ -20,7 +19,7 @@ define([
         /**
          * 当前页面的缓存，主要数据集依赖使用。
          */
-        var PAGE_CONTEXT = {};
+        //var PAGE_CONTEXT = {};
 
         var opt = {
             /**
@@ -390,14 +389,14 @@ define([
              *
              * @param eventName
              */
-            listen: function (eventName, eventBindingDivId) {
-                //var $bindingDiv = $("#" + eventBindingDivId);
-                if (gaeaString.equalsIgnoreCase(eventName, GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE)) {
-                    GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, "#" + eventBindingDivId, function (event, data) {
-                        PAGE_CONTEXT = _.extend(PAGE_CONTEXT, data.PAGE_CONTEXT);
-                    });
-                }
-            },
+            //listen: function (eventName, eventBindingDivId) {
+            //    //var $bindingDiv = $("#" + eventBindingDivId);
+            //    if (gaeaString.equalsIgnoreCase(eventName, GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE)) {
+            //        GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.CONTEXT.PAGE.UPDATE, "#" + eventBindingDivId, function (event, data) {
+            //            PAGE_CONTEXT = _.extend(PAGE_CONTEXT, data.PAGE_CONTEXT);
+            //        });
+            //    }
+            //},
             /**
              * 根据column的定义，拼凑一个带有各种属性的空的对象。例如：
              * { id:'', name:'', age:''}
@@ -529,7 +528,7 @@ define([
                             //var queryCondition = {};
                             //queryCondition.id = condition.id;
                             if (gaeaValid.isNotNull(condition.values) && _.isArray(condition.values)) {
-                                var queryValues = new Array();
+                                //var queryValues = new Array();
                                 /**
                                  * 【2】遍历condition中的每个value.
                                  *
@@ -794,24 +793,24 @@ define([
                 var dfd = $.Deferred();// JQuery同步对象
                 /* 遍历所有配置了data-gaea-data的元素 */
                 $div.find("[data-gaea-ui]").each(function (index, element) {
-                    var $this = $(this);// 默认是下拉选择框，其实可能不是。
-                    var uiStr = $this.data("gaea-ui");
-                    var thisUI = gaeaString.parseJSON(uiStr);
-                    var componentCtId = $this.attr("id");
+                    //var $this = $(this);// 默认是下拉选择框，其实可能不是。
+                    //var uiStr = $this.data("gaea-ui");
+                    //var thisUI = gaeaString.parseJSON(uiStr);
+                    //var componentCtId = $this.attr("id");
 
                     /**
                      * 把数据转换为table显示
                      */
-                    if (gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
-                        var dataStr = $this.data("gaea-data");
-                        var dataConfig = gaeaString.parseJSON(dataStr);
-                        if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
-                            // 获取数据
-                            //var dsData = gaeaData.dataSet.getData(componentCtId);
-                            // 初始化table
-                            gaeaData.component.table.init(componentCtId);
-                        }
-                    }
+                    //if (gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
+                    //    var dataStr = $this.data("gaea-data");
+                    //    var dataConfig = gaeaString.parseJSON(dataStr);
+                    //    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
+                    //        // 获取数据
+                    //        //var dsData = gaeaData.dataSet.getData(componentCtId);
+                    //        // 初始化table
+                    //        gaeaData.component.table.init(componentCtId);
+                    //    }
+                    //}
                 });
                 dfd.resolve();
                 return dfd.promise();
@@ -826,37 +825,37 @@ define([
              */
             initData: function (divId, options) {
                 var dfd = $.Deferred();// JQuery同步对象
-                var dsLoadFunctions = new Array();
-                var $div = $("#" + divId);
+                //var dsLoadFunctions = new Array();
+                //var $div = $("#" + divId);
                 /* 遍历所有配置了data-gaea-data的元素 */
-                $div.find("[data-gaea-ui]").each(function (index, element) {
-                    var $this = $(this);// 默认是下拉选择框，其实可能不是。
-                    var uiStr = $this.data("gaea-ui");
-                    var thisUI = gaeaString.parseJSON(uiStr);
-                    var componentCtId = $this.attr("id");
+                //$div.find("[data-gaea-ui]").each(function (index, element) {
+                //    var $this = $(this);// 默认是下拉选择框，其实可能不是。
+                //    var uiStr = $this.data("gaea-ui");
+                //    var thisUI = gaeaString.parseJSON(uiStr);
+                    //var componentCtId = $this.attr("id");
 
                     /**
                      * 把数据转换为table显示
                      */
-                    if (gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
-                        var dataStr = $this.data("gaea-data");
-                        var dataConfig = gaeaString.parseJSON(dataStr);
-                        if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
-                            var func = function () {
-                                $.when(gaeaData.dataSet.getDataByDomId(componentCtId)).done(function (data, textStatus, jqXHR) {
-                                    //var jqXHR = params[2]; // 从$.ajax请求返回，封装过来的jqXHR应该是第三个
-                                    //var dsData = jqXHR.gaeaData;
-                                    // 初始化table
-                                    gaeaData.component.table.initData(componentCtId, data);
-                                });
-                            };
-                            dsLoadFunctions.push(func());
-                        }
-                    }
-                });
-                $.when.apply($, dsLoadFunctions).done(function () {
+                    //if (gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
+                        //var dataStr = $this.data("gaea-data");
+                        //var dataConfig = gaeaString.parseJSON(dataStr);
+                        //if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
+                        //    var func = function () {
+                        //        $.when(gaeaData.dataSet.getDataByDomId(componentCtId)).done(function (data, textStatus, jqXHR) {
+                        //            //var jqXHR = params[2]; // 从$.ajax请求返回，封装过来的jqXHR应该是第三个
+                        //            //var dsData = jqXHR.gaeaData;
+                        //            // 初始化table
+                        //            gaeaData.component.table.initData(componentCtId, data);
+                        //        });
+                        //    };
+                        //    dsLoadFunctions.push(func());
+                        //}
+                    //}
+                //});
+                //$.when.apply($, dsLoadFunctions).done(function () {
                     dfd.resolve();
-                });
+                //});
                 return dfd.promise();
             },
             /**
@@ -868,279 +867,282 @@ define([
             initAfterBinding: function (containerId) {
                 var $container = $("#" + containerId);
                 /* 遍历所有配置了data-gaea-data的元素 */
-                $container.find("[data-gaea-ui]").each(function (index, element) {
-                    var $this = $(this);// 默认是下拉选择框，其实可能不是。
-                    var uiStr = $this.data("gaea-ui");
-                    var thisUI = gaeaString.parseJSON(uiStr);
-                    var componentCtId = $this.attr("id");// 遍历到当前组件的容器id，一般是一个divId
-
-                    /**
-                     * 把数据转换为table显示
-                     */
-                    var dataStr = $this.data("gaea-data");
-                    var dataConfig = gaeaString.parseJSON(dataStr);
-                    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
-                        if (gaeaValid.isNull(dataConfig.name)) {
-                            throw "gaea-ui对应的gaea-data的name属性不允许为空！";
-                        }
-                        gaeaData.component.table.initAfterBinding(componentCtId, dataConfig);
-                    }
-                });
-            },
+                //$container.find("[data-gaea-ui]").each(function (index, element) {
+                //    var $this = $(this);// 默认是下拉选择框，其实可能不是。
+                //    var uiStr = $this.data("gaea-ui");
+                //    var thisUI = gaeaString.parseJSON(uiStr);
+                //    var componentCtId = $this.attr("id");// 遍历到当前组件的容器id，一般是一个divId
+                //
+                //    /**
+                //     * 把数据转换为table显示
+                //     */
+                //    var dataStr = $this.data("gaea-data");
+                //    var dataConfig = gaeaString.parseJSON(dataStr);
+                //    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
+                //        if (gaeaValid.isNull(dataConfig.name)) {
+                //            throw "gaea-ui对应的gaea-data的name属性不允许为空！";
+                //        }
+                //        gaeaData.component.table.initAfterBinding(componentCtId, dataConfig);
+                //    }
+                //});
+            }
             /**
              * 这个是和KO binding密切相关的可行编辑的table。之所以不放在ui.grid中，是因为这个重度依赖KO提供行编辑功能。
              * 而且，重点不是在列表展示。所以一些效果的会比较简单，不会有什么排序之类的。
              *
              * 涉及按钮的生成。
              * table的建模和数组的observableArray。但没有binding。
+             *
+             * 没用了！
+             * 可编辑表格，改为用gaea.ui.grid实现！2017-5-24
              */
-            table: {
-                init: function (containerId) {
-                    var that = this;
-                    var $this = $("#" + containerId);
-                    var $tbody = $this.find("tbody");
-                    var dataStr = $this.data("gaea-data");
-                    var dataConfig = gaeaString.parseJSON(dataStr);
-                    var name = dataConfig.name;// 整个table的变量名。data-gaea-data="name:'testList'...
-                    var $bindContainer = $this.parents("[data-gaea-data-bind-area=true]");
-                    var bindContainerId = $bindContainer.attr("id");
-                    if (gaeaValid.isNull(name)) {
-                        throw "gaea-data未配置name属性，无法进行初始化！";
-                    }
-
-                    var toolbarDivName = name + "_toolbar";
-                    var btnAddName = name + "_btn_add";
-                    $this.append(_.template(gaeaUI.TEMPLATE.DIV.WITH_NAME)({
-                        NAME: toolbarDivName,
-                        ID: toolbarDivName,
-                        CONTENT: "" // 这里不需要用到content。设个空即可。
-                    }));
-                    // 初始化 TOOLBAR
-                    var gaeaToolbar = require("gaeajs-ui-toolbar");
-                    gaeaToolbar.create({
-                        renderTo: toolbarDivName,
-                        buttons: [{
-                            "id": btnAddName,
-                            "name": btnAddName,
-                            "htmlName": btnAddName,
-                            "htmlId": btnAddName,
-                            "htmlValue": "添加",
-                            "type": null,
-                            "href": null,
-                            "linkViewId": null,
-                            "linkComponent": null,
-                            "componentName": "button",
-                            "action": null
-                        }]
-                    });
-
-
-                    var array = new Array();
-                    gaeaGrid = require("gaeajs-ui-grid"); // 经常拿不到模块，为什么
-                    var tableDefine = gaeaGrid.tableGrid.getColumnDefine(containerId);
-                    // TODO 把按钮触发封装一下？
-                    $("#" + btnAddName).click(function () {
-                        // 根据定义，生成一个对象，对象各个属性为空
-                        var obj = {};
-                        /**
-                         * 根据column的定义，拼凑一个带有各种属性的空的对象。例如：
-                         * { id:'', name:'', age:''}
-                         * 这其中的id,name,age等属性需要从column定义中获取.
-                         */
-                        obj = gaeaData.createEmptyObject(tableDefine.columns);
-                        gaeaData.viewModel[bindContainerId][name].push(obj);// push后，由于KO binding了，所以table会多出一行
-
-                        // 找到最后一行，把里面的input的name属性修改掉
-                        var trCount = $tbody.children("tr").length;
-                        var rowIdx = trCount - 1;
-                        $.each($tbody.children("tr:last").find("td input"), function (idx, val) {
-                            var nameVal = $(this).attr("name");
-                            gaeaData.component.table.resetName($(this), {
-                                ARRAY_NAME: name,
-                                ARRAY_INDEX: rowIdx,
-                                NAME: nameVal
-                            });
-                        });
-                    });
-
-                    /* 创建定义行！！这一行只是定义用（各个列的data-bind），如果结合了KO，就会把这一行隐藏，然后push的新数据，就会以这一行的模板进行添加。 */
-
-                    // 创建第一行，并添加相关列的KO binding
-                    that.appendTrWithBinding($tbody, tableDefine.columns);
-                    // 增加行编辑的删除方法。依赖KO。
-                    that.initRemoveFunction({
-                        name: name,
-                        bindContainerId: bindContainerId
-                    });
-                    // 初始化第一行（模板行）的序号列。（本来想用来做行删除，不过后来用了KO的方法就不用了）
-                    that.firstTR.initSequence(containerId);
-                    // 初始化第一行(模板行)的按钮区,并默认添加删除按钮.
-                    that.firstTR.initRowButtons(containerId, that.getRemoveFunctionName(name));
-                    gaeaData.dataBind.bindForEach($tbody, name);
-                    //options._viewModel[name] = ko.observableArray(array);
-                    gaeaData.viewModel[bindContainerId][name] = ko.observableArray(array);
-                },
-                initData: function (containerId, data) {
-                    var $this = $("#" + containerId);
-                    var dataStr = $this.data("gaea-data");
-                    var dataConfig = gaeaString.parseJSON(dataStr);
-                    var name = dataConfig.name;// 整个table的变量名。data-gaea-data="name:'testList'...
-                    var $bindContainer = $this.parents("[data-gaea-data-bind-area=true]");
-                    var bindContainerId = $bindContainer.attr("id");
-                    if (gaeaValid.isNull(name)) {
-                        throw "gaea-data未配置name属性，无法进行初始化！";
-                    }
-                    /**
-                     * 填充数据
-                     */
-                    if (gaeaValid.isNotNull(data)) {
-                        if (_.isArray(data)) {
-                            $.each(data, function (key, val) {
-                                //options._viewModel[name].push(val);
-                                gaeaData.viewModel[bindContainerId][name].push(val);
-                            });
-                        } else {
-                            //options._viewModel[name].push(data);
-                            gaeaData.viewModel[bindContainerId][name].push(data);
-                        }
-                    }
-                },
-                initAfterBinding: function (containerId, gaeaDataConfig) {
-                    // 把填充的数据的name属性修改掉。按照数组的方式命名。
-                    this.resetNames(containerId, gaeaDataConfig.name);
-                },
-                /**
-                 * 把table中所有input的name，根据gaea-data定义的name，改掉。
-                 * 即：
-                 * table下所有input，都会加上table的gaea-data定义的name作为前缀，并转换为数组形式。
-                 * @param containerId
-                 * @param name
-                 */
-                resetNames: function (containerId, name) {
-                    // 把填充的数据的name属性修改掉。按照数组的方式命名。
-                    var $tbody = $("#" + containerId).find("tbody");
-                    //var name = "testList";
-                    $.each($tbody.children("tr"), function (trIdx, tr) {
-                        //console.log("idx: " + trIdx);
-                        $.each($(tr).find("td input"), function (idx, val) {
-                            var nameVal = $(this).attr("name");
-                            gaeaData.component.table.resetName($(this), {
-                                ARRAY_NAME: name,
-                                ARRAY_INDEX: trIdx,
-                                NAME: nameVal
-                            });
-                        });
-                    });
-                },
-                /**
-                 * 往给定id容器的最后，append一行。列以conlumnsDefine定义拼凑，附带data-bind。
-                 * @param $container JQuery对象。一般是tbody。
-                 */
-                appendTrWithBinding: function ($container, columnsDefine) {
-                    //var $container = $("#"+$container);
-                    if (gaeaValid.isNull($container)) {
-                        throw "缺少目标对象，例如tbody，无法append TR.";
-                    }
-                    $container.append(templates.HTML.TR);
-                    var dataBindTemplate = _.template(templates.dataBind.VALUE);
-                    $.each(columnsDefine, function (idx, column) {
-                        //var nameVal = name + "[0]."+column.id;
-                        var nameVal = column.id;// 这只是个base name。因为这个是列表，为了和服务端配合，name还得加上前缀和下标才能注入List。
-                        //if(!column.hidden){
-                        var tdTemplate = _.template(templates.HTML.TD_WITH_INPUT);
-                        $container.children("tr").append(tdTemplate({
-                            ID: column.id,
-                            NAME: nameVal,
-                            DATA_BIND: dataBindTemplate({
-                                VALUE: column.id
-                            })
-                        }));
-                    });
-                },
-                /**
-                 * 第一行（模板行）的相关方法
-                 */
-                firstTR: {
-                    /**
-                     * 1. 给table增加一个排序列
-                     * 2. 增加最后的命令操作区。增加删除行的按钮，点击删除一行。
-                     * @param containerId
-                     * @param removeFunctionName
-                     */
-                    initRowButtons: function (containerId, removeFunctionName) {
-                        var that = this;
-                        //var $thRow = $("#"+containerId).find("thead tr");
-                        //$thRow.prepend("<th>序号</th>");
-
-                        var $tbody = $("#" + containerId).find("tbody");
-                        //var tdTemplate = _.template(templates.HTML.TD_WITH_DATABIND);
-                        var removeButtonTemplate = _.template(templates.HTML.SPAN_REMOVE_BUTTON);
-                        // 给data-bind模板行的最前面，加一个排序列。主要是获取序号做删除。
-                        $tbody.children("tr").append(removeButtonTemplate({
-                            DATA_BIND: "click: $parent." + removeFunctionName   // 这是KO的方法。$parent 是ko的内置变量.
-                        }));
-                    },
-                    /**
-                     * 初始化序号的列
-                     * @param containerId
-                     */
-                    initSequence: function (containerId) {
-                        var $thRow = $("#" + containerId).find("thead tr");
-                        $thRow.prepend("<th>序号</th>");
-
-                        var $tbody = $("#" + containerId).find("tbody");
-                        var tdTemplate = _.template(templates.HTML.TD_WITH_DATABIND);
-                        // 给data-bind模板行的最前面，加一个序号列。主要是获取序号做删除。
-                        $tbody.children("tr").prepend(tdTemplate({
-                            DATA_BIND: "text: $index" // $index 是KO的内部变量
-                        }));
-                    }
-                },
-                /**
-                 * 定义行编辑的移除行的方法名。因为可能一个编辑页有多个行编辑table,不想相互的删除行方法混淆.
-                 * 因为如果名字不作区分,都是调用 $parent.remove()
-                 * 方法命名规则:
-                 * 用该行编辑table的name + "_remove"
-                 * @param name
-                 * @returns {string}
-                 */
-                getRemoveFunctionName: function (name) {
-                    return name + "_remove";
-                },
-                /**
-                 * 基于KO binding的移除一个列表的某行。列表应该是基于KO foreach生成。
-                 *
-                 * @param options
-                 *              name table数据（数组）在viewModel中的name.例如(name=user): viewModel.xx.user
-                 *              bindContainerId
-                 */
-                initRemoveFunction: function (options) {
-                    var that = this;
-                    var name = options.name;
-                    var bindContainerId = options.bindContainerId;
-                    var removeFunctionName = that.getRemoveFunctionName(name);
-                    //options._viewModel[removeFunctionName] = function () {
-                    //    options._viewModel[name].remove(this);// 这个是利用了KO的特性。如果没有用ko binding应该是不行的。
-                    //};
-                    gaeaData.viewModel[bindContainerId][removeFunctionName] = function () {
-                        gaeaData.viewModel[bindContainerId][name].remove(this);// 这个是利用了KO的特性。如果没有用ko binding应该是不行的。
-                    };
-                },
-                /**
-                 * 把某对象（例如，一个input，或者div）的name属性改掉。
-                 * @param $target jquery对象。要改name属性的对象。
-                 * @param options
-                 ARRAY_NAME:name,   // 数组名
-                 ARRAY_INDEX:rowIdx, // 数组下标
-                 NAME:nameVal // 真正的名字
-                 */
-                resetName: function ($target, options) {
-                    var nameVal = $target.attr("name");
-                    var nameTemplate = _.template("<%=ARRAY_NAME %>[<%=ARRAY_INDEX %>].<%=NAME %>");
-                    nameVal = nameTemplate(options);
-                    $target.attr("name", nameVal);
-                }
-            }
+            //table: {
+            //    init: function (containerId) {
+            //        var that = this;
+            //        var $this = $("#" + containerId);
+            //        var $tbody = $this.find("tbody");
+            //        var dataStr = $this.data("gaea-data");
+            //        var dataConfig = gaeaString.parseJSON(dataStr);
+            //        var name = dataConfig.name;// 整个table的变量名。data-gaea-data="name:'testList'...
+            //        var $bindContainer = $this.parents("[data-gaea-data-bind-area=true]");
+            //        var bindContainerId = $bindContainer.attr("id");
+            //        if (gaeaValid.isNull(name)) {
+            //            throw "gaea-data未配置name属性，无法进行初始化！";
+            //        }
+            //
+            //        var toolbarDivName = name + "_toolbar";
+            //        var btnAddName = name + "_btn_add";
+            //        $this.append(_.template(gaeaUI.TEMPLATE.DIV.WITH_NAME)({
+            //            NAME: toolbarDivName,
+            //            ID: toolbarDivName,
+            //            CONTENT: "" // 这里不需要用到content。设个空即可。
+            //        }));
+            //        // 初始化 TOOLBAR
+            //        var gaeaToolbar = require("gaeajs-ui-toolbar");
+            //        gaeaToolbar.create({
+            //            renderTo: toolbarDivName,
+            //            buttons: [{
+            //                "id": btnAddName,
+            //                "name": btnAddName,
+            //                "htmlName": btnAddName,
+            //                "htmlId": btnAddName,
+            //                "htmlValue": "添加",
+            //                "type": null,
+            //                "href": null,
+            //                "linkViewId": null,
+            //                "linkComponent": null,
+            //                "componentName": "button",
+            //                "action": null
+            //            }]
+            //        });
+            //
+            //
+            //        var array = new Array();
+            //        gaeaGrid = require("gaeajs-ui-grid"); // 经常拿不到模块，为什么
+            //        var tableDefine = gaeaGrid.tableGrid.getColumnDefine(containerId);
+            //        // TODO 把按钮触发封装一下？
+            //        $("#" + btnAddName).click(function () {
+            //            // 根据定义，生成一个对象，对象各个属性为空
+            //            var obj = {};
+            //            /**
+            //             * 根据column的定义，拼凑一个带有各种属性的空的对象。例如：
+            //             * { id:'', name:'', age:''}
+            //             * 这其中的id,name,age等属性需要从column定义中获取.
+            //             */
+            //            obj = gaeaData.createEmptyObject(tableDefine.columns);
+            //            gaeaData.viewModel[bindContainerId][name].push(obj);// push后，由于KO binding了，所以table会多出一行
+            //
+            //            // 找到最后一行，把里面的input的name属性修改掉
+            //            var trCount = $tbody.children("tr").length;
+            //            var rowIdx = trCount - 1;
+            //            $.each($tbody.children("tr:last").find("td input"), function (idx, val) {
+            //                var nameVal = $(this).attr("name");
+            //                gaeaData.component.table.resetName($(this), {
+            //                    ARRAY_NAME: name,
+            //                    ARRAY_INDEX: rowIdx,
+            //                    NAME: nameVal
+            //                });
+            //            });
+            //        });
+            //
+            //        /* 创建定义行！！这一行只是定义用（各个列的data-bind），如果结合了KO，就会把这一行隐藏，然后push的新数据，就会以这一行的模板进行添加。 */
+            //
+            //        // 创建第一行，并添加相关列的KO binding
+            //        that.appendTrWithBinding($tbody, tableDefine.columns);
+            //        // 增加行编辑的删除方法。依赖KO。
+            //        that.initRemoveFunction({
+            //            name: name,
+            //            bindContainerId: bindContainerId
+            //        });
+            //        // 初始化第一行（模板行）的序号列。（本来想用来做行删除，不过后来用了KO的方法就不用了）
+            //        that.firstTR.initSequence(containerId);
+            //        // 初始化第一行(模板行)的按钮区,并默认添加删除按钮.
+            //        that.firstTR.initRowButtons(containerId, that.getRemoveFunctionName(name));
+            //        gaeaData.dataBind.bindForEach($tbody, name);
+            //        //options._viewModel[name] = ko.observableArray(array);
+            //        gaeaData.viewModel[bindContainerId][name] = ko.observableArray(array);
+            //    },
+            //    initData: function (containerId, data) {
+            //        var $this = $("#" + containerId);
+            //        var dataStr = $this.data("gaea-data");
+            //        var dataConfig = gaeaString.parseJSON(dataStr);
+            //        var name = dataConfig.name;// 整个table的变量名。data-gaea-data="name:'testList'...
+            //        var $bindContainer = $this.parents("[data-gaea-data-bind-area=true]");
+            //        var bindContainerId = $bindContainer.attr("id");
+            //        if (gaeaValid.isNull(name)) {
+            //            throw "gaea-data未配置name属性，无法进行初始化！";
+            //        }
+            //        /**
+            //         * 填充数据
+            //         */
+            //        if (gaeaValid.isNotNull(data)) {
+            //            if (_.isArray(data)) {
+            //                $.each(data, function (key, val) {
+            //                    //options._viewModel[name].push(val);
+            //                    gaeaData.viewModel[bindContainerId][name].push(val);
+            //                });
+            //            } else {
+            //                //options._viewModel[name].push(data);
+            //                gaeaData.viewModel[bindContainerId][name].push(data);
+            //            }
+            //        }
+            //    },
+            //    initAfterBinding: function (containerId, gaeaDataConfig) {
+            //        // 把填充的数据的name属性修改掉。按照数组的方式命名。
+            //        this.resetNames(containerId, gaeaDataConfig.name);
+            //    },
+            //    /**
+            //     * 把table中所有input的name，根据gaea-data定义的name，改掉。
+            //     * 即：
+            //     * table下所有input，都会加上table的gaea-data定义的name作为前缀，并转换为数组形式。
+            //     * @param containerId
+            //     * @param name
+            //     */
+            //    resetNames: function (containerId, name) {
+            //        // 把填充的数据的name属性修改掉。按照数组的方式命名。
+            //        var $tbody = $("#" + containerId).find("tbody");
+            //        //var name = "testList";
+            //        $.each($tbody.children("tr"), function (trIdx, tr) {
+            //            //console.log("idx: " + trIdx);
+            //            $.each($(tr).find("td input"), function (idx, val) {
+            //                var nameVal = $(this).attr("name");
+            //                gaeaData.component.table.resetName($(this), {
+            //                    ARRAY_NAME: name,
+            //                    ARRAY_INDEX: trIdx,
+            //                    NAME: nameVal
+            //                });
+            //            });
+            //        });
+            //    },
+            //    /**
+            //     * 往给定id容器的最后，append一行。列以conlumnsDefine定义拼凑，附带data-bind。
+            //     * @param $container JQuery对象。一般是tbody。
+            //     */
+            //    appendTrWithBinding: function ($container, columnsDefine) {
+            //        //var $container = $("#"+$container);
+            //        if (gaeaValid.isNull($container)) {
+            //            throw "缺少目标对象，例如tbody，无法append TR.";
+            //        }
+            //        $container.append(templates.HTML.TR);
+            //        var dataBindTemplate = _.template(templates.dataBind.VALUE);
+            //        $.each(columnsDefine, function (idx, column) {
+            //            //var nameVal = name + "[0]."+column.id;
+            //            var nameVal = column.id;// 这只是个base name。因为这个是列表，为了和服务端配合，name还得加上前缀和下标才能注入List。
+            //            //if(!column.hidden){
+            //            var tdTemplate = _.template(templates.HTML.TD_WITH_INPUT);
+            //            $container.children("tr").append(tdTemplate({
+            //                ID: column.id,
+            //                NAME: nameVal,
+            //                DATA_BIND: dataBindTemplate({
+            //                    VALUE: column.id
+            //                })
+            //            }));
+            //        });
+            //    },
+            //    /**
+            //     * 第一行（模板行）的相关方法
+            //     */
+            //    firstTR: {
+            //        /**
+            //         * 1. 给table增加一个排序列
+            //         * 2. 增加最后的命令操作区。增加删除行的按钮，点击删除一行。
+            //         * @param containerId
+            //         * @param removeFunctionName
+            //         */
+            //        initRowButtons: function (containerId, removeFunctionName) {
+            //            var that = this;
+            //            //var $thRow = $("#"+containerId).find("thead tr");
+            //            //$thRow.prepend("<th>序号</th>");
+            //
+            //            var $tbody = $("#" + containerId).find("tbody");
+            //            //var tdTemplate = _.template(templates.HTML.TD_WITH_DATABIND);
+            //            var removeButtonTemplate = _.template(templates.HTML.SPAN_REMOVE_BUTTON);
+            //            // 给data-bind模板行的最前面，加一个排序列。主要是获取序号做删除。
+            //            $tbody.children("tr").append(removeButtonTemplate({
+            //                DATA_BIND: "click: $parent." + removeFunctionName   // 这是KO的方法。$parent 是ko的内置变量.
+            //            }));
+            //        },
+            //        /**
+            //         * 初始化序号的列
+            //         * @param containerId
+            //         */
+            //        initSequence: function (containerId) {
+            //            var $thRow = $("#" + containerId).find("thead tr");
+            //            $thRow.prepend("<th>序号</th>");
+            //
+            //            var $tbody = $("#" + containerId).find("tbody");
+            //            var tdTemplate = _.template(templates.HTML.TD_WITH_DATABIND);
+            //            // 给data-bind模板行的最前面，加一个序号列。主要是获取序号做删除。
+            //            $tbody.children("tr").prepend(tdTemplate({
+            //                DATA_BIND: "text: $index" // $index 是KO的内部变量
+            //            }));
+            //        }
+            //    },
+            //    /**
+            //     * 定义行编辑的移除行的方法名。因为可能一个编辑页有多个行编辑table,不想相互的删除行方法混淆.
+            //     * 因为如果名字不作区分,都是调用 $parent.remove()
+            //     * 方法命名规则:
+            //     * 用该行编辑table的name + "_remove"
+            //     * @param name
+            //     * @returns {string}
+            //     */
+            //    getRemoveFunctionName: function (name) {
+            //        return name + "_remove";
+            //    },
+            //    /**
+            //     * 基于KO binding的移除一个列表的某行。列表应该是基于KO foreach生成。
+            //     *
+            //     * @param options
+            //     *              name table数据（数组）在viewModel中的name.例如(name=user): viewModel.xx.user
+            //     *              bindContainerId
+            //     */
+            //    initRemoveFunction: function (options) {
+            //        var that = this;
+            //        var name = options.name;
+            //        var bindContainerId = options.bindContainerId;
+            //        var removeFunctionName = that.getRemoveFunctionName(name);
+            //        //options._viewModel[removeFunctionName] = function () {
+            //        //    options._viewModel[name].remove(this);// 这个是利用了KO的特性。如果没有用ko binding应该是不行的。
+            //        //};
+            //        gaeaData.viewModel[bindContainerId][removeFunctionName] = function () {
+            //            gaeaData.viewModel[bindContainerId][name].remove(this);// 这个是利用了KO的特性。如果没有用ko binding应该是不行的。
+            //        };
+            //    },
+            //    /**
+            //     * 把某对象（例如，一个input，或者div）的name属性改掉。
+            //     * @param $target jquery对象。要改name属性的对象。
+            //     * @param options
+            //     ARRAY_NAME:name,   // 数组名
+            //     ARRAY_INDEX:rowIdx, // 数组下标
+            //     NAME:nameVal // 真正的名字
+            //     */
+            //    resetName: function ($target, options) {
+            //        var nameVal = $target.attr("name");
+            //        var nameTemplate = _.template("<%=ARRAY_NAME %>[<%=ARRAY_INDEX %>].<%=NAME %>");
+            //        nameVal = nameTemplate(options);
+            //        $target.attr("name", nameVal);
+            //    }
+            //}
         };
         /**
          * 把 data 填充到 divId 中的字段中去（input,textarea,select等）

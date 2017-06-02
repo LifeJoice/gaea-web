@@ -62,7 +62,8 @@
     cursor: pointer;
     /* position: relative */
     display: inline-block;
-    margin-right: 5px;
+    /*margin-right: 5px;*/
+    right: 20px;/* 关闭按钮的位置 */
     /*关闭按钮大小*/
     width: 25px;
     height: 25px;

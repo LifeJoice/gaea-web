@@ -64,10 +64,8 @@ public class SystemResourcesController {
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String save(Resource resource) {
+    public void save(Resource resource) {
         systemResourcesService.save(resource);
-        return "";
-//        return "/gaea/security/resource/create-update-form.html";
     }
 
     @RequestMapping(value = "/test", produces = "plain/text; charset=UTF-8")

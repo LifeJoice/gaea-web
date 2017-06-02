@@ -1,0 +1,59 @@
+<div id="div-dataset-mgr" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block"><span class="fieldname">名称</span><span class="fieldvalue"><input id="name"
+                                                                                                  name="dataSet.name"
+                                                                                                  value=""></span></div>
+        <div class="field-block"><span class="fieldname">关联主表名</span><span class="fieldvalue"><input id="primaryTable"
+                                                                                                     name="dataSet.primaryTable"
+                                                                                                     value=""></span>
+        </div>
+        <div class="field-block">
+            <span class="fieldname">权限校验方式</span>
+            <span class="fieldvalue">
+                <select id="authorityType" name="dataSet.authorityType"
+                        data-gaea-data="dataset:'DS_DATASET_AUTHORITY_TYPE'"></select>
+            </span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">缓存方式</span>
+            <span class="fieldvalue">
+                <select id="cacheType" name="dataSet.cacheType" data-gaea-data="dataset:'DS_DATASET_CACHE_TYPE'">
+                </select>
+            </span>
+        </div>
+        <!--<div class="field-block">-->
+        <!--<span class="fieldname">班角色</span>-->
+        <!--<span class="fieldvalue">-->
+        <!--<select id="classRolesList" name="classRolesList"-->
+        <!--data-gaea-ui-select2="dataset:'DEMO_CLASS_ROLE',default:{ value:'2' }, placeholder: '请选择...'"-->
+        <!--multiple="multiple" required></select>-->
+        <!--</span>-->
+        <!--</div>-->
+    </div>
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">SQL语句</span>
+            <span class="fieldvalue"><textarea id="sql" name="dataSet.sql" value=""/></span>
+        </div>
+    </div>
+    <!-- ***********************************************  这个是可编辑从表  *********************************************** -->
+    <div class="row">
+        <div class="grid-field-block">
+            <!--<span class="fieldname">班级学生</span>-->
+            <!-- TODO test。稍后得增加一种样式，适应这种新的grid的布局。-->
+            <div><span class="field-name">静态数据</span></div>
+            <div class="field-value">
+                <div id="dsDataList" data-gaea-ui-name="dsDataList"
+                     data-gaea-ui-crud-grid='columns:[
+                     {name:"text",text:"文本", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
+                     },
+                     {name:"value",text:"值", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
+                     }
+                     ]'>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

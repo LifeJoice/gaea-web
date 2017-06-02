@@ -4,10 +4,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.SystemCacheFactory;
-import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.service.SchemaDataService;
@@ -36,6 +36,8 @@ public class SchemaDataServiceImpl implements SchemaDataService {
     private GaeaSchemaCache gaeaSchemaCache;
     @Autowired
     private GaeaXmlSchemaProcessor gaeaXmlSchemaProcessor;
+    @Autowired
+    private SystemDataSetService systemDataSetService;
 
     /**
      * 根据XML Schema的View.Grid.Column对数据进行二次处理。
@@ -43,13 +45,14 @@ public class SchemaDataServiceImpl implements SchemaDataService {
      *
      * @param origResults
      * @param grid
+     * @param isDsTranslate    是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
      * @return
      * @throws SysLogicalException
      * @throws ValidationFailedException
      */
     @Override
-    public List<Map<String, Object>> transformViewData(List<Map<String, Object>> origResults, SchemaGrid grid) throws SysLogicalException, ValidationFailedException {
-        List<Map<String, Object>> result = gaeaXmlSchemaProcessor.changeDbColumnNameInData(origResults, grid);
+    public List<Map<String, Object>> transformViewData(List<Map<String, Object>> origResults, SchemaGrid grid, boolean isDsTranslate) throws SysLogicalException, ValidationFailedException {
+        List<Map<String, Object>> result = systemDataSetService.changeDbColumnNameInData(origResults, grid, isDsTranslate);
         return result;
     }
 
@@ -81,7 +84,7 @@ public class SchemaDataServiceImpl implements SchemaDataService {
             }
         }
         Map<String, SchemaColumn> columnMap = GaeaExcelUtils.getDbNameColumnMap(fieldMap);
-        List<Map<String, Object>> result = gaeaXmlSchemaProcessor.changeDbColumnNameInData(origResults, columnMap, true);
+        List<Map<String, Object>> result = systemDataSetService.changeDbColumnNameInData(origResults, columnMap, true, true);
         return result;
     }
 }

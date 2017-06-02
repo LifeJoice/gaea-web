@@ -16,6 +16,7 @@ import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.data.authority.DsAuthorityResult;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.service.SystemDataSetAuthorityService;
+import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;
@@ -55,6 +56,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     private SchemaDataService schemaDataService;
     @Autowired
     private SystemDataSetAuthorityService systemDataSetAuthorityService;
+    @Autowired
+    private SystemDataSetService systemDataSetService;
 
     @Override
     public PageResult query(GaeaXmlSchema gaeaXml, List<QueryCondition> filters,
@@ -111,8 +114,9 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             pageResult = gaeaSqlProcessor.query(sql, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
 
             List<Map<String, Object>> dataList = pageResult.getContent();
-            // 基于UR XML SCHEMA的结果集格式转换
-            dataList = schemaDataService.transformViewData(dataList, grid);
+            // 基于XML SCHEMA的结果集格式转换
+            // 默认需要对结果的每个字段做数据集转换
+            dataList = schemaDataService.transformViewData(dataList, grid, true);
             pageResult.setContent(dataList);
 
             // 设置翻页相关数据
@@ -212,22 +216,28 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * <p>
      * schemaId,其实也是用于获取dataset. 如果schemaId和datasetId同时存在，则用dataSetId获取的DataSet.
      * </p>
+     * 【重要】
+     * 数据的优先级：dataSetId > schemaId
+     * 数据列的定义优先级：schema.grid > dataSet.columnsDefine
      *
      * @param schemaId          可以为空。如果schemaId和datasetId同时存在，则用dataSetId.
      * @param datasetId         可以为空。如果schemaId和datasetId同时存在，则用dataSetId.
      * @param defaultDsContext
-     * @param queryConditionDTO @return
+     * @param queryConditionDTO
+     * @param isDsTranslate     是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
      * @throws ValidationFailedException
      * @throws SysLogicalException
      */
     @Override
-    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException {
+    public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO, boolean isDsTranslate) throws ValidationFailedException, SysLogicalException, SysInitException {
         GaeaXmlSchema gaeaXmlSchema = null;
         if (StringUtils.isNotEmpty(schemaId)) {
             gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
         }
         SchemaGrid grid = null;
         DataSet dataSet = null;
+        Map<String, SchemaColumn> columnDefineMap = null;
+        boolean displayUndefinedColumn = true;
 //        String sql = "";
         if (gaeaXmlSchema != null) {
 //            dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0); // 不再从Schema中获取DataSet定义了。只获取配置的对应DataSet的名字。
@@ -237,6 +247,9 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             if (columnDef == null) {
                 throw new ValidationFailedException("Schema未定义主键列，无法根据id查询。");
             }
+            // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
+            columnDefineMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
+            displayUndefinedColumn = grid.getDisplayUndefinedColumn();
         }
         /**
          * if
@@ -257,11 +270,20 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             logger.debug(MessageFormat.format("找不到对应的数据集，无法进行查询。dataSet ID: {0}", datasetId));
             return null;
         }
+        /**
+         * 如果从Schema中获取不到列定义，才是用DataSet的<columns-define>
+         * 数据列的定义优先级：schema.grid > dataSet.columnsDefine
+         */
+        if (columnDefineMap == null) {
+            columnDefineMap = GaeaSchemaUtils.convertToSchemaColumnMap(gaeaDataSet.getColumns());
+        }
+        // query data
         dataSet = GaeaSchemaUtils.translateDataSet(gaeaDataSet);
         List<Map<String, Object>> newDataList = queryByConditions(dataSet, queryConditionDTO, defaultDsContext);
+        // convert/format data
         // 基于XML SCHEMA的结果集格式转换，如果有传过来XML SCHEMA ID的话
-        if (grid != null && CollectionUtils.isNotEmpty(newDataList)) {
-            newDataList = schemaDataService.transformViewData(newDataList, grid);
+        if (columnDefineMap != null && CollectionUtils.isNotEmpty(newDataList)) {
+            newDataList = systemDataSetService.changeDbColumnNameInData(newDataList, columnDefineMap, displayUndefinedColumn, isDsTranslate);
         }
         return newDataList;
     }
@@ -301,6 +323,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                 conditionSet = dataSet.getWhere().getConditionSets().get(queryConditionDTO.getId());
                 if (conditionSet != null && conditionSet.getConditions() != null) {
                     for (int i = 0; i < conditionSet.getConditions().size(); i++) {
+                        // AI.TODO 这里不能用顺序来确定键值对应。因为对于is null之类的，是没有值的。需要增加一个标识符来做对应关系。
                         // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
                         Condition schemaCondition = conditionSet.getConditions().get(i);
                         DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致

@@ -73,7 +73,7 @@ public class CommonViewQueryController {
      */
     @RequestMapping(value = "/byCondition", method = RequestMethod.POST)
     @ResponseBody
-    public List<Map<String, Object>> queryByConditions(String schemaId, String conditions,
+    public List<Map<String, Object>> queryByConditions(String schemaId, String conditions,Boolean isDsTranslate,
                                                        String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException {
         DataSetCommonQueryConditionDTO queryConditionDTO = null;
         if (StringUtils.isNotEmpty(conditions)) {
@@ -88,8 +88,12 @@ public class CommonViewQueryController {
         if (StringUtils.isEmpty(dsId) && StringUtils.isEmpty(schemaId)) {
             return null;
         }
+        // 默认需要对结果的每个字段做数据集转换
+        if(isDsTranslate==null){
+            isDsTranslate = true;
+        }
         try {
-            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, null, queryConditionDTO);
+            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, null, queryConditionDTO, isDsTranslate);
             return result;
         } catch (SysLogicalException e) {
             logger.debug(e.getMessage(), e);

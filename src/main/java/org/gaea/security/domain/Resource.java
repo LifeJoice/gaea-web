@@ -20,7 +20,7 @@ public class Resource implements Serializable {
     private String id;
     @Column(name = "NAME")
     private String name;
-    @Column(name = "RESOURCE_URL")
+    @Column(name = "RESOURCE_URL",nullable = false)
     private String resourceUrl;                // 资源。暂时来说，就是URL。
     @Column(name = "LEVEL_NUM")
     private Integer level = 0;          // 在树中的级别。只是方便管理。
@@ -28,9 +28,9 @@ public class Resource implements Serializable {
     private Integer orderSeq;               // 如果是菜单，有个排序。
     @Column(name = "description")
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    @JoinColumn(name = "PARENT_ID")
-    private Resource parent;
+//    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+//    @JoinColumn(name = "PARENT_ID")
+//    private Resource parent;
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     @JoinTable(
             name = "GAEA_SYS_AUTHORITIES_RESOURCES", joinColumns = {
@@ -95,13 +95,13 @@ public class Resource implements Serializable {
         this.description = description;
     }
 
-    public Resource getParent() {
-        return parent;
-    }
+//    public Resource getParent() {
+//        return parent;
+//    }
 
-    public void setParent(Resource parent) {
-        this.parent = parent;
-    }
+//    public void setParent(Resource parent) {
+//        this.parent = parent;
+//    }
 
     public List<Authority> getAuthorities() {
         return authorities;

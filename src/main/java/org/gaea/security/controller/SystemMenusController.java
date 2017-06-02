@@ -56,7 +56,7 @@ public class SystemMenusController {
 //    }
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String save(Menu menu) {
+    public String save(@RequestBean Menu menu) {
         menu.setStatus(1);
         systemMenusService.save(menu);
         return "";

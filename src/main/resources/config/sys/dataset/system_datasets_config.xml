@@ -77,8 +77,15 @@
     <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
     <dataset id="DS_MENU" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
-            <![CDATA[SELECT id value,name text,resource_id resource_id FROM gaea_sys_menus]]>
+            <![CDATA[SELECT id,name,resource_id FROM gaea_sys_menus]]>
         </data-sql>
+        <!--定义查询出来的结果集的字段名转换-->
+        <columns-define>
+            <column name="value" db-column-name="ID" data-type="String" />
+            <column name="text" db-column-name="NAME" data-type="String" />
+            <column name="resourceId" db-column-name="RESOURCE_ID" data-type="String" />
+        </columns-define>
+        <!--条件-->
         <where>
             <condition-set id="testTrigger">
                 <and propName="resource_id" op="eq"></and>

@@ -204,7 +204,9 @@ define([
                     title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
                     content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
                 }, function () {
+                    // get selected row
                     var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                    // trigger delete action
                     $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
                         selectedRow: row,
                         button: opts.button
@@ -217,7 +219,7 @@ define([
              * @param {string} opts.id
              * @param {object} opts.button              button的服务端定义
              */
-            doPseudoDelete: function () {
+            doPseudoDelete: function (opts) {
                 gaeaValid.isNull({
                     check: opts.id,
                     exception: "按钮id为空，无法触发删除事件（删除动作绑定在某按钮上）。"
@@ -228,7 +230,9 @@ define([
                     title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
                     content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
                 }, function () {
-                    var row = gaeaGrid.getSelected();
+                    // get selected row
+                    var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                    // trigger delete action
                     $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
                         selectedRow: row,
                         button: opts.button

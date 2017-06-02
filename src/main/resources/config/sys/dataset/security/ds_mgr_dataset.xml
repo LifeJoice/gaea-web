@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--数据集自己的数据集。好绕。-->
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<dataset-definition>
+    <dataset id="DS_DATASET_MANAGEMENT" primary-table="GAEA_SYS_DATASET">
+        <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
+        <data-sql>
+            <![CDATA[SELECT * FROM GAEA_SYS_DATASET]]>
+        </data-sql>
+        <!--对应SchemaWhere-->
+        <where>
+            <!--编辑的数据筛选-->
+            <condition-set id="byId">
+                <and propName="id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+
+    <!-- ********************************************** 数据集的数据权限校验方式 ********************************************** -->
+    <dataset id="DS_DATASET_AUTHORITY_TYPE" cache-type="static">
+        <data>
+            <data-element value="0" text="不校验"/>
+            <data-element value="1" text="无授权，不访问"/>
+            <data-element value="2" text="无授权，无限制"/>
+        </data>
+    </dataset>
+
+    <!-- ********************************************** 数据集的缓存方式 ********************************************** -->
+    <dataset id="DS_DATASET_CACHE_TYPE" cache-type="static">
+        <data>
+            <data-element value="static" text="系统启动一次性"/>
+            <data-element value="auto" text="自动"/>
+        </data>
+    </dataset>
+</dataset-definition>

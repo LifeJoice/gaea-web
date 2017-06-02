@@ -11,9 +11,10 @@ define([
             /**
              * 创建个按钮的html。简单的HTML拼凑而已。
              * @param {object} btnOptions
-             * @param {object} btnOptions.htmlId    html id
-             * @param {object} btnOptions.text      按钮的文本
-             * @param {object} btnOptions.size      要生成大按钮，还是小按钮。默认medium. value: small |
+             * @param {object} btnOptions.jqContainer       容器jq对象。可以为空。非空时，生成的按钮html append在这个容器最后。
+             * @param {object} btnOptions.htmlId            html id
+             * @param {object} btnOptions.text              按钮的文本
+             * @param {object} btnOptions.size              要生成大按钮，还是小按钮。默认medium. value: small |
              */
             create: function (btnOptions) {
                 var buttonHtml = "";
@@ -31,6 +32,10 @@ define([
                         btnOptions.text +
                         "</span>" +
                         "</a>";
+                }
+                // 放入容器
+                if (gaeaValid.isNotNull(btnOptions.jqContainer)) {
+                    btnOptions.jqContainer.append(html);
                 }
                 return html;
             },

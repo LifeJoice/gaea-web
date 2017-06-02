@@ -16,11 +16,45 @@ body{
     background-color: #222222;
     opacity: 0.9;
 }
+
+/* 菜单上面，系统名、用户信息区域的定义 */
 .main-left .head{
     width: 100%;
     height: 100px;
     position: relative;
 }
+
+/* 系统名称 */
+.main-left .head .system-title {
+    display: block;
+    width: 100%;
+    height: 80%;
+}
+
+/*用户信息区*/
+.main-left .head .user-info {
+    display: block;
+    width: 96%;
+    font-size: 13px;
+}
+
+.main-left .head .user-info > div:hover {
+    border-color: white;
+}
+
+.main-left .head .user-info > div {
+    display: block;
+    float: right;
+    padding: 2px;
+    box-sizing: border-box;
+    border: 1px solid #222222;
+}
+
+.main-left .head .user-info a {
+    color: white;
+    text-decoration: none;
+}
+
 /*右边区域定义*/
 .main-right{
     /*clear: both;*/
