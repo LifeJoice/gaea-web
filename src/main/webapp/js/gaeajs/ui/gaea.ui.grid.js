@@ -658,6 +658,25 @@ define([
                 /* 应用相关的效果，如复选框选中等 */
                 _grid._applyJsStyle();
             },
+            data: {
+                /**
+                 * 触发grid刷新。原有的数据将会被抛弃。
+                 * @param {string} gridId       grid容器id
+                 * @param {object} data         要刷新的数据
+                 */
+                reset: function (gridId, data) {
+                    if (gaeaValid.isNull(gridId)) {
+                        throw "grid id为空，无法重置grid的数据！";
+                    }
+                    var $gridCt = $("#" + gridId);
+                    // 触发刷新
+                    $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, {
+                        data: data,
+                        // 是否额外的新增数据。这个不是指替换，指添加。
+                        isNewData: false
+                    });
+                }
+            },
             /**
              * 获取grid中选中的行的数据对象。
              * @param argId
@@ -1945,16 +1964,16 @@ define([
                             result[field.id] = "";
                         });
                         return result;
-                    },
+                    }
                     /**
                      * 写入crud grid的data。
                      * @param {object} opts
                      * @param {string} opts.id                      grid容器id
                      * @param {object} opts.data                    要写入的data
                      */
-                    setValues: function (opts) {
-
-                    }
+                    //setValues: function (opts) {
+                    //
+                    //}
                     /**
                      * 获取grid数据区的数据。
                      * @param {object} opts
@@ -2737,14 +2756,17 @@ define([
         return {
             create: _grid.create,
             getSelected: _grid.getSelected,
-            tableGrid: _grid.tableGrid,
+            data: {
+                reset: _grid.data.reset
+            },
+            //tableGrid: _grid.tableGrid, // 没用过
             query: {
                 getQueryConditions: gridQuery.parser.getQueryConditions
             },
             crudGrid: {
                 addNewOne: _private.crudGrid.addNewOne,
-                deleteSelected: _private.crudGrid.deleteSelected,
-                setValues: _private.crudGrid.setValues
+                deleteSelected: _private.crudGrid.deleteSelected
+                //setValues: _private.crudGrid.setValues // 就没实现过！
             }
         };
     });

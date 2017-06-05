@@ -9,6 +9,7 @@ import org.gaea.framework.web.data.service.SystemDataSetMgrService;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.security.domain.User;
 import org.gaea.security.service.SystemUsersService;
+import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by iverson on 2016/1/3.
@@ -46,6 +49,24 @@ public class SystemDataSetMgrController {
     @ResponseBody
     public void save(@RequestBean DataSetEntity dataSet, HttpServletRequest request, @RequestBean("dsDataList") List<DataItem> dsDataList) throws ProcessFailedException {
         systemDataSetMgrService.saveOrUpdate(dataSet, dsDataList);
+    }
+
+    /**
+     * 编辑功能，获取数据
+     *
+     * @param dataSet
+     * @return
+     * @throws ProcessFailedException
+     * @throws IOException
+     */
+    @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String loadEditData(@RequestBean("selectedRow") DataSetEntity dataSet) throws ProcessFailedException, IOException {
+        Map result = systemDataSetMgrService.loadEditData(dataSet);
+        if (result != null) {
+            return GaeaJacksonUtils.parse(result);
+        }
+        return "";
     }
 
     /**

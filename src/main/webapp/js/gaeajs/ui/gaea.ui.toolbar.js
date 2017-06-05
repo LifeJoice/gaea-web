@@ -305,20 +305,20 @@ define([
              * @param buttonOptions
              * @private
              */
-            _createInterfaceActions: function (buttonOptions) {
-                console.log("into _createInterfaceActions");
-                var that = this;
-                if (gaeaValid.isNotNull(that.options.interface)) {
-                    $.each(that.options.interface, function (key, functionVal) {
-                        console.log("为interface action添加事件。");
-                        $("#" + buttonOptions.htmlId).click(function () {
-                            var row = gaeaGrid.getSelected();
-                            console.log("interface action中是否能get row？row is not null? " + gaeaValid.isNotNull(row));
-                            functionVal(row);
-                        });
-                    })
-                }
-            },
+            //_createInterfaceActions: function (buttonOptions) {
+            //    console.log("into _createInterfaceActions");
+            //    var that = this;
+            //    if (gaeaValid.isNotNull(that.options.interface)) {
+            //        $.each(that.options.interface, function (key, functionVal) {
+            //            console.log("为interface action添加事件。");
+            //            $("#" + buttonOptions.htmlId).click(function () {
+            //                var row = gaeaGrid.getSelected();
+            //                console.log("interface action中是否能get row？row is not null? " + gaeaValid.isNotNull(row));
+            //                functionVal(row);
+            //            });
+            //        })
+            //    }
+            //},
             button: {
                 /**
                  * 给构造Toolbar的json对象添加click事件。

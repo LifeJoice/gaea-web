@@ -14,17 +14,21 @@
             <button id="btnSyncDbDataSet" name="btnSyncDbDataSet" html-value="刷新缓存数据集"
                     submit-url="/gaea/data/dataset/synchronize-db-dataset" msg="同步数据库数据集至缓存"/>
         </actions>
-
+        <!--工作流弹出框-->
         <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
                    submit-url="/admin/wf-demo/new-dayoff/complete.do">
             <button id="btnApproved" name="btnApproved" html-value="批准" type="approve"/>
             <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove"/>
             <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel"/>
         </wf-dialog>
+        <!--新增弹出框-->
         <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/data/dataset/showCreateUpdateForm"
                      submit-url="/gaea/data/dataset/add"/>
+        <!-- 编辑弹出框 -->
         <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
-                     content-url="/gaea/data/dataset/showCreateUpdateForm" submit-url="/gaea/data/dataset/add"/>
+                     content-url="/gaea/data/dataset/showCreateUpdateForm" submit-url="/gaea/data/dataset/add"
+                     load-data-url="/gaea/data/dataset/load-edit-data"/>
+        <!--列表定义-->
         <grid id="dataset-grid" title="数据集管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
               dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="20">
             <column id="id" name="id" label="ID" db-column-name="ID"

@@ -11,11 +11,13 @@
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
-        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid'
+        "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid',
+        "gaeajs-data"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
-              gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid) {
+              gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid,
+              gaeaData) {
 
         var gaeaCommons = {
             /**
@@ -51,6 +53,40 @@ define([
             initGaeaUIAfterData: function (opts) {
                 // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
                 $("#" + opts.containerId).find("select").trigger("change");
+            },
+            /**
+             * 负责所有数据的填充，包括Gaea框架的UI组件的数据填充。
+             * @param {object} opts
+             * @param {object} opts.id              container id
+             * @param {object} opts.data            要填充的数据
+             */
+            fillData: function (opts) {
+                if (gaeaValid.isNull(opts.id) || gaeaValid.isNull(opts.data)) {
+                    return;
+                }
+
+                // 填充字段（input、textarea、select等）的值
+                gaeaData.fieldData.init(opts.id, opts.data);
+
+                /**
+                 * Gaea框架的组件数据填充！
+                 * 当前只查找crud-grid组件，但后续如有其它组件，还是得加进来。并且针对的可能是特定的组件的数据填充。
+                 */
+
+                    // 可编辑表格crud-grid的数据填充
+                $("#" + opts.id).find("[data-gaea-ui-crud-grid]").each(function (key, target) {
+                    // $(this)是crud-grid的容器，里面有toolbar和grid两个组件。
+                    var $gridCt = $(this).children(".gaea-grid-ct");
+                    var gridId = $gridCt.attr("id");
+                    var name = $(this).data("gaea-ui-name"); // name需要从最底层容器获取
+                    if (gaeaValid.isNull(name)) {
+                        throw "组件data-gaea-ui-name为空，无法填充数据！";
+                    }
+                    // 如果data中，有部分数据和grid的name一致，才填充！
+                    if (gaeaValid.isNotNull(opts.data[name])) {
+                        gaeaGrid.data.reset(gridId, opts.data[name]);
+                    }
+                });
             }
         };
 
@@ -251,21 +287,21 @@ define([
                             gaeaGrid.crudGrid.addNewOne(opts.gridOptions)
                         }
                     }, {
-                            "id": btnDelId,
-                            "name": btnDelId,
-                            "htmlName": btnDelId,
-                            "htmlId": btnDelId,
-                            "htmlValue": "删除",
-                            "type": null,
-                            "href": null,
-                            "linkViewId": null,
-                            "linkComponent": null,
-                            "componentName": "button", // 定义组件
-                            "action": null,
-                            "size": "small",
-                            onClick: function () {
-                                gaeaGrid.crudGrid.deleteSelected(opts.gridOptions)
-                            }
+                        "id": btnDelId,
+                        "name": btnDelId,
+                        "htmlName": btnDelId,
+                        "htmlId": btnDelId,
+                        "htmlValue": "删除",
+                        "type": null,
+                        "href": null,
+                        "linkViewId": null,
+                        "linkComponent": null,
+                        "componentName": "button", // 定义组件
+                        "action": null,
+                        "size": "small",
+                        onClick: function () {
+                            gaeaGrid.crudGrid.deleteSelected(opts.gridOptions)
+                        }
                     },
                         {
                             "id": btnExcelImportId,

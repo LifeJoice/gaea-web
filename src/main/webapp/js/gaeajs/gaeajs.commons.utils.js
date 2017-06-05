@@ -265,7 +265,8 @@ define([
              *     （那样可能也填充不到正确的，因为进一步就会按arr[0]...的方式去找目标填充）
              * </p>
              * <p>
-             *     暂时支持select, input, textarea这几类输入。
+             *     暂时支持select, input, textarea这几类输入。<br/>
+             *     不支持grid。这个需要组件另外处理。
              * </p>
              * @param {object} opts
              * @param {string} opts.id                  要填充入的容器（例如div）id
@@ -289,13 +290,13 @@ define([
                 };
                 // array必须在前，因为_.isObject会把array也当object的
                 if (_.isArray(opts.data)) {
+                    // empty, continue
+                    if (_.isEmpty(opts.data)) {
+                        return;
+                    }
                     /**
                      * it's array
                      */
-                    //var findTemplate = _.template("select[name='<%=NAME%>']");
-                    //var jqSelector = findTemplate({
-                    //    NAME: opts.name
-                    //});
                     var $filterResult = $("#" + opts.id).find("select").filter(jqIgnoreCaseFilter(opts.name));
                     if (utils.array.isGenericValue(opts.data) && $filterResult.length > 0) {
                         // 目标对象是select，可以批量填充。不再需要遍历了。

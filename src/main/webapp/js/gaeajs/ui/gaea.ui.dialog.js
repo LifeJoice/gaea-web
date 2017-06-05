@@ -7,13 +7,13 @@ define([
         "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string",
         "gaeajs-ui-definition", "gaeajs-ui-view", "gaea-system-url", 'gaeajs-ui-notify',
         "gaeajs-ui-commons", "gaeajs-ui-multiselect", "gaeajs-common", "gaeajs-ui-components",
-        "gaeajs-common-utils", "gaeajs-context", "gaeajs-ui-dataFilterDialog",
+        "gaeajs-common-utils", "gaeajs-context", "gaeajs-ui-dataFilterDialog", "gaeajs-ui-grid",
         'gaea-jqui-dialog', "jquery-serializeObject", "jquery-ui-effects-all"],
     function ($, _, _s, gaeaAjax, gaeaValid,
               gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
               gaeaUI, gaeaMultiSelect, gaeaCommon, gaeaComponents,
-              gaeaCommonUtils, gaeaContext, gaeaDataFilterDialog) {
+              gaeaCommonUtils, gaeaContext, gaeaDataFilterDialog, gaeaGrid) {
 
 
         /**
@@ -87,15 +87,18 @@ define([
              * @param {object} data         要刷新的数据
              */
             triggerGridRefresh: function (gridId, data) {
-                var $gridCt = $("#" + gridId);
-                //var gridOptions = $gridCt.data("options");
-                //var allData = gridOptions.data;
-                // 触发刷新
-                $gridCt.trigger(GAEA_EVENTS.DEFINE.UI.GRID.REFRESH_DATA, {
-                    data: data,
-                    // 全部数据替换刷新
-                    isNewData: false
-                });
+
+                gaeaGrid.data.reset(gridId, data);
+
+                //var $gridCt = $("#" + gridId);
+                ////var gridOptions = $gridCt.data("options");
+                ////var allData = gridOptions.data;
+                //// 触发刷新
+                //$gridCt.trigger(GAEA_EVENTS.DEFINE.UI.GRID.REFRESH_DATA, {
+                //    data: data,
+                //    // 全部数据替换刷新
+                //    isNewData: false
+                //});
             }
         };
 
@@ -491,7 +494,13 @@ define([
                              * 例如select2，得初始化后，改数据还得调用trigger change，然后，未初始化前trigger change是没用的，也就改不了数据了。
                              */
                             if (gaeaValid.isNotNull(options.data)) {
-                                gaeaData.fieldData.init(options.id, options.data);
+
+                                gaeaUI.fillData({
+                                    id: options.id,
+                                    data: options.data
+                                });
+
+                                //gaeaData.fieldData.init(options.id, options.data);
                                 // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
                                 gaeaUI.initGaeaUIAfterData({
                                     containerId: options.id
@@ -1016,6 +1025,7 @@ define([
              *
              * @param {object} opts
              * @param {string} opts.gridId          grid的容器id
+             * @param {string} opts.loadDataUrl     编辑弹出框有指定的数据来源
              * @returns {*}
              */
             getData: function (opts) {
@@ -1058,11 +1068,15 @@ define([
                         }
                     });
                 } else {
+                    // 请求服务端的数据
+                    var requestData = {
+                        selectedRow: gaeaContext.getValue("selectedRow", opts.gridId)
+                    };
                     // 数据加载要求同步
                     gaeaAjax.ajax({
                         url: opts.loadDataUrl,
                         async: false, // 同步，否则后面加载内容还有数据集会乱的
-                        data: gaeaContext.getValue("selectedRow", opts.id),
+                        data: gaeaCommonUtils.data.flattenData(requestData), // 把数据拍扁。不然传的是对象，服务端无法解析。
                         success: function (data) {
                             result = data;
                         },
