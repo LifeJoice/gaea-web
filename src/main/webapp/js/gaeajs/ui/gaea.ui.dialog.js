@@ -87,18 +87,9 @@ define([
              * @param {object} data         要刷新的数据
              */
             triggerGridRefresh: function (gridId, data) {
-
-                gaeaGrid.data.reset(gridId, data);
-
-                //var $gridCt = $("#" + gridId);
-                ////var gridOptions = $gridCt.data("options");
-                ////var allData = gridOptions.data;
-                //// 触发刷新
-                //$gridCt.trigger(GAEA_EVENTS.DEFINE.UI.GRID.REFRESH_DATA, {
-                //    data: data,
-                //    // 全部数据替换刷新
-                //    isNewData: false
-                //});
+                require(["gaeajs-ui-grid"], function (gaeaGrid) {
+                    gaeaGrid.data.reset(gridId, data);
+                });
             }
         };
 
