@@ -108,9 +108,9 @@ public class GaeaSchemaUtils {
      * @param columnList
      * @return
      */
-    public static Map<String, SchemaColumn> getDbNameColumnMap(List<SchemaColumn> columnList) {
+    public static LinkedCaseInsensitiveMap<SchemaColumn> getDbNameColumnMap(List<SchemaColumn> columnList) {
         if (CollectionUtils.isNotEmpty(columnList)) {
-            Map<String, SchemaColumn> columnMap = new HashMap<String, SchemaColumn>();
+            LinkedCaseInsensitiveMap<SchemaColumn> columnMap = new LinkedCaseInsensitiveMap<SchemaColumn>();
             for (SchemaColumn column : columnList) {
                 columnMap.put(column.getDbColumnName(), column);
             }

@@ -13,6 +13,7 @@ import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.poi.domain.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,11 +93,11 @@ public class GaeaExcelUtils {
      * @param fieldMap
      * @return
      */
-    public static Map<String, SchemaColumn> getDbNameColumnMap(Map<String, Field> fieldMap) {
+    public static LinkedCaseInsensitiveMap<SchemaColumn> getDbNameColumnMap(Map<String, Field> fieldMap) {
         if (MapUtils.isEmpty(fieldMap)) {
             return null;
         }
-        Map<String, SchemaColumn> columnMap = new HashMap<String, SchemaColumn>();
+        LinkedCaseInsensitiveMap<SchemaColumn> columnMap = new LinkedCaseInsensitiveMap<SchemaColumn>();
         for (String key : fieldMap.keySet()) {
             Field excelField = fieldMap.get(key);
             if (StringUtils.isEmpty(excelField.getDbColumnName())) {

@@ -121,7 +121,6 @@
        res.LEVEL_NUM    r_level,
        res.NAME         r_name,
        res.ORDER_SEQ    r_order,
-       res.PARENT_ID    r_parent_id,
        res.RESOURCE_URL r_res
   FROM gaea_sys_menus menu
   LEFT JOIN gaea_sys_menus pmenu

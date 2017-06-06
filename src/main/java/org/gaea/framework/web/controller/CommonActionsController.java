@@ -57,8 +57,10 @@ public class CommonActionsController {
 
     /**
      * 系统公用的button action处理。
-     * SchemaId + buttonId可以定义到唯一的action
-     *
+     * SchemaId + buttonId可以定义到唯一的action。使用这个接口的功能有：
+     * <ul>
+     *     <li>根据模板导出Excel</li>
+     * </ul>
      * @param method
      * @param schemaId
      * @param request

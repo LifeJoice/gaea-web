@@ -17,7 +17,6 @@ import org.gaea.framework.web.data.domain.DsConditionSetEntity;
 import org.gaea.framework.web.data.repository.SystemDataSetRepository;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.data.util.GaeaDataSetUtils;
-import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
@@ -397,7 +396,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * @return Map. key: 大写的column name.
      */
     @Override
-    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, Map<String, SchemaColumn> columnMap, boolean displayUndefinedColumn, boolean isDsTranslate) {
+    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, LinkedCaseInsensitiveMap<SchemaColumn> columnMap, boolean displayUndefinedColumn, boolean isDsTranslate) {
         if (dataList == null) {
             return null;
         }
@@ -489,7 +488,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             throw new ValidationFailedException("XML Schema grid定义为空。无法执行转换操作！");
         }
         // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
-        Map<String, SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
+        LinkedCaseInsensitiveMap<SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
         return changeDbColumnNameInData(dataList, columnMap, grid.getDisplayUndefinedColumn(), isDsTranslate);
     }
 }

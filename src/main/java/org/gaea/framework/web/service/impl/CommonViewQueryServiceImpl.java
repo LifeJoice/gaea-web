@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -236,7 +237,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
         }
         SchemaGrid grid = null;
         DataSet dataSet = null;
-        Map<String, SchemaColumn> columnDefineMap = null;
+        LinkedCaseInsensitiveMap<SchemaColumn> columnDefineMap = null;
         boolean displayUndefinedColumn = true;
 //        String sql = "";
         if (gaeaXmlSchema != null) {
