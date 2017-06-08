@@ -76,11 +76,6 @@ define([
                 PAGE: "page",
                 DIALOG: "dialog"
             },
-            //COLUMN: {
-            //    DATA_TYPE_DATE: "date",
-            //    DATA_TYPE_TIME: "time",
-            //    DATA_TYPE_DATETIME: "datetime"
-            //},
             QUERY: {
                 FILTER_CONTAINER_ID: "mars-tb-head-query" // 列表页的快捷查询块的id
             },
@@ -282,163 +277,6 @@ define([
 
                 // 【2】 点击确定，开始查询。
                 gridQuery.view.init(opts);
-                // ------------------------------------>>>> query refact to gaea.ui.grid.query
-                //$gridCt.find("#headqueryOK").click(function () {
-                //    //// 利用underscore的模板功能。查询参数的变量名的名，和值的名（有点绕……）的拼凑模板。
-                //    //var paramNameTemplate = _.template(TEMPLATE.QUERY.PARAM_NAME);
-                //    //var paramValueTemplate = _.template(TEMPLATE.QUERY.PARAM_VALUE);
-                //    //// 收起查询区
-                //    //$("#mars-tb-head-query").slideUp("fast");    // cool一点的方式
-                //    //var queryConditions = new Object();         // 查询请求数据
-                //    //var i = 0;      // 查询条件数组的下标
-                //    ////queryConditions.urSchemaId = $("#urSchemaId").val();
-                //    //$("#mars-headquery-inputs").find("input").each(function (index) {
-                //    //    console.log("input value: " + $(this).val() + " , " + $(this).prop("value"));
-                //    //    var inputVal = $(this).val();
-                //    //    console.log("empty length: " + inputVal.length + " 0 length: " + "0".length);
-                //    //    if (gaeaValid.isNotNull(inputVal)) {
-                //    //        //var nameKey = "filters[" + i + "].name";        // 不能用index。输入框为空的时候index也会递增。
-                //    //        var nameKey = paramNameTemplate({P_SEQ:i});        // 不能用index。输入框为空的时候index也会递增。
-                //    //        var nameValue = $(this).data("field-id");
-                //    //        //var valKey = "filters[" + i + "].value";
-                //    //        var valKey = paramValueTemplate({P_SEQ:i});
-                //    //        var valValue = $(this).val();
-                //    //        queryConditions[nameKey] = nameValue;
-                //    //        queryConditions[valKey] = valValue;
-                //    //        i += 1;
-                //    //    }
-                //    //});
-                //    // ------------------>>>> 上面的都重构到getQueryConditions方法
-                //    // 收起查询区
-                //    _query.hide(opts);
-                //    var queryConditions = gridQuery.parser.getQueryConditions(opts);
-                //    gridQuery.doQuery({
-                //        id: opts.id,
-                //        queryConditions: queryConditions
-                //    });
-                //});
-                //// 【3】 点击列头，展示查询区。但忽略“选择全部”按钮区。
-                //_private.event.bindShowSimpleQuery(opts);
-                //// 设定查询区的比较符按钮点击操作，和相关的触发事件。
-                //_query.view.event.setQueryCompareButtonTrigger(opts);
-                //_query.view.event.bindQueryCompareButtonEvent(opts);
-                //// 【4】 初始化快捷查询区的gaea UI组件（例如：select2等）
-                //_query.view.initGaeaUI(opts);
-                // <<<< ------------------------------------
-            },
-            /**
-             * 初始化query中的UI 组件（例如select2等）
-             * @param {object} opts
-             * @param {string} opts.id              grid id
-             */
-            //initGaeaUI: function (opts) {
-            //    gaeaValid.isNull({
-            //        check: opts.id,
-            //        exception: "grid id为空，无法初始化查询区的Gaea UI组件！"
-            //    });
-            //    var $grid = $("#" + opts.id);
-            //    var gridOptions = $grid.data().options;
-            //    var fields = gridOptions.model.fields;
-            //    var columns = gridOptions.columns;
-            //    //var $headQueryCt = $("#" + opts.id + " .gaea-grid-header .mars-tb-head-query");
-            //
-            //
-            //    for (var i = 0; i < fields.length; i++) {
-            //        var field = fields[i];
-            //        /**
-            //         * @type {object}
-            //         * @property {object} [queryCondition]              列的查询定义对象
-            //         * @property {string} queryCondition.component      组件名
-            //         * @property {boolean} queryCondition.multiple      是否支持多选
-            //         */
-            //        var column = columns[i];
-            //        var columnHtmId = "mars-hq-column-" + (i + 1); // column的序列化从1开始吧
-            //        var inputId = "mars-hq-" + field.id;
-            //
-            //
-            //        /**
-            //         * 根据系统返回的各个字段的类型定义，做相应的转化和初始化。
-            //         * 例如：
-            //         * 日期类的字段，需要初始化日期控件。
-            //         */
-            //        if (gaeaValid.isNotNull(column.datetimeFormat)) {
-            //            if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
-            //                // 初始化日期控件
-            //                gaeaPlugins.datePicker.init({
-            //                    target: "#"+inputId
-            //                });
-            //            } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_TIME)) {
-            //                // TODO
-            //            } else if (gaeaStringUtils.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME)) {
-            //                // 初始化日期时间控件
-            //                gaeaPlugins.datetimePicker.init({
-            //                    target: "#"+inputId
-            //                });
-            //            }
-            //        }
-            //
-            //        // 初始化各种插件
-            //        if (gaeaValid.isNotNull(column.queryCondition)) {
-            //            if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT, column.queryCondition.component)) {
-            //                // 初始化jQuery select2插件
-            //                var gaeaSelect2 = require("gaeajs-ui-select2");
-            //                gaeaSelect2.init({
-            //                    jqSelector: "#" + opts.id + " .gaea-grid-header .mars-tb-head-query " + "#" + inputId,
-            //                    initDataSet: true,
-            //                    multiple: column.queryCondition.multiple,
-            //                    placeholder: "请选择..."
-            //                });
-            //            }
-            //        }
-            //    }
-            //},
-            event: {
-                ///**
-                // * 初始化触发快捷查询区的比较按钮的功能。
-                // * @param {object} opts
-                // * @param {string} opts.id                  grid id
-                // */
-                //setQueryCompareButtonTrigger: function (opts) {
-                //    var $gridCt = $("#" + opts.id);
-                //    var $queryButtons = $gridCt.find(".gaea-query-buttons");
-                //    var $queryCt = $gridCt.find(".mars-tb-head-query");
-                //    $queryButtons.children("i").click(function () {
-                //        //var $columnCt = $(this).parent().parent();
-                //        var $buttonList = $(this).parent();
-                //        //var $clickButton = $(this);
-                //        // 点击了某个按钮，例如'大于', 把按钮移到最前面去
-                //        $buttonList.prepend(this);
-                //        // 触发事件
-                //        //var valueObj = _gaeaInput.getValue(containerId);
-                //        //if (gaeaValid.isNotNull(valueObj)) {
-                //        //    options = _.extend(options, valueObj);
-                //        $queryCt.trigger(gaeaEvents.DEFINE.UI.INPUT.CHANGE);
-                //        //}
-                //    });
-                //},
-                ///**
-                // * 注册快捷查询区的比较操作符按钮的监听。
-                // * 监听在整个头部快捷查询区。因为考虑，一旦改变，应该所有的查询条件和值都得遍历、汇总，而不只是当前点击这一个。
-                // * @param {object} opts
-                // * @param {string} opts.id              grid id
-                // */
-                //bindQueryCompareButtonEvent: function (opts) {
-                //    var queryCtSelector = "#" + opts.id + " .mars-tb-head-query";
-                //    gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.INPUT.CHANGE, queryCtSelector, function (event, data) {
-                //        //var value = _gaeaInput.getValue(data.containerId);
-                //        // 回调函数
-                //        //if (_.isFunction(opts.change)) {
-                //        //    opts.change();
-                //        //}
-                //        var queryConditions = gridQuery.parser.getQueryConditions(opts);
-                //        gridQuery.doQuery({
-                //            id: opts.id,
-                //            queryConditions: queryConditions
-                //        });
-                //        // 收起快捷查询
-                //        _query.hide(opts);
-                //    });
-                //}
             }
         };
 
@@ -683,7 +521,7 @@ define([
              * @returns {jsonData}
              */
             getSelected: function (argId) {
-                console.log("这里缺一个grid id");// TODO
+                //console.log("这里缺一个grid id");// TODO
                 return _grid.cache.selectedRow;
             },
             _setSelectRow: function (row) {
@@ -978,76 +816,14 @@ define([
                  * 2. 根据传来的data数组，重建grid的数据区，包括重建CSS、分页、各种事件等。
                  */
                 _private.event.bindRefreshData(opts);
-                //gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, "#" + gridId, function (event, data) {
-                //    if (gaeaValid.isNull(data) || (gaeaValid.isNull(data.data) && gaeaValid.isNull(data.filterData))) {
-                //        throw "触发gaeaUI_event_grid_refresh_data事件,但data为空!无法刷新!";
-                //    }
-                //    var $gridCt = $(this);
-                //    // 刷新缓存数据
-                //    if (gaeaValid.isNotNull(data.data)) {
-                //        $gridCt.data("options").data = data.data;
-                //    }
-                //    // 缓存过滤后的数据到grid中
-                //    if (gaeaValid.isNotNull(data.filterData)) {
-                //        $gridCt.data("options").filterData = data.filterData;
-                //    }
-                //    // 用查询结果，刷新数据列表
-                //    _grid._refreshData({
-                //        id: gridId
-                //    });
-                //    /**
-                //     * 非crud grid的操作
-                //     */
-                //    if (!gaeaString.equalsIgnoreCase(opts.component, GAEA_UI_DEFINE.UI.COMPONENT.CRUD_GRID)) {
-                //        // 刷新当前的分页信息，和服务端一致: 当前第几页, 每页多少条, 共多少页
-                //        $grid.data().options.page = _.extend($grid.data().options.page, data.page);
-                //
-                //
-                //        //_grid.options.page = _.extend(_grid.options.page, data.page);
-                //
-                //
-                //        //_grid.options.page.rowCount = data.page.rowCount;
-                //        //_grid.options.page.page = data.page.page; // 当前第几页
-                //        //_grid.options.page.size = data.size; // 每页多少条
-                //        //_grid.options.page.pageCount = data.totalPages; // 共多少页
-                //        // 更新UI的footer（含分页）
-                //        _grid._createFooter({
-                //            id: gridId
-                //        });
-                //    }
-                //});
                 /**
                  * 注册行选择缓存所选行数据事件
                  */
                 _private.event.registerCacheSelectRowData(opts);
-                //gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + gridId, function (event, data) {
-                //    // 【1】刷新selectedRows（每次覆盖）
-                //    var rowIndexes = _private.grid.getSelectedIndexes({
-                //        id: gridId
-                //    });
-                //    // 通过选择的index，获得行数据
-                //    var selectedRows = _private.grid.getRowDatas({
-                //        id: opts.id,
-                //        indexes: rowIndexes
-                //    });
-                //    // 刷新上下文（缓存行数据）
-                //    gaeaContext.setValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, gridId, selectedRows);
-                //
-                //    // 【2】刷新selectedRow上下文
-                //    if (gaeaValid.isNotNull(data.selectedRow)) {
-                //        gaeaContext.setValue("selectedRow", gridId, data.selectedRow);
-                //        gaeaContext.setValue("id", gridId, data.selectedRow.id);
-                //    }
-                //});
                 /**
                  * 注册选择全部事件
                  */
                 _private.event.bindCheckAll(opts);
-                //$grid.on(GAEA_EVENTS.DEFINE.UI.GRID.SELECT, function (event, data) {
-                //    console.log("trigger grid select event in gaeaUI dialog.");
-                //    selectedRow = data.selectedRow;
-                //    crudDialog.cache.selectedRow = selectedRow;
-                //});
 
                 /**
                  * 监听重置事件。例如在提交某个action后，ajax回来需要重置grid。
@@ -1058,52 +834,6 @@ define([
                 gaeaContext.init({
                     id: GAEA_UI_DEFINE.UI.GAEA_CONTEXT.ID
                 });
-
-                //// 绑定事件。点击行选中复选框。
-                //$(".tb-body").on("click", "tr", function () {
-                //    //$(".tb-body").find("tr").click(function () {
-                //    var index = $(this).data("rowindex");
-                //    var i = index - 1;
-                //    // 选中行前复选框
-                //    $(":checkbox[id^='urgrid-chb']").prop("checked", false);
-                //    $(this).find("[id^='urgrid-chb']").prop("checked", "true");
-                //    // 添加选中class
-                //    $(".tb-body tr").removeClass("selected");
-                //    $(this).addClass("selected");
-                //    //console.log("rowindex: "+$(this).data("rowindex"));
-                //    $(this).find("[id^='urgrid-chb']").val($(this).data("rowindex") - 1);
-                //    selectedRow = that.options.data[($(this).data("rowindex") - 1)];
-                //    selectedRow.index = $(this).data("rowindex");
-                //    that._setSelectRow(selectedRow);
-                //    that.options.listeners.select(selectedRow);
-                //    /**
-                //     * 触发选中事件。基于事件去影响相关的其他组件或元素。
-                //     * 例如：
-                //     * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
-                //     */
-                //        //console.log("grid renderTo: "+_grid.options.renderTo);
-                //    $("#" + _grid.options.renderTo).trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
-                //        selectedRow: selectedRow
-                //    });
-                //    // 复选框选中的效果
-                //    // find the first span which is our circle/bubble
-                //    //var jqLabel = $("#urgrid-cb-label-" + i);
-                //    ////jqLabel.append("<span class=\"check\"></span>" +
-                //    ////    "<span class=\"box\"></span>");
-                //    //var el = jqLabel.children('span:first-child');
-                //    //
-                //    //// add the bubble class (we do this so it doesnt show on page load)
-                //    //el.addClass('circle');
-                //    //
-                //    //// clone it
-                //    //var newone = el.clone(true);
-                //    //
-                //    //// add the cloned version before our original
-                //    //el.before(newone);
-                //    //
-                //    //// remove the original so that it is ready to run on next click
-                //    //$("." + el.attr("class") + ":last").remove();
-                //});
             },
             /**
              * 构造Grid的脚部元素。即Pagination分页部分。
@@ -2089,56 +1819,17 @@ define([
                      */
                     _private.event.bindRefreshData(opts);
 
-                    //gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, "#" + gridId, function (event, data) {
-                    //    if (gaeaValid.isNull(data) || gaeaValid.isNull(data.data)) {
-                    //        throw "触发gaeaUI_event_grid_refresh_data事件,但data为空!无法刷新!";
-                    //    }
-                    //    // 用查询结果，刷新数据列表
-                    //    _grid._refreshData({
-                    //        id: gridId,
-                    //        data: data.data
-                    //    });
-                    //    // 刷新当前的分页信息，和服务端一致: 当前第几页, 每页多少条, 共多少页
-                    //    $grid.data().options.page = _.extend($grid.data().options.page, data.page);
-                    //    // 更新UI的footer（含分页）
-                    //    _grid._createFooter({
-                    //        id: gridId
-                    //    });
-                    //});
                     /**
                      * 注册行选择缓存所选行数据事件
                      */
                     _private.event.registerCacheSelectRowData(opts);
-                    //gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + gridId, function (event, data) {
-                    //    // 【1】刷新selectedRows（每次覆盖）
-                    //    var rowIndexes = _private.grid.getSelectedIndexes({
-                    //        id: gridId
-                    //    });
-                    //    // 通过选择的index，获得行数据
-                    //    var selectedRows = _private.grid.getRowDatas({
-                    //        id: opts.id,
-                    //        indexes: rowIndexes
-                    //    });
-                    //    // 刷新上下文（缓存行数据）
-                    //    gaeaContext.setValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, gridId, selectedRows);
-                    //
-                    //    // 【2】刷新selectedRow上下文
-                    //    if (gaeaValid.isNotNull(data.selectedRow)) {
-                    //        gaeaContext.setValue("selectedRow", gridId, data.selectedRow);
-                    //        //gaeaContext.setValue("id", gridId, data.selectedRow.id);
-                    //    }
-                    //});
+
                     /**
                      * 注册选择全部事件
                      */
                     _private.event.bindCheckAll(opts);
 
-                    /**
-                     * 监听重置事件。例如在提交某个action后，ajax回来需要重置grid。
-                     */
-                        //_private.event.bindGridReset();
-
-                        // 初始化上下文插件（可以重复初始化，所以不怕）
+                    // 初始化上下文插件（可以重复初始化，所以不怕）
                     gaeaContext.init({
                         id: GAEA_UI_DEFINE.UI.GAEA_CONTEXT.ID
                     });
@@ -2149,10 +1840,6 @@ define([
                          * 注册行选择事件
                          */
                         _private.event.bindSelectRow(opts);
-                        /**
-                         * 注册行选择缓存所选行数据事件
-                         */
-                        //_private.event.registerCacheSelectRowData(opts);
                     }
                     /**
                      *
@@ -2186,10 +1873,6 @@ define([
                      * @param {int} [opts.rowData.origIndex]            如果是检索过的数据，会有原数组中位置的index。这个会覆盖rowIndex。
                      * @param {string} [opts.isNewData=true]            如果true，会添加到缓存的data中。如果是filter方式，应该为false。
                      * @param {string} opts.queryAction                 查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
-                     //* @param {jqSelector|jqObject} opts.target 应该没用吧
-                     //* @param {object[]} opts.model                     grid的模型的定义
-                     //* @param {object[]} opts.model.fields             列字段的定义,这个是为了匹配data的field key。
-                     //* @param {GaeaColumn[]} opts.columns                  grid的列定义
                      */
                     addTr: function (opts) {
                         opts = _.extend(_.clone(defaultOpts.crudGrid.addNewOne), opts);
@@ -2206,141 +1889,109 @@ define([
                         } else if (gaeaValid.isNotNull(gridOptions.data)) {
                             rowIndex = gridOptions.data.length;
                         }
-                        // 生成CheckBox id
-                        var checkBoxId = opts.id + "-cbx-" + rowIndex;
                         // 生成tr
                         $tbBody.append("<tr data-rowindex='" + (rowIndex + 1) + "'>");
+                        var $lastTr = $tbBody.find("tr:last");
 
                         // 添加到缓存的data中
                         if (gaeaValid.isNull(gridOptions.data)) {
                             gridOptions.data = [];
                         }
-                        // TODO 这个应该重构放在这个方法外
-                        // 是否新的行。会加入到grid的总数据集中。
-                        //if(opts.isNewData) {
-                        //    gridOptions.data.push(opts.rowData);
-                        //}
-                        // 构建html的行
+
+                        /**
+                         * 遍历字段定义（这个基本都是要展示的，如果遍历column有些不需要展示就得跳过，比较麻烦），生成行的每个单元格。
+                         */
                         $.each(gridOptions.model.fields, function (i, iValue) {
                             /**
                              * @type {GaeaColumn}
                              */
                             var column = _.extend(_.clone(defaultOpts.column), gridOptions.columns[i]);
                             var field = this;
-
-
-                            //$tbBody.append("<tr data-rowindex='" + (i + 1) + "'>");
-                            // 遍历每一列定义。遍历column等效于遍历field
-                            //for (var j = 0; j < columns.length; j++) {
-                            //    var field = fields[j];
-                            //    var column = columns[j];
-                            var columnHtmId = "gridcolumn-" + (i + 1); // column的序列化从1开始吧
-                            var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
-                            // 遍历数据（一行）中每一列的值，如果id和当前列id一致就填充进去。
-                            $.each(opts.rowData, function (key, val) {
-                                //var cellText = cell;
-                                //if (_.isObject(cell)) {
-                                //    if (gaeaValid.isNull(cell.text)) {
-                                //        console.warn("grid单元格是对象，但text却为空( text为系统默认的显示文本 )。 cell: %s", JSON.stringify(cell));
-                                //    }
-                                //    cellText = cell.text;
-                                //}
-                                // 如果数据中的key和field（grid数据结构定义）中的设置一致（即类似data.columnname = grid.columnname），则把值复制到表格中。
-                                if (gaeaString.equalsIgnoreCase(field.id, key)) {
-                                    hasNotMatchedField = false; // 找到对应的列单元格数据项
-                                    var $td = $("<td class='grid-td' data-columnid='" + columnHtmId + "'></td>");
-                                    // create input div
-                                    var $inputDiv = $('<div class="grid-td-div"></div>');
-                                    // 第一列，生成复选框。
-                                    if (i == 0) {
-                                        $tbBody.find("tr:last").append("<td class='checkbox'>" +
-                                            "<div class=\"row-check\">" +
-                                            "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
-                                                // Label里面的都是复选框的效果元素。
-                                            "<label id='gaea-cb-label-" + i + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
-                                            "</label>" +
-                                            "</div>" +
-                                            "</td>");
-                                    }
-                                    // 先初始化DOM，插入单元格容器。这样可以用更多jQuery的功能，例如find, wrap等。
-                                    $td.append($inputDiv);
-                                    $tbBody.find("tr:last").append($td);
-                                    // 转换日期格式
-                                    //if (gaeaValid.isNotNull(cellText) && gaeaValid.isNotNull(column.datetimeFormat)) {
-                                    //    cellText = gaeaDT.getDate(cellText, {format: column.datetimeFormat});
-                                    //}
-                                    // create input 'name'
-                                    var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
-                                    ///**
-                                    // * if 字段可编辑
-                                    // *      构造input
-                                    // * else
-                                    // *      只是显示文字
-                                    // */
-                                    //if (column.editable) {
-                                    //    // create input box
-                                    //    $inputDiv.append(gaeaInput.create({
-                                    //        id: inputName,
-                                    //        name: inputName,
-                                    //        class: "crud-grid-input",
-                                    //        dataType: column.dataType,
-                                    //        value: val,
-                                    //        validator: column.validator,// 校验定义
-                                    //        onChange: function (event) {
-                                    //            // 刷新缓存的值
-                                    //            _private.crudGrid.data.refreshOneField({
-                                    //                id: opts.id,
-                                    //                target: this
-                                    //            });
-                                    //        }
-                                    //    }));
-                                    //} else {
-                                    //    $td.addClass("non-editable");
-                                    //    $inputDiv.append(gaeaContext.getValue(column.value));
-                                    //}
-                                    _private.crudGrid.html.createTdContent($td, {
-                                        id: opts.id,
-                                        inputId: inputName,
-                                        column: column,
-                                        inputValue: val
-                                    });
-
-                                    //$td.append($inputDiv);
-                                    //$tbBody.find("tr:last").append($td);
-                                }
-                            });
-                            // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
-                            if (hasNotMatchedField) {
-                                $tbBody.find("tr:last").append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
-                                    "<div class=\"grid-td-div\"></div></td>");
-                            }
-
-
+                            // create a td
+                            _private.crudGrid.html.addTd($lastTr, column, field, rowIndex, i, opts.rowData, opts);
                         });
 
                         // 给行末尾添加一个单元格，负责撑开剩余空间，让表格可以width 100%
                         $tbBody.find("tr:last").append("<td></td>");
                         // 生成行前操作区。判断是否有工作流。有的话生成'查看工作流'的按钮
-                        if (gridOptions.withWorkflow == true) {
-                            //if (_grid.options.withWorkflow == true) {
-                            if (gaeaValid.isNotNull(opts.rowData.wfProcInstId)) {
-                                _grid.cache.rows.push({
-                                    index: rowIndex,                       // 从0开始的
-                                    headActions: [{
-                                        type: "wf-active-diagram",   // 这个是规范定义的，不能乱起。
-                                        wfProcInstId: opts.rowData.wfProcInstId
-                                    }]
-                                });
-                                // 设置有行前操作区。关系到列头的排版。
-                                //if(!this.cache.hasRowHeadActions) {
-                                //    this.cache.hasRowHeadActions = true;
-                                //}
-                            } else {
-                                _grid.cache.rows.push(null);
-                            }
-                        }
+                        _wf.html.addTrButtons(rowIndex, opts);
 
                         $tbBody.append("</tr>");
+                    },
+                    /**
+                     * 添加可编辑表格（crud-grid）的一个单元格. copy from addTr.
+                     * @param {jqObject} $tr            jQuery对象。行。新增的td就会加在这里面。
+                     * @param {GaeaColumn} column       服务端返回的列定义对象。
+                     * @param {object} field            服务端返回的字段定义。
+                     * @param {string} rowIndex         第几行。关系到行前复选框的name里面的序号，和行input的name里面的序号等
+                     * @param {string} columnIndex      第几列。
+                     * @param {object} rowData          行数据。
+                     * @param {object} opts             其他的配置
+                     * @param {string} opts.id          grid的容器id。对于crud-grid，是gaea-ui-crud-grid定义位置id。
+                     */
+                    addTd: function ($tr, column, field, rowIndex, columnIndex, rowData, opts) {
+
+                        /**
+                         * @type {GaeaColumn}
+                         */
+                        //var column = _.extend(_.clone(defaultOpts.column), gridOptions.columns[i]);
+                        //var field = this;
+                        var columnHtmId = "gridcolumn-" + (columnIndex + 1); // column的序列化从1开始吧
+                        // 生成CheckBox id
+                        var checkBoxId = opts.id + "-cbx-" + rowIndex;
+                        var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
+                        // 遍历数据（一行）中每一列的值，如果id和当前列id一致就填充进去。
+                        $.each(rowData, function (key, val) {
+                            //var cellText = cell;
+                            //if (_.isObject(cell)) {
+                            //    if (gaeaValid.isNull(cell.text)) {
+                            //        console.warn("grid单元格是对象，但text却为空( text为系统默认的显示文本 )。 cell: %s", JSON.stringify(cell));
+                            //    }
+                            //    cellText = cell.text;
+                            //}
+                            // 如果数据中的key和field（grid数据结构定义）中的设置一致（即类似data.columnname = grid.columnname），则把值复制到表格中。
+                            if (gaeaString.equalsIgnoreCase(field.id, key)) {
+                                hasNotMatchedField = false; // 找到对应的列单元格数据项
+                                var $td = $("<td class='grid-td' data-columnid='" + columnHtmId + "'></td>");
+                                // create input div
+                                var $inputDiv = $('<div class="grid-td-div"></div>');
+                                // 第一列，生成复选框。
+                                if (columnIndex == 0) {
+                                    $tr.append("<td class='checkbox'>" +
+                                        "<div class=\"row-check\">" +
+                                        "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
+                                            // Label里面的都是复选框的效果元素。
+                                        "<label id='gaea-cb-label-" + columnIndex + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
+                                        "</label>" +
+                                        "</div>" +
+                                        "</td>");
+                                }
+                                // 先初始化DOM，插入单元格容器。这样可以用更多jQuery的功能，例如find, wrap等。
+                                $td.append($inputDiv);
+                                //$tbBody.find("tr:last").append($td);
+                                $tr.append($td);
+                                // 转换日期格式
+                                //if (gaeaValid.isNotNull(cellText) && gaeaValid.isNotNull(column.datetimeFormat)) {
+                                //    cellText = gaeaDT.getDate(cellText, {format: column.datetimeFormat});
+                                //}
+                                // create input 'name'
+                                var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
+
+                                // 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
+                                _private.crudGrid.html.createTdContent($td, {
+                                    id: opts.id,
+                                    inputId: inputName,
+                                    column: column,
+                                    inputValue: val
+                                });
+                            }
+                        });
+                        // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
+                        if (hasNotMatchedField) {
+                            $tr.append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
+                                "<div class=\"grid-td-div\"></div></td>");
+                        }
+
                     },
                     /**
                      * 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
@@ -2746,6 +2397,42 @@ define([
                             var $howManyItem = $(this);
                             $selected.text($howManyItem.text());
                         });
+                    }
+                }
+            }
+        };
+
+        // 工作流相关的
+        var _wf = {
+            html: {
+                /**
+                 * 生成行前操作区。判断是否有工作流。有的话生成'查看工作流'的按钮.
+                 * copy from addTr。
+                 * @param {object} opts
+                 * @param {string} opts.id                          crud grid容器。这个是最外层的容器，里面应该还有toolbar和真正grid的容器。
+                 * @param {object} opts.rowData                     一行的数据。
+                 * @param {object} opts.rowData.wfProcInstId        行数据是否带对应工作流的id
+                 */
+                addTrButtons: function (rowIndex, opts) {
+                    var $gridCt = $("#" + opts.id);
+                    var gridOptions = $gridCt.data().options;
+                    if (gridOptions.withWorkflow == true) {
+                        //if (_grid.options.withWorkflow == true) {
+                        if (gaeaValid.isNotNull(opts.rowData.wfProcInstId)) {
+                            _grid.cache.rows.push({
+                                index: rowIndex,                       // 从0开始的
+                                headActions: [{
+                                    type: "wf-active-diagram",   // 这个是规范定义的，不能乱起。
+                                    wfProcInstId: opts.rowData.wfProcInstId
+                                }]
+                            });
+                            // 设置有行前操作区。关系到列头的排版。
+                            //if(!this.cache.hasRowHeadActions) {
+                            //    this.cache.hasRowHeadActions = true;
+                            //}
+                        } else {
+                            _grid.cache.rows.push(null);
+                        }
                     }
                 }
             }
