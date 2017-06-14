@@ -14,8 +14,15 @@ define([
     function ($, _, _s, gaeaValid, gaeaString,
               gaeaEvent, gaeaCommonUtils) {
 
-        var CONTEXT = {};
-        var $pageContext = CONTEXT; // 这个供表达式直读值
+        /**
+         * gaeaContext组件，依赖页面有一个
+         * <span class="gaea-sys-content-context"></span>
+         * 的元素，作为缓存data关联的对象。
+         */
+        if ($(".gaea-sys-content-context").length < 1) {
+            throw "缺少class=gaea-sys-content-context元素，初始化gaeaContext组件失败！";
+        }
+        var CONTEXT = $(".gaea-sys-content-context").data();
 
         var isInit = false;
 
@@ -49,12 +56,17 @@ define([
                     return null;
                 }
                 var $pageContext = CONTEXT;
-                var value = null;
+                var value = "";
                 // 如果符合gaea context的取值表达式规范，就可以直接读取值
                 if (gaeaContext.isGaeaContextEL(key)) {
                     // 按照gaea框架标准格式化表达式
                     key = _private.gaeaEL.formatName(key);
-                    value = eval(key);
+                    try {
+                        value = eval(key);
+                    } catch (err) {
+                        // debug. 上下文有点像黑盒，有时候可能不知道哪里的值缺失了
+                        tools.gaeaEL.debugUndefined(key);
+                    }
                 }
                 // 如果经过表达式检查，值为空，以普通方式获取值。
                 if (gaeaValid.isNull(value)) {
@@ -89,6 +101,8 @@ define([
                 } else {
                     CONTEXT[key][id] = value;
                 }
+                // refresh
+                $(".gaea-sys-content-context").data(CONTEXT);
             },
             /**
              * 清空整个上下文数据。
@@ -140,6 +154,34 @@ define([
             }
         };
 
+        // 工具
+        var tools = {
+            gaeaEL: {
+                debugUndefined: function (elStr) {
+                    var partEL = "";
+                    // 这个供表达式直读值, 不能看没引用就删掉
+                    // 获取缓存context。不知道为什么不能直接访问到CONTEXT变量
+                    var $pageContext = $(".gaea-sys-content-context").data();
+                    /**
+                     * 参考：
+                     "$pageContext['selectedRow']['gaea-grid-ct']['name']".split(/(\[[\'\w\']*\])/);
+                     result ==> ["$pageContext", "['selectedRow']", "['gaea-grid-ct']", "['name']", ""]
+                     */
+                    $.each(elStr.split(/(\[\'[\w]*\'\])/g), function (i, iValue) {
+                        if (gaeaValid.isNull(iValue)) {
+                            return;
+                        }
+                        partEL += iValue;
+                        if (i > 0) {
+                            if (gaeaValid.isNull(eval(partEL))) {
+                                console.warn("尝试执行 %s 获取上下文的值，但 %s 部分为空！", elStr, partEL);
+                                return false;
+                            }
+                        }
+                    });
+                }
+            }
+        };
 
         return gaeaContext;
     });

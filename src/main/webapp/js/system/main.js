@@ -95,6 +95,9 @@ require([
         $(".gaea-main").siblings(".xdsoft_datetimepicker, .ui-dialog").remove();
         // 加载对应的功能页面到内容块。
         if (gaeaValid.isNotNull($(this).data("href"))) {
+            // 刷新缓存。这个是内容页的上下文缓存，例如：放置grid选中的行、编辑中未提交的数据等
+            $(".gaea-sys-content-context").removeData();
+            // 加载功能内容
             $(".gaea-sys-content").load($(this).data("href"));
         }
     });
