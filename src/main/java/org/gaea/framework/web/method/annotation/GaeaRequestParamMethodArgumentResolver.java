@@ -259,7 +259,10 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
             // 获取请求中的List的下标并排序。即：users[0],users[1]...等的0,1等下标。
             List<Integer> indexList = getSortedList(servletRequest, prefix);
 
-            if (beanClass == null) {        // 非泛型List，只需按页面请求参数名的顺序组成List即可。
+            if (beanClass == null || beanClass.isInstance(new String())) {        // 非泛型List，只需按页面请求参数名的顺序组成List即可。
+                /**
+                 * 如果List没有泛型部分，或者泛型部分是String例如List<String>的，直接赋值。
+                 */
                 for (Integer i : indexList) {
                     String paramName = prefix + PRE_SQUARE_BRACKETS + i + SFX_SQUARE_BRACKETS;
                     String[] paramValues = webRequest.getParameterValues(paramName);
