@@ -12,12 +12,12 @@ define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
         "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid',
-        "gaeajs-data"
+        "gaeajs-data", "gaeajs-ui-tabs"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
               gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid,
-              gaeaData) {
+              gaeaData, gaeaTabs) {
 
         var gaeaCommons = {
             /**
@@ -35,6 +35,8 @@ define([
                 _private.initGaeaButton(ctSelector);
                 // 初始化select2插件
                 _private.initSelect2(ctSelector);
+                // 初始化tabs插件
+                _private.initGaeaTabs(ctSelector);
                 // 初始化crud grid
                 _private.crudGrid.init({
                     target: ctSelector
@@ -163,6 +165,45 @@ define([
                     // 请求gaea select2模块进行初始化
                     gaeaSelect2.init({
                         jqSelector: "#" + id
+                    });
+                });
+                dfd.resolve();
+                return dfd.promise();
+            },
+            /**
+             * 初始化所有的gaea.ui.tabs组件。
+             *
+             * @param {string} ctSelector
+             */
+            initGaeaTabs: function (ctSelector) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(ctSelector)) {
+                    dfd.resolve();
+                    return dfd.promise();
+                }
+                // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
+                var componentName = "data-" + GAEA_UI_DEFINE.UI.TABS.DEFINE;
+                // 找gaeaUI按钮的jq选择器条件( <select data-gaea-ui-select2=*** ...> )
+                // 查找所有按钮，遍历并初始化
+                $(ctSelector).find("[" + componentName + "]").each(function (i, eachTabObj) {
+                    var $tabs = $(eachTabObj);
+                    var id = $tabs.attr("id");
+                    if (gaeaValid.isNull(id)) {
+                        throw "gaea tabs组件的id不允许为空！";
+                    }
+                    /**
+                     * debug
+                     * 检查是否有重复元素！
+                     * 这个很重要。否则会有一些莫名其妙的问题。
+                     */
+                    if (!gaeaUtils.dom.checkUnique(id)) {
+                        console.warn("gaea tabs组件根据id查找不唯一。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
+
+                    // 请求gaea.ui.tabs模块进行初始化
+                    gaeaTabs.init({
+                        containerId: id
                     });
                 });
                 dfd.resolve();

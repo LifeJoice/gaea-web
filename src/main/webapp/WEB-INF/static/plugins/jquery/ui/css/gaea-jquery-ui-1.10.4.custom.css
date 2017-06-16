@@ -303,3 +303,9 @@ button.ui-corner-all {
     border: none;
 }
 
+.ui-tabs .ui-tabs-panel {
+    /* gaea的tab的内容不要再加上padding了，否则和第一个tab里面的padding不一致 */
+    /*padding:0;*/
+    /* 这个和.gaea-ui-page一致 */
+    padding: 10px 0 0;
+}

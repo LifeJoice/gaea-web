@@ -23,6 +23,12 @@ public class DsAuthorityEntity implements Serializable, org.gaea.data.dataset.do
     @Column(name = "ID")
     private String id;
 
+    @Column(name = "NAME", nullable = false, length = 50)
+    private String name;
+
+    @Column(name = "DESCRIPTION")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "DATASET_ID")
     private DataSetEntity dataSetEntity;
@@ -30,10 +36,11 @@ public class DsAuthorityEntity implements Serializable, org.gaea.data.dataset.do
     /**
      * 这个是附加的权限过滤的conditionSet。
      */
-    @OneToOne(mappedBy = "dsAuthorityEntity", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "dsAuthorityEntity", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private DsAuthConditionSetEntity dsAuthConditionSetEntity;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    /* 不需要Cascade，这里会维护关系，但不会更新Role的内容 */
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     @JoinTable(
             name = "GAEA_SYS_DS_AUTHORITIES_ROLES", joinColumns = {
             @JoinColumn(name = "DS_AUTHORITY_ID")
@@ -49,14 +56,6 @@ public class DsAuthorityEntity implements Serializable, org.gaea.data.dataset.do
     public void setId(String id) {
         this.id = id;
     }
-
-//    public DsAuthorityGroup getDsAuthorityGroup() {
-//        return dsAuthorityGroup;
-//    }
-//
-//    public void setDsAuthorityGroup(DsAuthorityGroup dsAuthorityGroup) {
-//        this.dsAuthorityGroup = dsAuthorityGroup;
-//    }
 
     public DataSetEntity getDataSetEntity() {
         return dataSetEntity;
@@ -80,5 +79,21 @@ public class DsAuthorityEntity implements Serializable, org.gaea.data.dataset.do
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

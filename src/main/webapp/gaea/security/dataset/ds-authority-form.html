@@ -1,0 +1,57 @@
+<div id="tabs" data-gaea-ui-tabs="" data-gaea-ui="component:'tabs' ">
+    <ul>
+        <li><a href="#div-ds-authority-mgr-tab1">数据集权限</a></li>
+        <!--<li><a href="#tabs-2">菜单管理</a></li>-->
+        <li><a href="/gaea/data/dataset/showDsAuthConditionSetForm">权限条件</a></li>
+    </ul>
+    <!-- -------------------------------------------------------------------------------------- tab1 数据集权限 -------------------------------------------------------------------------------------- -->
+    <div id="div-ds-authority-mgr-tab1" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+        <div class="row">
+            <div class="field-block">
+                <span class="fieldname">权限名称</span>
+                <span class="fieldvalue"><input id="name" name="dsAuthority.name" value="" data-msg-required="名称不能为空"
+                                                required></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="field-block">
+                <span class="fieldname">权限描述</span>
+                <span class="fieldvalue">
+                    <textarea id="description" name="dsAuthority.description"></textarea>
+                </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="field-block">
+                <span class="fieldname">角色数据授权</span>
+                <span class="fieldvalue">
+                    <div id="dsAuthRoleIds" class="gaea-multi-select"
+                         data-gaea-data="name: 'dsAuthRoleIds',
+                    selectable:{dataset:'DS_AUTH_ROLES',condition:{id:'selectable',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][name]' }]} },
+                    selected:{dataset:'DS_AUTH_ROLES',condition:{id:'selected',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][name]' }]} }"></div>
+                </span>
+            </div>
+        </div>
+        <!-- ***********************************************  这个是可编辑从表  *********************************************** -->
+        <!--<div class="row">-->
+        <!--<div class="grid-field-block">-->
+        <!--&lt;!&ndash;<span class="fieldname">班级学生</span>&ndash;&gt;-->
+        <!--&lt;!&ndash; TODO test。稍后得增加一种样式，适应这种新的grid的布局。&ndash;&gt;-->
+        <!--<div><span class="field-name">静态数据</span></div>-->
+        <!--<div class="field-value">-->
+        <!--<div id="dsDataList" data-gaea-ui-name="dsDataList"-->
+        <!--data-gaea-ui-crud-grid='columns:[-->
+        <!--{name:"text",text:"文本", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }-->
+        <!--},-->
+        <!--{name:"value",text:"值", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }-->
+        <!--}-->
+        <!--]'>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</div>-->
+    </div>
+
+    <!--<div id="div-ds-authority-mgr-tab2"></div>-->
+
+</div>

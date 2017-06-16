@@ -2,6 +2,10 @@ package org.gaea.framework.web.data.service;
 
 import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.exception.ProcessFailedException;
+import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.web.data.authority.entity.DsAuthConditionEntity;
+import org.gaea.framework.web.data.authority.entity.DsAuthConditionSetEntity;
+import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 
 import java.util.List;
@@ -14,4 +18,6 @@ public interface SystemDataSetMgrService {
     void saveOrUpdate(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException;
 
     Map loadEditData(DataSetEntity dataSet) throws ProcessFailedException;
+
+    void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException;
 }

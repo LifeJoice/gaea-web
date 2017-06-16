@@ -7,14 +7,18 @@ import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.web.data.authority.entity.DsAuthConditionEntity;
+import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.repository.SystemDataSetRepository;
+import org.gaea.framework.web.data.repository.SystemDsAuthorityRepository;
 import org.gaea.framework.web.data.service.SystemDataSetMgrService;
 import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +38,8 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
     private final Logger logger = LoggerFactory.getLogger(SystemDataSetServiceImpl.class);
     @Autowired
     private SystemDataSetRepository systemDataSetRepository;
+    @Autowired
+    private SystemDsAuthorityRepository systemDsAuthorityRepository;
 
     @Override
     public void saveOrUpdate(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException {
@@ -68,15 +74,15 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
         }
         Map<String, Object> result = new HashMap<String, Object>();
         DataSetEntity dataSet = systemDataSetRepository.findOne(inDataSet.getId());
+        // 转换为map，因为后面还要附加DsData转换的list
+        result.put("dataSet.name", dataSet.getName());
+        result.put("dataSet.primaryTable", dataSet.getPrimaryTable());
+        result.put("dataSet.authorityType", dataSet.getAuthorityType());
+        result.put("dataSet.cacheType", dataSet.getCacheType());
+        result.put("dataSet.sql", dataSet.getSql());
         // 如果静态数据非空
         if (StringUtils.isNotEmpty(dataSet.getDsData())) {
             try {
-                // 转换为map，因为后面还要附加DsData转换的list
-                result.put("dataSet.name", dataSet.getName());
-                result.put("dataSet.primaryTable", dataSet.getPrimaryTable());
-                result.put("dataSet.authorityType", dataSet.getAuthorityType());
-                result.put("dataSet.cacheType", dataSet.getCacheType());
-                result.put("dataSet.sql", dataSet.getSql());
 //                result = objectMapper.convertValue(dataSet, Map.class);
                 // 转换DsData静态数据json
                 List<DataItem> dataItemList = GaeaJacksonUtils.parseList(dataSet.getDsData(), ArrayList.class, DataItem.class);
@@ -87,5 +93,36 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException {
+        if (dsAuthority == null) {
+            throw new ValidationFailedException("数据集权限对象为空，无法保存！");
+        }
+        if (dsAuthority.getDataSetEntity() == null || StringUtils.isEmpty(dsAuthority.getDataSetEntity().getId())) {
+            throw new ValidationFailedException("获取不到数据集id，无法新增数据集权限。");
+        }
+        DataSetEntity newDataSet = systemDataSetRepository.findOne(dsAuthority.getDataSetEntity().getId());
+        if (newDataSet == null) {
+            throw new ValidationFailedException("提交的数据集id在数据库中查找不到！DataSetId=" + dsAuthority.getDataSetEntity().getId());
+        }
+        // 双向绑定DsAuthority和DataSet的关系
+        dsAuthority.setDataSetEntity(newDataSet);
+        // 双向绑定DsAuthCondition和DsAuthConditionSet的关系
+        for (DsAuthConditionEntity cond : dsAuthority.getDsAuthConditionSetEntity().getDsAuthConditionEntities()) {
+            cond.setDsAuthConditionSetEntity(dsAuthority.getDsAuthConditionSetEntity());
+        }
+        // 双向绑定DsAuthority和DsAuthConditionSet的关系
+        dsAuthority.getDsAuthConditionSetEntity().setDsAuthorityEntity(dsAuthority);
+
+        // 双向绑定DataSet和DsAuthority的关系
+        if (newDataSet.getDsAuthorities() == null) {
+            newDataSet.setDsAuthorities(new ArrayList<DsAuthorityEntity>());
+        }
+        newDataSet.getDsAuthorities().add(dsAuthority);
+
+        systemDsAuthorityRepository.save(dsAuthority);
     }
 }

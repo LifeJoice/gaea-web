@@ -2138,6 +2138,7 @@ require.config({
         knockoutJS: '/js/thirdparty/knockoutJS/knockout-3.4.0.debug',
         /* Gaea Data.负责处理数据相关，例如：数据集等 */
         "gaeajs-data": '/js/gaeajs/data/gaeajs-data',
+        "gaeajs-data-content": '/js/gaeajs/data/gaea.data.content',
         /* Gaea tools */
         "gaeajs-common": '/js/gaeajs/gaeajs-common',
         "gaeajs-common-utils": '/js/gaeajs/gaeajs.commons.utils',
@@ -2167,7 +2168,7 @@ require.config({
         "gaeajs-ui-form": '/js/gaeajs/ui/gaea.ui.form',
         "gaeajs-ui-notify": '/js/gaeajs/ui/gaea.ui.notify',
         "gaeajs-ui-multiselect": '/js/gaeajs/ui/gaea.ui.multiselect',
-        "gaeajs-ui-components": '/js/gaeajs/ui/gaea.ui.components',
+        "gaeajs-ui-tabs": '/js/gaeajs/ui/gaea.ui.tabs',
         "gaeajs-ui-select2": '/js/gaeajs/ui/gaea.ui.select2',
         /* Jquery-UI */
         "jquery-ui-core":'/js/thirdparty/jquery/ui/core',

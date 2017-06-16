@@ -11,6 +11,8 @@
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
             <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
+            <button id="btnNewDsAuthority" name="btnNewDsAuthority" html-value="新增数据集权限" link-view-id="dsAuthAddDialog"
+                    action="add"/>
             <button id="btnSyncDbDataSet" name="btnSyncDbDataSet" html-value="刷新缓存数据集"
                     submit-url="/gaea/data/dataset/synchronize-db-dataset" msg="同步数据库数据集至缓存"/>
         </actions>
@@ -28,9 +30,12 @@
         <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
                      content-url="/gaea/data/dataset/showCreateUpdateForm" submit-url="/gaea/data/dataset/add"
                      load-data-url="/gaea/data/dataset/load-edit-data"/>
+        <!-- 新增数据集权限弹出框 -->
+        <crud-dialog id="dsAuthAddDialog" html-id="dsAuthAddDialog" id-field="id"
+                     content-url="/gaea/data/dataset/showDsAuthForm" submit-url="/gaea/data/dataset/add-ds-authority"/>
         <!--列表定义-->
         <grid id="dataset-grid" title="数据集管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
-              dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="20">
+              dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="25">
             <column id="id" name="id" label="ID" db-column-name="ID"
                     visible="false" sortable="true" html-width="200" primary-key="true" data-type="String"/>
             <column id="name" name="name" label="名称" db-column-name="name"

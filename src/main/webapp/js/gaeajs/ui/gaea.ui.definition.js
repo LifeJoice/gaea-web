@@ -67,6 +67,9 @@ define(function () {
             },
             COMMON_CONFIG_DIALOG_ID: "gaeaUI_common_config_dialog" // 通用的确认弹框的默认id.因为很多地方用弹框但并不关系弹框是什么, 只是要用弹框显示点信息而已. 就共用这个就好了. 确保名字别重复就好.
         },
+        TABS: {
+            DEFINE: "gaea-ui-tabs"
+        },
         GRID: {
             CRUD_GRID_DEFINE: "gaea-ui-crud-grid",
             ID: "gridId",

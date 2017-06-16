@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<dataset-definition>
+    <dataset id="DS_DATASET_MANAGEMENT" primary-table="GAEA_SYS_DATASET">
+        <!-- data-sql中的CDATA最好别带有空格、换行等。这些会被解析器读取，导致不可预知的错误。-->
+        <data-sql>
+            <![CDATA[SELECT * FROM GAEA_SYS_DATASET]]>
+        </data-sql>
+        <!--对应SchemaWhere-->
+        <where>
+            <!--编辑的数据筛选-->
+            <condition-set id="byId">
+                <and propName="id" op="eq"></and>
+            </condition-set>
+        </where>
+    </dataset>
+
+    <!-- ********************************************** （数据集）权限角色关系多选列表 ********************************************** -->
+    <dataset id="DS_AUTH_ROLES" cache-type="auto" authority-type="0">
+        <data-sql>
+            <![CDATA[select r.*
+  from gaea_sys_roles r
+  left join gaea_sys_ds_authorities_roles dsAuthRole
+    on dsauthrole.role_id = r.id
+  left join gaea_sys_ds_authorities dsAuth
+    on dsAuth.id = dsauthrole.ds_authority_id
+  left join gaea_sys_dataset ds
+    on ds.id = dsAuth.Dataset_Id
+    ]]>
+        </data-sql>
+        <!--定义查询出来的结果集的字段名转换-->
+        <columns-define>
+            <column name="value" db-column-name="ID" data-type="String"/>
+            <column name="text" db-column-name="NAME" data-type="String"/>
+        </columns-define>
+        <!--定义条件-->
+        <where>
+            <!-- 数据集权限编辑的“可选角色”和“已选角色”-->
+            <condition-set id="selectable" append-sql=" ds.name is null :DS_NOT_EQ">
+                <or propName="ds.name" op="ne" placeholder="DS_NOT_EQ"></or>
+            </condition-set>
+            <condition-set id="selected">
+                <and propName="ds.name" op="eq"></and>
+            </condition-set>
+            <!-- 新增数据集权限，可选（即全部） -->
+            <!--<condition-set id="new-selectable" append-sql=" ds.name is null :DS_NOT_EQ">-->
+            <!--<or propName="ds.name" op="ne" placeholder="DS_NOT_EQ"></or>-->
+            <!--</condition-set>-->
+        </where>
+    </dataset>
+</dataset-definition>

@@ -1,0 +1,40 @@
+<!-- -------------------------------------------------------------------------------------- tab2 数据集权限条件 -------------------------------------------------------------------------------------- -->
+<div id="div-ds-auth-conditionSet-mgr-tab2" class="gaea-form" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">条件集名称</span>
+            <span class="fieldvalue"><input id="dsAuthCondSet.name" name="dsAuthCondSet.name" value=""
+                                            data-msg-required="名称不能为空" required></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">附加SQL</span>
+                <span class="fieldvalue">
+                    <textarea id="dsAuthCondSet.appendSql" name="dsAuthCondSet.appendSql"></textarea>
+                </span>
+        </div>
+    </div>
+    <!-- ***********************************************  这个是可编辑从表  *********************************************** -->
+    <div class="row">
+        <div class="grid-field-block">
+            <!--<span class="fieldname">班级学生</span>-->
+            <!-- TODO test。稍后得增加一种样式，适应这种新的grid的布局。-->
+            <div><span class="field-name">静态数据</span></div>
+            <div class="field-value">
+                <div id="authConditionList" data-gaea-ui-name="authConditionList"
+                     data-gaea-ui-crud-grid='columns:[
+                         {name:"condOp",text:"项间关系符", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
+                         },
+                         {name:"propName",text:"属性名", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
+                         },
+                         {name:"op",text:"关系符", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
+                         },
+                         {name:"propValue",text:"值", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
+                         }
+                         ]'>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
