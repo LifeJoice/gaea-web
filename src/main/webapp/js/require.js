@@ -2150,6 +2150,8 @@ require.config({
         "gaeajs-common-actions": '/js/gaeajs/gaeajs.commons.actions',
         // 通用上下文组件
         "gaeajs-context": '/js/gaeajs/gaeajs.context',
+        // 通用操作链组件
+        "gaeajs-ui-chain": '/js/gaeajs/ui/gaea.ui.chain',
         /* Gaea UI */
         "gaeajs-ui-view": '/js/gaeajs/ui/gaea.ui.view',/* Gaea UI View.View是组件的结合的表示（或者理解为page也可以）。 */
         "gaeajs-ui-definition": '/js/gaeajs/ui/gaea.ui.definition',/* Gaea UI 的一般性定义，如ACTION、UI（和schema对应）的名字等 */
