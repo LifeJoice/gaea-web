@@ -161,81 +161,81 @@ public class ActionsService {
 //        }
 //    }
 
-    /**
-     * 把SchemaActions对象转换为JO对象，方便返回给前端。同时也可以把一些信息过滤掉不要返回。
-     * 例如：
-     * ExcelExportButtonAction的param就不需要展示给前端。后台用即可。
-     *
-     * @param actions
-     * @return
-     */
-    public SchemaActionsJO toJson(SchemaActions actions) {
-        if (actions == null) {
-            return null;
-        }
-        SchemaActionsJO actionsJO = new SchemaActionsJO();
-        // 复制action
-        BeanUtils.copyProperties(actions, actionsJO, "buttons");
+//    /**
+//     * 把SchemaActions对象转换为JO对象，方便返回给前端。同时也可以把一些信息过滤掉不要返回。
+//     * 例如：
+//     * ExcelExportButtonAction的param就不需要展示给前端。后台用即可。
+//     *
+//     * @param actions
+//     * @return
+//     */
+//    public SchemaActionsJO toJson(SchemaActions actions) {
+//        if (actions == null) {
+//            return null;
+//        }
+//        SchemaActionsJO actionsJO = new SchemaActionsJO();
+//        // 复制action
+//        BeanUtils.copyProperties(actions, actionsJO, "buttons");
+//
+//        if (CollectionUtils.isNotEmpty(actions.getButtons())) {
+//            for (Object objButton : actions.getButtons()) {
+//
+//                if (objButton instanceof SchemaButton) {
+//                    SchemaButton button = (SchemaButton) objButton;
+//                    // 复制button
+//                    SchemaButtonJO buttonJO = toJson(button);
+//                    // 添加button
+//                    actionsJO.getButtons().add(buttonJO);
+//                } else if (objButton instanceof SchemaButtonGroup) {
+//                    SchemaButtonGroup buttonGroup = (SchemaButtonGroup) objButton;
+//                    SchemaButtonGroupJO buttonGroupJO = new SchemaButtonGroupJO();
+//                    // 复制 buttonGroup
+//                    BeanUtils.copyProperties(buttonGroup, buttonGroupJO, "buttons");
+//                    for (SchemaButton button :
+//                            buttonGroup.getButtons()) {
+//                        SchemaButtonJO buttonJO = toJson(button);
+//                        buttonGroupJO.getButtons().add(buttonJO);
+//                    }
+//                    // 添加buttonGroup
+//                    actionsJO.getButtons().add(buttonGroupJO);
+//                }
+//            }
+//        }
+//
+//        return actionsJO;
+//    }
 
-        if (CollectionUtils.isNotEmpty(actions.getButtons())) {
-            for (Object objButton : actions.getButtons()) {
-
-                if (objButton instanceof SchemaButton) {
-                    SchemaButton button = (SchemaButton) objButton;
-                    // 复制button
-                    SchemaButtonJO buttonJO = toJson(button);
-                    // 添加button
-                    actionsJO.getButtons().add(buttonJO);
-                } else if (objButton instanceof SchemaButtonGroup) {
-                    SchemaButtonGroup buttonGroup = (SchemaButtonGroup) objButton;
-                    SchemaButtonGroupJO buttonGroupJO = new SchemaButtonGroupJO();
-                    // 复制 buttonGroup
-                    BeanUtils.copyProperties(buttonGroup, buttonGroupJO, "buttons");
-                    for (SchemaButton button :
-                            buttonGroup.getButtons()) {
-                        SchemaButtonJO buttonJO = toJson(button);
-                        buttonGroupJO.getButtons().add(buttonJO);
-                    }
-                    // 添加buttonGroup
-                    actionsJO.getButtons().add(buttonGroupJO);
-                }
-            }
-        }
-
-        return actionsJO;
-    }
-
-    /**
-     * 把SchemaButton转换为JO对象。返回前端用。
-     *
-     * @param button
-     * @return
-     */
-    private SchemaButtonJO toJson(SchemaButton button) {
-        SchemaButtonJO buttonJO = new SchemaButtonJO();
-        // 复制button
-        BeanUtils.copyProperties(button, buttonJO, "actions");
-        if (CollectionUtils.isNotEmpty(button.getActions())) {
-            buttonJO.setActions(new ArrayList<ButtonActionJO>());
-            for (Object objAction :
-                    button.getActions()) {
-                if (objAction == null) {
-                    continue;
-                }
-                Action action = (Action) objAction;
-                ButtonActionJO actionJO = new ButtonActionJO();
-                // 复制button action
-                BeanUtils.copyProperties(action, actionJO, "actionParamMap");
-                // 如果不是ExcelExportButtonAction
-                if (!(action instanceof ExcelExportButtonAction)) {
-                    if (MapUtils.isNotEmpty(action.getActionParamMap())) {
-                        actionJO.setParams(new ArrayList<ActionParam>(action.getActionParamMap().values()));
-                    }
-                }
-                // 添加button action
-                buttonJO.getActions().add(actionJO);
-            }
-        }
-        return buttonJO;
-    }
+//    /**
+//     * 把SchemaButton转换为JO对象。返回前端用。
+//     *
+//     * @param button
+//     * @return
+//     */
+//    private SchemaButtonJO toJson(SchemaButton button) {
+//        SchemaButtonJO buttonJO = new SchemaButtonJO();
+//        // 复制button
+//        BeanUtils.copyProperties(button, buttonJO, "actions");
+//        if (CollectionUtils.isNotEmpty(button.getActions())) {
+//            buttonJO.setActions(new ArrayList<ButtonActionJO>());
+//            for (Object objAction :
+//                    button.getActions()) {
+//                if (objAction == null) {
+//                    continue;
+//                }
+//                Action action = (Action) objAction;
+//                ButtonActionJO actionJO = new ButtonActionJO();
+//                // 复制button action
+//                BeanUtils.copyProperties(action, actionJO, "actionParamMap");
+//                // 如果不是ExcelExportButtonAction
+//                if (!(action instanceof ExcelExportButtonAction)) {
+//                    if (MapUtils.isNotEmpty(action.getActionParamMap())) {
+//                        actionJO.setParams(new ArrayList<ActionParam>(action.getActionParamMap().values()));
+//                    }
+//                }
+//                // 添加button action
+//                buttonJO.getActions().add(actionJO);
+//            }
+//        }
+//        return buttonJO;
+//    }
 }

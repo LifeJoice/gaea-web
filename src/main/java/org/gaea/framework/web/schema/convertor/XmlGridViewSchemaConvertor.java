@@ -54,46 +54,46 @@ public class XmlGridViewSchemaConvertor implements SchemaConvertor<SchemaGrid> {
         return grid;
     }
 
-    /**
-     * 把Grid转换为GridDTO。方便前端处理。
-     *
-     * @param origGrid
-     * @return
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     */
-    public SchemaGridJO convert(SchemaGrid origGrid) throws InvocationTargetException, IllegalAccessException {
-        SchemaGridJO gridDTO = new SchemaGridJO();
-        GridModelDTO model = new GridModelDTO();
-        // 复制DTO属性
-        BeanUtils.copyProperties(gridDTO, origGrid);
-        gridDTO.setColumns(new ArrayList<SchemaColumnJO>());
-        for (int i = 0; i < origGrid.getColumns().size(); i++) {
-//        for (SchemaColumn column:origGrid.getColumns()){
-            SchemaColumn column = origGrid.getColumns().get(i);
-            SchemaColumnJO columnJO = new SchemaColumnJO();
-            // 复制column属性
-            org.gaea.util.BeanUtils.copyProperties(column, columnJO, "queryCondition");
-            // 转换JO里的别名字段等
-            columnJO.setText(column.getLabel());       // label即text
-            columnJO.setWidth(column.getHtmlWidth());  // htmlWidth即width
-            columnJO.setHidden(!column.getVisible());  // hidden和visible相反
-            // 复制column queryCondition
-            ColumnQueryConditionJO queryConditionJO = new ColumnQueryConditionJO();
-            if (column.getQueryCondition() != null) {
-                BeanUtils.copyProperties(queryConditionJO, column.getQueryCondition());
-                columnJO.setQueryCondition(queryConditionJO);
-            }
-            // 生成jo.model
-            if (column.getPrimaryKey()) {
-                model.setIdProperty(column.getHtmlId());    // 主键字段即model.idProperty
-            }
-            model.getFields().add(new GridModelFieldDTO(column.getHtmlId()));
-            gridDTO.getColumns().add(columnJO);
-        }
-        gridDTO.setModel(model);
-        return gridDTO;
-    }
+//    /**
+//     * 把Grid转换为GridDTO。方便前端处理。
+//     *
+//     * @param origGrid
+//     * @return
+//     * @throws InvocationTargetException
+//     * @throws IllegalAccessException
+//     */
+//    public SchemaGridJO convert(SchemaGrid origGrid) throws InvocationTargetException, IllegalAccessException {
+//        SchemaGridJO gridDTO = new SchemaGridJO();
+//        GridModelDTO model = new GridModelDTO();
+//        // 复制DTO属性
+//        BeanUtils.copyProperties(gridDTO, origGrid);
+//        gridDTO.setColumns(new ArrayList<SchemaColumnJO>());
+//        for (int i = 0; i < origGrid.getColumns().size(); i++) {
+////        for (SchemaColumn column:origGrid.getColumns()){
+//            SchemaColumn column = origGrid.getColumns().get(i);
+//            SchemaColumnJO columnJO = new SchemaColumnJO();
+//            // 复制column属性
+//            org.gaea.util.BeanUtils.copyProperties(column, columnJO, "queryCondition");
+//            // 转换JO里的别名字段等
+//            columnJO.setText(column.getLabel());       // label即text
+//            columnJO.setWidth(column.getHtmlWidth());  // htmlWidth即width
+//            columnJO.setHidden(!column.getVisible());  // hidden和visible相反
+//            // 复制column queryCondition
+//            ColumnQueryConditionJO queryConditionJO = new ColumnQueryConditionJO();
+//            if (column.getQueryCondition() != null) {
+//                BeanUtils.copyProperties(queryConditionJO, column.getQueryCondition());
+//                columnJO.setQueryCondition(queryConditionJO);
+//            }
+//            // 生成jo.model
+//            if (column.getPrimaryKey()) {
+//                model.setIdProperty(column.getHtmlId());    // 主键字段即model.idProperty
+//            }
+//            model.getFields().add(new GridModelFieldDTO(column.getHtmlId()));
+//            gridDTO.getColumns().add(columnJO);
+//        }
+//        gridDTO.setModel(model);
+//        return gridDTO;
+//    }
 
     private SchemaColumn covertToColumn(Node columnNode) throws InvocationTargetException, IllegalAccessException, InvalidDataException {
         SchemaColumn column = new SchemaColumn();

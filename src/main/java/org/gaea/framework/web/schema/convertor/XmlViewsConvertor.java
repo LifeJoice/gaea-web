@@ -44,11 +44,11 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
                 SchemaGrid grid = urXmlGridViewSchemaConvertor.convert(viewNodes);
                 schemaViews.setGrid(grid);
                 // grid转为gridDTO
-                SchemaGridJO gridDTO = urXmlGridViewSchemaConvertor.convert(grid);
+//                SchemaGridJO gridDTO = urXmlGridViewSchemaConvertor.convert(grid);
                 // 初始化分页
-                int pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : 0;
-                gridDTO.setPage(new SchemaGridPage(1, pageSize));
-                schemaViews.setGridJO(gridDTO);
+//                int pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : 0;
+//                gridDTO.setPage(new SchemaGridPage(1, pageSize));
+//                schemaViews.setGridJO(gridDTO);
             }
             /**
              * 如果是普通弹框、工作流组件的弹框、上传组件的弹框、增删改弹框，则作为弹框解析。

@@ -1,6 +1,7 @@
-package org.gaea.framework.web.schema.domain.view;
+package org.gaea.framework.web.schema.view.jo;
 
 import org.gaea.framework.web.schema.domain.SchemaViewsComponent;
+import org.gaea.framework.web.schema.domain.view.SchemaButton;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by Iverson on 2015/7/6.
  */
-public class SchemaDialog implements SchemaViewsComponent, Serializable {
+public class SchemaDialogJO implements SchemaViewsComponent, Serializable {
     private String id;
     private String name;
     private String htmlName;
