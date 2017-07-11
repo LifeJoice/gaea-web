@@ -8,11 +8,21 @@
 /*.hd-div{*/
 .tb-head {
     position: relative;
-    height: 35px;
+    height: 36px;
     font-size: 14px;
     /*font-weight: bold;*/
     /*表格列头字体为白色。*/
     color: white;
+}
+
+/*
+可编辑表格的列头行自适应
+AI.TODO 后面可以把所有grid的列头都利用这种方式自适应。之前是因为没找到方法，直接用js设了宽度，非常不好。
+*/
+.crud-grid-ct .tb-head {
+    display: inline-flex;
+    min-width: 100%;
+    background-color: #2D3E50;
 }
 
 /* --------------- >>>> 列表内容部分 <<<< --------------- */
@@ -54,7 +64,7 @@
     /*文字水平居中*/
     text-align: center;
     /*文字垂直居中。line-height和div高度一致即可。*/
-    line-height: 35px;
+    line-height: 36px;
 }
 
 /*列头最后一列。空列。填充满行的剩余部分。*/
@@ -444,6 +454,22 @@ span.icon.last::after {
 /*}*/
 
 /* ************************************************************** crud grid（可编辑grid） ************************************************************** */
+
+/* 可编辑表格的容器。它包含了表格的toolbar和表格本身。 */
+.crud-grid-ct {
+    width: 100%;
+}
+
+.crud-grid-ct .gaea-grid-ct {
+    margin-top: 5px; /* 由于可编辑表格上面有toolbar，需要留出空间 */
+}
+
+/* AI.TODO 后面可以把所有grid的列头都利用这种方式自适应。之前是因为没找到方法，直接用js设了宽度，非常不好。 */
+.crud-grid-ct .column-header {
+    border: 0;
+    margin-left: 1px;
+}
+
 /* 单元格容器 */
 .crud-grid .grid-td-div {
     /* 因为有input框，可编辑grid的行会高点 */

@@ -2,15 +2,37 @@
  * 基于RequireJS的模块化重构。让依赖更清晰，更简单。
  * Created by iverson on 2016-2-17 11:48:52.
  */
+
+/**
+ * 服务端定义的Dialog的按钮
+ *
+ * @typedef {object} ServerButton
+ * @property {string} id
+ * @property {string} name
+ * @property {string} htmlName
+ * @property {string} htmlId
+ * @property {string} htmlValue
+ * @property {string} type
+ * @property {string} href
+ * @property {string} linkViewId
+ * @property {string} linkComponent
+ * @property {string} componentName
+ * @property {string} submitUrl
+ * @property {string} submitType
+ * @property {string} msg
+ * @property {string} action
+ * @property {string} actions
+ */
+
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaeajs-ui-workflow',
         "gaeajs-ui-form", "gaeajs-data", "gaeajs-common-utils-string", "gaeajs-uploader", "gaeajs-ui-definition",
         "gaeajs-ui-events", "gaeajs-common-actions", "gaea-system-url", "gaeajs-ui-notify", "gaeajs-common-utils",
-        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button", "gaeajs-ui-crud-grid", "gaeajs-context"],
+        "gaeajs-ui-view", "gaea-system-url", "gaeajs-ui-button", "gaeajs-ui-crud-grid", "gaeajs-context", "gaeajs-ui-commons"],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog, gaeaWF,
               gaeaForm, gaeaData, gaeaString, gaeaUploader, GAEA_UI_DEFINE,
               GAEA_EVENTS, gaeaActions, URL, gaeaNotify, gaeaUtils,
-              gaeaView, SYS_URL, gaeaButton, gaeaCrudGrid, gaeaContext) {
+              gaeaView, SYS_URL, gaeaButton, gaeaCrudGrid, gaeaContext, gaeaUI) {
 
         /**
          * 初始化Button后缓存在button.data中的options。
@@ -73,12 +95,15 @@ define([
                 var that = this;
                 var containerId = options.renderTo;
                 var $container = $("#" + options.renderTo);
+                var gaeaButton = require("gaeajs-ui-button");
+                var gaeaDialog = require("gaeajs-ui-dialog");
+                var gaeaView = require("gaeajs-ui-view");
                 $container.addClass("finder-action-items");
                 // 遍历按钮配置(views.actions.buttons)
                 $.each(this.options.buttons, function (key, val) {
                     var thisButton = this;
                     //var $button = $("#" + this.htmlId);
-                    var dialogDef = null;
+                    //var dialogDef = null;
                     /**
                      * if 是按钮组
                      *      按照按钮组的逻辑处理
@@ -125,7 +150,12 @@ define([
                      * 找到关于工作流弹出框的描述信息，然后构造。
                      */
                     if (gaeaValid.isNotNull(this.linkViewId)) {
-                        var linkObj = gaeaDialog.findDialog(inViews, this.linkViewId);
+                        //var linkObj = gaeaDialog.findDialog(inViews, this.linkViewId);
+                        var linkObj = gaeaUI.utils.findComponent(inViews, this.linkViewId);
+                        if (gaeaValid.isNull(linkObj)) {
+                            console.warn("根据linkViewId找不到对应的组件！linkViewId: %s", this.linkViewId);
+                            return;
+                        }
                         // linkObj = dialog options
                         var dialogOpts = _.clone(linkObj);
                         // cache link object
@@ -271,6 +301,22 @@ define([
                             //gaeaDialog.create(dialogOption);
                             gaeaDialog.init(dialogOption);
                         }
+                        /**
+                         *  ------------------->>> view组件
+                         */
+                        else if (gaeaString.equalsIgnoreCase("view", linkObj.componentName)) {
+                            var viewDefine = _.clone(linkObj);
+                            // 关联父的view
+                            viewDefine.parentId = inViews.id;
+                            //viewDefine.button = this;
+                            // 绑定点击事件触发打开
+                            viewDefine.triggers = {
+                                click: {
+                                    trgSelector: "#" + thisButton.id
+                                }
+                            };
+                            gaeaView.init(viewDefine);
+                        }
                     }
                     /**
                      * [3] 处理页面自定义的接口
@@ -299,6 +345,28 @@ define([
                         id: thisButton.htmlId
                     });
                 });
+            },
+            /**
+             * 添加一个按钮
+             * TODO 未完成。待view的返回做好一起完成。
+             * @param {ServerButton} opts
+             * @param {string} opts.id          toolbar的id
+             * @param {string} opts.size        按钮的大小
+             */
+            add: function (opts) {
+                gaeaValid.isNull({check: opts.id, exception: "toolbar id不允许为空！"});
+                var $container = $("#" + opts.id);
+                var $buttonCt = $("<span></span>");
+                $container.append($buttonCt);
+                // create and append button
+                gaeaButton.create({
+                    jqContainer: $buttonCt,
+                    htmlId: opts.htmlId,
+                    text: opts.text,
+                    size: opts.size
+                });
+                // cache options
+                $("#" + this.htmlId).data("gaeaOptions", opts);
             },
             /**
              * 根据views.actions.buttons.interfaceAction的值，有各个具体的页面去实现自己的function并赋给按钮。
@@ -781,7 +849,8 @@ define([
                 var data = {};
                 var row = gaeaGrid.getSelected();
                 // 获取页面的SCHEMA ID
-                var schemaId = gaeaView.list.getSchemaId();
+                //var schemaId = gaeaView.list.getSchemaId();
+                var schemaId = $("#urSchemaId").val();
                 data.schemaId = schemaId;
                 // 获取页面快捷查询的条件
                 var queryConditions = gaeaGrid.query.getQueryConditions({

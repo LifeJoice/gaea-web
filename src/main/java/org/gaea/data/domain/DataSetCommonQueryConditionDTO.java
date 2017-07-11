@@ -1,5 +1,6 @@
 package org.gaea.data.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +20,9 @@ public class DataSetCommonQueryConditionDTO {
     }
 
     public List<DataSetCommonQueryConditionValueDTO> getValues() {
+        if (values == null) {
+            values = new ArrayList<DataSetCommonQueryConditionValueDTO>();
+        }
         return values;
     }
 

@@ -46,6 +46,13 @@ define([
                  */
                 openDialogChainList: {
                     // { dialog1->dialog2:{ dialog1:{...}, dialog1->dialog2:{...} }, dialog3->dialog4:{dialog3:{...}, dialog3->dialog4:{...} } }
+                },
+                /**
+                 * view视图的链路表。
+                 * key：所有打开view的id组合，基于id以打开顺序拼凑而成。
+                 */
+                viewChainList: {
+
                 }
             },
             // 新建一个弹出链
@@ -56,7 +63,10 @@ define([
                 public.cache.openDialogChainList[key] = value;
             },
             /**
-             *
+             * 把一个组件/操作(即id) + 上一个组件/操作id（即parentId）缓存成链条形式，并且缓存这个组件/操作对应的相关数据(data).
+             * <p>
+             *     如果
+             * </p>
              * @param {object} opts
              * @param {string} opts.id
              * @param {string} [opts.parentId]                          如果没有父级弹框id, 我就是第一个
@@ -64,7 +74,7 @@ define([
              */
             add: function (opts) {
                 if (gaeaValid.isNull(opts.id)) {
-                    throw "dialog id为空，无法缓存新的弹出框操作链。";
+                    throw "id为空，无法添加弹出框操作链的新节点。opts: " + JSON.stringify(opts);
                 }
                 // 不知道为什么，第一次创建的按钮也有了缓存
                 //if(_private.chain.exist(opts.id)){
@@ -86,8 +96,40 @@ define([
                         ID: opts.id
                     });
                     //parentChain[newKey] = opts.options;
-                    _private.add(newKey, opts.options);
+                    _private.set(newKey, opts.options);
                 }
+            },
+            /**
+             * 设置某个链节点的值
+             *
+             * @param nodeId
+             * @param key
+             * @param value
+             */
+            setNodeValue: function (nodeId, key, value) {
+                if (gaeaValid.isNull(nodeId) || gaeaValid.isNull(key)) {
+                    return;
+                }
+                var node = _private.pickEndWith(nodeId);
+                if (gaeaValid.isNull(node)) {
+                    throw "找不到gaea操作链对应的节点。id：" + nodeId;
+                }
+                node[nodeId][key] = value;
+            },
+            /**
+             * 这个一个临时的缓存。任何一个想加入chain的组件/操作都可以重写这个值。
+             * 这个值表示一个最近、最新的操作。方便后续的其他要加入chain的组件/操作借助这个parent接上操作链。
+             * @param {object} parentObj
+             * @param {string} parentObj.id             每个parent object都应该有个id吧
+             */
+            setParent: function (parentObj) {
+                gaeaContext.setValue(vcCtxName, "parent", parentObj);
+            },
+            /**
+             * 同上，和setParent对应。获取临时缓存的parent对象。
+             */
+            getParent: function () {
+                return gaeaContext.getValue(vcCtxName, "parent");
             },
             getEndWith: function (opts) {
                 if (gaeaValid.isNull(opts.id)) {
@@ -162,6 +204,19 @@ define([
                     return false;
                 }
                 return true;
+            },
+            /**
+             * 根据某个节点的id，获取它，和它之前整个链条的所有节点的data。并返回。
+             *
+             * @param nodeId
+             * @returns {Array}
+             */
+            getChainData: function (nodeId) {
+                if (gaeaValid.isNull(nodeId)) {
+                    return;
+                }
+                var result = _private.pickChainBeforeMe(nodeId);
+                return result;
             }
         };
 
@@ -171,7 +226,7 @@ define([
              * @param key           当前弹出框和前面n多弹出框的id的组合名
              * @param value         值。一般是当前弹出框的配置项。
              */
-            add: function (key, value) {
+            set: function (key, value) {
                 if (gaeaValid.isNull(key)) {
                     throw "(缓存弹出框链)key为空, 无法进行缓存弹出框链信息的操作.";
                 }
@@ -190,7 +245,7 @@ define([
                 if (_.isEmpty(result)) {
                     return null;
                 }
-                return result;
+                return result[id];
             },
             /**
              * 从缓存的dialog弹出链中，找到id对应的那个key的value。
@@ -206,6 +261,63 @@ define([
                     return null;
                 }
                 return result;
+            },
+            /**
+             * 从缓存的dialog弹出链中，找到id对应的那个key的value。
+             * @param nodeId
+             * @returns {对象}
+             */
+            pickChainBeforeMe: function (nodeId) {
+                if (gaeaValid.isNull(nodeId)) {
+                    return;
+                }
+                // 首先找我结尾的key，即整个链条
+                var chainKey = _private.findKeyEndWith(nodeId);
+                if (gaeaValid.isNull(chainKey)) {
+                    return;
+                }
+                // 对我的key进行分解(key就是链条), 得出前面的节点
+                var nodeNameArr = chainKey.split(TEMPLATE.CHAIN.NAME_SEPARATOR);
+                var loopName = "";
+                var result = [];
+                // 遍历节点
+                $.each(nodeNameArr, function (i, val) {
+                    /**
+                     * 叠加获得每个节点的key. 例如:
+                     dialog1: ... ,
+                     dialog1->dialog2 : ...,
+                     */
+                    if (i > 0) {
+                        loopName += TEMPLATE.CHAIN.NAME_SEPARATOR;
+                    }
+                    loopName += val;
+                    // 根据key name获取对应的节点数据/定义等
+                    var cacheChainNode = _private.pick(loopName);
+                    result.push(cacheChainNode);
+                });
+
+                // pick方法找不到，会返回一个空的（{}）对象，而不是null
+                if (result.length < 1) {
+                    return;
+                }
+                return result;
+            },
+            /**
+             * 找到操作链中，我处于最后一个节点的链对象的key。
+             * 一般可以用于，把key分解，就得出之前的整个操作链条。
+             * @param nodeId
+             * @returns {String}
+             */
+            findKeyEndWith: function (nodeId) {
+                var myChainKey;
+
+                $.each(public.cache.openDialogChainList, function (key, val) {
+                    if (_s.endsWith(key, nodeId)) {
+                        myChainKey = key;
+                    }
+                });
+
+                return myChainKey;
             },
             /**
              * 找到我所在的链的具体位置, 即key end with id就是我。

@@ -7,6 +7,18 @@
  * 对于grid，当前选中了哪几行等。
  * Created by iverson on 2017年2月23日 14:32:01
  */
+
+/**
+ * 缓存的属性说明。
+ *
+ * @typedef {object} GaeaContext
+ * @property {string} id                            selected row id
+ * @property {object} selectedRow                   选中的行
+ * @property {object[]} selectedRows                选中的多行
+ * @property {object} gaeaViewChain                 gaea.ui.chain 链的相关数据
+ * @property {object} viewChain                     view链的相关数据
+ //* @property {ServerDialog.Button[]} buttons
+ */
 define([
         "jquery", "underscore", "underscore-string", "gaeajs-common-utils-validate", "gaeajs-common-utils-string",
         "gaeajs-ui-events", "gaeajs-common-utils"
@@ -63,6 +75,10 @@ define([
                     key = _private.gaeaEL.formatName(key);
                     try {
                         value = eval(key);
+                        if (gaeaValid.isNull(value)) {
+                            value = "";
+                        }
+                        return value;
                     } catch (err) {
                         // debug. 上下文有点像黑盒，有时候可能不知道哪里的值缺失了
                         tools.gaeaEL.debugUndefined(key);
@@ -85,21 +101,23 @@ define([
             },
             /**
              * 把值放入上下文中。
-             * @param {string} key          某个key。一般表示某一类的缓存，例如：selectRows
-             * @param {string} [id]         组件id。例如两个grid的selectRows，就必须通过两个id区分。
-             * @param value
+             * AI.TODO 这个尚未彻底改造完！key还是只能两级！
+             * @param {string} rootKey          某个key。一般表示某一类的缓存，例如：selectRows
+             * @param {string...} [id]          组件id1, [id1.]id2, [id1.id2.]id3。动态数组。例如两个grid的selectRows，就必须通过两个id区分。
+             * @param val                       值
              */
-            setValue: function (key, id, value) {
-                gaeaValid.isNull({check: key, exception: "key为空，无法把值写入上下文。"});
+            setValue: function (rootKey, id, val) {
+                gaeaValid.isNull({check: rootKey, exception: "key为空，无法把值写入上下文。"});
+                var value = arguments[arguments.length - 1];
                 // init key
-                if (gaeaValid.isNull(CONTEXT[key])) {
-                    CONTEXT[key] = {};
+                if (gaeaValid.isNull(CONTEXT[rootKey])) {
+                    CONTEXT[rootKey] = {};
                 }
                 // set key->id value
-                if (gaeaValid.isNull(id)) {
-                    CONTEXT[key] = value;
+                if (gaeaValid.isNull(id) || arguments.length < 3) {
+                    CONTEXT[rootKey] = value;
                 } else {
-                    CONTEXT[key][id] = value;
+                    CONTEXT[rootKey][id] = value;
                 }
                 // refresh
                 $(".gaea-sys-content-context").data(CONTEXT);

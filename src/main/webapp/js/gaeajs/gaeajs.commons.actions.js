@@ -194,6 +194,7 @@ define([
              * @param {object} opts.button              button的服务端定义
              */
             doRealDelete: function (opts) {
+                var gaeaDialog = require("gaeajs-ui-dialog");
                 gaeaValid.isNull({
                     check: opts.id,
                     exception: "按钮id为空，无法触发删除事件（删除动作绑定在某按钮上）。"

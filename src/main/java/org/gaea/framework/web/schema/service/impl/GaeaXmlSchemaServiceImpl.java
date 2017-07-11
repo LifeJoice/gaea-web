@@ -2,10 +2,11 @@ package org.gaea.framework.web.schema.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.exception.InvalidDataException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SystemConfigException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.data.dataset.domain.ConditionSet;
+import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.data.system.SystemDataSetFactory;
+import org.gaea.exception.*;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.service.SystemDataSetService;
@@ -31,6 +32,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -112,27 +115,27 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
     public String getJsonSchema(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName) throws IllegalAccessException, ParserConfigurationException, IOException, SysInitException, SAXException, InvocationTargetException, ValidationFailedException, InvalidDataException, SystemConfigException {
         // 获得HTML模板混合XML SCHEMA的页面。
         GaeaXmlSchema gaeaXML = gaeaXmlSchemaProcessor.parseXml(viewSchemaPath, springApplicationContext);
-        return getJsonSchema(gaeaXML, loginName);
+        return getJsonSchema(gaeaXML, loginName, null);
     }
 
     /**
      * 根据指定的xml schema，查询获取对应的数据集的数据，然后转换成json返回。
      *
      * @param gaeaXML
-     * @param loginName 对应的数据集的数据权限过滤用
-     * @return
+     * @param loginName       对应的数据集的数据权限过滤用  @return
+     * @param conditionSetMap
      * @throws ValidationFailedException
      * @throws InvalidDataException
      * @throws SystemConfigException
      */
     @Override
-    public String getJsonSchema(GaeaXmlSchema gaeaXML, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
+    public String getJsonSchema(GaeaXmlSchema gaeaXML, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws ValidationFailedException, InvalidDataException, SystemConfigException {
 
         String jsonData = "";
         try {
             // 根据DataSet查询并填充数据
             if (gaeaXML.getSchemaData() != null && CollectionUtils.isNotEmpty(gaeaXML.getSchemaData().getDataSetList())) {
-                DataSet ds = systemDataSetService.queryDataAndTotalElement(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(), loginName);
+                DataSet ds = systemDataSetService.queryDataAndTotalElement(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(), loginName, conditionSetMap);
                 gaeaXML.getSchemaData().getDataSetList().set(0, ds);
                 // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
                 Map<String, Object> dataMap = gaeaXmlSchemaProcessor.combineSchemaInfo(gaeaXML);
@@ -172,6 +175,44 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
         if (gaeaXmlSchema == null) {
             throw new ValidationFailedException("找不到对应的Schema。请检查是否缺少了相关的配置/放错了位置/命名错误等。");
         }
-        return getJsonSchema(gaeaXmlSchema, loginName);
+        return getJsonSchema(gaeaXmlSchema, loginName, null);
+    }
+
+    /**
+     * 从数据集的where中，寻找queryConditionDTOList所有对应的ConditionSet。如果isStrictMatchAll=true，则找不到会抛出异常！
+     *
+     * @param gaeaDataSet
+     * @param queryConditionDTOList
+     * @param isStrictMatchAll      是否要求queryConditionDTOList中对应的所有ConditionSet都要找到？true：找不到就抛出异常
+     * @return
+     * @throws ProcessFailedException
+     */
+    @Override
+    public LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> getConditionSets(GaeaDataSet gaeaDataSet, List<DataSetCommonQueryConditionDTO> queryConditionDTOList, boolean isStrictMatchAll) throws ProcessFailedException {
+        if (gaeaDataSet == null || queryConditionDTOList == null) {
+            return null;
+        }
+        if (gaeaDataSet.getWhere() == null || gaeaDataSet.getWhere().getConditionSets() == null) {
+            logger.trace("数据集定义的条件集（Where）为空，无法查找特定条件集定义！");
+            return null;
+        }
+        Map<String, ConditionSet> dsConditionSets = gaeaDataSet.getWhere().getConditionSets();
+        LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> resultMap = new LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO>();
+        // 遍历
+        for (DataSetCommonQueryConditionDTO queryConditionDTO : queryConditionDTOList) {
+            ConditionSet findCondSet = null;
+            for (String condSetId : dsConditionSets.keySet()) {
+                if (queryConditionDTO.getId().equalsIgnoreCase(condSetId)) {
+                    findCondSet = dsConditionSets.get(condSetId);
+                }
+            }
+            if (findCondSet == null && isStrictMatchAll) {
+                throw new ProcessFailedException("输入的条件集列表，部分条件集无法找到，如果忽略，会导致部分查询条件缺少！数据集id : " + gaeaDataSet.getId() + "条件集id : " + queryConditionDTO.getId());
+            } else {
+                logger.trace("输入的条件集列表，部分条件集无法找到，如果忽略，会导致部分查询条件缺少！数据集id : " + gaeaDataSet.getId() + "条件集id : " + queryConditionDTO.getId());
+            }
+            resultMap.put(findCondSet, queryConditionDTO);
+        }
+        return resultMap;
     }
 }

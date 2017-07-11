@@ -13,12 +13,19 @@ import java.util.List;
  * Created by Iverson on 2015/6/30.
  */
 public class SchemaViews implements Serializable {
+    private String id;
+    //    private String name;
+//    private String htmlName;
+//    private String htmlId;
+    private String title;
+    private String contentUrl;      // 准备加载内容到dialog的URL地址
+    private String componentName; // 就是XML的元素名
     private SchemaGrid grid;
     private SchemaGridJO gridJO;
     private List<SchemaDialog> dialogs;
     private SchemaActions actions;
     private SchemaImport imports;
-    private String title;
+    private List<SchemaViews> views;
 
     public SchemaGrid getGrid() {
         return grid;
@@ -72,5 +79,40 @@ public class SchemaViews implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public List<SchemaViews> getViews() {
+        if (views == null) {
+            views = new ArrayList<SchemaViews>();
+        }
+        return views;
+    }
+
+    public void setViews(List<SchemaViews> views) {
+        this.views = views;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getContentUrl() {
+        return contentUrl;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
+    }
+
+    public String getComponentName() {
+        return componentName;
+    }
+
+    public void setComponentName(String componentName) {
+        this.componentName = componentName;
     }
 }

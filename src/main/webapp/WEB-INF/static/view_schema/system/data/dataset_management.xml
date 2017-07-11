@@ -6,15 +6,17 @@
         <dataset id="DS_DATASET_MANAGEMENT" primary-table="GAEA_SYS_DATASET">
         </dataset>
     </data>
-    <views title="数据集管理">
+    <views id="dsMgrView" title="数据集管理">
         <actions id="myActions">
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
             <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
-            <button id="btnNewDsAuthority" name="btnNewDsAuthority" html-value="新增数据集权限" link-view-id="dsAuthAddDialog"
-                    action="add"/>
+            <!--<button id="btnNewDsAuthority" name="btnNewDsAuthority" html-value="新增数据集权限" link-view-id="dsAuthAddDialog"-->
+            <!--action="add"/>-->
             <button id="btnSyncDbDataSet" name="btnSyncDbDataSet" html-value="刷新缓存数据集"
                     submit-url="/gaea/data/dataset/synchronize-db-dataset" msg="同步数据库数据集至缓存"/>
+            <button id="btnShowDsAuthList" name="btnShowDsAuthList" html-value="数据集权限"
+                    link-view-id="dsAuthorityMgrView"/>
         </actions>
         <!--工作流弹出框-->
         <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
@@ -31,8 +33,13 @@
                      content-url="/gaea/data/dataset/showCreateUpdateForm" submit-url="/gaea/data/dataset/add"
                      load-data-url="/gaea/data/dataset/load-edit-data"/>
         <!-- 新增数据集权限弹出框 -->
-        <crud-dialog id="dsAuthAddDialog" html-id="dsAuthAddDialog" id-field="id"
-                     content-url="/gaea/data/dataset/showDsAuthForm" submit-url="/gaea/data/dataset/add-ds-authority"/>
+        <!--<crud-dialog id="dsAuthAddDialog" html-id="dsAuthAddDialog" id-field="id"-->
+        <!--content-url="/gaea/data/dataset/showDsAuthForm" submit-url="/gaea/data/dataset/add-ds-authority"/>-->
+
+        <!-- 这是新页面。表示内容区整个跳转到新的内容。 -->
+        <view id="dsAuthorityMgrView" title="数据集权限管理" content-url="/gaea/data/dataset/auth/management"/>
+
+
         <!--列表定义-->
         <grid id="dataset-grid" title="数据集管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
               dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="25">

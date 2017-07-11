@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SCHEMA id必须全局唯一。会进入系统的cache。-->
+<ur-schema id="GAEA_SCHEMA_DS_AUTHORITY_MANAGEMENT">
+    <data>
+        <!--primary-table标识这个ds的主要表，主要是分页用，以这个主表的id为分页依据。（不要->如果我们只是用来增、编辑的话，就不需要data-sql部分的内容了。）-->
+        <dataset id="DS_DATASET_AUTHORITY_MANAGEMENT">
+        </dataset>
+    </data>
+    <views id="dsAuthMgrView" title="数据集权限管理">
+        <actions id="myActions">
+            <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDsAuthDialog" action="add"/>
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDsAuthDialog" action="update"/>
+            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
+            <!--<button id="btnNewDsAuthority" name="btnNewDsAuthority" html-value="新增数据集权限" link-view-id="dsAuthAddDialog"-->
+            <!--action="add"/>-->
+        </actions>
+        <!--工作流弹出框-->
+        <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
+                   submit-url="/admin/wf-demo/new-dayoff/complete.do">
+            <button id="btnApproved" name="btnApproved" html-value="批准" type="approve"/>
+            <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove"/>
+            <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel"/>
+        </wf-dialog>
+        <!--新增弹出框-->
+        <crud-dialog id="createDsAuthDialog" html-id="createDsAuthDialog"
+                     content-url="/gaea/data/dataset/auth/showDsAuthForm" submit-url="/gaea/data/dataset/auth/add"/>
+        <!-- 编辑弹出框 -->
+        <crud-dialog id="editDsAuthDialog" html-id="editDsAuthDialog" id-field="id"
+                     content-url="/gaea/data/dataset/auth/showDsAuthForm" submit-url="/gaea/data/dataset/auth/update"
+                     load-data-url="/gaea/data/dataset/auth/load-edit-data"/>
+        <!-- 新增数据集权限弹出框 -->
+        <!--<crud-dialog id="createDsAuthDialog" html-id="createDsAuthDialog" id-field="id"-->
+        <!--content-url="/gaea/data/dataset/showDsAuthForm" submit-url="/gaea/data/dataset/add-ds-authority"/>-->
+
+        <!-- 这是新页面。表示内容区整个跳转到新的内容。 -->
+        <!--<view id="dsAuthorityMgrView" title="数据集权限管理" content-url="/gaea/data/dataset/showDsAuthForm"/>-->
+
+
+        <!--列表定义-->
+        <grid id="dataset-authority-grid" title="数据集权限管理" with-workflow="true" render-to="urgrid"
+              display-undefined-column="true"
+              dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="25">
+            <column id="id" name="id" label="ID" db-column-name="ID"
+                    visible="false" sortable="true" html-width="200" primary-key="true" data-type="String"/>
+            <column id="dsName" name="dsName" label="数据集名称" db-column-name="dsName"
+                    visible="true" sortable="false" html-width="200" data-type="String"/>
+            <column id="name" name="name" label="权限名称" db-column-name="name"
+                    visible="true" sortable="false" html-width="200" data-type="String"/>
+            <column id="description" name="description" label="描述" db-column-name="description"
+                    visible="true" sortable="false" html-width="300" data-type="String"/>
+        </grid>
+    </views>
+</ur-schema>

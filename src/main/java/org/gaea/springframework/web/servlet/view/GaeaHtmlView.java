@@ -1,9 +1,8 @@
 package org.gaea.springframework.web.servlet.view;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.GaeaException;
-import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
+import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.schema.service.GaeaXmlViewService;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.util.GaeaExceptionUtils;
@@ -13,8 +12,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,7 +47,14 @@ public class GaeaHtmlView extends AbstractUrlBasedView {
         // 把XML schema转换成HTML
         String viewHtml = "";
         try {
-            viewHtml =  gaeaXmlViewService.getViewContent(getApplicationContext(), resourceFilePath, loginName);
+            // 获取Controller传过来的额外条件，需要拼接到XML Schema的DataSet作为条件
+            List<DataSetCommonQueryConditionDTO> queryConditionDTOList = (List<DataSetCommonQueryConditionDTO>) request.getAttribute(CommonDefinition.PARAM_NAME_QUERY_CONDITIONSETS);
+
+            viewHtml = gaeaXmlViewService.getViewContent(getApplicationContext(), resourceFilePath, loginName, queryConditionDTOList);
+        } catch (ClassCastException e) {
+            logger.error("构造Gaea列表页的条件集参数传递错误！要求List<DataSetCommonQueryConditionDTO>！", e);
+            viewHtml = GaeaExceptionUtils.getJsonMessage(GaeaException.DEFAULT_FAIL, e.getMessage(), "系统错误，请联系管理员！");
+            response.setStatus(GaeaException.DEFAULT_FAIL);// 自定义一般校验错误 600
         }catch(Exception e){
             logger.error("Gaea框架生成视图内容失败！", e);
             viewHtml = GaeaExceptionUtils.getJsonMessage(GaeaException.DEFAULT_FAIL,e.getMessage(),"系统错误，请联系管理员！");

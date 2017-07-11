@@ -192,7 +192,14 @@ public class GaeaSchemaUtils {
             return null;
         }
         SchemaViewJO result = new SchemaViewJO();
-        BeanUtils.copyProperties(origView, result, "dialogs", "actions");
+        BeanUtils.copyProperties(origView, result, "dialogs", "actions", "views");
+        // 子view转换
+        if (origView.getViews() != null) {
+            for (SchemaViews view : origView.getViews()) {
+                SchemaViewJO viewJO = convert(view);
+                result.getViews().add(viewJO);
+            }
+        }
         // Grid转换
         if (origView.getGrid() != null) {
             SchemaGridJO gridJO = convert(origView.getGrid());

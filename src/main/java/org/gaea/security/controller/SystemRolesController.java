@@ -60,7 +60,7 @@ public class SystemRolesController {
     @RequestMapping(value = "/saveRoleUsers", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public String saveRoleUsers(Role role, @RequestBean List<String> userIds) {
-//        systemRolesService.save(authority);
+        systemRolesService.saveRoleUsers(role, userIds);
         return "";
     }
 

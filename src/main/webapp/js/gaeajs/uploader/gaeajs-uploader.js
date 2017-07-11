@@ -130,6 +130,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
              * @private
              */
             _initDialog: function (dialogOptions) {
+                var gaeaDialog = require("gaeajs-ui-dialog");
 
                 if (gaeaValid.isNotNull(dialogOptions.htmlWidth)) {
                     dialogOptions.width = dialogOptions.htmlWidth;

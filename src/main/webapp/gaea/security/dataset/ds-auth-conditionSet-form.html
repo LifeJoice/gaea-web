@@ -22,8 +22,10 @@
             <!-- TODO test。稍后得增加一种样式，适应这种新的grid的布局。-->
             <div><span class="field-name">静态数据</span></div>
             <div class="field-value">
-                <div id="authConditionList" data-gaea-ui-name="authConditionList"
+                <div id="authConditionList" class="crud-grid-ct" data-gaea-ui-name="authConditionList"
                      data-gaea-ui-crud-grid='columns:[
+                         {name:"id",text:"ID", width:120,editable:false
+                         },
                          {name:"condOp",text:"项间关系符", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
                          },
                          {name:"propName",text:"属性名", width:120, validator: { html: {"data-msg":"值不允许为空。",required:"required" } }
@@ -37,4 +39,5 @@
             </div>
         </div>
     </div>
+    <input type="hidden" name="dsAuthCondSet.id">
 </div>

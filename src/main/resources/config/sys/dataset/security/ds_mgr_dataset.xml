@@ -30,6 +30,7 @@
         <data>
             <data-element value="static" text="系统启动一次性"/>
             <data-element value="auto" text="自动"/>
+            <data-element value="none" text="不缓存"/>
         </data>
     </dataset>
 </dataset-definition>

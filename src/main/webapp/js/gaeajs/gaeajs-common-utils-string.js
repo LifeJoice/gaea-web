@@ -99,6 +99,13 @@ define([
             if (_s.include(name, ".")) {
                 name = name.split(".").join("\\.");
             }
+            // 是否带有中括号。做转义处理。一些html id、name之类的"[]"是没有转义的.在JQuery中使用会出错.
+            if (_s.include(name, "[")) {
+                name = name.split("[").join("\\[");
+            }
+            if (_s.include(name, "]")) {
+                name = name.split("]").join("\\]");
+            }
             return name;
         }
     };

@@ -15,7 +15,7 @@ define([
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
               gaeaUI, gaeaMultiSelect, gaeaCommon, gaeaComponents,
               gaeaCommonUtils, gaeaContext, gaeaDataFilterDialog, gaeaGrid,
-              gaeaContent, gaeaViewChain) {
+              gaeaContent, gaeaUIChain) {
 
 
         /**
@@ -166,10 +166,13 @@ define([
 
                 // 缓存当前dialog的配置
                 $dialog.data("gaea-options", opts);
+                // 添加"data-gaea-ui-dialog"标识
+                // 这对dialog中的组件找父dialog很必要。
+                $("#" + opts.id).attr("data-gaea-ui-dialog", "");
 
                 // 加入弹出框链
                 // cache options in chain
-                gaeaViewChain.add({
+                gaeaUIChain.add({
                     id: opts.id,
                     parentId: opts.parentId,
                     options: opts
@@ -527,7 +530,7 @@ define([
              * @returns {*|boolean}
              */
             isOpen: function (id) {
-                return gaeaViewChain.exist(id);
+                return gaeaUIChain.exist(id);
             }
         };
         var crudDialog = {
@@ -600,7 +603,7 @@ define([
                 //});
 
                 // 加入弹出框链
-                gaeaViewChain.add({
+                gaeaUIChain.add({
                     id: dialogOpts.id,
                     //parentId:opts.parentId,
                     options: dialogOpts
@@ -634,6 +637,10 @@ define([
                     openStyle: dialogOpts.openStyle,
                     submitUrl: dialogOpts.submitUrl
                 });
+
+                // 添加"data-gaea-ui-dialog"标识
+                // 这对dialog中的组件找父dialog很必要。
+                $("#" + dialogOpts.id).attr("data-gaea-ui-dialog", "");
 
                 /**
                  * 创建了dialog html后，对里面的form也得做validate的初始化。否则jQuery.validate插件会报错：
@@ -914,6 +921,7 @@ define([
                     //GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options.triggerOpenJqSelector, function (event, data) {
                 GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, options.triggerOpenJqSelector, function (event, data) {
                     var gridId = data.gridId;
+                    var editData;
 
                     if (options.initComponentData) {
 
@@ -922,12 +930,13 @@ define([
                             gaeaNotify.error("grid id为空，无法执行编辑操作。");
                         }
 
+                        // 加载数据
                         editData = crudDialog.getData({
                             id: options.id,
                             gridId: gridId,
                             loadDataUrl: options.loadDataUrl
                         });
-
+                        options["editData"] = editData; // 一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的）
                         options.data = editData;
                     }
 
@@ -1034,7 +1043,8 @@ define([
                 var result;
                 var conditions = {};
                 //conditions.id = selectedRow.id;
-                conditions.schemaId = gaeaView.list.getSchemaId();
+                //conditions.schemaId = gaeaView.list.getSchemaId();
+                conditions.schemaId = $("#urSchemaId").val();
                 // 默认不需要对结果的每个字段做数据集转换
                 conditions.isDsTranslate = false;
 
@@ -1303,6 +1313,11 @@ define([
                         // 成功回调
                         success: function () {
                             var requestData = $("#" + formId).serializeObject();
+
+                            // 获取链式操作，前面节点的数据。可能服务端功能需要（一般都需要）。
+                            var viewChainData = gaeaView.getViewData($("#viewId").val());
+                            requestData["viewChain"] = JSON.stringify(viewChainData); // 必须json化。因为数据是笼统的，没有严格的对象mapping
+
                             // 把extra的data合并（覆盖）form的data
                             /**
                              * @type {DialogGaeaOptions}
@@ -1385,7 +1400,7 @@ define([
                         }));
                     } else if (gaeaString.equalsIgnoreCase(options.openStyle, "inOne") && gaeaValid.isNotNull(options.parentId)) {
                         // 获取缓存的弹框链中，对应的最顶级dialog
-                        var rootDialogId = gaeaViewChain.getRootId(options.parentId);
+                        var rootDialogId = gaeaUIChain.getRootId(options.parentId);
                         if (gaeaValid.isNull(rootDialogId)) {
                             rootDialogId = options.parentId;
                         }
@@ -1701,7 +1716,7 @@ define([
                     throw "dialog id为空，无法打开inOne dialog。";
                 }
                 //var $dialog = $("#" + opts.id);
-                var rootDialogId = gaeaViewChain.getRootId(opts.id);
+                var rootDialogId = gaeaUIChain.getRootId(opts.id);
                 var $rootDialog = $("#" + rootDialogId);
                 // parent id为空, 应该是打开普通dialog, 而不是inOne dialog
                 if (gaeaValid.isNull(opts.parentId)) {
@@ -1716,7 +1731,7 @@ define([
             show: function (opts) {
                 var $dialog = $("#" + opts.id);
                 // 隐藏原来的页面
-                if (gaeaViewChain.isRoot(opts.parentId)) {
+                if (gaeaUIChain.isRoot(opts.parentId)) {
                     // 父级是根dialog，就不能全部隐藏了。不然大家都看不到了。
                     $("#" + opts.parentId).children("div:first").hide();
                 } else {
@@ -1740,7 +1755,7 @@ define([
                     exception: "dialog id为空，不能做取消dialog操作。"
                 });
                 var $dialog = $("#" + opts.id);
-                var parentDialogId = gaeaViewChain.getParentId(opts.id);
+                var parentDialogId = gaeaUIChain.getParentId(opts.id);
 
                 // 如果自己就是最顶级dialog，则调用普通dialog的关闭功能
                 if (gaeaValid.isNull(parentDialogId)) {
@@ -1753,7 +1768,7 @@ define([
 
                 var $parentDialog = $("#" + parentDialogId);
                 // 显示父页面
-                if (gaeaViewChain.isRoot(parentDialogId)) {
+                if (gaeaUIChain.isRoot(parentDialogId)) {
                     // 父级是根dialog，就不能全部显示，显示第一个子div（默认代表根dialog内容）
                     _private.inOne._private.showParent($parentDialog.children("div:first"));
                 } else {
@@ -1774,11 +1789,11 @@ define([
                     check: opts.id,
                     exception: "dialog id为空，不能做取消dialog操作。"
                 });
-                var parentDialogId = gaeaViewChain.getParentId(opts.id);
-                var cacheParentDialog = gaeaViewChain.getEndWith({id: parentDialogId});
+                var parentDialogId = gaeaUIChain.getParentId(opts.id);
+                var cacheParentDialog = gaeaUIChain.getEndWith({id: parentDialogId});
                 var cacheDialogOptions = _.values(cacheParentDialog)[0];
                 // 替换dialog的按钮
-                var rootDialogId = gaeaViewChain.getRootId(opts.id);
+                var rootDialogId = gaeaUIChain.getRootId(opts.id);
                 var $rootDialog = $("#" + rootDialogId);
                 $rootDialog.gaeaDialog("option", "buttons", cacheDialogOptions.buttons);
             },
@@ -1850,7 +1865,7 @@ define([
             if (gaeaValid.isNull(opts.id)) {
                 throw "没有 id，无法创建Dialog。";
             }
-            if (gaeaViewChain.exist(opts.id)) {
+            if (gaeaUIChain.exist(opts.id)) {
                 console.debug("dialog已经打开过，并缓存。");
                 //throw "dialog已经打开过，并缓存。无法再创建。";
             }

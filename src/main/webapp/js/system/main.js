@@ -97,6 +97,9 @@ require([
         if (gaeaValid.isNotNull($(this).data("href"))) {
             // 刷新缓存。这个是内容页的上下文缓存，例如：放置grid选中的行、编辑中未提交的数据等
             $(".gaea-sys-content-context").removeData();
+            // 刷新全局事件对象（锚）
+            $("#gaea-event-ct").remove();
+            $(".main-right").append('<span id="gaea-event-ct" style="display: none;">Gaea事件的绑定对象(不显示)</span>');
             // 加载功能内容
             $(".gaea-sys-content").load($(this).data("href"));
         }

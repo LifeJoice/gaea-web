@@ -42,6 +42,7 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
     private SystemDsAuthorityRepository systemDsAuthorityRepository;
 
     @Override
+    @Transactional
     public void saveOrUpdate(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException {
         if (dataSetEntity == null) {
             throw new IllegalArgumentException("数据集为空，无法保存！");
@@ -94,35 +95,72 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
         }
         return result;
     }
-
-    @Override
-    @Transactional
-    public void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException {
-        if (dsAuthority == null) {
-            throw new ValidationFailedException("数据集权限对象为空，无法保存！");
-        }
-        if (dsAuthority.getDataSetEntity() == null || StringUtils.isEmpty(dsAuthority.getDataSetEntity().getId())) {
-            throw new ValidationFailedException("获取不到数据集id，无法新增数据集权限。");
-        }
-        DataSetEntity newDataSet = systemDataSetRepository.findOne(dsAuthority.getDataSetEntity().getId());
-        if (newDataSet == null) {
-            throw new ValidationFailedException("提交的数据集id在数据库中查找不到！DataSetId=" + dsAuthority.getDataSetEntity().getId());
-        }
-        // 双向绑定DsAuthority和DataSet的关系
-        dsAuthority.setDataSetEntity(newDataSet);
-        // 双向绑定DsAuthCondition和DsAuthConditionSet的关系
-        for (DsAuthConditionEntity cond : dsAuthority.getDsAuthConditionSetEntity().getDsAuthConditionEntities()) {
-            cond.setDsAuthConditionSetEntity(dsAuthority.getDsAuthConditionSetEntity());
-        }
-        // 双向绑定DsAuthority和DsAuthConditionSet的关系
-        dsAuthority.getDsAuthConditionSetEntity().setDsAuthorityEntity(dsAuthority);
-
-        // 双向绑定DataSet和DsAuthority的关系
-        if (newDataSet.getDsAuthorities() == null) {
-            newDataSet.setDsAuthorities(new ArrayList<DsAuthorityEntity>());
-        }
-        newDataSet.getDsAuthorities().add(dsAuthority);
-
-        systemDsAuthorityRepository.save(dsAuthority);
-    }
+//
+//    @Override
+//    @Transactional
+//    public void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException {
+//        if (dsAuthority == null) {
+//            throw new ValidationFailedException("数据集权限对象为空，无法保存！");
+//        }
+//        if (dsAuthority.getDataSetEntity() == null || StringUtils.isEmpty(dsAuthority.getDataSetEntity().getId())) {
+//            throw new ValidationFailedException("获取不到数据集id，无法新增数据集权限。");
+//        }
+//        DataSetEntity newDataSet = systemDataSetRepository.findOne(dsAuthority.getDataSetEntity().getId());
+//        if (newDataSet == null) {
+//            throw new ValidationFailedException("提交的数据集id在数据库中查找不到！DataSetId=" + dsAuthority.getDataSetEntity().getId());
+//        }
+//        // 双向绑定DsAuthority和DataSet的关系
+//        dsAuthority.setDataSetEntity(newDataSet);
+//        // 双向绑定DsAuthCondition和DsAuthConditionSet的关系
+//        for (DsAuthConditionEntity cond : dsAuthority.getDsAuthConditionSetEntity().getDsAuthConditionEntities()) {
+//            cond.setDsAuthConditionSetEntity(dsAuthority.getDsAuthConditionSetEntity());
+//        }
+//        // 双向绑定DsAuthority和DsAuthConditionSet的关系
+//        dsAuthority.getDsAuthConditionSetEntity().setDsAuthorityEntity(dsAuthority);
+//
+//        // 双向绑定DataSet和DsAuthority的关系
+//        if (newDataSet.getDsAuthorities() == null) {
+//            newDataSet.setDsAuthorities(new ArrayList<DsAuthorityEntity>());
+//        }
+//        newDataSet.getDsAuthorities().add(dsAuthority);
+//
+//        systemDsAuthorityRepository.save(dsAuthority);
+//    }
+//
+//    @Override
+//    @Transactional
+//    public void updateDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException {
+//        if (dsAuthority == null || StringUtils.isEmpty(dsAuthority.getId())) {
+//            throw new ValidationFailedException("数据集权限对象为空，无法保存！");
+//        }
+//        if (dsAuthority.getDataSetEntity() == null || StringUtils.isEmpty(dsAuthority.getDataSetEntity().getId())) {
+//            throw new ValidationFailedException("获取不到数据集id，无法新增数据集权限。");
+//        }
+//        // find dataset
+//        DataSetEntity newDataSet = systemDataSetRepository.findOne(dsAuthority.getDataSetEntity().getId());
+//        if (newDataSet == null) {
+//            throw new ValidationFailedException("提交的数据集id在数据库中查找不到！DataSetId=" + dsAuthority.getDataSetEntity().getId());
+//        }
+//
+//        // 双向绑定DsAuthority和DataSet的关系
+//        dsAuthority.setDataSetEntity(newDataSet);
+//
+//        // 双向绑定DsAuthCondition和DsAuthConditionSet的关系
+//        // condition -> conditionSet
+//        for (DsAuthConditionEntity cond : dsAuthority.getDsAuthConditionSetEntity().getDsAuthConditionEntities()) {
+//            cond.setDsAuthConditionSetEntity(dsAuthority.getDsAuthConditionSetEntity());
+//        }
+//
+//        // 双向绑定DsAuthority和DsAuthConditionSet的关系
+//        // authority conditionSet -> authority
+//        dsAuthority.getDsAuthConditionSetEntity().setDsAuthorityEntity(dsAuthority);
+//
+//        // 双向绑定DataSet和DsAuthority的关系
+//        if (newDataSet.getDsAuthorities() == null) {
+//            newDataSet.setDsAuthorities(new ArrayList<DsAuthorityEntity>());
+//        }
+//        newDataSet.getDsAuthorities().add(dsAuthority);
+//
+//        systemDsAuthorityRepository.save(dsAuthority);
+//    }
 }

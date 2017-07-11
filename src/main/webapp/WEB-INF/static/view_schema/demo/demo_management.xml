@@ -36,7 +36,7 @@
             </table>
         </data-schema>
     </data>
-    <views title="演示功能-班级管理列表页">
+    <views id="demoMgrView" title="演示功能-班级管理列表页">
         <field-set id="" table-name="GAEA_SYS_RESOURCES">
             <field id="beginDatetime" name="beginDatetime" label="请假开始时间" db-column-name="BEGIN_DATETIME"
                    visible="true" sortable="true" html-width="100" data-type="String"

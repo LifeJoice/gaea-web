@@ -3,11 +3,17 @@
  * 2016-2-17 11:09:22
  * Iverson
  */
-require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-toolbar', 'gaeajs-ui-notify', 'webuploader',
+require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-toolbar', 'gaeajs-ui-notify', 'webuploader', "gaeajs-ui-chain", "gaeajs-ui-view",
         'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-mouse', 'jquery-ui-button', 'jquery-ui-draggable', 'jquery-ui-position',
         'jquery-ui-dialog', 'gaea-jqui-dialog', 'jquery-serializeObject'],
-    function ($, gaeaAjax, gaeaValid, gaeaGrid, gaeaToolbar, gaeaNotify, webuploader) {
+    function ($, gaeaAjax, gaeaValid, gaeaGrid, gaeaToolbar, gaeaNotify, webuploader, gaeaUIChain, gaeaView) {
         $("#urSchemaId").val(viewSchema.initData.id);
+
+        // 最后，初始化链式view
+        // 这个之后，才能初始化toolbar。里面的按钮关联的其他view会依赖这个作为父。
+        gaeaView.addChain(viewSchema.initData.views);
+        $("#viewId").val(viewSchema.initData.views.id);
+
         // 初始化GRID
         viewSchema.initData.grid.listeners = {
             select: function (row) {

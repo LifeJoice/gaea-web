@@ -1,7 +1,7 @@
-package org.gaea.framework.web.data.authority.entity;
+package org.gaea.framework.web.data.authority.jo;
 
+import org.gaea.framework.web.data.authority.entity.DsAuthConditionSetEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
-import org.gaea.framework.web.data.domain.DsConditionSetEntity;
 import org.gaea.security.domain.Role;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -11,42 +11,28 @@ import java.util.List;
 
 /**
  * 数据集权限定义实体
- * Created by iverson on 2016/12/5.
+ * <p/>
+ * JO对象。负责以json的方式传递给前端。
+ * 因为直接用entity、domain等传递，可能会有不想要的关系（entity必须严格符合JPA模型）、字段。
+ * JO对象是零散的，不严谨的，根据前端需要千变万化的。
+ * <p/>
+ * Created by iverson on 2017-7-3 15:36:00
  */
-@Entity
-@Table(name = "GAEA_SYS_DS_AUTHORITIES")
-public class DsAuthorityEntity implements Serializable, org.gaea.data.dataset.domain.DsAuthority {
+public class DsAuthorityJO implements Serializable, org.gaea.data.dataset.domain.DsAuthority {
     private static final long serialVersionUID = 1L;
-    @Id
-    @GenericGenerator(name = "gaeaDateTimeIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
-    @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
-    @Column(name = "ID")
     private String id;
 
-    @Column(name = "NAME", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "DESCRIPTION")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DATASET_ID")
     private DataSetEntity dataSetEntity;
 
     /**
      * 这个是附加的权限过滤的conditionSet。
      */
-    @OneToOne(mappedBy = "dsAuthorityEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private DsAuthConditionSetEntity dsAuthConditionSetEntity;
 
-    /* 不需要Cascade，这里会维护关系，但不会更新Role的内容 */
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "GAEA_SYS_DS_AUTHORITIES_ROLES", joinColumns = {
-            @JoinColumn(name = "DS_AUTHORITY_ID")
-    }, inverseJoinColumns = {
-            @JoinColumn(name = "ROLE_ID")
-    })
     private List<Role> roles;
 
     public String getId() {

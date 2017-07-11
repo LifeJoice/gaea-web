@@ -30,7 +30,7 @@ public class Role implements Serializable, DsAuthRole {
     private Role parent;
     @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Role> subRoles;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_USERS_ROLES", joinColumns = {
             @JoinColumn(name = "ROLE_ID")

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.dataset.service.GaeaDataSetService;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.*;
 import org.gaea.framework.web.common.CommonDefinition;
@@ -344,12 +346,17 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * 使用传入的DataSet的id，查询结果集后，往传入的DataSet填入data和totalElements，并返回。
      * </p>
      *
-     * @param ds          就是输入参数ds，填充了数据即返回
+     * @param ds                 就是输入参数ds，填充了数据即返回
      * @param strPageSize
+     * @param loginName
+     * @param conditionSetMap    key：条件集 value：条件集的值。这个需要有序的map。查询条件组成sql的顺序，会按照map中的顺序来。
+     * @return
      * @throws InvalidDataException
+     * @throws SystemConfigException
+     * @throws ValidationFailedException
      */
     @Override
-    public DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName) throws InvalidDataException, SystemConfigException, ValidationFailedException {
+    public DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws InvalidDataException, SystemConfigException, ValidationFailedException {
         int pageSize = 0;
         if (!StringUtils.isNumeric(strPageSize)) {
             throw new InvalidDataException("XML 定义的pageSize必须为整数.当前值：" + strPageSize);
@@ -367,7 +374,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
         }
         PageResult pageResultSet = null;
         try {
-            pageResultSet = commonViewQueryService.query(gaeaDataSet, null, new SchemaGridPage(1, pageSize), loginName);
+            pageResultSet = commonViewQueryService.query(gaeaDataSet, conditionSetMap, new SchemaGridPage(1, pageSize), loginName);
 
             logger.debug("\n【SQL】 " + gaeaDataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
             ds.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());

@@ -4,6 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.security.domain.Authority;
 import org.gaea.security.domain.Role;
+import org.gaea.security.domain.User;
 import org.gaea.security.repository.SystemRolesRepository;
 import org.gaea.security.service.SystemRolesService;
 import org.slf4j.Logger;
@@ -52,6 +53,30 @@ public class SystemRolesServiceImpl implements SystemRolesService {
 //            authorities.clear();
         }
 //        role.setAuthorities(authorities);
+        systemRolesRepository.save(role);
+    }
+
+    @Override
+    @Transactional
+    public void saveRoleUsers(Role role, List<String> userIds) {
+        if (role == null || StringUtils.isEmpty(role.getId())) {
+            throw new IllegalArgumentException("角色id不允许为空。否则无法执行角色权限的更新操作！");
+        }
+        role = systemRolesRepository.findOne(role.getId());
+        if (CollectionUtils.isEmpty(role.getUsers())) {
+            role.setUsers(new ArrayList<User>());
+        }
+        // 先清空关系
+        role.getUsers().clear();
+
+        List<User> users = role.getUsers();
+        if (CollectionUtils.isNotEmpty(userIds)) {
+            for (String userId : userIds) {
+                if (StringUtils.isNotEmpty(userId)) {
+                    users.add(new User(userId));
+                }
+            }
+        }
         systemRolesRepository.save(role);
     }
 }

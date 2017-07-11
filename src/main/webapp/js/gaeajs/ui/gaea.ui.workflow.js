@@ -3,8 +3,8 @@
  * 封装工作流相关的组件。
  * Created by iverson on 2016-2-17 11:48:52.
  */
-define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog', 'gaea-jqui-dialog',
-        "gaeajs-context", "gaeajs-ui-notify", "gaeajs-ui-definition"],
+define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-grid', 'gaeajs-ui-dialog',
+        "gaeajs-context", "gaeajs-ui-notify", "gaeajs-ui-definition", 'gaea-jqui-dialog'],
     function ($, _, gaeaAjax, gaeaValid, gaeaGrid, gaeaDialog,
               gaeaContext, gaeaNotify, GAEA_UI_DEFINE) {
     var workflow = {
@@ -40,6 +40,7 @@ define(["jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils
                 //})
             },
             createNormalApprovalDialogAndBinding: function (inOptions, linkAction) {
+                var gaeaDialog = require("gaeajs-ui-dialog");
                 this.cache.options = inOptions;
                 //inOptions.autoOpen = false;
                 var dlgSelector = null;

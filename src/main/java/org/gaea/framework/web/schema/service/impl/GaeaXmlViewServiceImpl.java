@@ -1,10 +1,12 @@
 package org.gaea.framework.web.schema.service.impl;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.gaea.exception.InvalidDataException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SystemConfigException;
-import org.gaea.exception.ValidationFailedException;
+import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.ConditionSet;
+import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.data.system.SystemDataSetFactory;
+import org.gaea.db.QueryCondition;
+import org.gaea.exception.*;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.convertor.list.GridPageTemplateHelper;
@@ -12,7 +14,6 @@ import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.service.GaeaXmlSchemaService;
 import org.gaea.framework.web.schema.service.GaeaXmlViewService;
-import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
-import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Created by iverson on 2016-12-30 14:42:20.
@@ -42,26 +44,26 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
     @Autowired
     private GaeaXmlSchemaService gaeaXmlSchemaService;
 
-    /**
-     * 通过HTML模板，加上XML SCHEMA定义，获取最终完整的HTML页面。
-     * <p>具体参考 getViewContent(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName) 接口。</p>
-     *
-     * @param springApplicationContext
-     * @param viewSchemaLocation
-     * @param schemaName
-     * @param loginName
-     * @return
-     * @throws ValidationFailedException
-     * @throws IOException
-     * @throws InvalidDataException
-     * @throws SystemConfigException
-     */
-    @Override
-    public String getViewContent(ApplicationContext springApplicationContext, String viewSchemaLocation, String schemaName, String loginName)
-            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException {
-        String viewSchemaPath = viewSchemaLocation + schemaName;
-        return getViewContent(springApplicationContext, viewSchemaPath, loginName);
-    }
+//    /**
+//     * 通过HTML模板，加上XML SCHEMA定义，获取最终完整的HTML页面。
+//     * <p>具体参考 getViewContent(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName) 接口。</p>
+//     *
+//     * @param springApplicationContext
+//     * @param viewSchemaLocation
+//     * @param schemaName
+//     * @param loginName
+//     * @return
+//     * @throws ValidationFailedException
+//     * @throws IOException
+//     * @throws InvalidDataException
+//     * @throws SystemConfigException
+//     */
+//    @Override
+//    public String getViewContent(ApplicationContext springApplicationContext, String viewSchemaLocation, String schemaName, String loginName)
+//            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException {
+//        String viewSchemaPath = viewSchemaLocation + schemaName;
+//        return getViewContent(springApplicationContext, viewSchemaPath, loginName, null);
+//    }
 
     /**
      * 通过HTML模板，加上XML SCHEMA定义，获取最终完整的HTML页面。
@@ -85,12 +87,13 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
      * @param springApplicationContext 用于获取服务器目录下的模板
      * @param viewSchemaPath           XML SCHEMA路径
      * @param loginName                用户登录名。数据权限过滤用。
+     * @param queryConditionDTOList     可以为空。schemaPath对应XML的数据集的相关查询条件.  有序。顺序就是拼装SQL的条件的顺序。
      * @return 一个HTML页面的String
      * @throws ValidationFailedException
      */
     @Override
-    public String getViewContent(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName)
-            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException {
+    public String getViewContent(ApplicationContext springApplicationContext, String viewSchemaPath, String loginName, List<DataSetCommonQueryConditionDTO> queryConditionDTOList)
+            throws ValidationFailedException, IOException, InvalidDataException, SystemConfigException, SysInitException, ProcessFailedException {
         String htmlPage = "";
         String jsonData = "";
         GridPageTemplateHelper listSchemaHtml = null;
@@ -100,6 +103,13 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
             logger.debug(MessageFormat.format("准备开始解析Gaea xml模板 {0}.", "'" + viewSchemaPath + "'").toString());
             // 获得HTML模板混合XML SCHEMA的页面。
             GaeaXmlSchema gaeaXML = gaeaXmlSchemaProcessor.parseXml(viewSchemaPath, springApplicationContext);
+            DataSet dataSet = null;
+            if (gaeaXML.getSchemaData() != null && gaeaXML.getSchemaData().getDataSetList() != null && !gaeaXML.getSchemaData().getDataSetList().isEmpty()) {
+                dataSet = gaeaXML.getSchemaData().getDataSetList().get(0);
+                if (dataSet != null && StringUtils.isNotEmpty(dataSet.getId())) {
+                    // 通过DataSet id获取缓存的数据集定义
+                    GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
+
 //            // 根据DataSet查询并填充数据
 //            if (gaeaXML.getSchemaData() != null && CollectionUtils.isNotEmpty(gaeaXML.getSchemaData().getDataSetList())) {
 ////                DataSet ds = gaeaXmlSchemaProcessor.queryAndFillData(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(),loginName);
@@ -109,7 +119,12 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
 //                Map<String, Object> dataMap = gaeaXmlSchemaProcessor.combineSchemaInfo(gaeaXML);
 //                // 把最终结果转换为json字符串
 //                jsonData = GaeaJacksonUtils.parse(dataMap);
-            jsonData = gaeaXmlSchemaService.getJsonSchema(gaeaXML, loginName);
+
+                    // 如果某些查询条件（queryConditionDTOList）在系统的数据集定义中缺少，略过（虽然这样会导致查询条件的缺少）
+                    LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap = gaeaXmlSchemaService.getConditionSets(gaeaDataSet, queryConditionDTOList, false);
+                    jsonData = gaeaXmlSchemaService.getJsonSchema(gaeaXML, loginName, conditionSetMap);
+                }
+            }
 //                // 把结果注入HTML页面
                 listSchemaHtml.replaceData(jsonData);
 //            }

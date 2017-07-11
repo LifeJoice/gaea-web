@@ -6,8 +6,18 @@
  * by Iverson 2016-6-25 16:14:35
  *
  */
+
+/**
+ * 触发器。定义一个组件被什么触发等信息。
+ *
+ * @typedef {object} GaeaUITrigger
+ * @property {string} trgSelector                   触发选择器。由这个选择器导致的触发。参考：$(trgSelector).on(...)
+ */
+
+
 define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-utils-string"],
     function ($, _, gaeaValid, gaeaString) {
+
         var events = {};
 
         events.cache = {
@@ -72,7 +82,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     REFRESH_DATA: "gaeaUI_event_grid_refresh_data", // 刷新数据区事件
                     SYNC_GRID_DATA: "gaeaUI_event_grid_sync_grid_data", // 同步数据区的数据事件。一般crud grid需要，因为数据区是可编辑的。
                     RELOAD: "gaeaUI_event_grid_reload", // 刷新grid数据的事件。无需参数。
-                    SELECT: "gaeaUI_event_grid_select"  // 选中了grid的某一行的事件
+                    SELECT: "gaeaUI_event_grid_select",  // 选中了grid的某一行的事件
+                    GLOBAL_LAST_SELECT_FINISHED: "gaeaUI_event_grid_global_last_select_finished"  // 全局事件！不绑定具体grid。选中了grid的某一行的事件, 并且完成了把选中行数据缓存等工作
                 },
                 /**
                  * 复选框组件相关事件

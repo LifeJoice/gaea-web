@@ -19,6 +19,32 @@ define([
               gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid,
               gaeaData, gaeaTabs) {
 
+        /**
+         * 服务端的View对象的定义。
+         *
+         * @typedef {object} ServerView
+         * @property {string} id                            元素id
+         * @property {string} parentId                      父级的view id
+         * @property {ServerDialog} dialogs
+         * @property {ServerView} views
+         * @property {ServerAction} actions
+         * @property {string} title                         页面标题。
+         * @property {string} contentUrl                    内容加载的url
+         * @property {string} componentName                 组件名。value：wf-dialog|crud-dialog|
+         //* @property {ServerDialog.Button[]} buttons        这个弹出框对应的按钮
+         */
+
+        /**
+         *
+         *
+         * @typedef {object} ServerAction
+         * @property {string} id                            dialog id
+         * @property {string} name
+         * @property {string} htmlName
+         * @property {string} htmlId
+         * @property {ServerDialog.Button[]} buttons        这个弹出框对应的按钮
+         */
+
         var gaeaCommons = {
             /**
              *
@@ -89,6 +115,30 @@ define([
                         gaeaGrid.data.reset(gridId, opts.data[name]);
                     }
                 });
+            }
+        };
+
+        // 通用工具类
+        gaeaCommons.utils = {
+            /**
+             * 根据id，从服务端返回的元素中，寻找对应的gaea组件。
+             * 注意！当前主要找服务端返回的views里面的dialogs和views两个数组！
+             * @param {ServerView} inViews
+             * @param linkViewId
+             * @returns {object}    某个组件定义对象（例如：服务端的dialog定义）。不是和jQuery dialog的配置项对应的（可能某个别会重复）
+             */
+            findComponent: function (inViews, linkViewId) {
+                if (gaeaValid.isNull(inViews) || gaeaValid.isNull(linkViewId)) {
+                    throw "输入的views定义 或 关联组件id为空，无法查找组件！";
+                }
+                var target;
+                if (gaeaValid.isNotNull(inViews.dialogs)) {
+                    target = _.findWhere(inViews.dialogs, {id: linkViewId});
+                }
+                if (gaeaValid.isNull(target) && gaeaValid.isNotNull(inViews.dialogs)) {
+                    target = _.findWhere(inViews.views, {id: linkViewId});
+                }
+                return target;
             }
         };
 

@@ -1,6 +1,7 @@
 package org.gaea.framework.web.schema.convertor;
 
 import org.gaea.exception.InvalidDataException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
 import org.gaea.framework.web.schema.domain.SchemaViews;
@@ -34,6 +35,7 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
         NodeList nodes = xmlViewsNode.getChildNodes();
         SchemaViews schemaViews = new SchemaViews();
         schemaViews = GaeaXmlUtils.copyAttributesToBean(xmlViewsNode, schemaViews, SchemaViews.class);
+
         for (int i = 0; i < nodes.getLength(); i++) {
             Node viewNodes = nodes.item(i);
             // xml解析会把各种换行符等解析成元素。统统跳过。
@@ -65,6 +67,11 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
             } else if (XmlSchemaDefinition.IMPORT_JAVASCRIPT_NAME.equals(viewNodes.getNodeName()) ||
                     XmlSchemaDefinition.IMPORT_CSS_NAME.equals(viewNodes.getNodeName())) {
                 convertImports(schemaViews, viewNodes);
+            } else if (XmlSchemaDefinition.VIEW_NAME.equals(viewNodes.getNodeName())) {
+                SchemaViews subView = convert(viewNodes);
+                // 设置viewName。前端会根据这个区分不同的弹出框类型（组件），进行不同的处理。有点类似type了。
+                subView.setComponentName(viewNodes.getNodeName());
+                schemaViews.getViews().add(subView);
             }
         }
         return schemaViews;

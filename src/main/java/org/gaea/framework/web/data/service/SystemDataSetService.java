@@ -1,6 +1,8 @@
 package org.gaea.framework.web.data.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.gaea.data.dataset.domain.ConditionSet;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SystemConfigException;
@@ -11,6 +13,7 @@ import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +28,7 @@ public interface SystemDataSetService {
     @Transactional(readOnly = true)
     void synchronizeDBDataSet();
 
-    DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName) throws InvalidDataException, SystemConfigException, ValidationFailedException;
+    DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws InvalidDataException, SystemConfigException, ValidationFailedException;
 
     /**
      * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>

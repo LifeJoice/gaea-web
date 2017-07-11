@@ -35,6 +35,11 @@
     width: 33%;
 }
 
+/* 表格的块，就是可编辑表格，独占一行 */
+.grid-field-block {
+    width: 100%;
+}
+
 .field-block:last-child {
     width: 34%; /* 最后一块是34%，保证全部就是100% */
 }

@@ -7,6 +7,7 @@ import org.gaea.framework.web.data.authority.entity.DsAuthConditionEntity;
 import org.gaea.framework.web.data.authority.entity.DsAuthConditionSetEntity;
 import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -19,5 +20,7 @@ public interface SystemDataSetMgrService {
 
     Map loadEditData(DataSetEntity dataSet) throws ProcessFailedException;
 
-    void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException;
+//    void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException;
+//
+//    void updateDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException;
 }

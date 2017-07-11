@@ -1492,6 +1492,7 @@ define([
                         // 遍历column数组，设置显示样式（CSS等）
                         $.each(gridOptions.columns, function (idx, obj) {
                             var col = this;
+                            _.defaults(col, defaultOpts.column);
                             var gridColumnId = "gridcolumn-" + (idx + 1);
                             if (gaeaValid.isNotNull(col.width) && $.isNumeric(col.width)) {
                                 // 设置单元格宽度
@@ -1544,7 +1545,11 @@ define([
                             totalWidth = "100%";
                         }
                         //GAEA_UI_DEFINE.UI.MAIN.getUIPageJQ().css("width", totalWidth);
-                        $gridCt.css("width", totalWidth);
+                        // 不是可编辑表格，才设定宽度。可编辑表格让它自适应好了
+                        if ($gridCt.parents(".crud-grid-ct").length < 1) {
+                            $gridCt.css("width", totalWidth);
+                            console.debug("设定表格id= %s 的宽度为 %s", opts.id, totalWidth);
+                        }
                     },
                     /**
                      *
@@ -1937,10 +1942,32 @@ define([
                         //var column = _.extend(_.clone(defaultOpts.column), gridOptions.columns[i]);
                         //var field = this;
                         var columnHtmId = "gridcolumn-" + (columnIndex + 1); // column的序列化从1开始吧
+
                         // 生成CheckBox id
                         var checkBoxId = opts.id + "-cbx-" + rowIndex;
-                        var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
-                        // 遍历数据（一行）中每一列的值，如果id和当前列id一致就填充进去。
+                        // 第一列，生成复选框。
+                        if (columnIndex == 0) {
+                            $tr.append("<td class='checkbox'>" +
+                                "<div class=\"row-check\">" +
+                                "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
+                                    // Label里面的都是复选框的效果元素。
+                                "<label id='gaea-cb-label-" + columnIndex + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
+                                "</label>" +
+                                "</div>" +
+                                "</td>");
+                        }
+
+                        //var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
+                        // create input 'name'
+                        var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
+                        var value;
+
+                        // 初始单元格的容器
+                        var $td = $(gaeaString.builder.simpleBuild('<td class="grid-td" data-columnid="%s"><div class="grid-td-div"></div></td>', columnHtmId));
+                        $tr.append($td);
+
+                        // 获取当前要填充的值
+                        // 遍历数据（一行）中每一列的值，如果id和当前列id一致就是。
                         $.each(rowData, function (key, val) {
                             //var cellText = cell;
                             //if (_.isObject(cell)) {
@@ -1951,46 +1978,55 @@ define([
                             //}
                             // 如果数据中的key和field（grid数据结构定义）中的设置一致（即类似data.columnname = grid.columnname），则把值复制到表格中。
                             if (gaeaString.equalsIgnoreCase(field.id, key)) {
-                                hasNotMatchedField = false; // 找到对应的列单元格数据项
-                                var $td = $("<td class='grid-td' data-columnid='" + columnHtmId + "'></td>");
+                                //hasNotMatchedField = false; // 找到对应的列单元格数据项
+                                value = val;
+                                //var $td = $("<td class='grid-td' data-columnid='" + columnHtmId + "'></td>");
                                 // create input div
-                                var $inputDiv = $('<div class="grid-td-div"></div>');
+                                //var $inputDiv = $('<div class="grid-td-div"></div>');
                                 // 第一列，生成复选框。
-                                if (columnIndex == 0) {
-                                    $tr.append("<td class='checkbox'>" +
-                                        "<div class=\"row-check\">" +
-                                        "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
-                                            // Label里面的都是复选框的效果元素。
-                                        "<label id='gaea-cb-label-" + columnIndex + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
-                                        "</label>" +
-                                        "</div>" +
-                                        "</td>");
-                                }
+                                //if (columnIndex == 0) {
+                                //    $tr.append("<td class='checkbox'>" +
+                                //        "<div class=\"row-check\">" +
+                                //        "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
+                                //            // Label里面的都是复选框的效果元素。
+                                //        "<label id='gaea-cb-label-" + columnIndex + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
+                                //        "</label>" +
+                                //        "</div>" +
+                                //        "</td>");
+                                //}
                                 // 先初始化DOM，插入单元格容器。这样可以用更多jQuery的功能，例如find, wrap等。
-                                $td.append($inputDiv);
+                                //$td.append($inputDiv);
                                 //$tbBody.find("tr:last").append($td);
-                                $tr.append($td);
+                                //$tr.append($td);
                                 // 转换日期格式
                                 //if (gaeaValid.isNotNull(cellText) && gaeaValid.isNotNull(column.datetimeFormat)) {
                                 //    cellText = gaeaDT.getDate(cellText, {format: column.datetimeFormat});
                                 //}
-                                // create input 'name'
-                                var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
+                                //// create input 'name'
+                                //var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
 
-                                // 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
-                                _private.crudGrid.html.createTdContent($td, {
-                                    id: opts.id,
-                                    inputId: inputName,
-                                    column: column,
-                                    inputValue: val
-                                });
+                                //// 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
+                                //_private.crudGrid.html.createTdContent($td, {
+                                //    id: opts.id,
+                                //    inputId: inputName,
+                                //    column: column,
+                                //    inputValue: val
+                                //});
                             }
                         });
                         // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
-                        if (hasNotMatchedField) {
-                            $tr.append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
-                                "<div class=\"grid-td-div\"></div></td>");
-                        }
+                        //if (hasNotMatchedField) {
+                        //    $tr.append("<td class='grid-td' data-columnid='" + columnHtmId + "'>" +
+                        //        "<div class=\"grid-td-div\"></div></td>");
+                        //}
+
+                        // 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
+                        _private.crudGrid.html.createTdContent($td, {
+                            id: opts.id,
+                            inputId: inputName,
+                            column: column,
+                            inputValue: value
+                        });
 
                     },
                     /**
@@ -2005,33 +2041,55 @@ define([
                      */
                     createTdContent: function ($td, opts) {
                         var $cellCt = $td.children(".grid-td-div");
-                        /**
-                         * if 字段可编辑
-                         *      构造input
-                         * else
-                         *      只是显示文字
-                         */
-                        if (opts.column.editable) {
-                            // create input box
-                            $cellCt.append(gaeaInput.create({
-                                id: opts.inputId,
-                                name: opts.inputId,
-                                class: "crud-grid-input",
-                                dataType: opts.column.dataType,
-                                value: opts.inputValue,
-                                validator: opts.column.validator,// 校验定义
-                                onChange: function (event) {
-                                    // 刷新缓存的值
-                                    _private.crudGrid.data.refreshOneField({
-                                        id: opts.id,
-                                        target: this // 当前change的对象
-                                    });
-                                }
-                            }));
-                        } else {
+                        // create input box
+                        // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
+                        $cellCt.append(gaeaInput.create({
+                            id: opts.inputId,
+                            name: opts.inputId,
+                            class: "crud-grid-input",
+                            dataType: opts.column.dataType,
+                            value: opts.inputValue,
+                            validator: opts.column.validator,// 校验定义
+                            onChange: function (event) {
+                                // 刷新缓存的值
+                                _private.crudGrid.data.refreshOneField({
+                                    id: opts.id,
+                                    target: this // 当前change的对象
+                                });
+                            }
+                        }));
+
+                        var $tdInput = $("#" + gaeaString.format.getValidName(opts.inputId));
+
+                        // 如果不可编辑
+                        if (!opts.column.editable) {
+                            //    // create input box
+                            //    $cellCt.append(gaeaInput.create({
+                            //        id: opts.inputId,
+                            //        name: opts.inputId,
+                            //        class: "crud-grid-input",
+                            //        dataType: opts.column.dataType,
+                            //        value: opts.inputValue,
+                            //        validator: opts.column.validator,// 校验定义
+                            //        onChange: function (event) {
+                            //            // 刷新缓存的值
+                            //            _private.crudGrid.data.refreshOneField({
+                            //                id: opts.id,
+                            //                target: this // 当前change的对象
+                            //            });
+                            //        }
+                            //    }));
+                            //} else {
                             $td.addClass("non-editable");
+                            // 不可编辑
+                            $tdInput.prop("readonly", true);
                             // init Html first
-                            $cellCt.append(gaeaContext.getValue(opts.column.value));
+                            // 如果手动设定了值，以手动设定的值为准
+                            // AI.TODO 这里设定值，越界了！应该放到gaeaInput里面去统一处理！
+                            if (gaeaValid.isNotNull(opts.column.value)) {
+                                //$cellCt.append(gaeaContext.getValue(opts.column.value));
+                                $tdInput.val(gaeaContext.getValue(opts.column.value));
+                            }
                             /**
                              * if 是图片的话，处理图片。
                              * 初始化lightGallery图片查看插件放到整个table初始化完成后。
@@ -2159,6 +2217,8 @@ define([
                  */
                 registerCacheSelectRowData: function (opts) {
                     var gridId = opts.id;
+                    var $gridCt = $("#" + opts.id);
+
                     gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + opts.id, function (event, data) {
                         // 【1】刷新selectedRows（每次覆盖）
                         var rowIndexes = _private.grid.getSelectedIndexes({
@@ -2177,6 +2237,16 @@ define([
                             gaeaContext.setValue("selectedRow", gridId, data.selectedRow);
                             gaeaContext.setValue("id", gridId, data.selectedRow.id);
                         }
+
+                        // 【3】触发选中处理完成事件
+                        // 这个是全局的，广播最新选中行数据。且无关哪个grid
+                        gaeaContext.setValue("lastSelectedRow", data.selectedRow);
+                        gaeaContext.setValue("lastSelectedRows", selectedRows);
+                        gaeaEvents.publish(gaeaEvents.DEFINE.UI.GRID.GLOBAL_LAST_SELECT_FINISHED, {
+                            gridId: gridId,
+                            selectedRow: data.selectedRow,
+                            selectedRows: selectedRows
+                        });
                     });
                 },
                 ///**

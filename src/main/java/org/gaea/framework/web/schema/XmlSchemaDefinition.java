@@ -11,6 +11,11 @@ public class XmlSchemaDefinition {
     public static String ROOT_NODE = "ur-schema";
     public static String DATA_NAME = "data";
     public static String VIEWS_NAME = "views";
+    /**
+     * 这个，应该和上面的VIEWS_NAME等价。只是当前重构没彻底，所以，XML里面大的元素叫views，其中嵌套的叫view。
+     * AI.TODO 后面重构，把views重构为view吧。现在代码都只用SchemaViews一个对象表示。所以代码改变没那么大。
+     */
+    public static String VIEW_NAME = "view";
     public static String GRID_NAME = "grid";
     public static String DIALOG_NAME = "dialog";
     public static String CRUD_DIALOG_NAME = "crud-dialog";// 增删改弹出框

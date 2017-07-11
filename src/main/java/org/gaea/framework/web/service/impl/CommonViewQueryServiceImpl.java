@@ -38,6 +38,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -175,32 +176,60 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     }
 
     /**
-     * @param gaeaDataSet 数据集的定义。主要用sql，primaryTable等。
-     * @param conditions  条件
+     * 这个是结合权限过滤的查询。
+     *
+     * @param gaeaDataSet          数据集的定义。主要用sql，primaryTable等。
+    //     * @param conditions  条件 重构删掉了，从没用过 by Iverson 2017-7-11
      * @param page
-     * @param loginName   登录账户名。主要用于数据权限过滤。
-     * @return
+     * @param loginName   登录账户名。主要用于数据权限过滤。   @return
      * @throws ValidationFailedException
      * @throws InvalidDataException
      * @throws SystemConfigException
      */
     @Override
-    public PageResult query(GaeaDataSet gaeaDataSet, List<QueryCondition> conditions, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
+    public PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
         if (gaeaDataSet != null) {
-            if (conditions == null) {
-                conditions = new ArrayList<QueryCondition>();
-            }
+//            if (authConditions == null) {
+//                authConditions = new ArrayList<QueryCondition>();
+//            }
             // 数据集权限校验
             ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
             // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
-            if (authorityConditionSet != null && CollectionUtils.isNotEmpty(authorityConditionSet.getConditions())) {
-                // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
-                List<Condition> originConditions = CollectionUtils.isEmpty(conditions) ? new ArrayList<Condition>() : convertToConditions(conditions);
-                authorityConditionSet.getConditions().addAll(originConditions);
-            }
-            // 构建默认的SQL中表达式要用的上下文对象
+//            if (authorityConditionSet != null && CollectionUtils.isNotEmpty(authorityConditionSet.getConditions())) {
+//                // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
+//                List<Condition> originConditions = CollectionUtils.isEmpty(authConditions) ? new ArrayList<Condition>() : convertToConditions(authConditions);
+//                authorityConditionSet.getConditions().addAll(originConditions);
+//            }
+            // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
             GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
             return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
+        }
+        return null;
+    }
+
+    @Override
+    public PageResult query(GaeaDataSet gaeaDataSet, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
+        if (gaeaDataSet != null) {
+            LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> newSortConditionSetMap = new LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO>(); // 新的排顺序的条件集的map
+            if (conditionSetMap == null) {
+                conditionSetMap = new LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO>();
+            }
+            /**
+             * 权限校验的条件集在第一位
+             */
+
+            ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);// 数据集权限校验
+            if (authorityConditionSet != null && StringUtils.isNotEmpty(authorityConditionSet.getId())) {
+                newSortConditionSetMap.put(authorityConditionSet, null); // 权限校验的值对象，不是DataSetCommonQueryConditionDTO，是GaeaDefaultDsContext
+            }
+            /**
+             * 再叠加其他条件
+             */
+            newSortConditionSetMap.putAll(conditionSetMap);
+
+            // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+            return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), newSortConditionSetMap, page, defaultDsContext);
         }
         return null;
     }

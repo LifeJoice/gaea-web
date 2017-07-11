@@ -28,6 +28,7 @@ import java.sql.Types;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -117,13 +118,21 @@ public class GaeaSqlProcessor {
 
     /**
      * 查询。
+     * <p>
+     * 历史原因，这个当前只能匹配一个条件集查询。即如果有权限的条件集，就用不了其他条件集了。<br/>
+     * 推荐多个条件集使用另一个query接口。
+     * </p>
+     * <p>
+     * 权限校验（或者表达式）的值对象，用的不是DataSetCommonQueryConditionDTO，而是GaeaDefaultDsContext对象。
+     * AI.TODO 这个，重构一下，整合两个值对象会比较合理
+     * </p>
      *
      * @param sql
      * @param primaryTable
      * @param conditionSet      条件。
      * @param page
      * @param defaultDsContext  主要用权限过滤，和SQL中的表达式（如果有）的解析。
-     * @param queryConditionDTO 查询的条件的值。这个一般页面发起的查询有。一般的可以放入到ConditionSet。有点重复了。
+     * @param queryConditionDTO 可以为空。查询的条件的值。这个一般页面发起的查询有。一般的可以放入到ConditionSet。有点重复了。
      * @return
      * @throws ValidationFailedException
      * @throws InvalidDataException
@@ -144,6 +153,52 @@ public class GaeaSqlProcessor {
         }
         if (StringUtils.isNotEmpty(whereCause)) {
             sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause).toString();
+        }
+        PageResult pageResult = query(sql, params, primaryTable, page);
+        return pageResult;
+    }
+
+    /**
+     * 支持多个ConditionSet作为查询条件的查询功能。
+     *
+     * @param sql
+     * @param primaryTable
+     * @param conditionSetMap  key：条件集 value：条件集的值。这个需要有序的map。查询条件组成sql的顺序，会按照map中的顺序来。
+     * @param page
+     * @param defaultDsContext
+     * @return
+     * @throws ValidationFailedException
+     * @throws InvalidDataException
+     */
+    public PageResult query(String sql, String primaryTable, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext) throws ValidationFailedException, InvalidDataException {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        StringBuilder whereCause = new StringBuilder();
+        /**
+         * 构造where
+         */
+        if (conditionSetMap != null) {
+            for (ConditionSet conditionSet : conditionSetMap.keySet()) {
+                DataSetCommonQueryConditionDTO queryConditionDTO = conditionSetMap.get(conditionSet);
+                /* 拼凑【WHERE】条件语句 */
+                whereCause.append(parseConditionSet(conditionSet, queryConditionDTO));
+                /**
+                 * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
+                 * else 按条件对象，拼凑条件参数值
+                 * 用Spring Template查询必须。
+                 */
+//                if (params == null && (conditionSet == null || CollectionUtils.isEmpty(conditionSet.getConditions()))) {
+//                    params = new MapSqlParameterSource();
+//                } else {
+                if (conditionSet != null && CollectionUtils.isNotEmpty(conditionSet.getConditions())) {
+                    params.addValues(genWhereParams(getConditions(conditionSet, queryConditionDTO), defaultDsContext).getValues());
+                }
+            }
+        }
+        /**
+         * 最终SQL
+         */
+        if (StringUtils.isNotEmpty(whereCause)) {
+            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause.toString()).toString();
         }
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
@@ -171,18 +226,17 @@ public class GaeaSqlProcessor {
             }
             /**
              * 拼凑查询条件.
-             * if value不为空
-             *      username = :USER_NAME
-             * else value为空
-             *      直接用操作符。例如：
+             * if 关系符是 eq/neq( is null / is not null)这类查询, 直接用操作符。例如：
              *      username is not null
-             * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
+             * else
+             *      username = :USER_NAME
              */
-            if (StringUtils.isNotEmpty(cond.getPropValue())) {
-                whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
-            } else {
-                whereSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
-            }
+            whereSql.append(parseCondition(cond));
+//            if (StringUtils.isNotEmpty(cond.getPropValue())) {
+//                whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
+//            } else {
+//                whereSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
+//            }
         }
         return whereSql.toString();
     }
@@ -276,18 +330,17 @@ public class GaeaSqlProcessor {
 //                    }
                     /**
                      * 拼凑查询条件.
-                     * if value不为空
-                     *      username = :USER_NAME
-                     * else value为空
-                     *      直接用操作符。例如：
+                     * if 关系符是 eq/neq( is null / is not null)这类查询, 直接用操作符。例如：
                      *      username is not null
-                     * {0} 字段名 {1} sql比较符 {2} Spring namedParameterJdbcTemplate的sql占位符
+                     * else
+                     *      username = :USER_NAME
                      */
-                    if (StringUtils.isNotEmpty(cond.getPropValue())) {
-                        conditionSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
-                    } else {
-                        conditionSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
-                    }
+                    conditionSql.append(parseCondition(cond));
+//                    if (StringUtils.isNotEmpty(cond.getPropValue())) {
+//                        conditionSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
+//                    } else {
+//                        conditionSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
+//                    }
                     /**
                      * if 没有placeholder,或者placeholder找不到
                      *      直接加上条件SQL即可
@@ -306,6 +359,36 @@ public class GaeaSqlProcessor {
             }
         }
         return whereSql.toString();
+    }
+
+    /**
+     * 拼凑查询条件.
+     * if 关系符是 eq/neq( is null / is not null)这类查询
+     * 直接用操作符。例如：
+     * username is not null
+     * else
+     * username = :USER_NAME
+     *
+     * @param cond
+     * @return
+     * @throws ValidationFailedException
+     */
+    private String parseCondition(QueryCondition cond) throws ValidationFailedException {
+        StringBuilder result = new StringBuilder();
+        /**
+         * if 关系符是 is null / is not null这类查询
+         *      则不需要">=<"之类的
+         *      直接用操作符。例如：
+         *      username is not null
+         * else
+         *      username = :USER_NAME
+         */
+        if (QueryCondition.FIELD_OP_NULL.equalsIgnoreCase(cond.getOp()) || QueryCondition.FIELD_OP_NOT_NULL.equalsIgnoreCase(cond.getOp())) {
+            result.append(MessageFormat.format("{0} {1}", cond.getPropName().toUpperCase(), parseFieldOp(cond)));
+        } else {
+            result.append(MessageFormat.format("{0} {1} :{2}", cond.getPropName().toUpperCase(), parseFieldOp(cond), cond.getPropName().toUpperCase()));
+        }
+        return result.toString();
     }
 
     /**
@@ -362,9 +445,9 @@ public class GaeaSqlProcessor {
 //                String value = cond.getPropValue();
                 Object value = parseParamValue(cond, defaultDsContext);
                 // 查询条件，变量名或值为空就略过
-                if (StringUtils.isEmpty(columnName) || value == null) {
-                    continue;
-                }
+//                if (StringUtils.isEmpty(columnName) || value == null) {
+//                    continue;
+//                }
                 // 拼凑查询条件 username=:USER_NAME
                 if (SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(cond.getDataType())) {// 如果XML SCHEMA定义的是日期类型，进行特别处理
 //                    FastDateFormat df = FastDateFormat.getInstance("yyyy-MM-dd");
@@ -385,6 +468,10 @@ public class GaeaSqlProcessor {
 
     /**
      * 转换值。主要是增加like操作符。是以**开始，还是以**结束。就是“%”加在前面还是后面。
+     * <p>
+     * 针对带表达式的处理（例如：权限校验里面的）<br/>
+     * 1. 默认可用的值对象，就是GaeaDefaultDsContext。（无关DataSetCommonQueryConditionDTO）
+     * </p>
      *
      * @param cond
      * @param defaultDsContext

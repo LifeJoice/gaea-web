@@ -1,11 +1,11 @@
-<div id="tabs" data-gaea-ui-tabs="" data-gaea-ui="component:'tabs' ">
+<div id="ds-authority-tabs" data-gaea-ui-tabs="" data-gaea-ui="component:'tabs' ">
     <ul>
         <li><a href="#div-ds-authority-mgr-tab1">数据集权限</a></li>
-        <!--<li><a href="#tabs-2">菜单管理</a></li>-->
-        <li><a href="/gaea/data/dataset/showDsAuthConditionSetForm">权限条件</a></li>
+        <li><a href="/gaea/data/dataset/auth/showDsAuthConditionSetForm">权限条件</a></li>
     </ul>
     <!-- -------------------------------------------------------------------------------------- tab1 数据集权限 -------------------------------------------------------------------------------------- -->
     <div id="div-ds-authority-mgr-tab1" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+        <input type="hidden" id="dsAuthorityId" name="dsAuthority.id" value=""><!-- 隐藏id值，当编辑的时候有值！ -->
         <div class="row">
             <div class="field-block">
                 <span class="fieldname">权限名称</span>
@@ -27,8 +27,19 @@
                 <span class="fieldvalue">
                     <div id="dsAuthRoleIds" class="gaea-multi-select"
                          data-gaea-data="name: 'dsAuthRoleIds',
-                    selectable:{dataset:'DS_AUTH_ROLES',condition:{id:'selectable',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][name]' }]} },
-                    selected:{dataset:'DS_AUTH_ROLES',condition:{id:'selected',values:[{ type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][name]' }]} }"></div>
+                    selectable:{
+                        dataset:'DS_AUTH_ROLES_SELECTABLE',
+                        condition:{id:'selectable',values:[
+                            { type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][dsName]' },
+                            { type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][name]' }
+                        ]} },
+                    selected:{
+                    dataset:'DS_AUTH_ROLES_SELECTED',
+                    condition:{id:'selected',values:[
+                        { type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][dsName]' },
+                        { type:'pageContext',value:'$pageContext[selectedRow][gaea-grid-ct][name]' }
+                        ]} }">
+                    </div>
                 </span>
             </div>
         </div>

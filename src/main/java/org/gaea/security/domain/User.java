@@ -4,6 +4,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
+    @GenericGenerator(name = "gaeaDateTimeIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     private String id;
     @Column(name = "name")
@@ -72,6 +73,9 @@ public class User implements Serializable {
     }
 
     public List<Role> getRoles() {
+        if (roles == null) {
+            roles = new ArrayList<Role>();
+        }
         return roles;
     }
 
