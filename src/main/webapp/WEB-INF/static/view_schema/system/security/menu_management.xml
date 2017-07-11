@@ -19,7 +19,7 @@
             <!--</where>-->
         </dataset>
     </data>
-    <views title="菜单管理">
+    <views id="menuMgrView" title="菜单管理">
         <actions id="myActions">
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add" />
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update" />

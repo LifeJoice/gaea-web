@@ -31,7 +31,7 @@
             </table>
         </data-schema>
     </data>
-    <views title="资源管理">
+    <views id="resourceMgrView" title="资源管理">
         <field-set id="" table-name="GAEA_SYS_RESOURCES">
             <field id="beginDatetime" name="beginDatetime" label="请假开始时间" db-column-name="BEGIN_DATETIME"
                    visible="true" sortable="true" html-width="100" data-type="String" datetime-format="yyyy-MM-dd hh:mm" />

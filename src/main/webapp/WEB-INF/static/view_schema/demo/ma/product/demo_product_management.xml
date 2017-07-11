@@ -4,7 +4,7 @@
     <data>
         <dataset id="DS_DEMO_PRODUCT_MANAGEMENT" primary-table="PRODUCT_INFO"></dataset>
     </data>
-    <views title="演示功能-产品管理">
+    <views id="demoProductMgrView" title="演示功能-产品管理">
         <!--<import-javascript src="" position="headfirst|headlast(default)|bodyend" />-->
         <!--<import-css src="" /> css暂时是没有position属性的。默认都为headlast -->
         <!--<import-javascript src="/static/plugins/jquery/datetimepicker/jquery.datetimepicker.js" />-->
