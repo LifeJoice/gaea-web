@@ -184,11 +184,11 @@ public class GaeaRequestParamMethodArgumentResolver implements HandlerMethodArgu
                 }
                 List convertedBeanList = null;
                 /**
-                 * if 注解的目标是List<Map>>这种的，不能用JavaType去转换，Jackson会报错，用默认的List转换即可
+                 * if 注解是List（没有<xxx>） 或者 </xxx>注解的目标是List<Map>>这种的，不能用JavaType去转换，Jackson会报错，用默认的List转换即可
                  * else 是List<SomeClass>的
                  *      用JavaType转换
                  */
-                if (beanClass.isAssignableFrom(Map.class)) {
+                if (beanClass == null || beanClass.isAssignableFrom(Map.class)) {
                     convertedBeanList = objectMapper.readValue(data, List.class);
                 } else {
                     JavaType javaType = objectMapper.getTypeFactory().constructParametrizedType(ArrayList.class, List.class, beanClass);
