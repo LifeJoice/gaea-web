@@ -123,7 +123,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
      *
      * @param gaeaXML
      * @param loginName       对应的数据集的数据权限过滤用  @return
-     * @param conditionSetMap
+     * @param conditionSetMap key：条件集 value：条件集的值。这个需要有序的map。查询条件组成sql的顺序，会按照map中的顺序来。
      * @throws ValidationFailedException
      * @throws InvalidDataException
      * @throws SystemConfigException
@@ -138,7 +138,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
                 DataSet ds = systemDataSetService.queryDataAndTotalElement(gaeaXML.getSchemaData().getDataSetList().get(0), gaeaXML.getSchemaViews().getGrid().getPageSize(), loginName, conditionSetMap);
                 gaeaXML.getSchemaData().getDataSetList().set(0, ds);
                 // 整合要返回给页面的json。包括sql数据的清洗、对应数据集的转换等。
-                Map<String, Object> dataMap = gaeaXmlSchemaProcessor.combineSchemaInfo(gaeaXML);
+                Map<String, Object> dataMap = gaeaXmlSchemaProcessor.combineSchemaInfo(gaeaXML, conditionSetMap);
                 // 把最终结果转换为json字符串
                 jsonData = GaeaJacksonUtils.parse(dataMap);
             }

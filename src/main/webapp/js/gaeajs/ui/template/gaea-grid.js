@@ -12,7 +12,14 @@ require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', '
         // 最后，初始化链式view
         // 这个之后，才能初始化toolbar。里面的按钮关联的其他view会依赖这个作为父。
         gaeaView.addChain(viewSchema.initData.views);
-        $("#viewId").val(viewSchema.initData.views.id);
+        $("#gaeaViewId").val(viewSchema.initData.views.id);
+        // 缓存view组件的config options，并初始化id
+        if ($("[data-gaea-ui-view]").length == 1) {
+            $("[data-gaea-ui-view]:first").data("gaeaOptions", viewSchema.initData.views);
+            $("[data-gaea-ui-view]:first").attr("id", viewSchema.initData.views.id);
+        } else {
+            throw "当前页面有两个view的绑定元素( [data-gaea-ui-view] )！无法确定如何初始化gaea view组件！";
+        }
 
         // 初始化GRID
         viewSchema.initData.grid.listeners = {

@@ -2,17 +2,21 @@ package org.gaea.framework.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.ConditionSet;
+import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
-import org.gaea.exception.InvalidDataException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SysLogicalException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.schema.service.GaeaXmlSchemaService;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.framework.web.service.CommonViewQueryService;
+import org.gaea.framework.web.utils.GaeaWebConditionUtils;
+import org.gaea.framework.web.utils.GaeaWebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +44,14 @@ public class CommonViewQueryController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private CommonViewQueryService commonViewQueryService;
+    @Autowired
+    private GaeaXmlSchemaService gaeaXmlSchemaService;
+    @Autowired
+    private SystemDataSetService systemDataSetService;
+    @Autowired
+    private GaeaSqlProcessor gaeaSqlProcessor;
+    @Autowired
+    private GaeaWebConditionUtils gaeaWebConditionUtils;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -45,18 +59,31 @@ public class CommonViewQueryController {
      * 本类的默认查询方法。
      *
      * @param page
-     * @param urSchemaId
-     * @param filters
+     * @param urSchemaId       xml schema id
+     * @param filters          列表页的查询条件
+     * @param preConditions    前置条件。如果是下钻的页面，例如从一个列表页跳到第二个列表页，则第二个列表页很可能带着某些第一个列表页的前置条件。
      * @param request
      * @param response
      * @return
+     * @throws InvalidDataException
+     * @throws SysLogicalException
+     * @throws ValidationFailedException
+     * @throws SysInitException
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public PageResult page(@RequestBean SchemaGridPage page, String urSchemaId, @RequestBean("filters") List<QueryCondition> filters,
+    public PageResult page(@RequestBean SchemaGridPage page, String urSchemaId, @RequestBean("filters") List<QueryCondition> filters, String preConditions,
                            HttpServletRequest request, HttpServletResponse response) throws InvalidDataException, SysLogicalException, ValidationFailedException, SysInitException {
-        PageResult result = commonViewQueryService.query(urSchemaId, filters, page, GaeaWebSecuritySystem.getUserName(request));
-            return result;
+        List<QueryCondition> newQueryConditions = new ArrayList<QueryCondition>();
+        // 如果有前置条件，先转换前置条件
+        if (StringUtils.isNotEmpty(preConditions)) {
+            newQueryConditions.addAll(gaeaWebConditionUtils.convert(urSchemaId, preConditions));
+        }
+        // 再叠加当前的查询条件
+        newQueryConditions.addAll(filters);
+
+        PageResult result = commonViewQueryService.query(urSchemaId, newQueryConditions, page, GaeaWebSecuritySystem.getUserName(request));
+        return result;
     }
 
     /**
@@ -73,7 +100,7 @@ public class CommonViewQueryController {
      */
     @RequestMapping(value = "/byCondition", method = RequestMethod.POST)
     @ResponseBody
-    public List<Map<String, Object>> queryByConditions(String schemaId, String conditions,Boolean isDsTranslate,
+    public List<Map<String, Object>> queryByConditions(String schemaId, String conditions, Boolean isDsTranslate,
                                                        String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException {
         DataSetCommonQueryConditionDTO queryConditionDTO = null;
         if (StringUtils.isNotEmpty(conditions)) {
@@ -89,7 +116,7 @@ public class CommonViewQueryController {
             return null;
         }
         // 默认需要对结果的每个字段做数据集转换
-        if(isDsTranslate==null){
+        if (isDsTranslate == null) {
             isDsTranslate = true;
         }
         try {

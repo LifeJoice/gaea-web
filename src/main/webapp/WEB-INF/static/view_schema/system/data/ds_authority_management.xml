@@ -42,6 +42,9 @@
               dataset-id="DS_USER_MANAGEMENT" ds-primary-table="GAEA_SYS_USERS" page-size="25">
             <column id="id" name="id" label="ID" db-column-name="ID"
                     visible="false" sortable="true" html-width="200" primary-key="true" data-type="String"/>
+            <!-- dataset_id是列表页的前置条件查询需要 -->
+            <column id="dataset_id" name="dataset_id" label="dataset_id" db-column-name="dataset_id"
+                    visible="false" sortable="true" html-width="60" data-type="String"/>
             <column id="dsName" name="dsName" label="数据集名称" db-column-name="dsName"
                     visible="true" sortable="false" html-width="200" data-type="String"/>
             <column id="name" name="name" label="权限名称" db-column-name="name"

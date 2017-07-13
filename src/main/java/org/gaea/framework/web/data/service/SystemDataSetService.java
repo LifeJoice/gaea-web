@@ -2,11 +2,9 @@ package org.gaea.framework.web.data.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.gaea.data.dataset.domain.ConditionSet;
+import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
-import org.gaea.exception.InvalidDataException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SystemConfigException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
@@ -59,4 +57,6 @@ public interface SystemDataSetService {
      * @throws ValidationFailedException
      */
     List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid, boolean isDsTranslate) throws ValidationFailedException;
+
+    GaeaDataSet getGaeaDataSet(String schemaId) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException;
 }

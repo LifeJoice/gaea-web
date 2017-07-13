@@ -1,5 +1,6 @@
 package org.gaea.framework.web.schema.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.GaeaDataSet;
@@ -14,6 +15,7 @@ import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.service.GaeaXmlSchemaService;
 import org.gaea.framework.web.schema.service.GaeaXmlViewService;
+import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by iverson on 2016-12-30 14:42:20.
@@ -87,7 +91,7 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
      * @param springApplicationContext 用于获取服务器目录下的模板
      * @param viewSchemaPath           XML SCHEMA路径
      * @param loginName                用户登录名。数据权限过滤用。
-     * @param queryConditionDTOList     可以为空。schemaPath对应XML的数据集的相关查询条件.  有序。顺序就是拼装SQL的条件的顺序。
+     * @param queryConditionDTOList    可以为空。schemaPath对应XML的数据集的相关查询条件.  有序。顺序就是拼装SQL的条件的顺序。
      * @return 一个HTML页面的String
      * @throws ValidationFailedException
      */
@@ -125,9 +129,8 @@ public class GaeaXmlViewServiceImpl implements GaeaXmlViewService {
                     jsonData = gaeaXmlSchemaService.getJsonSchema(gaeaXML, loginName, conditionSetMap);
                 }
             }
-//                // 把结果注入HTML页面
-                listSchemaHtml.replaceData(jsonData);
-//            }
+            // 把json（数据、UI定义等）直接注入HTML代码
+            listSchemaHtml.replaceData(jsonData);
             /**
              * 根据XML SCHEMA生成额外的信息. 直接修改gaeaXML里面的内容，所以没有返回。
              * 完善要返回前端的一些额外的内容。比如：

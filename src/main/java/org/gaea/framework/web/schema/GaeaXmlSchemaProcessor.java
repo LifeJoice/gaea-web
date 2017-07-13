@@ -1,9 +1,12 @@
 package org.gaea.framework.web.schema;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.SysInitException;
@@ -19,6 +22,7 @@ import org.gaea.framework.web.schema.domain.view.*;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.schema.view.jo.SchemaViewJO;
 import org.gaea.framework.web.schema.view.service.ActionsService;
+import org.gaea.framework.web.utils.GaeaWebConditionUtils;
 import org.gaea.util.GaeaXmlUtils;
 import org.gaea.util.MathUtils;
 import org.slf4j.Logger;
@@ -60,7 +64,7 @@ public class GaeaXmlSchemaProcessor {
     /**
      * 解析Gaea框架的XML页面描述文件。
      *
-     * @param resource    xml schema文件的resource对象
+     * @param resource xml schema文件的resource对象
      * @return
      * @throws ValidationFailedException
      * @throws IOException
@@ -238,7 +242,7 @@ public class GaeaXmlSchemaProcessor {
      * 根据XML Schema的原始信息，我们生成、完善一些关联信息。例如：<br/>
      * button的link-view-id关联的对象，和需要的一些额外信息等。
      * <p>
-     *     直接修改gaeaXML里面的内容，所以没有返回。
+     * 直接修改gaeaXML里面的内容，所以没有返回。
      * </p>
      *
      * @param gaeaXmlSchema
@@ -250,7 +254,7 @@ public class GaeaXmlSchemaProcessor {
     /**
      * 初始化组件列表（key：组件id value：组件对象<br/>
      * <p>
-     *     所谓组件列表, GaeaXmlSchema.viewsComponents, 就是一个组件混合列表,我随时可以通过一个id找到对应的组件信息.方便前端各种渲染使用.
+     * 所谓组件列表, GaeaXmlSchema.viewsComponents, 就是一个组件混合列表,我随时可以通过一个id找到对应的组件信息.方便前端各种渲染使用.
      * </p>
      * 所谓组件，就是各种<button>, <views:dialog>等。
      * <p>因为像button的link-view-id可以链接到别的组件，所以我们需要通过组件列表去在后期获取对应的组件，而不用每次都遍历。
@@ -294,10 +298,12 @@ public class GaeaXmlSchemaProcessor {
     /**
      * 把从XML SCHEMA中读取的各种信息，例如<data>, <views:actions>, <views:dialog>等汇总到一个map中。
      * AI.TODO 急需把SchemaXXX和XXXJO分离。现在混在一起非常乱。
+     *
      * @param gaeaXmlSchema
+     * @param conditionSetMap
      * @return
      */
-    public Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema) throws ValidationFailedException {
+    public Map<String, Object> combineSchemaInfo(GaeaXmlSchema gaeaXmlSchema, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws ValidationFailedException {
         Map<String, Object> root = new HashMap<String, Object>();
 //        Map<String, Object> viewsMap = new HashMap<String, Object>();
         SchemaViews schemaViews = gaeaXmlSchema.getSchemaViews();
@@ -312,6 +318,10 @@ public class GaeaXmlSchemaProcessor {
         List<Map<String, Object>> dataList = systemDataSetService.changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid(), true);
 //        schemaViews.getGridJO().setData(dataList);
         viewJO.getGrid().setData(dataList);
+        // 设定view的前置条件
+        if (MapUtils.isNotEmpty(conditionSetMap)) {
+            viewJO.setPreConditions(GaeaWebConditionUtils.getValues(conditionSetMap));
+        }
         // 设置翻页相关数据
 //        Integer pageSize = schemaViews.getGridJO().getPage().getSize();                                     // 每页多少条
         Integer pageSize = viewJO.getGrid().getPage().getSize();                                             // 每页多少条

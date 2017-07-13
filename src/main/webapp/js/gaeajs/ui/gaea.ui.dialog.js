@@ -1315,7 +1315,7 @@ define([
                             var requestData = $("#" + formId).serializeObject();
 
                             // 获取链式操作，前面节点的数据。可能服务端功能需要（一般都需要）。
-                            var viewChainData = gaeaView.getViewData($("#viewId").val());
+                            var viewChainData = gaeaView.getViewData($("#gaeaViewId").val());
                             requestData["viewChain"] = JSON.stringify(viewChainData); // 必须json化。因为数据是笼统的，没有严格的对象mapping
 
                             // 把extra的data合并（覆盖）form的data

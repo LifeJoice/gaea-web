@@ -61,7 +61,8 @@ define([
                 var queryData = {
                     urSchemaId: $("#urSchemaId").val(),
                     filters: opts.queryConditions,
-                    page: opts.pageCondition
+                    page: opts.pageCondition,
+                    preConditions: _private.getPreConditions() // 前置条件。一般（下钻）子页面有。
                 };
                 // 获取SchemaId。对于Grid查询必须。
                 //queryConditions.urSchemaId = $("#urSchemaId").val();
@@ -623,6 +624,24 @@ define([
 
         // 私有方法
         var _private = {};
+
+        /**
+         * 获取前置的查询条件。这一般是在view链式操作的子view中。
+         //* @param opts
+         * @returns {*}
+         */
+        _private.getPreConditions = function () {
+            var result;
+            var $view = $("[data-gaea-ui-view]:first");
+            /**
+             * @type {ServerView}
+             */
+            var viewOptions = $view.data("gaeaOptions");
+            if (gaeaValid.isNotNull(viewOptions.preConditions)) {
+                result = JSON.stringify(viewOptions.preConditions);
+            }
+            return result;
+        };
 
         return {
             doQuery: query.doQuery,

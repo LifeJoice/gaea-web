@@ -142,7 +142,7 @@ define([
                  * @param opts
                  */
                 setChainNodeData: function (opts) {
-                    var nodeId = $("#viewId").val();
+                    var nodeId = $("#gaeaViewId").val();
                     var newData = {
                         selectedRow: gaeaContext.getValue("lastSelectedRow"),
                         selectedRows: gaeaContext.getValue("lastSelectedRows")

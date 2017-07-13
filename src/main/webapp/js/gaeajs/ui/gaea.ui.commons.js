@@ -31,6 +31,7 @@ define([
          * @property {string} title                         页面标题。
          * @property {string} contentUrl                    内容加载的url
          * @property {string} componentName                 组件名。value：wf-dialog|crud-dialog|
+         * @property {object} preConditions                 可以为空。（前置）条件对象。如果是下钻的页面，例如从一个列表页跳到第二个列表页，则第二个列表页很可能带着某些第一个列表页的前置条件。
          //* @property {ServerDialog.Button[]} buttons        这个弹出框对应的按钮
          */
 

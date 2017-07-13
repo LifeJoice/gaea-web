@@ -52,7 +52,7 @@
     <link href="/js/gaeajs/ui/css/gaea-ui.css" rel="stylesheet" type="text/css"/><!--gaea ui组件样式（复选框、tabs、loading等）-->
 </head>
 <body>
-<div class="gaea-ui-page">
+<div data-gaea-ui-view="" class="gaea-ui-page"><!-- id是js动态填充 -->
     <div id="view-title" class="view title"></div>
     <div id='gaea-toolbar' class='gaea-toolbar'></div>
     <div id="gaea-grid-ct"></div>
@@ -71,7 +71,7 @@
     <span id="gaea-context-ct" style="display: none;">Gaea上下文事件的绑定对象(不显示)</span>
     <!--<span id="gaea-event-ct" style="display: none;">Gaea事件的绑定对象(不显示)</span>-->
     <input type="hidden" id="urSchemaId" name="urSchemaId" value="">
-    <input type="hidden" id="viewId" name="viewId" value=""><!-- 这个是gaea view组件的id，当前这个页面的id -->
+    <input type="hidden" id="gaeaViewId" name="gaeaViewId" value=""><!-- 这个是gaea view组件的id，当前这个页面的id -->
 </div>
 <!UR_VIEW_SCHEMA IMPORT_BODYEND>
 </body>
