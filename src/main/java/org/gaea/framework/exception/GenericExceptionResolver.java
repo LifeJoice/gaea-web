@@ -55,6 +55,7 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
      */
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         ModelAndView mav = new ModelAndView();
+        String debugMessage = "";
         /* 先对异常进行日志处理,避免丢失. */
         logException(ex);
         try {
@@ -62,6 +63,8 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);// 默认错误 500
             if (isSimpleFailed(ex)) {
                 response.setStatus(GaeaException.DEFAULT_FAIL);// 自定义一般校验错误 600
+                GaeaException gaeaException = (GaeaException) ex;
+                debugMessage = gaeaException.getDebugMessage();
             }
             /* 解决返回json乱码的问题 */
             response.setContentType("text/xml;charset=utf-8");
@@ -82,6 +85,7 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
 //        mav.setViewName("MappingJacksonJsonView");
             Map<String, String> errorMsg = new HashMap<String, String>();
             errorMsg.put("message", ex.getMessage());
+            errorMsg.put("debugMessage", debugMessage);
             mav.addAllObjects(errorMsg);
             /**
              * 对请求类型进行区分: 1. 如果是json请求，将结果转换成json返回。 2. 如果不是json请求，则需要跳转页面。
