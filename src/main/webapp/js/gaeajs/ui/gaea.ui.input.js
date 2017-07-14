@@ -31,7 +31,8 @@ define([
 
         var gaeaInput = {
             defaultOpts: {
-                class: ""
+                class: "",
+                editable: true
             },
             /**
              *
@@ -42,6 +43,7 @@ define([
              * @param {string} opts.name                        input的name
              * @param {string} opts.class                       input的class
              * @param {string} opts.value                       input的value
+             * @param {boolean} opts.editable                   是否可编辑。默认true。
              * @param {string} opts.dataType                    数据的类型：string|date|time|datetime|...
              * @param {GaeaColumnValidator} opts.validator      gaea的crud grid的编辑列的校验定义
              * @param {function} opts.onChange                  onChange事件
@@ -86,6 +88,13 @@ define([
                 if (gaeaValid.isNotNull(opts.containerId) && $inputDiv.length > 0) {
                     $inputDiv.append($input);
                 }
+
+                // set non editable
+                if (!opts.editable) {
+                    // 不可编辑
+                    $input.prop("readonly", true);
+                }
+
                 // set value
                 if (gaeaValid.isNotNull(opts.value)) {
                     gaeaInput.setValue({

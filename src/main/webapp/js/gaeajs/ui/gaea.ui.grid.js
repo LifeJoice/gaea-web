@@ -111,8 +111,7 @@ define([
         /**
          * 查询相关的定义。高级查询的处理器。
          */
-        var _query = {
-        };
+        var _query = {};
         /**
          * 查询的视图（页面元素、构造等） 2016-6-19 18:38:26
          * @type {{}}
@@ -1863,6 +1862,19 @@ define([
                      */
                     createTdContent: function ($td, opts) {
                         var $cellCt = $td.children(".grid-td-div");
+                        var value = opts.inputValue;
+                        // 如果没有具体的值，看列有没有定义默认值
+                        if (gaeaValid.isNull(value) && gaeaValid.isNotNull(opts.column.value)) {
+                            /**
+                             * if 通过gaeaContext获取到值（表示表达式方式） then 以gaeaContext获取的值为准
+                             * else 就以列定义的值，作为最终的值
+                             */
+                            if (gaeaValid.isNotNull(gaeaContext.getValue(opts.column.value))) {
+                                value = gaeaContext.getValue(opts.column.value);
+                            } else {
+                                value = opts.column.value;
+                            }
+                        }
                         // create input box
                         // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
                         $cellCt.append(gaeaInput.create({
@@ -1870,7 +1882,8 @@ define([
                             name: opts.inputId,
                             class: "crud-grid-input",
                             dataType: opts.column.dataType,
-                            value: opts.inputValue,
+                            value: value,
+                            editable: opts.column.editable,
                             validator: opts.column.validator,// 校验定义
                             onChange: function (event) {
                                 // 刷新缓存的值
@@ -1881,7 +1894,7 @@ define([
                             }
                         }));
 
-                        var $tdInput = $("#" + gaeaString.format.getValidName(opts.inputId));
+                        //var $tdInput = $("#" + gaeaString.format.getValidName(opts.inputId));
 
                         // 如果不可编辑
                         if (!opts.column.editable) {
@@ -1903,15 +1916,15 @@ define([
                             //    }));
                             //} else {
                             $td.addClass("non-editable");
-                            // 不可编辑
-                            $tdInput.prop("readonly", true);
-                            // init Html first
-                            // 如果手动设定了值，以手动设定的值为准
-                            // AI.TODO 这里设定值，越界了！应该放到gaeaInput里面去统一处理！
-                            if (gaeaValid.isNotNull(opts.column.value)) {
-                                //$cellCt.append(gaeaContext.getValue(opts.column.value));
-                                $tdInput.val(gaeaContext.getValue(opts.column.value));
-                            }
+                            //// 不可编辑
+                            //$tdInput.prop("readonly", true);
+                            //// init Html first
+                            //// 如果手动设定了值，以手动设定的值为准
+                            //// AI.TODO 这里设定值，越界了！应该放到gaeaInput里面去统一处理！
+                            //if (gaeaValid.isNotNull(opts.column.value)) {
+                            //    //$cellCt.append(gaeaContext.getValue(opts.column.value));
+                            //    $tdInput.val(gaeaContext.getValue(opts.column.value));
+                            //}
                             /**
                              * if 是图片的话，处理图片。
                              * 初始化lightGallery图片查看插件放到整个table初始化完成后。
