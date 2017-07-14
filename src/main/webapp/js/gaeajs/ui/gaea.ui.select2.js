@@ -104,7 +104,7 @@ define([
                     condition: opts.condition,
                     success: function (data) {
                         // 找到某个.gaea-query-input-div的select
-                        var $select = $(opts.jqSelector).children("#" + opts.htmlId);
+                        var $select = $(opts.jqSelector).children("#" + gaeaString.format.getValidName(opts.htmlId));
                         if (_.isArray(data)) {
                             $.each(data, function (i, iValue) {
                                 var optionTemplate = _.template('<option value="<%= VALUE %>"><%= TEXT %></option>');
