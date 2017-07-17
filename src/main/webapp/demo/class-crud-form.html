@@ -32,7 +32,7 @@
             <span class="fieldname">班角色</span>
             <span class="fieldvalue">
                 <select id="classRolesList" name="classRolesList"
-                        data-gaea-ui-select2="dataset:'DEMO_CLASS_ROLE',default:{ value:'2' }, placeholder: '请选择...'"
+                        data-gaea-ui-select2="dataset:'DEMO_CLASS_ROLE',default:{ value:'2' }"
                         multiple="multiple" required></select>
             </span>
         </div>
@@ -81,7 +81,7 @@
                 <div id="studentList" data-gaea-ui-name="students"
                      data-gaea-ui-crud-grid='columns:[
                      {name:"name",text:"姓名", editable:true,width:120,dataType:"string"},
-                     {name:"sex",text:"性别", width:60},
+                     {name:"sex",text:"性别", width:80, dataSetId: "DEMO_STUDENT_SEX", default:{ value:"2" }},
                      {name:"stuNo",text:"学号", width:60, validator: { html: {type:"number","data-msg":"非空。输入要求是数值。",required:"required" } }
                      },
                      {name:"birthday",text:"生日", width:120,dataType:"date"},

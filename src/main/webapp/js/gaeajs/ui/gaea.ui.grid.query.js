@@ -267,8 +267,7 @@ define([
                             gaeaSelect2.init({
                                 jqSelector: "#" + opts.id + " .gaea-grid-header .mars-tb-head-query " + "#" + inputId,
                                 initDataSet: true,
-                                multiple: column.queryCondition.multiple,
-                                placeholder: "请选择..."
+                                multiple: column.queryCondition.multiple
                             });
                         }
                     }

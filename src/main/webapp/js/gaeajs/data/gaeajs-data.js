@@ -597,7 +597,9 @@ define([
                                 return gaeaData.dataSet.getData({
                                     url: SYS_URL.DATA.DATASET.GET,
                                     //condition: newCondition,
-                                    dsId: dataSetId,
+                                    submitData: {
+                                        dsId: dataSetId
+                                    },
                                     isAsync: true,// 异步调用
                                     success: function (data) {
                                         if (!_.isArray(data)) {
@@ -693,8 +695,10 @@ define([
                             newCondition.values = queryValues;
                             gaeaData.dataSet.getData({
                                 isConditionParsed: true,// 表示condition已经解析过，不要再解析了！
-                                condition: gaeaData.newQueryCondition(newCondition),
-                                dsId: dataSetId,
+                                submitData: {
+                                    condition: gaeaData.newQueryCondition(newCondition),
+                                    dsId: dataSetId
+                                },
                                 isAsync: true,// 异步调用
                                 success: function (data) {
                                     successCallback(data);
@@ -719,17 +723,21 @@ define([
                 var configObj = gaeaString.parseJSON(configStr);
                 //var queryCondition = {};// 查询条件。( gaea-data: ... condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]} ... )
                 return gaeaData.dataSet.getData({
-                    condition: configObj.condition,
-                    dsId: configObj.dataset
+                    submitData: {
+                        condition: configObj.condition,
+                        dsId: configObj.dataset
+                    }
                 });
             },
             /**
              *
              * @param {object} options
              * @param {string} options.url                      请求的地址。默认是 SYS_URL.QUERY.BY_CONDITION
-             * @param {object} [options.condition]              例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
+             * @param {object} options.submitData               需要同步提交到服务端的数据
+             * @param {object} [options.submitData.condition]   例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
+             * @param {object} options.submitData.dsId          数据集id
              * @param {string} options.isConditionParsed=false  condition是否已经解析过！重复解析会有问题！
-             * @param {string} options.dataset                  数据集id
+             //* @param {string} options.dataset                  数据集id
              * @param {string} options.isAsync=false            是否异步调用。默认false，即同步调用。
              * @param {string} options.success                  完成后的回调
              * @returns jqXHR
@@ -741,12 +749,12 @@ define([
                 /**
                  * 解析gaea-data配置的查询条件。
                  */
-                if (!isConditionParsed && gaeaValid.isNotNull(options.condition)) {
-                    queryCondition = gaeaData.parseCondition(options.condition);
+                if (!isConditionParsed && gaeaValid.isNotNull(options.submitData.condition)) {
+                    queryCondition = gaeaData.parseCondition(options.submitData.condition);
                 } else {
-                    queryCondition = options.condition;
+                    queryCondition = options.submitData.condition;
                 }
-                options.conditions = JSON.stringify(queryCondition);
+                options.submitData.conditions = JSON.stringify(queryCondition);
                 // 统一后台数据集获取接口
                 options.url = SYS_URL.DATA.DATASET.GET;
                 return gaeaData.getData(options);
@@ -1229,10 +1237,11 @@ define([
          * 通过通用查询接口，查询数据。
          * @param options
          *              url 请求地址
-         *              conditions 查询条件。格式为json字符串（非对象，切记！）
-         *              dsId 数据集id
-         *              isAsync 是否异步调用。默认false，即同步调用。
-         *              success 完成后的回调
+         * @param {object} options.submitData               需要同步提交到服务端的数据
+         * @param {object} [options.submitData.condition]   查询条件。格式为json字符串（非对象，切记！）
+         * @param {object} options.submitData.dsId          数据集id
+         * @param {boolean} options.isAsync 是否异步调用。默认false，即同步调用。
+         * @param {function} options.success 完成后的回调
          * @returns jqXHR
          *              gaeaData ajax返回的data放在这个属性中
          */
@@ -1251,7 +1260,7 @@ define([
             return gaeaAjax.ajax({
                 url: url,
                 async: isAsync,
-                data: options,
+                data: options.submitData,
                 success: function (data, textStatus, jqXHR) {
 
                     if (_.isArray(data)) {
@@ -1456,6 +1465,37 @@ define([
                 //        }
                 //    }
                 //    return value;
+            },
+            /**
+             * 工具，协助获取真正的值。
+             * 因为在gaea框架中，“值”有很多种形态，可能是表达式，也可能是数据集（值是对象）。在真正成为填充在输入框的值前，需要一定的转换。
+             * @param {object|string} value
+             * @param valueDefine       可以为空。值的定义。一般例如：可编辑表格的列定义的值(column.value)等
+             * @returns {*}
+             */
+            getRealValue: function (value, valueDefine) {
+                var realValue = _.clone(value);
+                if (gaeaValid.isNull(value) && gaeaValid.isNotNull(valueDefine)) {
+                    /**
+                     * if 通过gaeaContext获取到值（表示表达式方式） then 以gaeaContext获取的值为准
+                     * else (可能valueDefine是个静态值) 就以列定义的值，作为最终的值
+                     */
+                    if (gaeaValid.isNotNull(gaeaContext.getValue(valueDefine))) {
+                        realValue = gaeaContext.getValue(valueDefine);
+                    } else {
+                        realValue = valueDefine;
+                    }
+                } else {
+                    /**
+                     * 这个可能是数据集返回的值
+                     * 结构可能是：value: { text: '男', value: 1}
+                     * 这个时候，我们要提取的是value
+                     */
+                    if (_.isObject(value)) {
+                        realValue = value.value;
+                    }
+                }
+                return realValue;
             }
         };
 

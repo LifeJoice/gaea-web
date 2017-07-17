@@ -129,9 +129,11 @@ define([
             }
             dataConfig.selectable.isAsync = true;// 异步调用。因为不需要KO binding，异步影响不大。
             return gaeaData.dataSet.getData({
-                dsId: dataConfig.selectable.dataset,
+                submitData: {
+                    dsId: dataConfig.selectable.dataset,
+                    condition: dataConfig.selectable.condition
+                },
                 isAsync: dataConfig.selectable.isAsync,
-                condition: dataConfig.selectable.condition,
                 success: function (data) {
                     // 初始化可选框里的选项
                     multiSelect.initUIWithData(data, {
@@ -163,9 +165,11 @@ define([
             var name = dataConfig.name;
             dataConfig.selected.isAsync = true;// 异步调用。因为不需要KO binding，异步影响不大。
             return gaeaData.dataSet.getData({
-                dsId: dataConfig.selected.dataset,
+                submitData: {
+                    dsId: dataConfig.selected.dataset,
+                    condition: dataConfig.selected.condition
+                },
                 isAsync: dataConfig.selected.isAsync,
-                condition: dataConfig.selected.condition,
                 success: function (data) {
                     if (gaeaValid.isNull(data)) {
                         return;

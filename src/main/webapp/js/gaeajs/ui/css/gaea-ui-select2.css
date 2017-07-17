@@ -4,6 +4,16 @@
  * by Iverson 2017年3月29日15:54:53
  */
 
+/* 下拉框的下拉容器不需要边框.
+ * 这个主要是兼容可编辑表格的需要。有边框在可编辑表格中很丑。
+ */
+.select2-dropdown {
+    border: none;
+    border-radius: 2px;
+    box-shadow: 2px 2px 6px -3px #000;
+    background-color: #fff;
+}
+
 /* ******************************************************************** 在表单中的select2的样式 ******************************************************************** */
 /* 选中的边框颜色，不要黑色啦 */
 .select2-container--default.select2-container--focus .select2-selection--multiple {
@@ -39,4 +49,26 @@
     top: 0;
     right: 0;
     width: 16px;
+}
+
+/* ******************************************************************** 可编辑表格（crud-grid）的select2样式 ******************************************************************** */
+.crud-grid .grid-td-div {
+
+}
+
+/* 这个宽度是必须的。select2组件会根据这个宽度，设定一个固定宽度。如果没有，select2随便设的宽度会比较难看。 */
+.crud-grid .grid-td-div select {
+    width: 100%;
+}
+
+/* 可编辑表格中的下拉框不需要边框等 */
+.crud-grid .grid-td-div .select2-selection {
+    border: none;
+    /*font-size:10px;*/
+}
+
+/* 由于嵌套在可编辑表格的单元格中，边距不要太大 */
+.crud-grid .grid-td-div .select2-selection__rendered {
+    padding-left: 2px;
+    padding-right: 10px;
 }

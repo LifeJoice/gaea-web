@@ -9,6 +9,9 @@
  * @property {string} GaeaColumn.text                   列头文本
  * @property {boolean} GaeaColumn.editable              是否可编辑
  * @property {int} GaeaColumn.width                     宽度
+ * @property {string} GaeaColumn.dataSetId              数据集id
+ * @property {object} GaeaColumn.default                默认项（值等）
+ * @property {string} GaeaColumn.default.value
  * @property {string} GaeaColumn.dataType               数据类型。string|date|datetime|img|...
  * @property {string} GaeaColumn.imgSrcPrefix           图片列，自动为<img>标签的src加上的前缀
  * @property {string} GaeaColumn.imgSrcSuffix           图片列，自动为<img>标签的src加上的后缀
@@ -33,12 +36,12 @@
 define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-ui-button', 'gaea-system-url', "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
-        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils",
+        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils", "gaeajs-data",
         "gaeajs-ui-grid-query", "gaeajs-ui-commons",
         "jquery-mCustomScrollbar", "jquery-lightGallery"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaButton, SYS_URL, gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
-              GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils,
+              GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils, gaeaData,
               gridQuery, gaeaUI) {
 
         // 默认的opts参数值的统一定义
@@ -1846,6 +1849,7 @@ define([
                             id: opts.id,
                             inputId: inputName,
                             column: column,
+                            field: field,
                             inputValue: value
                         });
 
@@ -1858,41 +1862,71 @@ define([
                      * @param {string} opts.inputId             生成的input框的id和name（共用）
                      * @param {string} opts.inputValue
                      * @param {GaeaColumn} opts.column
+                     * @param {object} field                    服务端返回的字段定义。
                      * @private
                      */
                     createTdContent: function ($td, opts) {
                         var $cellCt = $td.children(".grid-td-div");
                         var value = opts.inputValue;
-                        // 如果没有具体的值，看列有没有定义默认值
-                        if (gaeaValid.isNull(value) && gaeaValid.isNotNull(opts.column.value)) {
-                            /**
-                             * if 通过gaeaContext获取到值（表示表达式方式） then 以gaeaContext获取的值为准
-                             * else 就以列定义的值，作为最终的值
-                             */
-                            if (gaeaValid.isNotNull(gaeaContext.getValue(opts.column.value))) {
-                                value = gaeaContext.getValue(opts.column.value);
-                            } else {
-                                value = opts.column.value;
-                            }
-                        }
-                        // create input box
-                        // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
-                        $cellCt.append(gaeaInput.create({
-                            id: opts.inputId,
-                            name: opts.inputId,
-                            class: "crud-grid-input",
-                            dataType: opts.column.dataType,
-                            value: value,
-                            editable: opts.column.editable,
-                            validator: opts.column.validator,// 校验定义
-                            onChange: function (event) {
-                                // 刷新缓存的值
-                                _private.crudGrid.data.refreshOneField({
-                                    id: opts.id,
-                                    target: this // 当前change的对象
+
+                        // 通过工具方法，获取真正的值。因为gaea的值还有可能是表达式等……
+                        value = gaeaData.utils.getRealValue(value, opts.column.value);
+
+                        /**
+                         * 初始化 数据集下拉框/输入框/...
+                         */
+                        if (gaeaValid.isNotNull(opts.column.dataSetId)) {
+                            //var gaeaSelect2 = require("gaeajs-ui-select2");
+                            require(["gaeajs-ui-select2"], function (gaeaSelect2) {
+
+                                gaeaSelect2.createAndInit({
+                                    jqSelector: $cellCt,
+                                    htmlId: opts.inputId,
+                                    htmlName: opts.inputId,
+                                    dataSetId: opts.column.dataSetId,
+                                    fieldId: opts.field.id,
+                                    // --------->>>> 下面是init方法需要配置项
+                                    // 这个是创建了<select>元素后，元素的选择器
+                                    selectJqSelector: "#" + gaeaString.format.getValidName(opts.inputId),
+                                    default: opts.column.default,
+                                    value: value
                                 });
-                            }
-                        }));
+
+                                //$.when(
+                                //    gaeaSelect2.preInitHtmlAndData({
+                                //    jqSelector: $cellCt,
+                                //    htmlId: opts.inputId,
+                                //    htmlName: opts.inputId,
+                                //    dataSetId: opts.column.dataSetId,
+                                //    fieldId: opts.field.id
+                                //})
+                                //).done(
+                                //    gaeaSelect2.init({
+                                //        jqSelector: "#"+gaeaString.format.getValidName(opts.inputId),
+                                //        default: opts.column.default,
+                                //        value: value
+                                //    }));
+                            });
+                        } else {
+                            // create input box
+                            // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
+                            $cellCt.append(gaeaInput.create({
+                                id: opts.inputId,
+                                name: opts.inputId,
+                                class: "crud-grid-input",
+                                dataType: opts.column.dataType,
+                                value: value,
+                                editable: opts.column.editable,
+                                validator: opts.column.validator,// 校验定义
+                                onChange: function (event) {
+                                    // 刷新缓存的值
+                                    _private.crudGrid.data.refreshOneField({
+                                        id: opts.id,
+                                        target: this // 当前change的对象
+                                    });
+                                }
+                            }));
+                        }
 
                         //var $tdInput = $("#" + gaeaString.format.getValidName(opts.inputId));
 
