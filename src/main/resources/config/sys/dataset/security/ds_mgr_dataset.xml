@@ -33,4 +33,31 @@
             <data-element value="none" text="不缓存"/>
         </data>
     </dataset>
+
+    <!-- ********************************************** condition的相关 ********************************************** -->
+    <!-- 项间关系符 -->
+    <dataset id="DS_CONDITION_COND_OP" cache-type="static">
+        <data>
+            <data-element value="none" text="None"/>
+            <data-element value="and" text="And"/>
+            <data-element value="or" text="Or"/>
+        </data>
+    </dataset>
+
+    <!-- 单个条件的关系符 -->
+    <dataset id="DS_CONDITION_OP" cache-type="static">
+        <data>
+            <data-element value="eq" text="="/>
+            <data-element value="ne" text="!="/>
+            <!-- <、<=、>、>=等要用特殊替代字符 -->
+            <data-element value="lt" text="&lt;"/>
+            <data-element value="le" text="&lt;="/>
+            <data-element value="gt" text="&gt;"/>
+            <data-element value="ge" text="&gt;="/>
+            <data-element value="lk" text="Like"/>
+            <data-element value="na" text="Is Null"/>
+            <data-element value="nna" text="Not Null"/>
+        </data>
+    </dataset>
+
 </dataset-definition>
