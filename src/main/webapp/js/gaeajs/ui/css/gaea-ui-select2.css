@@ -57,7 +57,7 @@
 }
 
 /* 这个宽度是必须的。select2组件会根据这个宽度，设定一个固定宽度。如果没有，select2随便设的宽度会比较难看。 */
-.crud-grid .grid-td-div select {
+.crud-grid .grid-td-div select, .ui-tabs .gaea-form .crud-grid select {
     width: 100%;
 }
 
