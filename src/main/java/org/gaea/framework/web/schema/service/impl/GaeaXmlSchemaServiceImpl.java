@@ -206,10 +206,12 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
                     findCondSet = dsConditionSets.get(condSetId);
                 }
             }
-            if (findCondSet == null && isStrictMatchAll) {
-                throw new ProcessFailedException("输入的条件集列表，部分条件集无法找到，如果忽略，会导致部分查询条件缺少！数据集id : " + gaeaDataSet.getId() + "条件集id : " + queryConditionDTO.getId());
-            } else {
-                logger.trace("输入的条件集列表，部分条件集无法找到，如果忽略，会导致部分查询条件缺少！数据集id : " + gaeaDataSet.getId() + "条件集id : " + queryConditionDTO.getId());
+            if (findCondSet == null) {
+                if (isStrictMatchAll) {
+                    throw new ProcessFailedException("输入的条件集列表，部分条件集无法找到，如果忽略，会导致部分查询条件缺少！数据集id : " + gaeaDataSet.getId() + "条件集id : " + queryConditionDTO.getId());
+                } else {
+                    logger.trace("输入的条件集列表，部分条件集无法找到，如果忽略，会导致部分查询条件缺少！数据集id : " + gaeaDataSet.getId() + "条件集id : " + queryConditionDTO.getId());
+                }
             }
             resultMap.put(findCondSet, queryConditionDTO);
         }

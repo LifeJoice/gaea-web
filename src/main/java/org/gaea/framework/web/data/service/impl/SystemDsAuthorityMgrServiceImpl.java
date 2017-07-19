@@ -53,7 +53,6 @@ public class SystemDsAuthorityMgrServiceImpl implements SystemDsAuthorityMgrServ
             throw new IllegalArgumentException("数据权限id为空，无法加载编辑数据！");
         }
         Map<String, Object> result = new HashMap<String, Object>();
-//        DsAuthorityEntity dsAuthorityEntity = systemDsAuthorityRepository.findOne(dsAuthorityId);
         DsAuthorityEntity dsAuthorityEntity = systemDsAuthorityRepository.findWithAuthCondSets(dsAuthorityId);
         if (dsAuthorityEntity == null) {
             throw new ProcessFailedException("找不到对应的数据集的权限，无法编辑！");
@@ -62,30 +61,20 @@ public class SystemDsAuthorityMgrServiceImpl implements SystemDsAuthorityMgrServ
         result.put("dsAuthority.id", dsAuthorityEntity.getId());
         result.put("dsAuthority.name", dsAuthorityEntity.getName());
         result.put("dsAuthority.description", dsAuthorityEntity.getDescription());
-        result.put("dsAuthCondSet.id", dsAuthorityEntity.getDsAuthConditionSetEntity().getId());
-        result.put("dsAuthCondSet.name", dsAuthorityEntity.getDsAuthConditionSetEntity().getName());
-        result.put("dsAuthCondSet.appendSql", dsAuthorityEntity.getDsAuthConditionSetEntity().getAppendSql());
+        if (dsAuthorityEntity.getDsAuthConditionSetEntity() != null) {
+            result.put("dsAuthCondSet.id", dsAuthorityEntity.getDsAuthConditionSetEntity().getId());
+            result.put("dsAuthCondSet.name", dsAuthorityEntity.getDsAuthConditionSetEntity().getName());
+            result.put("dsAuthCondSet.appendSql", dsAuthorityEntity.getDsAuthConditionSetEntity().getAppendSql());
 
-        List<DsAuthConditionJO> dsAuthConditionJOList = new ArrayList<DsAuthConditionJO>();
-        for (DsAuthConditionEntity conditionEntity : dsAuthorityEntity.getDsAuthConditionSetEntity().getDsAuthConditionEntities()) {
-            DsAuthConditionJO conditionJO = new DsAuthConditionJO();
-            BeanUtils.copyProperties(conditionEntity, conditionJO);
-            dsAuthConditionJOList.add(conditionJO);
+            List<DsAuthConditionJO> dsAuthConditionJOList = new ArrayList<DsAuthConditionJO>();
+            for (DsAuthConditionEntity conditionEntity : dsAuthorityEntity.getDsAuthConditionSetEntity().getDsAuthConditionEntities()) {
+                DsAuthConditionJO conditionJO = new DsAuthConditionJO();
+                BeanUtils.copyProperties(conditionEntity, conditionJO);
+                dsAuthConditionJOList.add(conditionJO);
+            }
+
+            result.put("authConditionList", dsAuthConditionJOList);
         }
-
-        result.put("authConditionList", dsAuthConditionJOList);
-        // 如果静态数据非空
-//        if (CollectionUtils.isNotEmpty(dsAuthorityEntity.getDsAuthConditionSetEntity().getDsAuthConditionEntities())) {
-//            try {
-////                result = objectMapper.convertValue(dataSet, Map.class);
-//                // 转换DsData静态数据json
-//                List<DataItem> dataItemList = GaeaJacksonUtils.parseList(dataSet.getDsData(), ArrayList.class, DataItem.class);
-//                result.put("dsDataList", dataItemList);
-//            } catch (Exception e) {
-//                logger.error(e.getMessage(), e);
-//                throw new ProcessFailedException("数据集json数据转换失败！");
-//            }
-//        }
         return result;
     }
 
@@ -156,5 +145,19 @@ public class SystemDsAuthorityMgrServiceImpl implements SystemDsAuthorityMgrServ
         newDataSet.getDsAuthorities().add(dsAuthority);
 
         systemDsAuthorityRepository.save(dsAuthority);
+    }
+
+    @Override
+    @Transactional
+    public void delete(List<DsAuthorityEntity> deleteAuthorityList) throws ValidationFailedException {
+        if (CollectionUtils.isEmpty(deleteAuthorityList)) {
+            return;
+        }
+        for (DsAuthorityEntity inAuthority : deleteAuthorityList) {
+            if (StringUtils.isEmpty(inAuthority.getId())) {
+                throw new ValidationFailedException("要删除的数据集权限id为空！删除失败！");
+            }
+        }
+        systemDsAuthorityRepository.delete(deleteAuthorityList);
     }
 }

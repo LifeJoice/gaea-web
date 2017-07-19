@@ -36,7 +36,7 @@ public class DsAuthorityEntity implements Serializable, org.gaea.data.dataset.do
     /**
      * 这个是附加的权限过滤的conditionSet。
      */
-    @OneToOne(mappedBy = "dsAuthorityEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "dsAuthorityEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private DsAuthConditionSetEntity dsAuthConditionSetEntity;
 
     /* 不需要Cascade，这里会维护关系，但不会更新Role的内容 */

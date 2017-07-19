@@ -166,6 +166,13 @@ public class SystemDsAuthorityMgrController {
         systemDsAuthorityMgrService.updateDsAuthority(dsAuthority);
     }
 
+    // 删除数据集权限
+    @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void delete(@RequestBean(value = CommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
+                       @RequestBean("selectedRows") List<DsAuthorityEntity> dsAuthorityList) throws ProcessFailedException, ValidationFailedException {
+        systemDsAuthorityMgrService.delete(dsAuthorityList);
+    }
 
     // 加载数据，编辑数据集权限
     @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")

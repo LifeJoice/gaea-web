@@ -10,9 +10,8 @@
         <actions id="myActions">
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDsAuthDialog" action="add"/>
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDsAuthDialog" action="update"/>
-            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
-            <!--<button id="btnNewDsAuthority" name="btnNewDsAuthority" html-value="新增数据集权限" link-view-id="dsAuthAddDialog"-->
-            <!--action="add"/>-->
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/data/dataset/auth/delete"
+                    msg="删除数据集权限"/>
         </actions>
         <!--工作流弹出框-->
         <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"

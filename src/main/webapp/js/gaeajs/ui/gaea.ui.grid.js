@@ -2206,7 +2206,8 @@ define([
                             options.isNewData = data.isNewData;
                         }
                         // 刷新缓存数据
-                        if (gaeaValid.isNotNull(data.data)) {
+                        // 如果是刷空（清空），则以空数组判断。如果是undefined/null，还是不能触发清空！
+                        if (gaeaValid.isNotNull(data.data) || _.isArray(data.data)) {
                             $gridCt.data("options").data = data.data;
                         }
                         // 缓存过滤后的数据到grid中
