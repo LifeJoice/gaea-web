@@ -1428,7 +1428,7 @@ define([
                         }
                     },
                     /**
-                     *
+                     * 这个方法基本作废了。改为使用百分比控制grid高度，和absolute定位控制footbar位置。 by Iverson 2017年7月21日09:17:08
                      * @param {object} opts
                      * @param {string} opts.id              grid容器id
                      * @param {int} opts.heightType         高度计算方式。value = page|dialog
@@ -1442,19 +1442,22 @@ define([
                         var $gridDataBody = $gridCt.find(".gaea-grid-body:first");
 
                         /* 高度是根据整个页面 */
-                        if (gaeaString.equalsIgnoreCase(GRID_DEFINE.HEIGHT_TYPE.PAGE, heightType)) {
-                            var pageHeight = document.body.scrollHeight;
-                            // 页面高度 - footer高度 - grid标题栏高度 - toolbar高度 - title高度-padding高度
-                            finalHeight = pageHeight - 30 - 40 - 48 - 36 - 10;
-                        }
+                        //if (gaeaString.equalsIgnoreCase(GRID_DEFINE.HEIGHT_TYPE.PAGE, heightType)) {
+                        //    var pageHeight = document.body.scrollHeight;
+                        //    var toTop = $gridDataBody.offset().top;
+                        //    // 页面高度 - 距离页面顶部距离 - footer高度( 废弃：页面高度 - footer高度 - grid标题栏高度 - toolbar高度 - title高度-padding高度）
+                        //    finalHeight = pageHeight - toTop - 30;
+                        //
+                        //    $gridDataBody.height(finalHeight);
+                        //}
                         /* 高度是根据dialog */
-                        if (gaeaString.equalsIgnoreCase(GRID_DEFINE.HEIGHT_TYPE.DIALOG, heightType)) {
-                            // 向上找到dialog的内容容器
-                            finalHeight = $gridCt.parents(".ui-dialog-content:first").height();
-                            // 页面高度 - footer高度 - grid标题栏高度 - toolbar高度 - title高度-padding高度
-                            finalHeight = finalHeight - 30 - 40;
-                        }
-                        $gridDataBody.height(finalHeight);
+                        //if (gaeaString.equalsIgnoreCase(GRID_DEFINE.HEIGHT_TYPE.DIALOG, heightType)) {
+                        //    // 向上找到dialog的内容容器
+                        //    finalHeight = $gridCt.parents(".ui-dialog-content:first").height();
+                        //    // 页面高度 - footer高度 - grid标题栏高度 - toolbar高度 - title高度-padding高度
+                        //    finalHeight = finalHeight - 30 - 40;
+                        //}
+                        //$gridDataBody.height(finalHeight);
                         // 初始化滚动条，利用第三方插件 malihu-custom-scrollbar-plugin
                         //$gridDataBody.mCustomScrollbar({
                         //    theme: "dark-3"

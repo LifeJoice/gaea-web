@@ -52,7 +52,7 @@ public class DataSetEntity implements Serializable {
     public static final Integer DATASET_AUTHORITY_TYPE_NO_ROLE_ALL_PERMIT = 2;
     @OneToMany(mappedBy = "dataSetEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DsConditionSetEntity> dsConditionSetEntities;
-    @OneToMany(mappedBy = "dataSetEntity", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dataSetEntity", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<DsAuthorityEntity> dsAuthorities;
 
     public DataSetEntity() {

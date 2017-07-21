@@ -20,7 +20,5 @@ public interface SystemDataSetMgrService {
 
     Map loadEditData(DataSetEntity dataSet) throws ProcessFailedException;
 
-//    void saveDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException;
-//
-//    void updateDsAuthority(DsAuthorityEntity dsAuthority) throws ValidationFailedException;
+    void delete(List<DataSetEntity> dataSetList) throws ValidationFailedException;
 }

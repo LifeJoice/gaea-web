@@ -95,6 +95,19 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
         }
         return result;
     }
+
+    @Override
+    public void delete(List<DataSetEntity> inDataSetList) throws ValidationFailedException {
+        if (CollectionUtils.isEmpty(inDataSetList)) {
+            return;
+        }
+        for (DataSetEntity inDataSet : inDataSetList) {
+            if (StringUtils.isEmpty(inDataSet.getId())) {
+                throw new ValidationFailedException("要删除的数据集id为空！删除失败！");
+            }
+        }
+        systemDataSetRepository.delete(inDataSetList);
+    }
 //
 //    @Override
 //    @Transactional

@@ -10,7 +10,7 @@
     /*padding:10px;*/
     font-family: 微软雅黑 light;
     /*min-width: 900px;*/
-    min-height: 400px; /* 负责撑开弹出框后的高度。 */
+    /*min-height: 400px; !* 负责撑开弹出框后的高度。 *!*/
 }
 
 /* 表单的一行*/

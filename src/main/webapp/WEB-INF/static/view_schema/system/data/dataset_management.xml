@@ -10,9 +10,7 @@
         <actions id="myActions">
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
             <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
-            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
-            <!--<button id="btnNewDsAuthority" name="btnNewDsAuthority" html-value="新增数据集权限" link-view-id="dsAuthAddDialog"-->
-            <!--action="add"/>-->
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/data/dataset/delete" msg="删除数据集"/>
             <button id="btnSyncDbDataSet" name="btnSyncDbDataSet" html-value="刷新缓存数据集"
                     submit-url="/gaea/data/dataset/synchronize-db-dataset" msg="同步数据库数据集至缓存"/>
             <button id="btnShowDsAuthList" name="btnShowDsAuthList" html-value="数据集权限"
@@ -46,7 +44,7 @@
             <column id="id" name="id" label="ID" db-column-name="ID"
                     visible="false" sortable="true" html-width="200" primary-key="true" data-type="String"/>
             <column id="name" name="name" label="名称" db-column-name="name"
-                    visible="true" sortable="false" html-width="200" data-type="String"/>
+                    visible="true" sortable="false" html-width="300" data-type="String"/>
             <column id="primaryTable" name="primaryTable" label="主数据表" db-column-name="PRIMARY_TABLE"
                     visible="true" sortable="false" html-width="120" data-type="String"/>
             <column id="authorityType" name="authorityType" label="权限校验方式" db-column-name="AUTHORITY_TYPE"

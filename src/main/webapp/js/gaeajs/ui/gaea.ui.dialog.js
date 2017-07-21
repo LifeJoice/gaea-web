@@ -108,11 +108,11 @@ define([
             title: null,
             renderTo: null,
             width: 940,                         // 默认宽度
-            height: 550,                        // 默认高度
+            height: document.body.scrollHeight * 0.85,                        // 默认高度, 页面高度的85%. 设了高度后，jquery.ui.dialog会去调整内页的高度。
             maxHeight: 550, // 最大高度。这个关系自动生产高度的弹出框的最大高度。
             // 默认弹出位置
             position: {
-                my: "left+310 top+95",
+                my: "left+310 top+25",
                 at: "left top",
                 of: window
             },
@@ -166,9 +166,10 @@ define([
 
                 // 缓存当前dialog的配置
                 $dialog.data("gaea-options", opts);
-                // 添加"data-gaea-ui-dialog"标识
+                // 添加"data-gaea-ui-dialog"标识和gaea-dialog class
                 // 这对dialog中的组件找父dialog很必要。
                 $("#" + opts.id).attr("data-gaea-ui-dialog", "");
+                $("#" + opts.id).addClass("gaea-dialog");
 
                 // 加入弹出框链
                 // cache options in chain
@@ -638,9 +639,10 @@ define([
                     submitUrl: dialogOpts.submitUrl
                 });
 
-                // 添加"data-gaea-ui-dialog"标识
+                // 添加"data-gaea-ui-dialog"标识和"gaea-dialog" class
                 // 这对dialog中的组件找父dialog很必要。
                 $("#" + dialogOpts.id).attr("data-gaea-ui-dialog", "");
+                $("#" + dialogOpts.id).addClass("gaea-dialog");
 
                 /**
                  * 创建了dialog html后，对里面的form也得做validate的初始化。否则jQuery.validate插件会报错：
