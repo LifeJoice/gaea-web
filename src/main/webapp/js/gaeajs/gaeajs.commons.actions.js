@@ -14,14 +14,163 @@ define([
         "jquery", "underscore",
         'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaea-system-url",
         "gaeajs-ui-events", "gaeajs-ui-definition", "gaeajs-ui-notify", "gaeajs-ui-dialog", "gaeajs-context",
-        "gaeajs-common-utils"
+        "gaeajs-common-utils", "gaeajs-ui-crud-grid"
     ],
     function ($, _,
               gaeaAjax, gaeaValid, gaeaString, SYS_URL,
               GAEA_EVENTS, GAEA_UI_DEFINE, gaeaNotify, gaeaDialog, gaeaContext,
-              gaeaUtils) {
+              gaeaUtils, gaeaCrudGrid) {
         var actions = {};
 
+        /**
+         * 初始化一个按钮相关的所有（系统内置）操作，包括通用删除、excel导出等
+         *
+         * @param {object} opts
+         * @param {object} opts.button schema的button定义。其中应该也包含了buttonAction，但还是单独吧。
+         * @param {object} opts.buttonAction 某个button的某个action
+         * @param {object} opts.data 要POST到后台的数据. 应该必须有schemaId。
+         */
+        actions.init = function (opts) {
+
+            var buttonDef = opts.button;
+            opts.id = buttonDef.htmlId;
+            opts.action = buttonDef.action;
+            var $button = $("#" + buttonDef.htmlId);
+
+            /**
+             * 【1】通用校验框架
+             * 当按钮含有action/actions/onClick才校验。之所以要有这个，是因为弹出框等也有校验，这里如果不限制一下，弹出框类的会校验两次。
+             */
+            if ((gaeaValid.isNotNull(buttonDef.action) || gaeaValid.isNotNull(buttonDef.actions) || _.isFunction(buttonDef.onClick)) &&
+                gaeaValid.isNotNull(buttonDef.validators)) {
+                $button.click(function (event) {
+                    // validate
+                    // 如果有绑定校验器，需要校验通过才能继续。
+                    if (!$button.gaeaValidate("valid")) {
+                        // （验证不通过）立刻中止在本元素上绑定的所有同名事件的触发！
+                        event.stopImmediatePropagation();
+                        return;
+                    }
+                });
+            }
+
+            /**
+             * 对于删除按钮，需要通过监听事件进行。
+             */
+            if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED) ||
+                gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {
+                // 请求真删除
+                //opts.url = SYS_URL.CRUD.DELETE;
+                // 初始化通用删除功能（绑定点击事件等）
+                actions.deleteSelected.init(opts);
+                //} else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                //    // 初始化通用删除功能（绑定点击事件等）
+                //    actions.deleteSelected.init(opts);// options默认伪删除
+            }
+            // 由于历史是用buttonDef.action, 而新的是用buttonDef.action.name
+            // TODO 整合buttonDef.action.name和buttonDef.action. 整合下面的if和上面的if
+            if (_.isObject(buttonDef.action)) {
+                if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_IMPORT)) {
+                    /**
+                     * 可编辑表格的导入
+                     */
+                    gaeaCrudGrid.action.excelImport.init({
+                        sourceId: buttonDef.id,
+                        action: buttonDef.action
+                    });
+                } else if (gaeaString.equalsIgnoreCase(buttonDef.action.name, GAEA_UI_DEFINE.ACTION.CRUD_GRID.EXCEL_EXPORT)) {
+                    /**
+                     * 可编辑表格的导出
+                     */
+                    gaeaCrudGrid.action.excelExport.init({
+                        sourceId: buttonDef.id,
+                        action: buttonDef.action
+                    });
+                }
+            }
+            /**
+             * 按钮点击的事件
+             * 老的方式，是通过isBindOnClick配置项控制，但会比较繁琐。
+             * 新的都是通过直接检查回调函数即可。
+             * TODO 这个后面全部重构为基于onClick
+             */
+            //if ((gaeaValid.isNull(opts.isBindOnClick) || opts.isBindOnClick) && !_.isFunction(buttonDef.onClick)) {
+            //    $button.click(function () {
+            /**
+             * 创建按钮点击的对应处理。并执行。
+             */
+            //opts.id = buttonDef.htmlId;
+            //opts.action = buttonDef.action;
+
+            //var buttonDef = opts.button;
+            //var $button = $("#" + buttonDef.htmlId);
+            if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
+                actions.crudDialog.bindUpdateTrigger(opts);
+                //// 定义grid id，方便获取selected row的数据（编辑）。
+                //opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
+                //actions.crudDialog.update.do(opts);
+
+            } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
+                actions.crudDialog.bindAddTrigger(opts);
+                //// 定义grid id，方便获取selected row的数据（编辑）。
+                //opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
+                //actions.crudDialog.add.do(opts);
+
+                //} else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                //    actions.deleteSelected.doRealDelete(opts);
+                //} else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                //    actions.deleteSelected.doPseudoDelete(opts);
+            } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
+                actions.excel.bindExportTrigger(opts);
+            }
+            /**
+             * action和actions应该两者只有一个。
+             * actions是更深入的action的定义。并且，设计上希望一个button能执行多个action（未实现）
+             */
+            if (gaeaValid.isNotNull(buttonDef.actions)) {
+                //var data = _private.getSubmitData();
+                //data.buttonId = buttonDef.id;
+                //data.actionName = buttonDef.action;
+                //if (buttonDef.actions.length > 1) {
+                //    gaeaNotify.error("当前不支持一个按钮绑定多个action！请联系系统管理员检查。");
+                //    return;
+                //}
+                ///**
+                // * 暂时只支持绑定一个action。
+                // */
+                //actions.doAction({
+                //    button: buttonDef,
+                //    data: data
+                //});
+                _private.bindActionTrigger(opts);
+            }
+
+            /**
+             * 通用action的处理。即action有值。
+             * （TODO 上面的DELETE、ADD DIALOG等应该都放在这里，但历史遗留问题，后面慢慢重构吧）
+             */
+            //if (gaeaValid.isNotNull(buttonDef.action) && gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
+            //    var data = _private.getSubmitData();
+            //    data.buttonId = buttonDef.id;
+            //    data.actionName = buttonDef.action;
+            //    /**
+            //     * 普通action的处理（没有button-action子项）
+            //     * 【重要】
+            //     * TODO 暂时限定export excel走这个方法。因为其他的还没改过来。
+            //     */
+            //    actions.doSimpleAction({
+            //        button: buttonDef,
+            //        data: data
+            //    });
+            //}
+            //});
+            //}
+
+            // 绑定事件
+            if (_.isFunction(opts.button.onClick)) {
+                $button.on("click", opts.button.onClick);
+            }
+        };
         /**
          *
          * @param {object} opts
@@ -137,55 +286,143 @@ define([
          * 通用删除操作。
          */
         actions.deleteSelected = {
-            init: function (options) {
-                var buttonDef = options.button;
+            do: function (opts, data) {
+                var buttonDef = opts.button;
                 //var $button = $("#" + buttonDef.htmlId);
                 // 默认伪删除
                 var deleteURL = SYS_URL.CRUD.PSEUDO_DELETE;
-                if (gaeaValid.isNotNull(options.url)) {
-                    deleteURL = options.url;
+                if (gaeaValid.isNotNull(opts.url)) {
+                    deleteURL = opts.url;
                 }
-                /**
-                 * 绑定按钮触发的删除事件。
-                 */
-                GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, "#" + buttonDef.htmlId, function (event, data) {
-                    var schemaId = $("#" + GAEA_UI_DEFINE.UI.SCHEMA.ID).val();
-                    var gridId = $("#" + GAEA_UI_DEFINE.UI.GRID.ID).val();
-                    var row = data.selectedRow;
-                    // button define
-                    var button = data.button;
-                    // 通用删除！
-                    gaeaAjax.ajax({
-                        url: deleteURL,
-                        data: {
-                            id: row.id,
-                            urSchemaId: schemaId,
-                            gridId: gridId,
-                            wfProcInstId: row.wfProcInstId
-                        },
-                        success: function () {
-                            gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
+                var schemaId = $("#" + GAEA_UI_DEFINE.UI.SCHEMA.ID).val();
+                var gridId = $("#" + GAEA_UI_DEFINE.UI.GRID.ID).val();
+                //var row = data.selectedRow;
+                // get selected row
+                var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                // 通用删除！
+                gaeaAjax.ajax({
+                    url: deleteURL,
+                    data: {
+                        id: row.id,
+                        urSchemaId: schemaId,
+                        //gridId: gridId,
+                        wfProcInstId: row.wfProcInstId
+                    },
+                    success: function () {
+                        gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", buttonDef.msg));
+                        //gaeaNotify.message("删除成功！");
+                        $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                    },
+                    // 返回内容如果为空，则即使status=200，也会进入fail方法
+                    fail: function (jqXHR, textStatus, errorThrown) {
+                        // 如果返回status=200，则还是当做成功！
+                        if (jqXHR.status == 200) {
+                            gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", buttonDef.msg));
                             //gaeaNotify.message("删除成功！");
                             $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                        },
-                        // 返回内容如果为空，则即使status=200，也会进入fail方法
-                        fail: function (jqXHR, textStatus, errorThrown) {
-                            // 如果返回status=200，则还是当做成功！
-                            if (jqXHR.status == 200) {
-                                gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
-                                //gaeaNotify.message("删除成功！");
-                                $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                            } else {
-                                var result = jqXHR.responseJSON;
-                                gaeaNotify.fail(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
-                                    SIMPLE_MSG: "删除失败！",
-                                    ERROR_MSG: result.RESULT_MSG
-                                }));
-                            }
+                        } else {
+                            var result = jqXHR.responseJSON;
+                            gaeaNotify.fail(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
+                                SIMPLE_MSG: "删除失败！",
+                                ERROR_MSG: result.RESULT_MSG
+                            }));
                         }
-                    });
+                    }
                 });
+            },
+            init: function (options) {
+                var buttonDef = options.button;
+                ////var $button = $("#" + buttonDef.htmlId);
+                //// 默认伪删除
+                //var deleteURL = SYS_URL.CRUD.PSEUDO_DELETE;
+                //if (gaeaValid.isNotNull(options.url)) {
+                //    deleteURL = options.url;
+                //}
+                ///**
+                // * 绑定按钮触发的删除事件。
+                // */
+                //GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, "#" + buttonDef.htmlId, function (event, data) {
+                //    var schemaId = $("#" + GAEA_UI_DEFINE.UI.SCHEMA.ID).val();
+                //    var gridId = $("#" + GAEA_UI_DEFINE.UI.GRID.ID).val();
+                //    var row = data.selectedRow;
+                //    // button define
+                //    var button = data.button;
+                //    // 通用删除！
+                //    gaeaAjax.ajax({
+                //        url: deleteURL,
+                //        data: {
+                //            id: row.id,
+                //            urSchemaId: schemaId,
+                //            gridId: gridId,
+                //            wfProcInstId: row.wfProcInstId
+                //        },
+                //        success: function () {
+                //            gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
+                //            //gaeaNotify.message("删除成功！");
+                //            $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                //        },
+                //        // 返回内容如果为空，则即使status=200，也会进入fail方法
+                //        fail: function (jqXHR, textStatus, errorThrown) {
+                //            // 如果返回status=200，则还是当做成功！
+                //            if (jqXHR.status == 200) {
+                //                gaeaNotify.success(gaeaString.builder.simpleBuild("%s 删除成功。", button.msg));
+                //                //gaeaNotify.message("删除成功！");
+                //                $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                //            } else {
+                //                var result = jqXHR.responseJSON;
+                //                gaeaNotify.fail(_.template("<%=SIMPLE_MSG%><p/><%=ERROR_MSG%>")({
+                //                    SIMPLE_MSG: "删除失败！",
+                //                    ERROR_MSG: result.RESULT_MSG
+                //                }));
+                //            }
+                //        }
+                //    });
+                //}, { unbindBefore: false});
 
+                /**
+                 * 绑定按钮点击删除
+                 */
+                if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                    // 真删除
+                    options.url = SYS_URL.CRUD.DELETE;
+                    actions.deleteSelected.bindRealDeleteTrigger(options);
+                } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                    // 伪删除
+                    actions.deleteSelected.bindPseudoDeleteTrigger(options);
+                }
+
+            },
+            /**
+             * 绑定点击触发真删除事件。
+             * @param opts
+             */
+            bindRealDeleteTrigger: function (opts) {
+                // unbindBefore，不要解除之前的事件，之前还有绑定一个通用校验的事件
+                GAEA_EVENTS.registerListener("click", "#" + opts.button.htmlId, function (event, data) {
+                    //if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                    // 真删除
+                    actions.deleteSelected.doRealDelete(opts);
+                    //} else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                    //    // 伪删除
+                    //    actions.deleteSelected.doPseudoDelete(opts);
+                    //}
+                }, {unbindBefore: false});
+            },
+            /**
+             * 绑定点击触发伪删除事件。
+             * @param opts
+             */
+            bindPseudoDeleteTrigger: function (opts) {
+                // unbindBefore，不要解除之前的事件，之前还有绑定一个通用校验的事件
+                GAEA_EVENTS.registerListener("click", "#" + opts.button.htmlId, function (event, data) {
+                    //if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.DELETE_SELECTED)) {
+                    //    // 真删除
+                    //    actions.deleteSelected.doRealDelete(opts);
+                    //} else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
+                    // 伪删除
+                    actions.deleteSelected.doPseudoDelete(opts);
+                    //}
+                }, {unbindBefore: false});
             },
             /**
              * 真删除
@@ -201,17 +438,20 @@ define([
                 });
                 var $button = $("#" + opts.id);
                 // 弹框。确认删除？
-                gaeaDialog.confirmDialog({
+                //gaeaDialog.confirmDialog({
+                gaeaDialog.commonDialog.confirm({
                     title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
                     content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
                 }, function () {
-                    // get selected row
-                    var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
-                    // trigger delete action
-                    $button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
-                        selectedRow: row,
-                        button: opts.button
-                    });
+                    //// get selected row
+                    //var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                    //// trigger delete action
+                    //$button.trigger(GAEA_EVENTS.DEFINE.ACTION.DELETE_SELECTED, {
+                    //    selectedRow: row,
+                    //    button: opts.button
+                    //});
+
+                    actions.deleteSelected.do(opts);
                 });
             },
             /**
@@ -227,7 +467,7 @@ define([
                 });
                 var $button = $("#" + opts.id);
                 // 弹框。确认删除？
-                gaeaDialog.confirmDialog({
+                gaeaDialog.commonDialog.confirm({
                     title: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_TITLE,
                     content: GAEA_UI_DEFINE.TEXT.UI.DIALOG.DELETE_CONFIRM_CONTENT
                 }, function () {
@@ -243,6 +483,17 @@ define([
         };
 
         actions.crudDialog = {
+            /**
+             * 绑定点击打开新增弹出框。
+             * @param opts
+             */
+            bindAddTrigger: function (opts) {
+                GAEA_EVENTS.registerListener("click", "#" + opts.button.htmlId, function (event, data) {
+                    // 定义grid id，方便获取selected row的数据（编辑）。
+                    opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
+                    actions.crudDialog.add.do(opts);
+                });
+            },
             /**
              * 触发add这个行为。
              * @param opts
@@ -280,6 +531,41 @@ define([
                         $button.trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, opts);
                     }
                 }
+            },
+            /**
+             * 绑定点击打开编辑弹出框。
+             * @param opts
+             */
+            bindUpdateTrigger: function (opts) {
+                GAEA_EVENTS.registerListener("click", "#" + opts.button.htmlId, function (event, data) {
+                    // 定义grid id，方便获取selected row的数据（编辑）。
+                    opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
+                    actions.crudDialog.update.do(opts);
+                });
+            }
+        };
+
+        actions.excel = {
+            /**
+             * 绑定点击导出excel事件。
+             * @param opts
+             */
+            bindExportTrigger: function (opts) {
+                var buttonDef = opts.button;
+                GAEA_EVENTS.registerListener("click", "#" + opts.button.htmlId, function (event, data) {
+                    var data = _private.getSubmitData();
+                    data.buttonId = buttonDef.id;
+                    data.actionName = buttonDef.action;
+                    /**
+                     * 普通action的处理（没有button-action子项）
+                     * 【重要】
+                     * TODO 暂时限定export excel走这个方法。因为其他的还没改过来。
+                     */
+                    actions.doSimpleAction({
+                        button: opts.button,
+                        data: data
+                    });
+                }, {unbindBefore: false});
             }
         };
 
@@ -445,6 +731,61 @@ define([
                 });
 
                 return result;
+            },
+            /**
+             * copy from gaea.ui.toolbar _private.getSubmitData by Iverson 2017年7月25日15:22:32
+             * @param opts
+             *              rowParamName row作为data的属性的名。即 data.paramName=row. 空即data=row.
+             * @returns data
+             */
+            getSubmitData: function (opts) {
+                var gaeaGrid = require("gaeajs-ui-grid");
+                var data = {};
+                //var row = gaeaGrid.getSelected();
+                var row = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROW, "gaea-grid-ct");
+                // 获取页面的SCHEMA ID
+                //var schemaId = gaeaView.list.getSchemaId();
+                var schemaId = $("#urSchemaId").val();
+                data.schemaId = schemaId;
+                // 获取页面快捷查询的条件
+                var queryConditions = gaeaGrid.query.getQueryConditions({
+                    id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
+                });
+                // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
+                var newRow = gaeaUtils.data.flattenData(row);
+                if (gaeaValid.isNotNull(opts) && gaeaValid.isNotNull(opts.rowParamName)) {
+                    /**
+                     * row的数据作为data的一个属性值
+                     */
+                    var rowParamName = opts.rowParamName;
+                    data[rowParamName] = newRow;
+                } else {
+                    /**
+                     * 需要把row值合并到data
+                     */
+                    data = _.extend(data, newRow);
+                    data = _.extend(data, queryConditions);
+                }
+                return data;
+            },
+            bindActionTrigger: function (opts) {
+                var buttonDef = opts.button;
+                GAEA_EVENTS.registerListener("click", "#" + opts.button.htmlId, function (event, data) {
+                    var data = _private.getSubmitData();
+                    data.buttonId = buttonDef.id;
+                    data.actionName = buttonDef.action;
+                    if (buttonDef.actions.length > 1) {
+                        gaeaNotify.error("当前不支持一个按钮绑定多个action！请联系系统管理员检查。");
+                        return;
+                    }
+                    /**
+                     * 暂时只支持绑定一个action。
+                     */
+                    actions.doAction({
+                        button: buttonDef,
+                        data: data
+                    });
+                }, {unbindBefore: false});
             }
         };
 

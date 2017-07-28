@@ -9,12 +9,29 @@
     <views id="dsMgrView" title="数据集管理">
         <actions id="myActions">
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDialog" action="add"/>
-            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update"/>
-            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/data/dataset/delete" msg="删除数据集"/>
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDialog" action="update">
+                <validators>
+                    <action-validator data-msg="未选择任意记录，无法执行操作。"
+                                      check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                </validators>
+            </button>
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/data/dataset/delete" msg="删除数据集">
+                <validators>
+                    <action-validator data-msg="未选择任意记录，无法执行操作。"
+                                      check-expression="gaeaValid.isNotNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                </validators>
+            </button>
             <button id="btnSyncDbDataSet" name="btnSyncDbDataSet" html-value="刷新缓存数据集"
                     submit-url="/gaea/data/dataset/synchronize-db-dataset" msg="同步数据库数据集至缓存"/>
             <button id="btnShowDsAuthList" name="btnShowDsAuthList" html-value="数据集权限"
-                    link-view-id="dsAuthorityMgrView"/>
+                    link-view-id="dsAuthorityMgrView">
+                <validators>
+                    <action-validator data-msg="未选择任意记录，无法执行数据集权限配置。"
+                                      check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                    <action-validator data-msg="只能选择一个数据集进行权限配置。"
+                                      check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} $pageContext[selectedRows][gaea-grid-ct].length==1"/>
+                </validators>
+            </button>
         </actions>
         <!--工作流弹出框-->
         <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"

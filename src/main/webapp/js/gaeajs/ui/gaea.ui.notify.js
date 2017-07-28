@@ -53,7 +53,8 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
         warn: function (msg) {
             gaeaNotify.show({
                 msg: msg,
-                msgType: msgDefaultType.WARN
+                msgType: msgDefaultType.WARN,
+                permanent: false
             });
         },
         error: function (msg) {
@@ -82,8 +83,10 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
                 opts.type = opts.msgType;
                 opts.permanent = false;
                 $notify.jnotifyAddMessage(opts);
-            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.WARN, opts.msgType) ||
-                gaeaStringUtils.equalsIgnoreCase(msgDefaultType.ERROR, opts.msgType)) {
+            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.WARN, opts.msgType)) {
+                opts.type = "warn";
+                $notify.jnotifyAddMessage(opts);
+            } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.ERROR, opts.msgType)) {
                 opts.type = "error";
                 $notify.jnotifyAddMessage(opts);
             }

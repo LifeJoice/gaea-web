@@ -9,8 +9,11 @@
  * RequireJS,JQuery,重写的Date.format
  */
 define([
-        "jquery", "underscore", 'gaeajs-common-utils-validate', "jquery-validate"],
-    function ($, _, gaeaValid) {
+        "jquery", "underscore", 'gaeajs-common-utils-validate',
+        "gaeajs-common-utils-string", "gaeajs-context", "gaeajs-ui-notify",
+        "jquery-validate"],
+    function ($, _, gaeaValid,
+              gaeaString, gaeaContext, gaeaNotify) {
         /**
          * 加载的遮罩效果 2016-6-14 19:28:54
          * 用的是SVG图。
@@ -71,22 +74,94 @@ define([
                         }
                     }
                 }
+            },
+            /**
+             * 初始化相关的对象的校验器。不是立刻执行校验。
+             * @param options
+             * @returns {*}
+             */
+            init: function ($target, options) {
+                return $target.each(function () {
+                    var $container = $(this);
+                    /**
+                     * 依赖第三方框架：jquery-validate
+                     * 这个必须在进入页面的时候初始化。而不是在校验的时候调用。校验的手动调用是valid方法。
+                     */
+                    $container.validate();
+                });
+            },
+            /**
+             * 即刻执行目标对象的校验。
+             * @param opts
+             */
+            valid: function ($inTarget, opts) {
+                var result = false;
+                $inTarget.each(function () {
+                    var $target = $(this);
+                    var gaeaOpts = $target.data("gaeaOptions");
+                    if (gaeaValid.isNull(gaeaOpts.validators)) {
+                        return;
+                    }
+                    var validators = gaeaOpts.validators;
+                    // 这个是后面表达式计算需要的一个上下文变量，不能删除！
+                    var $pageContext = gaeaContext.getContext();
+                    if (_.isArray(validators)) {
+                        /**
+                         * 遍历所有校验器，如果第一个校验器校验通过，就执行第二个，第三个……如此类推。
+                         * 如果第一个失败，就中止执行。
+                         */
+                        $.each(validators, function (i, validator) {
+                            var origValidateEl = validator["check-expression"];
+                            var convertedValidateEl = gaeaContext.formatName(origValidateEl);
+                            try {
+                                var validateResult = eval(convertedValidateEl);
+                                result = validateResult;
+                                // 校验不通过
+                                if (!validateResult) {
+                                    gaeaNotify.warn(validator["data-msg"]);
+                                    // 中断检查，不再继续其他校验器
+                                    return false;
+                                }
+                            } catch (err) {
+                                gaeaNotify.error("校验失败！请联系系统管理员！" + err);
+                            }
+                        });
+                    }
+
+                    /**
+                     * 依赖第三方框架：jquery-validate
+                     * 这个必须在进入页面的时候初始化。而不是在校验的时候调用。校验的手动调用是valid方法。
+                     */
+                    //$target.validate();
+                });
+                return result;
             }
         };
         /**
          * 自定义的jQuery插件validate.
          * 当前只是简单的调用第三方插件初始化。
-         * @param options
+         * @example
+         * 触发校验
+         * $button.gaeaValidate("valid")
+         * 初始化
+         * $container.valid()
+         * @param {string|object} opts
+         * @param {object} opts.valid
          */
-        $.fn.gaeaValidate = function (options) {
-            return this.each(function () {
-                var $container = $(this);
-                /**
-                 * 依赖第三方框架：jquery-validate
-                 * 这个必须在进入页面的时候初始化。而不是在校验的时候调用。校验的手动调用是valid方法。
-                 */
-                $container.validate();
-            });
+        $.fn.gaeaValidate = function (opts) {
+            var $this = this;
+            // 初始化
+            if (gaeaValid.isNull(opts)) {
+                gaeaValidate.init($this, null);
+                return;
+            }
+
+            /**
+             * 即刻校验
+             */
+            if (gaeaString.equalsIgnoreCase("valid", opts) || gaeaValid.isNotNull(opts.valid)) {
+                return gaeaValidate.valid($this, null);
+            }
         };
         /**
          * 返回接口定义。

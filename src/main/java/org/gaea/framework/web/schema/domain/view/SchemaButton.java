@@ -1,11 +1,10 @@
 package org.gaea.framework.web.schema.domain.view;
 
-import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.SchemaViewsComponent;
-import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Iverson on 2015/7/6.
@@ -37,6 +36,10 @@ public class SchemaButton implements SchemaViewsComponent, Serializable {
      * 有序。可以按顺序执行多个action。
      */
     private List actions;
+    /**
+     * 按钮的校验器
+     */
+    private List<Map<String, String>> validators = null;
 
     public String getId() {
         return id;
@@ -157,5 +160,13 @@ public class SchemaButton implements SchemaViewsComponent, Serializable {
 
     public void setActions(List actions) {
         this.actions = actions;
+    }
+
+    public List<Map<String, String>> getValidators() {
+        return validators;
+    }
+
+    public void setValidators(List<Map<String, String>> validators) {
+        this.validators = validators;
     }
 }

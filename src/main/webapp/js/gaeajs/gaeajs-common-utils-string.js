@@ -44,6 +44,32 @@ define([
             return false;
         },
         /**
+         * 查找某个字符，是否在一个数组中存在。不区分大小写，但必须完全匹配。即不是include那种。
+         * @param {string} findStr              要查找的字符
+         * @param {string|array} findInArr      在这个数组中查找
+         * @returns {boolean}
+         */
+        inListIgnoreCase: function (findStr, findInArr) {
+            var result = false;
+            gaeaValid.isNull({
+                check: findStr,
+                exception: "inListIgnoreCase要查找的目标字符串为空！"
+            });
+            if (_.isString(findInArr)) {
+                return stringUtils.equalsIgnoreCase(findStr, findInArr);
+            }
+            if (_.isArray(findInArr)) {
+                $.each(findInArr, function (i, val) {
+                    if (stringUtils.equalsIgnoreCase(findStr, val)) {
+                        result = true;
+                        // 跳出循环
+                        return false;
+                    }
+                });
+            }
+            return result;
+        },
+        /**
          * 把一个字符串转换为json对象。主要是为了支持非严格的格式。
          * @param jsonStr 不带大括号的json对象字符串。例如：options:users,optionsText:'username',optionsValue:'username',value:userValue
          * @returns {{}}

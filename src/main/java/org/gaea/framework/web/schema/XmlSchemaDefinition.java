@@ -30,8 +30,14 @@ public class XmlSchemaDefinition {
     /* *************************************************** GRID *************************************************** */
     public static String GRID_COLUMN_NAME = "column";
     public static String GRID_COLUMN_QUERY_COND_NAME = "query-condition";
-    /* *************************************************** ACTION *************************************************** */
+    /**
+     * ********************************************************************************************************************************************************
+     * ACTION/BUTTON/BUTTON GROUP
+     * ********************************************************************************************************************************************************
+     */
     public static String ACTION_BUTTON_NAME = "button";
     public static String ACTION_BUTTON_GROUP_NAME = "button-group";
     public static String BUTTON_ACTION_NAME = "button-action"; // "button"的子元素。
+    public static String BUTTON_VALIDATORS_NAME = "validators"; // 校验规则的容器元素
+    public static String BUTTON_ACTION_VALIDATOR_NAME = "action-validator";
 }

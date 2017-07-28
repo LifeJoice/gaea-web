@@ -5,7 +5,18 @@
  * DEPENDENCE:
  * RequireJS,JQuery,重写的Date.format
  */
+
+/**
+ * 关于校验对象的定义。
+ *
+ * @typedef {object} GaeaValidator
+ * @property {string} data-msg              错误提示
+ * @property {string} required              是否必录
+ */
+
 define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
+
+    var _public = {};
     /**
      * 验证字符是否为空。
      * 如果opts是对象，且有exception的值，则校验不通过的时候，抛出异常。
@@ -15,7 +26,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
      * @param {string} opts.exception               抛出的异常描述. 如果这个字段有值，则校验不通过抛出异常；否则返回false
      * @returns {boolean}
      */
-    var isNotNull = function (opts) {
+    _public.isNotNull = function (opts) {
         if (_.isNull(opts) || _.isUndefined(opts)) {
             return false;
         }
@@ -27,7 +38,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
         if (_.isString(opts.exception) && _s.trim(opts.exception).length > 0) {
             var check = opts.check;
             //if(_.isString(opts.exception) && _s.trim(opts.exception).length>0){
-            if (isNotNull(check)) {
+            if (_public.isNotNull(check)) {
                 return true;
                 //}
             } else {
@@ -64,17 +75,23 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
      * @param {string} opts.exception               抛出的异常描述. 如果这个字段有值，则校验不通过抛出异常；否则返回false
      * @returns {boolean}
      */
-    var isNull = function (opts) {
-        return !isNotNull(opts);
+    _public.isNull = function (opts) {
+        return !_public.isNotNull(opts);
     };
-    var isNotNullArray = function (inArg) {
-        if (isNull(inArg)) {
+
+    // 是否为非空数组
+    _public.isNotNullArray = function (inArg) {
+        if (_public.isNull(inArg)) {
             return false;
         }
         if (_.isArray(inArg) && inArg.length > 0) {
             return true;
         }
         return false;
+    };
+    // 是否空数组
+    _public.isNullArray = function (inArg) {
+        return !_public.isNotNullArray(inArg);
     };
     /**
      * 判断一个多级的对象是否为空。这对动态生成的对象特别有用。
@@ -86,7 +103,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
      * @param objLevelArray     级别转换为一个数组描述。例如：要检测a.b.c对象,转换为的本参数是['b','c']
      * @returns {boolean}
      */
-    isNotNullMultiple = function (rootObj, objLevelArray) {
+    _public.isNotNullMultiple = function (rootObj, objLevelArray) {
         var parent = this;
         var isNotNull = false;
         // 检查当前对象属性中是否有该对象
@@ -99,7 +116,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
                     return false;
                 }
             }
-        })
+        });
         // 如果当前对象中有，继续检查子对象
         if (isNotNull && objLevelArray.length > 1) {
             // 移除第一个。然后递归继续
@@ -125,7 +142,7 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
          */
         getHtml: function (opts) {
             var htmlStr = "";
-            if (isNotNull(opts) && isNotNull(opts.html)) {
+            if (_public.isNotNull(opts) && _public.isNotNull(opts.html)) {
                 // 遍历每一个属性
                 $.each(opts.html, function (key, val) {
                     // 不是undefined|null|NaN, 但可以是""
@@ -141,11 +158,11 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
     /**
      * 返回（暴露）的接口
      */
-    return {
-        isNull: isNull,
-        isNotNull: isNotNull,
-        isNotNullArray: isNotNullArray,
-        isNotNullMultiple: isNotNullMultiple,
+    return _.extend(_public, {
+        //isNull: isNull,
+        //isNotNull: isNotNull,
+        //isNotNullArray: isNotNullArray,
+        //isNotNullMultiple: isNotNullMultiple,
         getHtml: gaeaValidator.getHtml
-    }
+    });
 });

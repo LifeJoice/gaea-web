@@ -86,6 +86,24 @@
     white-space: normal;
 }
 
+/* ******************************************************************** dialog组件的样式 ******************************************************************** */
+
+.gaea-common-dialog {
+    display: none;
+}
+
+/* 弹出确认框的样式 */
+.gaea-common-dialog .content-text {
+    text-align: center;
+    /*font-weight: bold;*/
+}
+
+.gaea-common-dialog .icon-ct {
+    text-align: center;
+    color: #ffc107;
+    padding: 10px;
+}
+
 /* ******************************************************************** loading组件的样式 ******************************************************************** */
 
 /**

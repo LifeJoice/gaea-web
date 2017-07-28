@@ -1,10 +1,7 @@
 package org.gaea.framework.web.schema.view.jo;
 
-import org.gaea.framework.web.schema.Action;
-import org.gaea.framework.web.schema.domain.SchemaViewsComponent;
-import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
-
 import java.util.List;
+import java.util.Map;
 
 /**
  * copy from SchemaButton
@@ -35,6 +32,10 @@ public class SchemaButtonJO {
      * 有序。可以按顺序执行多个action。
      */
     private List<ButtonActionJO> actions;
+    /**
+     * 按钮的校验器
+     */
+    private List<Map<String, String>> validators = null;
 
     public String getId() {
         return id;
@@ -154,5 +155,13 @@ public class SchemaButtonJO {
 
     public void setActions(List<ButtonActionJO> actions) {
         this.actions = actions;
+    }
+
+    public List<Map<String, String>> getValidators() {
+        return validators;
+    }
+
+    public void setValidators(List<Map<String, String>> validators) {
+        this.validators = validators;
     }
 }

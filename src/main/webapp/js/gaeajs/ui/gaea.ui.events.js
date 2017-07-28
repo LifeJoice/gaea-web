@@ -20,6 +20,13 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
 
         var events = {};
 
+        var _default = {
+            registerListenerOpts: {
+                // 是否去掉绑定当前对象的之前的事件
+                unbindBefore: true
+            }
+        };
+
         events.cache = {
             // 是否已经注册了自动关闭事件。这个应该只需要初始化一次。
             isRegisterAutoClose: false,
@@ -113,13 +120,18 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
          * eventFunction和defineFunction二选一。
          * @param {string} eventName                事件名
          * @param {string|null} jqSelector               绑定的id（某容器）.为空即为全局事件！
-         * @param {function} eventFunction            事件对应处理方法。有这个就忽略下面的defineFunction.
-         * @param {object} [opts]                   暂时无用。配置项。
+         * @param {function} eventFunction              事件对应处理方法。有这个就忽略下面的defineFunction.
+         * @param {object} [opts]
+         * @param {object} [opts.unbindBefore=true]     是否去掉绑定当前对象的之前的事件
          //* @param defineFunction            【废弃！】定义监听的方法，非event function。类似：function(){ $.on(...); }
          */
         events.registerListener = function (eventName, jqSelector, eventFunction, opts) {
             gaeaValid.isNull({check: eventName, exception: "事件名称为空，无法通过gaeaEvent注册监听事件！"});
             //gaeaValid.isNull({check: jqSelector, exception: "事件绑定的id为空，无法通过gaeaEvent注册监听事件！"});
+            if (gaeaValid.isNull(opts)) {
+                opts = {};
+            }
+            _.defaults(opts, _default.registerListenerOpts);
             // 如果没有指定jqSelector，则使用全局容器
             if (gaeaValid.isNull(jqSelector)) {
                 jqSelector = "#gaea-event-ct";
@@ -131,15 +143,17 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
 
             // eventFunction和defineFunction二选一
             if (_.isFunction(eventFunction)) {
-                debugStr = gaeaString.builder.simpleBuild("注册 %s 事件。", eventName);
+                debugStr = gaeaString.builder.simpleBuild("组件 %s 注册 %s 事件。", jqSelector, eventName);
                 if (_.isFunction($bindObj.data(key))) {
                     debugStr += " 该事件已经存在！先进行解绑操作。";
                 }
 
                 // 解绑
-                $bindObj.off(eventName);
+                if (opts.unbindBefore) {
+                    $bindObj.off(eventName);
+                }
                 // 如果需要debug已注册事件等信息，可以打开下面这个。
-                //console.debug(debugStr);
+                console.debug(debugStr);
                 // 绑定事件
                 $bindObj.on(eventName, eventFunction);
                 // 缓存当前已经注册的事件
@@ -197,7 +211,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
 
                         // 检查当前
                         if (gaeaValid.isNull(events.cache.lastOne)) {
-                            console.debug("没有注册最后操作的对象的jqSelector，无法关闭。");
+                            console.debug("缓存最后操作的对象的jqSelector为空，不执行自动关闭操作。");
                             return;
                         }
                         // 依赖setMe()寻找最后点击的对象，并关闭

@@ -64,6 +64,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
 
                 // 注册点击处理
                 gaeaEvents.registerListener("click", "#" + buttonOptions.id, function (event, ui) {
+                    var gaeaDialog = require("gaeajs-ui-dialog");
                     //$("#" + buttonOptions.id).click(function () {
                     //console.log("Go. Open dialog.");
                     // 打开dialog

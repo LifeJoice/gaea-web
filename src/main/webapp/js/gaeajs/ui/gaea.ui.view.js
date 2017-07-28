@@ -50,9 +50,17 @@ define([
 
                 // 如果关联点击事件 --> 点击打开view
                 if (gaeaValid.isNotNull(opts.triggers.click)) {
+                    var $refButton = $(opts.triggers.click.trgSelector); // 假设是个按钮。一般是个按钮。
 
                     // 点击打开view
                     GAEA_EVENTS.registerListener("click", opts.triggers.click.trgSelector, function (event, ui) { // gaea的事件注册中心,注册事件
+
+                        // validate
+                        // 如果有绑定校验器，需要校验通过才能继续。
+                        var buttonOpts = $refButton.data("gaeaOptions");
+                        if (gaeaValid.isNotNull(buttonOpts.validators) && !$refButton.gaeaValidate("valid")) {
+                            return;
+                        }
 
                         _private.viewChainData.setChainNodeData(opts);
                         // 点击的时候，先缓存父对象（短暂）

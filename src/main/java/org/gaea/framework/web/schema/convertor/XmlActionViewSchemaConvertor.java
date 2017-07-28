@@ -80,9 +80,45 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
                 // 解析< button >
                 Action buttonAction = parseButtonAction(viewNode);
                 button.getActions().add(buttonAction);
+            } else if (XmlSchemaDefinition.BUTTON_VALIDATORS_NAME.equals(viewNode.getNodeName())) {
+                /**
+                 * 解析button的validators
+                 */
+                List<Map<String, String>> validators = parseValidators(viewNode);
+                button.setValidators(validators);
             }
         }
         return button;
+    }
+
+    private List<Map<String, String>> parseValidators(Node node) throws InvalidDataException {
+        List<Map<String, String>> validatorList = new ArrayList<Map<String, String>>();
+
+        // 遍历 {@code <validators>}
+        NodeList nodes = node.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node validatorNode = nodes.item(i);
+            // xml解析会把各种换行符等解析成元素。统统跳过。
+            if (!(validatorNode instanceof Element)) {
+                continue;
+            }
+            if (XmlSchemaDefinition.BUTTON_ACTION_VALIDATOR_NAME.equals(validatorNode.getNodeName())) {
+                // 解析< button >
+                Map<String, String> paramMap = parseValidator(validatorNode);
+                validatorList.add(paramMap);
+            }
+        }
+        return validatorList;
+    }
+
+    private Map<String, String> parseValidator(Node node) throws InvalidDataException {
+
+//        SchemaValidator validator = new SchemaValidator();
+        Map<String, String> paramMap = GaeaXmlUtils.getAttributes(node);
+        paramMap.put("type", node.getNodeName());
+//        validator.setType(node.getNodeName());
+//        validator.setValidateParamMap(paramMap);
+        return paramMap;
     }
 
     /**

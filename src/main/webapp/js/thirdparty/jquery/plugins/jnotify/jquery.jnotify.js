@@ -103,6 +103,12 @@
                     iconClass = 'fa fa-times-circle fa-3x';
                 }
                     break;
+                // add by Iverson 2017年7月24日11:46:07
+                case 'warn':
+                {
+                    iconClass = 'fa fa-exclamation-triangle fa-3x';
+                }
+                    break;
                 case 'error':
                     {
                         styleClass = 'ui-state-error';

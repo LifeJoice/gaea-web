@@ -141,7 +141,7 @@ define(function () {
     var TEMPLATE = {
         DIV: {
             HIDDEN: '<div id="<%=ID%>" name="<%=NAME%>" style="display: none;"><%=CONTENT%></div>',
-            WITH_NAME: '<div id="<%=ID%>" name="<%=NAME%>"><%=CONTENT%></div>'
+            WITH_NAME: '<div id="<%=ID%>" name="<%=NAME%>"><div class="content-text"><%=CONTENT%></div></div>'
         },
         INPUT: {
             HIDDEN: '<input type="hidden" id="<%=ID%>" name="<%=NAME%>" value="<%=VALUE%>" >'

@@ -145,9 +145,9 @@ public class CommonCRUDServiceImpl implements CommonCRUDService {
         if (StringUtils.isBlank(urSchemaId)) {
             throw new ValidationFailedException("未能获取Schema id.无法删除操作！");
         }
-        if (StringUtils.isBlank(gridId)) {
-            throw new ValidationFailedException("未能获取列表的grid id.无法删除操作！");
-        }
+//        if (StringUtils.isBlank(gridId)) {
+//            throw new ValidationFailedException("未能获取列表的grid id.无法删除操作！");
+//        }
         // 从缓存获取XML SCHEMA对象
         GaeaXmlSchema gaeaXmlSchema = gaeaSchemaCache.get(urSchemaId);
         if (gaeaXmlSchema == null) {

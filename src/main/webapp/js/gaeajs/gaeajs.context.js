@@ -141,6 +141,13 @@ define([
                     return true;
                 }
                 return false;
+            },
+            /**
+             * 获取整个上下文。一般情况不建议直接调用，这个主要是给validator做表达式验证用！
+             * @returns {*|jQuery}
+             */
+            getContext: function () {
+                return $(".gaea-sys-content-context").data();
             }
         };
 
@@ -167,7 +174,22 @@ define([
                         return;
                     }
                     name = name.replace(/\[([\w\-_.]*)\]/g, "['$1']");
+                    // 转换特殊定义符
+                    name = _private.gaeaEL.convertEL(name);
                     return name;
+                },
+                /**
+                 * 转换表达式的特殊定义符({gaea#***})等。
+                 * @param origExp
+                 */
+                convertEL: function (origExp) {
+                    origExp = origExp.replace("{gaea#and}", "&&");
+                    origExp = origExp.replace("{gaea#or}", "||");
+                    origExp = origExp.replace("{gaea#gt}", ">");
+                    origExp = origExp.replace("{gaea#lt}", "<");
+                    origExp = origExp.replace("{gaea#ge}", ">=");
+                    origExp = origExp.replace("{gaea#le}", "<=");
+                    return origExp;
                 }
             }
         };
@@ -201,5 +223,7 @@ define([
             }
         };
 
-        return gaeaContext;
+        return _.extend(gaeaContext, {
+            formatName: _private.gaeaEL.formatName
+        });
     });

@@ -372,45 +372,45 @@ define([
             },
             /**
              * 共用的确认弹框。
-             * 需求：弹个框，显示一句话，OK就callbak，不OK就取消。
+             * 需求：弹个框，显示一句话，OK就callback，不OK就取消。
              * @param {object} options
              * @param {string} options.id dialog的div id.也可以为空, 就大家一起公用了. 其实也不影响.
              * @param {string} options.title 弹框的标题
              * @param {string} options.content 弹框的内容
-             * @param callback
+             * @param {function} callback
              */
-            confirmDialog: function (options, callback) {
-                var dialogId = options.id;// DOM的id
-                if (gaeaValid.isNull(dialogId)) {
-                    dialogId = GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID; // 共用
-                }
-                var $dialog = $("#" + dialogId);
-                if ($dialog.length < 1) {
-                    // not exist, create.
-                    dialog.utils.createDialogDiv({
-                        id: dialogId,
-                        content: options.content
-                    });
-                } else {
-                    $dialog.html(options.content);
-                }
-                //dialog.create({
-                _private.createDialog({
-                    id: dialogId,
-                    title: options.title,
-                    buttons: {
-                        "确认": function () {
-                            callback();
-                            $dialog.gaeaDialog("close");
-                            //$(this).remove();
-                        },
-                        "取消": function () {
-                            $dialog.gaeaDialog("close");
-                        }
-                    }
-                });
-                $dialog.gaeaDialog("open");
-            },
+            //confirmDialog: function (options, callback) {
+            //    var dialogId = options.id;// DOM的id
+            //    if (gaeaValid.isNull(dialogId)) {
+            //        dialogId = GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID; // 共用
+            //    }
+            //    var $dialog = $("#" + dialogId);
+            //    if ($dialog.length < 1) {
+            //        // not exist, create.
+            //        dialog.utils.createDialogDiv({
+            //            id: dialogId,
+            //            content: options.content
+            //        });
+            //    } else {
+            //        $dialog.html(options.content);
+            //    }
+            //    //dialog.create({
+            //    _private.createDialog({
+            //        id: dialogId,
+            //        title: options.title,
+            //        buttons: {
+            //            "确认": function () {
+            //                callback();
+            //                $dialog.gaeaDialog("close");
+            //                //$(this).remove();
+            //            },
+            //            "取消": function () {
+            //                $dialog.gaeaDialog("close");
+            //            }
+            //        }
+            //    });
+            //    $dialog.gaeaDialog("open");
+            //},
             /**
              * 主要是为了动画效果，初始化容器。
              * 预初始化dialog的HTML。主要是为了一些交互的效果，需要先有HTML容器的初始化。
@@ -655,7 +655,9 @@ define([
                     //}
                     //dialogOpts.formId = formId;
                     // 只是简单初始化，避免抛出undefined错误
-                $("#" + formId).validate();
+                require(["jquery-validate"], function () {
+                    $("#" + formId).validate();
+                });
                 // 检查当前页面有没有对应的DIV，没有创建一个。
                 //dialog.utils.createDialogDiv({
                 //    id: dialogOption.id,
@@ -709,20 +711,21 @@ define([
                         //    dialogOptions: dialogOption
                         //});
                     dialogOpts.initComponentData = true;
-                    crudDialog.bindOpenEvent(dialogOpts);
-                } else if (gaeaString.equalsIgnoreCase(dialogOpts.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
-                    // 初始化新增弹出框。包括点击触发。
-                    //crudDialog.initAddDialog({
-                    //    buttonDef: buttonDef,
-                    //    dialogOptions: dialogOption,
-                    //    parentId: options.parentId
-                    //    //openStyle:"inOne"
-                    //});
-
-
-                    //crudDialog.initAddDialog(dialogOpts);
-                    crudDialog.bindOpenEvent(dialogOpts);
+                    //crudDialog.bindOpenEvent(dialogOpts);
+                    //} else if (gaeaString.equalsIgnoreCase(dialogOpts.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
+                    //    // 初始化新增弹出框。包括点击触发。
+                    //    //crudDialog.initAddDialog({
+                    //    //    buttonDef: buttonDef,
+                    //    //    dialogOptions: dialogOption,
+                    //    //    parentId: options.parentId
+                    //    //    //openStyle:"inOne"
+                    //    //});
+                    //
+                    //
+                    //    //crudDialog.initAddDialog(dialogOpts);
+                    //    crudDialog.bindOpenEvent(dialogOpts);
                 }
+                crudDialog.bindOpenEvent(dialogOpts);
             },
             /**
              * 初始化新增弹出框。
@@ -907,6 +910,8 @@ define([
                 // 克隆一下，否则由于指针的关系会不确定。
                 options = _.clone(options);
                 var $dialog = $("#" + options.id);
+                var $refButton = $(options.triggerOpenJqSelector);
+                var buttonOpts = $refButton.data("gaeaOptions");
 
                 options.containerId = options.formId;
                 //var dialogId = options.id;
@@ -922,6 +927,12 @@ define([
                  */
                     //GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_UPDATE_OPEN, options.triggerOpenJqSelector, function (event, data) {
                 GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, options.triggerOpenJqSelector, function (event, data) {
+                    // validate
+                    // 如果有绑定校验器，需要校验通过才能继续。
+                    if (gaeaValid.isNotNull(buttonOpts.validators) && !$refButton.gaeaValidate("valid")) {
+                        return;
+                    }
+
                     var gridId = data.gridId;
                     var editData;
 
@@ -1164,6 +1175,115 @@ define([
             //    };
             //    return buttons;
             //}
+        };
+        // 通用性的弹出框，和相关的功能。例如：确认弹出框等
+        // copy and rafactor from confirmDialog by Iverson 2017年7月28日14:44:55
+        var commonDialog = {
+            /**
+             * 初始化一个弹出框的HTML基础部分。包括弹出框的div，和内容区。但不包含图标。
+             * @param {object} options
+             * @param {string} options.id dialog的div id.也可以为空, 就大家一起公用了. 其实也不影响.
+             * @param {string} options.title 弹框的标题
+             * @param {string} options.content 弹框的内容
+             * @param {function} callback
+             */
+            init: function (options, buttons, callback) {
+                var dialogId = options.id;// DOM的id
+                // 没有指定的div，使用公用的
+                if (gaeaValid.isNull(dialogId)) {
+                    dialogId = GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID; // 共用
+                }
+                // 检查是否存在div，没有先创建(HTML)
+                if ($("#" + dialogId).length < 1) {
+                    // not exist, create.
+                    dialog.utils.createDialogDiv({
+                        id: dialogId,
+                        content: options.content
+                    });
+                } else {
+                    $("#" + dialogId).html(_.template(GAEA_UI_DEFINE.TEMPLATE.DIV.WITH_NAME)({
+                        ID: options.id,
+                        NAME: options.id,
+                        CONTENT: options.content
+                    }));
+                }
+                var $dialog = $("#" + dialogId);
+                $dialog.addClass("gaea-common-dialog");
+                // 初始化标签，插入到弹出框内容的最前面
+                commonDialog.createIconDiv(options).prependTo($dialog);
+                // dialog初始化（调组件）
+                _private.createDialog({
+                    id: dialogId,
+                    title: options.title,
+                    height: 255,
+                    width: 460,
+                    position: {
+                        my: "center bottom",
+                        at: "center",
+                        of: window
+                    },
+                    buttons: buttons
+                });
+            },
+            /**
+             * 确认弹出框。含“确认”和“取消”按钮。对应感叹号提示符。
+             *
+             * @param {object} options
+             * @param {object} [options.id]         弹出框id。为空就用系统默认的。建议为空，整个系统公用一个即可。
+             * @param {string} [options.type]       如果为空，默认为感叹号图标。 value = message|forbidden
+             * @param {function} callback
+             */
+            confirm: function (options, callback) {
+                var dialogId = gaeaValid.isNull(options.id) ? GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID : options.id;
+                var confirmButtons = {
+                    "确认": function () {
+                        if (_.isFunction(callback)) {
+                            callback();
+                        }
+                        $dialog.gaeaDialog("close");
+                    },
+                    "取消": function () {
+                        $dialog.gaeaDialog("close");
+                    }
+                };
+                // 初始化，无论是否创建过都可以初始化
+                commonDialog.init(options, confirmButtons, callback);
+                // 初始化后再获取对象
+                var $dialog = $("#" + dialogId);
+                // 打开
+                $dialog.gaeaDialog("open");
+            },
+            /**
+             * 创建图标（和相关的容器div）。并以jQuery对象返回。
+             * @param {object} opts
+             * @param {string} [opts.type]          如果为空，默认为感叹号图标。 value = message|forbidden
+             * @returns {*|jQuery}
+             */
+            createIconDiv: function (opts) {
+                // 初始化确认弹出框的相关图标等
+                var iconClass;
+                // 搭配合适的图标
+                switch (opts.type) {
+                    // 禁止
+                    case 'message':
+                    {
+                        iconClass = 'fa fa-info-circle fa-3x';
+                    }
+                        break;
+                    case 'forbidden':
+                    {
+                        iconClass = 'fa fa-ban fa-3x';
+                    }
+                        break;
+                    default:
+                    {
+                        iconClass = 'fa fa-exclamation-triangle fa-3x';
+                    }
+                        break;
+                }
+                var $icon = $('<i aria-hidden="true"></i>').addClass(iconClass);
+                return $('<div class="icon-ct"></div>').append($icon);
+            }
         };
 
 
@@ -2118,6 +2238,9 @@ define([
             open: dialog.open,
             close: dialog.close,
             confirmDialog: dialog.confirmDialog,
-            preInitHtml: dialog.preInitHtml
+            preInitHtml: dialog.preInitHtml,
+            commonDialog: {
+                confirm: commonDialog.confirm
+            }
         };
     });

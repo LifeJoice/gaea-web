@@ -36,7 +36,8 @@
 }
 
 .ui-widget-header {
-    font-size: 26px;
+    font-size: 16px;
+    letter-spacing: 1px;
     border-top: 0;
     border-left: 0;
     border-right: 0;
@@ -309,3 +310,6 @@ button.ui-corner-all {
     /* 这个和.gaea-ui-page一致 */
     padding: 10px 0 0;
 }
+
+
+

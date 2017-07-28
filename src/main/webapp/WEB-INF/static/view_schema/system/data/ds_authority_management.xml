@@ -9,9 +9,19 @@
     <views id="dsAuthMgrView" title="数据集权限管理">
         <actions id="myActions">
             <button id="btnNew" name="btnNew" html-value="新增" link-view-id="createDsAuthDialog" action="add"/>
-            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDsAuthDialog" action="update"/>
+            <button id="btnEdit" name="btnEdit" html-value="编辑" link-view-id="editDsAuthDialog" action="update">
+                <validators>
+                    <action-validator data-msg="未选择任意记录，无法执行操作。"
+                                      check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                </validators>
+            </button>
             <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/data/dataset/auth/delete"
-                    msg="删除数据集权限"/>
+                    msg="删除数据集权限">
+                <validators>
+                    <action-validator data-msg="未选择任意记录，无法执行操作。"
+                                      check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                </validators>
+            </button>
         </actions>
         <!--工作流弹出框-->
         <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
