@@ -29,7 +29,7 @@
                 </validators>
             </button>
             <!--<button id="btnEditAuthRes" name="btnEditAuthRes" html-value="编辑权限资源" link-view-id="editAuthResDialog" action="update" />-->
-            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected">
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/security/user/delete" msg="删除用户">
                 <validators>
                     <action-validator data-msg="未选择任意记录，无法执行操作。"
                                       check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>

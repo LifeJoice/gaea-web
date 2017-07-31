@@ -16,7 +16,7 @@ public class Menu {
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     @Column(name = "ID")
     private String id;
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     private String name;
     @OneToOne(cascade=CascadeType.REMOVE)
     @JoinColumn(name="RESOURCE_ID")

@@ -18,9 +18,9 @@ public class Authority implements Serializable {
     @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     private String id;
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     private String name;                // 一个方便记忆的权限的名字。例如：查看用户列表
-    @Column(name = "CODE")
+    @Column(name = "CODE", unique = true, nullable = false)
     private String code;                // 框架判断权限的全英文的编码。例如：USER_LIST_QUERY
     @Column(name = "LEVEL_NUM")
     private Integer level = 0;          // 在树中的级别。只是方便管理。

@@ -5,7 +5,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.cache.GaeaCacheOperator;
 import org.gaea.exception.DataIntegrityViolationException;
-import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.common.CommonDefinition;
@@ -14,15 +13,15 @@ import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
 import org.gaea.security.repository.SystemUsersRepository;
 import org.gaea.security.service.SystemUsersService;
+import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,9 +41,26 @@ public class SystemUsersServiceImpl implements SystemUsersService {
     private SystemUsersRepository systemUsersRepository;
     @Autowired
     private GaeaCacheOperator gaeaCacheOperator;
+    // 注册的Spring Security公用加密器
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
-    public void save(User user) {
+    @Transactional
+    public void save(User inUser) throws ValidationFailedException {
+        if (StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getPassword())) {
+            throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
+        }
+        User user = inUser;
+        // id不为空，是更新操作
+        if (StringUtils.isNotEmpty(inUser.getId())) {
+            user = systemUsersRepository.findOne(inUser.getId());
+            BeanUtils.copyProperties(inUser, user, "roles");
+        }
+        // 如果有注册加密器，则加密后存储；否则就是明文存储。
+        if (passwordEncoder != null) {
+            user.setPassword(passwordEncoder.encode(inUser.getPassword()));
+        }
         systemUsersRepository.save(user);
     }
 
@@ -195,5 +211,15 @@ public class SystemUsersServiceImpl implements SystemUsersService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public void delete(List<User> userList) throws ValidationFailedException {
+        // id不为空，是更新操作
+        if (CollectionUtils.isEmpty(userList)) {
+            throw new ValidationFailedException("选择用户为空，无法执行删除操作！");
+        }
+        systemUsersRepository.delete(userList);
     }
 }

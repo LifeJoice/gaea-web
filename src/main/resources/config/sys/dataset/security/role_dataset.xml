@@ -23,9 +23,10 @@
     ON usrRoles.Role_Id=r.id]]>
         </data-sql>
         <where>
-            <condition-set id="selectable" append-sql=" u.id not in (SELECT u.id FROM gaea_sys_users u LEFT JOIN gaea_sys_users_roles usrRoles ON u.id = usrRoles.User_Id LEFT JOIN gaea_sys_roles r ON usrRoles.Role_Id = r.id where :SUB_QUERY_ID_EQ) :AUTH_ID_NOT_EQ">
+            <condition-set id="selectable"
+                           append-sql=" u.id not in (SELECT u.id FROM gaea_sys_users u LEFT JOIN gaea_sys_users_roles usrRoles ON u.id = usrRoles.User_Id LEFT JOIN gaea_sys_roles r ON usrRoles.Role_Id = r.id where :SUB_QUERY_ID_EQ)">
                 <none propName="usrRoles.Role_Id" op="eq" placeholder="SUB_QUERY_ID_EQ"></none>
-                <and propName="r.id" op="ne" placeholder="AUTH_ID_NOT_EQ"></and>
+                <!--<and propName="r.id" op="ne" placeholder="AUTH_ID_NOT_EQ"></and>-->
             </condition-set>
             <condition-set id="selected">
                 <and propName="r.id" op="eq"></and>

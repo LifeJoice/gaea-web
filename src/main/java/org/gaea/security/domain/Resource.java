@@ -18,7 +18,7 @@ public class Resource implements Serializable {
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     @Column(name = "ID")
     private String id;
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     private String name;
     @Column(name = "RESOURCE_URL",nullable = false)
     private String resourceUrl;                // 资源。暂时来说，就是URL。

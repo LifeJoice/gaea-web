@@ -7,12 +7,13 @@ import org.gaea.security.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Iverson on 2015/11/22.
  */
 public interface SystemUsersService {
-    void save(User user);
+    void save(User user) throws ValidationFailedException;
 
     public Collection<GrantedAuthority> findUserAuthorities(String loginName);
 
@@ -25,4 +26,6 @@ public interface SystemUsersService {
     String[] getCacheUserRoles(String loginName) throws ValidationFailedException, SystemConfigException;
 
     boolean isLogin(String loginName) throws SystemConfigException, ValidationFailedException;
+
+    void delete(List<User> userList) throws ValidationFailedException;
 }

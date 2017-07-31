@@ -68,6 +68,7 @@
     <!-- 注意能够为authentication-manager 设置alias别名  -->
     <authentication-manager alias="authenticationManager">
         <authentication-provider user-service-ref="userDetailsManager">
+            <password-encoder ref="passwordEncoder"/>
             <!--<password-encoder ref="passwordEncoder">-->
                 <!--<salt-source user-property="username" />-->
             <!--</password-encoder>-->
@@ -86,9 +87,11 @@
             class="org.gaea.security.extend.GaeaFilterInvocationSecurityMetadataSource">
     </b:bean>
 
-    <!-- 用户的密码加密或解密 -->
+    <!-- 用户的密码加密或解密. BCrypt比MD5更好 -->
+    <!--<b:bean id="passwordEncoder"-->
+    <!--class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />-->
     <b:bean id="passwordEncoder"
-          class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+            class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
     <!-- 用户详细信息管理：数据源、用户缓存（通过数据库管理用户、角色、权限、资源）。 -->
     <b:bean id="userDetailsManager" class="org.gaea.security.extend.GaeaUserDetailsService">
         <!--<b:property name="pubUsersHome" ref="pubUsersHome" />-->

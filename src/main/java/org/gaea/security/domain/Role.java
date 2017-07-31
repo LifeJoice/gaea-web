@@ -19,9 +19,9 @@ public class Role implements Serializable, DsAuthRole {
     @GenericGenerator(name="gaeaDateTimeIDGenerator", strategy="org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     private String id;
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "code")
+    @Column(name = "code", unique = true, nullable = false)
     private String code;                    // 代表性的全英文编码
     @Column(name = "description")
     private String description;

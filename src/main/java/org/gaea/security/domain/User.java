@@ -18,13 +18,13 @@ public class User implements Serializable {
     @GenericGenerator(name = "gaeaDateTimeIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
     @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
     private String id;
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "login_name")
+    @Column(name = "login_name", unique = true, nullable = false)
     private String loginName;
     @Column(name = "password")
     private String password;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_USERS_ROLES", joinColumns = {
             @JoinColumn(name = "USER_ID")

@@ -1,8 +1,7 @@
 package org.gaea.security.controller;
 
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
-import org.gaea.security.domain.Authority;
-import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
 import org.gaea.security.service.SystemUsersService;
 import org.slf4j.Logger;
@@ -37,6 +36,7 @@ public class SystemUserController {
 
     /**
      * 权限资源关系编辑页
+     *
      * @return
      */
     @RequestMapping(value = "/showUserRoles", produces = "plain/text; charset=UTF-8")
@@ -46,9 +46,14 @@ public class SystemUserController {
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String save(User user) {
+    public void save(User user) throws ValidationFailedException {
         systemUsersService.save(user);
-        return "";
+    }
+
+    @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void delete(@RequestBean("selectedRows") List<User> userList) throws ValidationFailedException {
+        systemUsersService.delete(userList);
     }
 
     @RequestMapping(value = "/saveUserRoles", produces = "plain/text; charset=UTF-8")

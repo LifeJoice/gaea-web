@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +25,8 @@ public class GaeaUsernamePasswordAuthenticationFilter extends UsernamePasswordAu
 
     @Autowired
     private SystemUsersService systemUsersService;
+    @Autowired
+    PasswordEncoder passwordEncoder; // 系统注册的统一的加密器
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -35,15 +38,22 @@ public class GaeaUsernamePasswordAuthenticationFilter extends UsernamePasswordAu
 
         String username = obtainUsername(request);
         String password = obtainPassword(request);
+        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(username)) {
+            throw new AuthenticationServiceException("用户名/密码不允许为空！");
+        }
 
         //验证用户账号与密码是否对应
         username = username.trim();
 
         User user = systemUsersService.findByLoginName(username);
+        if (user == null) {
+            throw new AuthenticationServiceException("用户不存在！");
+        }
 
-        if(user == null || !user.getPassword().equals(password)) {
-	/*
-	          在我们配置的simpleUrlAuthenticationFailureHandler处理登录失败的处理类在这么一段
+        // 加密验证(password是原始密码，user.getPassword是加密密码）
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+    /*
+              在我们配置的simpleUrlAuthenticationFailureHandler处理登录失败的处理类在这么一段
 	    这样我们可以在登录失败后，向用户提供相应的信息。
 		if (forwardToDestination) {
             request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, exception);
