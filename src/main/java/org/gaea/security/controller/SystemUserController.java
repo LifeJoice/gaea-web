@@ -31,7 +31,7 @@ public class SystemUserController {
 
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/security/user/crud-form.html";
+        return "/gaea-system/security/user/crud-form.html";
     }
 
     /**
@@ -41,13 +41,19 @@ public class SystemUserController {
      */
     @RequestMapping(value = "/showUserRoles", produces = "plain/text; charset=UTF-8")
     public String showRoleUsers() {
-        return "/gaea/security/user/user-roles-form.html";
+        return "/gaea-system/security/user/user-roles-form.html";
     }
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public void save(User user) throws ValidationFailedException {
         systemUsersService.save(user);
+    }
+
+    @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void update(User user) throws ValidationFailedException {
+        systemUsersService.update(user);
     }
 
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")

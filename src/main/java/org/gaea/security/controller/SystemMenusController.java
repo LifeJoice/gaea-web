@@ -42,7 +42,7 @@ public class SystemMenusController {
 
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/security/menu/crud-form.html";
+        return "/gaea-system/security/menu/crud-form.html";
     }
 
     /**

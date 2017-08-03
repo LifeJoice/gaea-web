@@ -28,4 +28,6 @@ public interface SystemUsersService {
     boolean isLogin(String loginName) throws SystemConfigException, ValidationFailedException;
 
     void delete(List<User> userList) throws ValidationFailedException;
+
+    void update(User user) throws ValidationFailedException;
 }

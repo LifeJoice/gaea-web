@@ -47,16 +47,32 @@ public class SystemUsersServiceImpl implements SystemUsersService {
 
     @Override
     @Transactional
-    public void save(User inUser) throws ValidationFailedException {
+    public void save(User user) throws ValidationFailedException {
+        if (StringUtils.isEmpty(user.getName()) || StringUtils.isEmpty(user.getName()) || StringUtils.isEmpty(user.getPassword())) {
+            throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
+        }
+        // 新增
+        user.setId("");
+//        User user = inUser;
+        // 如果有注册加密器，则加密后存储；否则就是明文存储。
+        if (passwordEncoder != null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        systemUsersRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void update(User inUser) throws ValidationFailedException {
         if (StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getPassword())) {
             throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
         }
-        User user = inUser;
-        // id不为空，是更新操作
-        if (StringUtils.isNotEmpty(inUser.getId())) {
-            user = systemUsersRepository.findOne(inUser.getId());
-            BeanUtils.copyProperties(inUser, user, "roles");
+        if (StringUtils.isEmpty(inUser.getId())) {
+            throw new ValidationFailedException("没有获得用户id，也许是未选择用户记录。");
         }
+
+        User user = systemUsersRepository.findOne(inUser.getId());
+        BeanUtils.copyProperties(inUser, user, "roles");
         // 如果有注册加密器，则加密后存储；否则就是明文存储。
         if (passwordEncoder != null) {
             user.setPassword(passwordEncoder.encode(inUser.getPassword()));

@@ -53,7 +53,8 @@
         <!--crud-dialog，是特别针对增删改的dialog。会涉及数据集的加载，编辑数据填充等许多特有功能。-->
         <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
         <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/add" />
-        <crud-dialog id="editDialog" html-id="editDialog" id-field="id" content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/add" />
+        <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
+                     content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/update"/>
         <!--<crud-dialog id="editAuthResDialog" html-id="editAuthResDialog" id-field="id" content-url="/gaea/security/user/showAuthResource" submit-url="/gaea/security/user/saveAuthResource" />-->
         <!--如果一个grid没有primary-key=true的字段，是无法和工作流结合的-->
         <!--display-undefined-column:如果dataset有的一个字段，但下面没有对应的column元素，是否以json传给页面。默认false-->
@@ -69,12 +70,6 @@
                     visible="true" sortable="false" html-width="200" data-type="String" />
             <column id="level" name="level" label="登录名称" db-column-name="login_name"
                     visible="true" sortable="false" html-width="200" data-type="String" />
-            <!--<column id="code" name="code" label="唯一编码" db-column-name="code"-->
-                    <!--visible="true" sortable="false" html-width="300" data-type="String" />-->
-            <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->
-                    <!--visible="true" sortable="false" html-width="240" data-type="String" />-->
-            <!--<column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"-->
-                    <!--visible="true" sortable="false" html-width="120" data-type="String" />-->
         </grid>
     </views>
 </ur-schema>

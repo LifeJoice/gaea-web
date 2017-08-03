@@ -40,7 +40,7 @@ public class SystemDataSetMgrController {
 
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/security/dataset/crud-form.html";
+        return "/gaea-system/security/dataset/crud-form.html";
     }
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")

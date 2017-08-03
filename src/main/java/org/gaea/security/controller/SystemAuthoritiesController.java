@@ -43,7 +43,7 @@ public class SystemAuthoritiesController {
 
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/security/authority/crud-form.html";
+        return "/gaea-system/security/authority/crud-form.html";
     }
 
     /**
@@ -53,7 +53,7 @@ public class SystemAuthoritiesController {
      */
     @RequestMapping(value = "/showAuthResource", produces = "plain/text; charset=UTF-8")
     public String showAuthResource() {
-        return "/gaea/security/authority/authority-resource-form.html";
+        return "/gaea-system/security/authority/authority-resource-form.html";
     }
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")

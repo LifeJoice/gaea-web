@@ -32,7 +32,7 @@ public class SystemRolesController {
 
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/security/role/crud-form.html";
+        return "/gaea-system/security/role/crud-form.html";
     }
 
     /**
@@ -42,12 +42,12 @@ public class SystemRolesController {
      */
     @RequestMapping(value = "/showRoleUsers", produces = "plain/text; charset=UTF-8")
     public String showRoleUsers() {
-        return "/gaea/security/role/role-users-form.html";
+        return "/gaea-system/security/role/role-users-form.html";
     }
 
     @RequestMapping(value = "/showRoleAuths", produces = "plain/text; charset=UTF-8")
     public String showRoleAuths() {
-        return "/gaea/security/role/role-authorities-form.html";
+        return "/gaea-system/security/role/role-authorities-form.html";
     }
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")

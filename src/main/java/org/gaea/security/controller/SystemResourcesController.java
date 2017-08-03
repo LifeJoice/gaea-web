@@ -59,7 +59,7 @@ public class SystemResourcesController {
 
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
-        return "/gaea/security/resource/create-update-form.html";
+        return "/gaea-system/security/resource/create-update-form.html";
     }
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")

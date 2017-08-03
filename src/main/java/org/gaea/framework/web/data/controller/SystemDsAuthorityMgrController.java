@@ -76,13 +76,13 @@ public class SystemDsAuthorityMgrController {
     // 数据集权限管理
     @RequestMapping(value = "/showDsAuthForm", produces = "plain/text; charset=UTF-8")
     public String showDsAuthForm() throws ProcessFailedException, IOException {
-        return "/gaea/security/dataset/ds-authority-form.html";
+        return "/gaea-system/security/dataset/ds-authority-form.html";
     }
 
     // 数据集权限管理 -> 权限条件管理
     @RequestMapping(value = "/showDsAuthConditionSetForm", produces = "plain/text; charset=UTF-8")
     public String showDsAuthConditionSetForm() throws ProcessFailedException, IOException {
-        return "/gaea/security/dataset/ds-auth-conditionSet-form.html";
+        return "/gaea-system/security/dataset/ds-auth-conditionSet-form.html";
     }
 
     // 新增数据集权限
