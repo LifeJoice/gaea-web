@@ -142,6 +142,201 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
     }
 
     /**
+     * 同步数据库的数据集。<br/>
+     * 读取数据库的数据集，然后清空当前缓存的所有数据集。再缓存数据库的数据集。
+     * <p>
+     *     {@code <columns-define>}不从数据库同步，只以XML文档为主。
+     * </p>
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public void synchronizeDBDataSet() {
+        List<DataSetEntity> dataSetEntityList = systemDataSetRepository.findAll();
+        if (CollectionUtils.isNotEmpty(dataSetEntityList)) {
+            try {
+                Map<String, GaeaDataSet> gaeaDataSetMap = new HashMap<String, GaeaDataSet>();
+                for (DataSetEntity ds : dataSetEntityList) {
+                    /**
+                     * lazy load各个属性, ConditionSet, Authority, Authority.Roles
+                     */
+                    ds.getDsConditionSetEntities();
+                    ds.getDsAuthorities();
+                    GaeaDataSet gaeaDataSet = GaeaDataSetUtils.convert(ds);
+                    // 不要覆盖columns，这个数据库没有存储的
+                    GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(ds.getName());
+                    gaeaDataSet.setColumns(cacheDataSet.getColumns());
+
+                    gaeaDataSetMap.put(gaeaDataSet.getId(), gaeaDataSet);
+                }
+                // 清空缓存数据集，并写入新的数据集
+                gaeaDataSetService.resetDataSets(gaeaDataSetMap);
+            } catch (InvalidDataException e) {
+                logger.error(e.getMessage(), e);
+            } catch (ProcessFailedException e) {
+                logger.error("已读取数据库数据集，但刷新系统缓存数据集失败！", e);
+            }
+        }
+    }
+
+    /**
+     * 查询DataSet的数据并填充。
+     * 重构。不要让XmlDataSchemaConvertor负担查询数据的功能了。
+     * copy from XmlDataSchemaConvertor.sqlQuery.
+     * <p>
+     * 使用传入的DataSet的id，查询结果集后，往传入的DataSet填入data和totalElements，并返回。
+     * </p>
+     *
+     * @param ds              就是输入参数ds，填充了数据即返回
+     * @param strPageSize
+     * @param loginName
+     * @param conditionSetMap key：条件集 value：条件集的值。这个需要有序的map。查询条件组成sql的顺序，会按照map中的顺序来。
+     * @return
+     * @throws InvalidDataException
+     * @throws SystemConfigException
+     * @throws ValidationFailedException
+     */
+    @Override
+    public DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws InvalidDataException, SystemConfigException, ValidationFailedException {
+        int pageSize = 0;
+        if (!StringUtils.isNumeric(strPageSize)) {
+            throw new InvalidDataException("XML 定义的pageSize必须为整数.当前值：" + strPageSize);
+        }
+        pageSize = Integer.parseInt(strPageSize);
+        if (pageSize <= 0) {
+            throw new InvalidDataException("每页要显示的记录数不允许小于等于0.");
+        }
+        if (StringUtils.isEmpty(ds.getId())) {
+            throw new InvalidDataException("数据集的id不允许为空！");
+        }
+        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(ds.getId());
+        if (StringUtils.isBlank(gaeaDataSet.getSql())) {
+            return ds;
+        }
+        PageResult pageResultSet = null;
+        try {
+            pageResultSet = commonViewQueryService.query(gaeaDataSet, conditionSetMap, new SchemaGridPage(1, pageSize), loginName);
+
+            logger.debug("\n【SQL】 " + gaeaDataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
+            ds.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
+            ds.setTotalElements(pageResultSet.getTotalElements());
+        } catch (InvalidDataException e) {
+            logger.info("系统动态查询失败。" + e.getMessage());
+        }
+        return ds;
+    }
+
+    /**
+     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
+     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
+     * 所以需要把结果集中的数据库字段名改为别名，即column.name
+     * <p>
+     * columnMap的key之所以为DB-COLUMN-NAME，是因为这个方法本身就是把data的key，从数据库字段名改为xml column name的。<br/>
+     * 在转换之前,无法通过data的key(这时候还是db column name),去找column(如果key是xml column name的话).
+     * </p>
+     * <p/>
+     * move from GaeaXmlSchemaProcessor by Iverson 2017-5-27
+     *
+     * @param dataList               sql查询的数据列表。一行 = Map < 字段名 ： 字段值 >
+     * @param columnMap              Map< db_column_name : schemaColumn >
+     * @param displayUndefinedColumn 是否显示XML Schema中未定义的列。如果是，则key以数据库字段名返回。
+     * @param isDsTranslate          是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
+     * @return Map. key: 大写的column name.
+     */
+    @Override
+    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, LinkedCaseInsensitiveMap<SchemaColumn> columnMap, boolean displayUndefinedColumn, boolean isDsTranslate) {
+        if (dataList == null) {
+            return null;
+        }
+        List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
+        // 遍历所有记录
+        for (Map<String, Object> rowDataMap : dataList) {
+            // 必须判断传入的map类型，然后构造同一类型的返回。
+            // 注意!
+            // Spring namedParameterJdbcTemplate.queryForList返回的是LinkedCaseInsensitiveMap，这样对于key（数据库列）是大小写不敏感的。如果变成HashMap就会大小写敏感了。
+            Map<String, Object> oneResultMap = rowDataMap instanceof LinkedCaseInsensitiveMap ? new LinkedCaseInsensitiveMap<Object>() : new HashMap<String, Object>();
+            // 遍历一条记录的所有字段
+            Set<String> keys = rowDataMap.keySet();
+            for (String key : keys) {
+                SchemaColumn column = columnMap.get(key);
+                // 如果XML SCHEMA没有定义该字段的column元素，而且又设置了display-undefined-column=true，就把该值传到前端。
+                if (column == null && displayUndefinedColumn) {
+                    oneResultMap.put(key, rowDataMap.get(key));
+                }
+                if (column == null) {
+                    continue;
+                }
+                // 遍历SCHEMA的“column”元素，对数据库字段名重命名
+//                for (SchemaColumn column : columns) {
+                // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
+//                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
+                /**
+                 * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
+                 * 例如：
+                 * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
+                 */
+                Object newValue = rowDataMap.get(key);
+                // 如果需要DataSet转换
+                if (isDsTranslate) {
+                    newValue = getValueFromDS(newValue, column.getDataSetId());
+                }
+                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
+            }
+            newResultMapList.add(oneResultMap);
+        }
+        return newResultMapList;
+    }
+
+    /**
+     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
+     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
+     * 所以需要把结果集中的数据库字段名改为别名，即column.name
+     * <p/>
+     * move from GaeaXmlSchemaProcessor by Iverson 2017-5-27
+     *
+     * @param dataList
+     * @param grid
+     * @param isDsTranslate 是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
+     * @return
+     * @throws ValidationFailedException
+     */
+    @Override
+    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid, boolean isDsTranslate) throws ValidationFailedException {
+        if (grid == null) {
+            throw new ValidationFailedException("XML Schema grid定义为空。无法执行转换操作！");
+        }
+        // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
+        LinkedCaseInsensitiveMap<SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
+        return changeDbColumnNameInData(dataList, columnMap, grid.getDisplayUndefinedColumn(), isDsTranslate);
+    }
+
+    /**
+     * 根据 schema id获取对应的数据集id，再从缓存的数据集中，找到数据集定义对象，返回。
+     *
+     * @param schemaId
+     * @return
+     * @throws ValidationFailedException
+     * @throws SysLogicalException
+     * @throws SystemConfigException
+     * @throws SysInitException
+     */
+    @Override
+    public GaeaDataSet getGaeaDataSet(String schemaId) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
+        if (StringUtils.isBlank(schemaId)) {
+            throw new ValidationFailedException("未能获取Schema id (in param schema id is null).无法查询！");
+        }
+        GaeaXmlSchema gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
+        if (gaeaXmlSchema == null) {
+            throw new SysLogicalException("未能从缓存获取对应的Schema对象。请检查逻辑关系！");
+        }
+        DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
+        if (dataSet == null || StringUtils.isEmpty(dataSet.getId())) {
+            throw new SystemConfigException("XML Schema的DataSet配置错误。没有配置DataSet或DataSet缺少id。SchemaId : " + schemaId);
+        }
+        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
+        return gaeaDataSet;
+    }
+
+    /**
      * 检查dsId是否在当前数据库存在，不存在就删掉！
      *
      * @param cacheAllDataSets 要检查是否存在数据库的数据集id
@@ -205,43 +400,6 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             dbDsEntity.getDsConditionSetEntities().addAll(toAddCondSets);
         }
         systemDataSetRepository.save(dbDsEntity);
-    }
-
-    /**
-     * 同步数据库的数据集。<br/>
-     * 读取数据库的数据集，然后清空当前缓存的所有数据集。再缓存数据库的数据集。
-     * <p>
-     *     {@code <columns-define>}不从数据库同步，只以XML文档为主。
-     * </p>
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public void synchronizeDBDataSet() {
-        List<DataSetEntity> dataSetEntityList = systemDataSetRepository.findAll();
-        if (CollectionUtils.isNotEmpty(dataSetEntityList)) {
-            try {
-                Map<String, GaeaDataSet> gaeaDataSetMap = new HashMap<String, GaeaDataSet>();
-                for (DataSetEntity ds : dataSetEntityList) {
-                    /**
-                     * lazy load各个属性, ConditionSet, Authority, Authority.Roles
-                     */
-                    ds.getDsConditionSetEntities();
-                    ds.getDsAuthorities();
-                    GaeaDataSet gaeaDataSet = GaeaDataSetUtils.convert(ds);
-                    // 不要覆盖columns，这个数据库没有存储的
-                    GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(ds.getName());
-                    gaeaDataSet.setColumns(cacheDataSet.getColumns());
-
-                    gaeaDataSetMap.put(gaeaDataSet.getId(), gaeaDataSet);
-                }
-                // 清空缓存数据集，并写入新的数据集
-                gaeaDataSetService.resetDataSets(gaeaDataSetMap);
-            } catch (InvalidDataException e) {
-                logger.error(e.getMessage(), e);
-            } catch (ProcessFailedException e) {
-                logger.error("已读取数据库数据集，但刷新系统缓存数据集失败！", e);
-            }
-        }
     }
 
     /**
@@ -343,114 +501,6 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
     }
 
     /**
-     * 查询DataSet的数据并填充。
-     * 重构。不要让XmlDataSchemaConvertor负担查询数据的功能了。
-     * copy from XmlDataSchemaConvertor.sqlQuery.
-     * <p>
-     * 使用传入的DataSet的id，查询结果集后，往传入的DataSet填入data和totalElements，并返回。
-     * </p>
-     *
-     * @param ds                 就是输入参数ds，填充了数据即返回
-     * @param strPageSize
-     * @param loginName
-     * @param conditionSetMap    key：条件集 value：条件集的值。这个需要有序的map。查询条件组成sql的顺序，会按照map中的顺序来。
-     * @return
-     * @throws InvalidDataException
-     * @throws SystemConfigException
-     * @throws ValidationFailedException
-     */
-    @Override
-    public DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws InvalidDataException, SystemConfigException, ValidationFailedException {
-        int pageSize = 0;
-        if (!StringUtils.isNumeric(strPageSize)) {
-            throw new InvalidDataException("XML 定义的pageSize必须为整数.当前值：" + strPageSize);
-        }
-        pageSize = Integer.parseInt(strPageSize);
-        if (pageSize <= 0) {
-            throw new InvalidDataException("每页要显示的记录数不允许小于等于0.");
-        }
-        if (StringUtils.isEmpty(ds.getId())) {
-            throw new InvalidDataException("数据集的id不允许为空！");
-        }
-        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(ds.getId());
-        if (StringUtils.isBlank(gaeaDataSet.getSql())) {
-            return ds;
-        }
-        PageResult pageResultSet = null;
-        try {
-            pageResultSet = commonViewQueryService.query(gaeaDataSet, conditionSetMap, new SchemaGridPage(1, pageSize), loginName);
-
-            logger.debug("\n【SQL】 " + gaeaDataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
-            ds.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
-            ds.setTotalElements(pageResultSet.getTotalElements());
-        } catch (InvalidDataException e) {
-            logger.info("系统动态查询失败。" + e.getMessage());
-        }
-        return ds;
-    }
-
-    /**
-     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
-     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
-     * 所以需要把结果集中的数据库字段名改为别名，即column.name
-     * <p>
-     * columnMap的key之所以为DB-COLUMN-NAME，是因为这个方法本身就是把data的key，从数据库字段名改为xml column name的。<br/>
-     * 在转换之前,无法通过data的key(这时候还是db column name),去找column(如果key是xml column name的话).
-     * </p>
-     * <p/>
-     * move from GaeaXmlSchemaProcessor by Iverson 2017-5-27
-     *
-     * @param dataList               sql查询的数据列表。一行 = Map < 字段名 ： 字段值 >
-     * @param columnMap              Map< db_column_name : schemaColumn >
-     * @param displayUndefinedColumn 是否显示XML Schema中未定义的列。如果是，则key以数据库字段名返回。
-     * @param isDsTranslate          是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
-     * @return Map. key: 大写的column name.
-     */
-    @Override
-    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, LinkedCaseInsensitiveMap<SchemaColumn> columnMap, boolean displayUndefinedColumn, boolean isDsTranslate) {
-        if (dataList == null) {
-            return null;
-        }
-        List<Map<String, Object>> newResultMapList = new ArrayList<Map<String, Object>>();
-        // 遍历所有记录
-        for (Map<String, Object> rowDataMap : dataList) {
-            // 必须判断传入的map类型，然后构造同一类型的返回。
-            // 注意!
-            // Spring namedParameterJdbcTemplate.queryForList返回的是LinkedCaseInsensitiveMap，这样对于key（数据库列）是大小写不敏感的。如果变成HashMap就会大小写敏感了。
-            Map<String, Object> oneResultMap = rowDataMap instanceof LinkedCaseInsensitiveMap ? new LinkedCaseInsensitiveMap<Object>() : new HashMap<String, Object>();
-            // 遍历一条记录的所有字段
-            Set<String> keys = rowDataMap.keySet();
-            for (String key : keys) {
-                SchemaColumn column = columnMap.get(key);
-                // 如果XML SCHEMA没有定义该字段的column元素，而且又设置了display-undefined-column=true，就把该值传到前端。
-                if (column == null && displayUndefinedColumn) {
-                    oneResultMap.put(key, rowDataMap.get(key));
-                }
-                if (column == null) {
-                    continue;
-                }
-                // 遍历SCHEMA的“column”元素，对数据库字段名重命名
-//                for (SchemaColumn column : columns) {
-                // 把结果集中数据库字段名，按XML SCHEMA的“column”的name改名。Map一进一出。
-//                    if (key.equalsIgnoreCase(column.getDbColumnName())) {
-                /**
-                 * 看看对应的列是否关联DataSet。是的话，把DataSet对应的赋值给value
-                 * 例如：
-                 * value=3，如果这个列有对应的dataset，则找value=3对应的，可能是 {value:3,text:三级菜单,otherValues:{key:value,key2:value2...}}
-                 */
-                Object newValue = rowDataMap.get(key);
-                // 如果需要DataSet转换
-                if (isDsTranslate) {
-                    newValue = getValueFromDS(newValue, column.getDataSetId());
-                }
-                oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
-            }
-            newResultMapList.add(oneResultMap);
-        }
-        return newResultMapList;
-    }
-
-    /**
      * 把value处理一下，根据对应的数据集，看有没有对应value的text。有，则作转换。
      * 例如：
      * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
@@ -478,55 +528,5 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             }
         }
         return newValue;
-    }
-
-    /**
-     * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
-     * 由于结果集是“数据库字段名:值”的键值对。直接把结果集转换json返回前端会暴露数据库的设计。<p/>
-     * 所以需要把结果集中的数据库字段名改为别名，即column.name
-     * <p/>
-     * move from GaeaXmlSchemaProcessor by Iverson 2017-5-27
-     *
-     * @param dataList
-     * @param grid
-     * @param isDsTranslate 是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
-     * @return
-     * @throws ValidationFailedException
-     */
-    @Override
-    public List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid, boolean isDsTranslate) throws ValidationFailedException {
-        if (grid == null) {
-            throw new ValidationFailedException("XML Schema grid定义为空。无法执行转换操作！");
-        }
-        // 这里的column map的key，是db-column-name，不是column-name，这个要注意。
-        LinkedCaseInsensitiveMap<SchemaColumn> columnMap = GaeaSchemaUtils.getDbNameColumnMap(grid.getColumns());
-        return changeDbColumnNameInData(dataList, columnMap, grid.getDisplayUndefinedColumn(), isDsTranslate);
-    }
-
-    /**
-     * 根据 schema id获取对应的数据集id，再从缓存的数据集中，找到数据集定义对象，返回。
-     *
-     * @param schemaId
-     * @return
-     * @throws ValidationFailedException
-     * @throws SysLogicalException
-     * @throws SystemConfigException
-     * @throws SysInitException
-     */
-    @Override
-    public GaeaDataSet getGaeaDataSet(String schemaId) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
-        if (StringUtils.isBlank(schemaId)) {
-            throw new ValidationFailedException("未能获取Schema id (in param schema id is null).无法查询！");
-        }
-        GaeaXmlSchema gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
-        if (gaeaXmlSchema == null) {
-            throw new SysLogicalException("未能从缓存获取对应的Schema对象。请检查逻辑关系！");
-        }
-        DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
-        if (dataSet == null || StringUtils.isEmpty(dataSet.getId())) {
-            throw new SystemConfigException("XML Schema的DataSet配置错误。没有配置DataSet或DataSet缺少id。SchemaId : " + schemaId);
-        }
-        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
-        return gaeaDataSet;
     }
 }
