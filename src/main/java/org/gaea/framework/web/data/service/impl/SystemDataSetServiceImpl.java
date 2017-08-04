@@ -227,33 +227,6 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
     }
 
     /**
-     * 根据 schema id获取对应的数据集id，再从缓存的数据集中，找到数据集定义对象，返回。
-     *
-     * @param schemaId
-     * @return
-     * @throws ValidationFailedException
-     * @throws SysLogicalException
-     * @throws SystemConfigException
-     * @throws SysInitException
-     */
-    @Override
-    public GaeaDataSet getGaeaDataSet(String schemaId) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
-        if (StringUtils.isBlank(schemaId)) {
-            throw new ValidationFailedException("未能获取Schema id (in param schema id is null).无法查询！");
-        }
-        GaeaXmlSchema gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
-        if (gaeaXmlSchema == null) {
-            throw new SysLogicalException("未能从缓存获取对应的Schema对象。请检查逻辑关系！");
-        }
-        DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
-        if (dataSet == null || StringUtils.isEmpty(dataSet.getId())) {
-            throw new SystemConfigException("XML Schema的DataSet配置错误。没有配置DataSet或DataSet缺少id。SchemaId : " + schemaId);
-        }
-        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
-        return gaeaDataSet;
-    }
-
-    /**
      * 检查dsId是否在当前数据库存在，不存在就删掉！
      *
      * @param cacheAllDataSets 要检查是否存在数据库的数据集id

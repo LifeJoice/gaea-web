@@ -10,6 +10,7 @@ import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.data.service.SystemDataSetService;
+import org.gaea.framework.web.data.util.GaeaDataSetUtils;
 import org.gaea.framework.web.schema.service.GaeaXmlSchemaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +66,7 @@ public class GaeaWebConditionUtils {
         List<QueryCondition> newQueryConditions = new ArrayList<QueryCondition>();
         GaeaDataSet gaeaDataSet = null;
         try {
-            gaeaDataSet = systemDataSetService.getGaeaDataSet(gaeaSchemaId);
-
+            gaeaDataSet = GaeaDataSetUtils.getGaeaDataSet(gaeaSchemaId);
         } catch (Exception e) {
             throw new ValidationFailedException("获取不到对应的数据集定义！请联系管理员！", e.getMessage());
         }

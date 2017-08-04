@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.*;
-import org.gaea.exception.InvalidDataException;
-import org.gaea.exception.SysInitException;
+import org.gaea.data.system.SystemDataSetFactory;
+import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.data.authority.domain.*;
 import org.gaea.framework.web.data.authority.domain.DsAuthorityImpl;
@@ -16,6 +16,9 @@ import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.domain.DsConditionEntity;
 import org.gaea.framework.web.data.domain.DsConditionSetEntity;
+import org.gaea.framework.web.schema.GaeaSchemaCache;
+import org.gaea.framework.web.schema.domain.DataSet;
+import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.security.domain.Role;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
@@ -191,5 +194,35 @@ public class GaeaDataSetUtils {
             }
         }
         return condSet;
+    }
+
+    /**
+     * 根据 schema id获取对应的数据集id，再从缓存的数据集中，找到数据集定义对象，返回。
+     *
+     * @param schemaId
+     * @return
+     * @throws ValidationFailedException
+     * @throws SysLogicalException
+     * @throws SystemConfigException
+     * @throws SysInitException
+     */
+    public static GaeaDataSet getGaeaDataSet(String schemaId) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException {
+        if (StringUtils.isBlank(schemaId)) {
+            throw new ValidationFailedException("未能获取Schema id (in param schema id is null).无法查询！");
+        }
+        GaeaSchemaCache gaeaSchemaCache = GaeaWebSystem.getBean(GaeaSchemaCache.class);
+        if (gaeaSchemaCache == null) {
+            throw new SysInitException("获取不到缓存对象", "获取不到Spring容器中的GaeaSchemaCache对象");
+        }
+        GaeaXmlSchema gaeaXmlSchema = gaeaSchemaCache.get(schemaId);
+        if (gaeaXmlSchema == null) {
+            throw new SysLogicalException("未能从缓存获取对应的Schema对象。请检查逻辑关系！");
+        }
+        DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
+        if (dataSet == null || StringUtils.isEmpty(dataSet.getId())) {
+            throw new SystemConfigException("XML Schema的DataSet配置错误。没有配置DataSet或DataSet缺少id。SchemaId : " + schemaId);
+        }
+        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
+        return gaeaDataSet;
     }
 }
