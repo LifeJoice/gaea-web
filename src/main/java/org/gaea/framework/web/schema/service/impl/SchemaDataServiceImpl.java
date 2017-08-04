@@ -5,6 +5,7 @@ import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.data.service.SystemDataSetService;
+import org.gaea.framework.web.data.util.DataSetConvertHelper;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.SystemCacheFactory;
@@ -53,7 +54,7 @@ public class SchemaDataServiceImpl implements SchemaDataService {
      */
     @Override
     public List<Map<String, Object>> transformViewData(List<Map<String, Object>> origResults, SchemaGrid grid, boolean isDsTranslate) throws SysLogicalException, ValidationFailedException {
-        List<Map<String, Object>> result = systemDataSetService.changeDbColumnNameInData(origResults, grid, isDsTranslate);
+        List<Map<String, Object>> result = DataSetConvertHelper.changeDbColumnNameInData(origResults, grid, isDsTranslate);
         return result;
     }
 
@@ -85,7 +86,7 @@ public class SchemaDataServiceImpl implements SchemaDataService {
             }
         }
         LinkedCaseInsensitiveMap<SchemaColumn> columnMap = GaeaExcelUtils.getDbNameColumnMap(fieldMap);
-        List<Map<String, Object>> result = systemDataSetService.changeDbColumnNameInData(origResults, columnMap, true, true);
+        List<Map<String, Object>> result = DataSetConvertHelper.changeDbColumnNameInData(origResults, columnMap, true, true);
         return result;
     }
 }

@@ -43,7 +43,7 @@ public interface SystemDataSetService {
      * @param isDsTranslate          是否需要对列进行数据集转换。例如是列表页之类的，可能是需要的；但如果是表单编辑的，那就不需要。否则填充值的时候会比较麻烦。
      * @return Map. key: 大写的column name.
      */
-    List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, LinkedCaseInsensitiveMap<SchemaColumn> columnMap, boolean displayUndefinedColumn, boolean isDsTranslate);
+//    List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, LinkedCaseInsensitiveMap<SchemaColumn> columnMap, boolean displayUndefinedColumn, boolean isDsTranslate);
 
     /**
      * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
@@ -56,7 +56,7 @@ public interface SystemDataSetService {
      * @return
      * @throws ValidationFailedException
      */
-    List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid, boolean isDsTranslate) throws ValidationFailedException;
+//    List<Map<String, Object>> changeDbColumnNameInData(List<Map<String, Object>> dataList, SchemaGrid grid, boolean isDsTranslate) throws ValidationFailedException;
 
     GaeaDataSet getGaeaDataSet(String schemaId) throws ValidationFailedException, SysLogicalException, SystemConfigException, SysInitException;
 }

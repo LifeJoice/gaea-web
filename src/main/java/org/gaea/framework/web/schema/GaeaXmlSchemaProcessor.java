@@ -12,6 +12,7 @@ import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.data.service.SystemDataSetService;
+import org.gaea.framework.web.data.util.DataSetConvertHelper;
 import org.gaea.framework.web.schema.convertor.XmlDataSchemaConvertor;
 import org.gaea.framework.web.schema.convertor.XmlViewsConvertor;
 import org.gaea.framework.web.schema.domain.DataSet;
@@ -315,7 +316,7 @@ public class GaeaXmlSchemaProcessor {
         // create SchemaJO
         SchemaViewJO viewJO = GaeaSchemaUtils.convert(schemaViews);
         // 拼装数据，转换结果集中的数据库字段名。
-        List<Map<String, Object>> dataList = systemDataSetService.changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid(), true);
+        List<Map<String, Object>> dataList = DataSetConvertHelper.changeDbColumnNameInData(dataSet.getSqlResult(), schemaViews.getGrid(), true);
 //        schemaViews.getGridJO().setData(dataList);
         viewJO.getGrid().setData(dataList);
         // 设定view的前置条件
