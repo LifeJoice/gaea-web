@@ -207,12 +207,13 @@ public class DataSetConvertHelper {
     }
 
     /**
+     * 输入的value是原始值（string等），通过寻找对应的数据集获取匹配（value相等）的对象。
      * 把value处理一下，根据对应的数据集，看有没有对应value的text。有，则作转换。
      * 例如：
      * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
      *
-     * @param value
-     * @param dataSetId
+     * @param value        原始值。这个一般为string。
+     * @param dataSetId    数据集id。通过获取数据集的数据，返回匹配value的项。
      * @return
      */
     private static Object getValueFromDS(Object value, String dataSetId) {
