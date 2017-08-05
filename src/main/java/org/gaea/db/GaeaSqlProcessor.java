@@ -6,8 +6,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.data.dataset.domain.Condition;
 import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
-import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
-import org.gaea.db.dialect.MySQL56InnoDBDialect;
+import org.gaea.data.domain.QueryValue;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
@@ -414,7 +413,7 @@ public class GaeaSqlProcessor {
             String value = schemaCondition.getPropValue();
             if (queryConditionDTO != null) {
                 // 【重要】假设顺序一致
-                DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);
+                QueryValue valueDTO = queryConditionDTO.getValues().get(i);
                 value = valueDTO.getValue();
             }
             QueryCondition cond = new QueryCondition();

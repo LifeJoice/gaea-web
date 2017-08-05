@@ -7,7 +7,7 @@ import org.gaea.data.dataset.domain.Condition;
 import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
-import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
+import org.gaea.data.domain.QueryValue;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
@@ -357,7 +357,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                         // AI.TODO 这里不能用顺序来确定键值对应。因为对于is null之类的，是没有值的。需要增加一个标识符来做对应关系。
                         // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
                         Condition schemaCondition = conditionSet.getConditions().get(i);
-                        DataSetCommonQueryConditionValueDTO valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
+                        QueryValue valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
                         QueryCondition cond = new QueryCondition();
                         cond.setPropName(schemaCondition.getPropName());// 查询字段为XML SCHEMA中的定义
                         cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认

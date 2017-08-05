@@ -5,8 +5,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.ConditionSet;
-import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.data.dataset.domain.GaeaDsResultConfig;
 import org.gaea.data.dataset.service.GaeaDataSetService;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
@@ -14,7 +14,6 @@ import org.gaea.exception.*;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.domain.DataSetEntity;
-import org.gaea.framework.web.data.domain.DsConditionEntity;
 import org.gaea.framework.web.data.domain.DsConditionSetEntity;
 import org.gaea.framework.web.data.repository.SystemDataSetRepository;
 import org.gaea.framework.web.data.service.SystemDataSetService;
@@ -22,12 +21,8 @@ import org.gaea.framework.web.data.util.DataSetConvertHelper;
 import org.gaea.framework.web.data.util.GaeaDataSetUtils;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.DataSet;
-import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
-import org.gaea.framework.web.schema.domain.view.SchemaColumn;
-import org.gaea.framework.web.schema.domain.view.SchemaGrid;
-import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
@@ -35,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.*;
 
@@ -224,6 +218,49 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             logger.info("系统动态查询失败。" + e.getMessage());
         }
         return ds;
+    }
+
+    /**
+     * 获取数据集对应的数据接口。
+     *
+     * @param resultConfig
+     * @param schemaId
+     * @param queryConditionDTO
+     * @return
+     * @throws ValidationFailedException
+     * @throws SysLogicalException
+     * @throws SysInitException
+     */
+    @Override
+    public List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException {
+
+        // 获取数据集定义。可能从数据库读，也可能从缓存获取。
+        GaeaDataSet dataSetDef = SystemDataSetFactory.getDataSet(resultConfig.getDsId());
+        List<Map<String, Object>> results = null;
+        // TODO 【重构】
+        // 整合CommonViewQueryController和当前方法两种数据集查询方式。一个是通过SQL，一个更多是静态。
+        // todo 后续应该整合到service中
+        if (StringUtils.isEmpty(dataSetDef.getSql())) {
+            results = gaeaDataSetService.getCommonResults(resultConfig);
+        } else {
+            boolean isDsTranslate = true;
+            // 如果没有schemaId，也就没有字段定义了，转换也没意义了
+            if (StringUtils.isEmpty(schemaId)) {
+                isDsTranslate = false;
+            }
+//            DataSetCommonQueryConditionDTO queryConditionDTO = null;
+//            if (StringUtils.isNotEmpty(conditions)) {
+//                try {
+//                    queryConditionDTO = objectMapper.readValue(conditions, DataSetCommonQueryConditionDTO.class);
+//                } catch (IOException e) {
+//                    logger.debug("转换查询条件失败！", e);
+//                    throw new ValidationFailedException("转换查询条件失败！");
+//                }
+//            }
+            // 默认需要对结果的每个字段做数据集转换
+            results = commonViewQueryService.queryByConditions(schemaId, resultConfig.getDsId(), null, queryConditionDTO, isDsTranslate);
+        }
+        return results;
     }
 
     /**

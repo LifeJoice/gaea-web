@@ -2,7 +2,7 @@ package org.gaea.framework.web.data.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
-import org.gaea.data.domain.DataSetCommonQueryConditionValueDTO;
+import org.gaea.data.domain.QueryValue;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
@@ -14,7 +14,6 @@ import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.service.SystemDataSetMgrService;
 import org.gaea.framework.web.data.service.SystemDsAuthorityMgrService;
-import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.security.domain.Role;
 import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
@@ -64,7 +63,7 @@ public class SystemDsAuthorityMgrController {
         List<DataSetCommonQueryConditionDTO> queryConditionDTOList = new ArrayList<DataSetCommonQueryConditionDTO>();
         DataSetCommonQueryConditionDTO queryConditionDTO = new DataSetCommonQueryConditionDTO();
         queryConditionDTO.setId("byDataSetId");
-        DataSetCommonQueryConditionValueDTO value = new DataSetCommonQueryConditionValueDTO();
+        QueryValue value = new QueryValue();
         value.setValue(dataSet.getId());
         queryConditionDTO.getValues().add(value);
         queryConditionDTOList.add(queryConditionDTO);

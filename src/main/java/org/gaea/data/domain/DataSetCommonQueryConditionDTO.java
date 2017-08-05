@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class DataSetCommonQueryConditionDTO {
     private String id;// 对应XML SCHEMA的<condition-set>的id
-    private List<DataSetCommonQueryConditionValueDTO> values;
+    private List<QueryValue> values;
 
     public String getId() {
         return id;
@@ -19,14 +19,14 @@ public class DataSetCommonQueryConditionDTO {
         this.id = id;
     }
 
-    public List<DataSetCommonQueryConditionValueDTO> getValues() {
+    public List<QueryValue> getValues() {
         if (values == null) {
-            values = new ArrayList<DataSetCommonQueryConditionValueDTO>();
+            values = new ArrayList<QueryValue>();
         }
         return values;
     }
 
-    public void setValues(List<DataSetCommonQueryConditionValueDTO> values) {
+    public void setValues(List<QueryValue> values) {
         this.values = values;
     }
 }
