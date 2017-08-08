@@ -239,15 +239,14 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
         List<Map<String, Object>> results = null;
         // TODO 【重构】
         // 整合CommonViewQueryController和当前方法两种数据集查询方式。一个是通过SQL，一个更多是静态。
-        // todo 后续应该整合到service中
         if (StringUtils.isEmpty(dataSetDef.getSql())) {
             results = gaeaDataSetService.getCommonResults(resultConfig);
         } else {
             boolean isDsTranslate = true;
-            // 如果没有schemaId，也就没有字段定义了，转换也没意义了
-            if (StringUtils.isEmpty(schemaId)) {
-                isDsTranslate = false;
-            }
+//            // 如果没有schemaId，也就没有字段定义了，转换也没意义了
+//            if (StringUtils.isEmpty(schemaId)) {
+//                isDsTranslate = false;
+//            }
 //            DataSetCommonQueryConditionDTO queryConditionDTO = null;
 //            if (StringUtils.isNotEmpty(conditions)) {
 //                try {
