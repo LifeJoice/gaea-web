@@ -77,20 +77,7 @@ define([
                  * 声明这个数组的目的，是为了控制，后面的data-bind处理，要等这几个方法全部执行完。
                  */
                 var defferedFunctions = [
-                    gaeaData.dataSet.scanAndInit(options.id), gaeaData.component.init(options.id)];
-                //gaeaData.dataSet.scanAndInit(options.id), gaeaUI.initGaeaUI(options.id), gaeaData.component.init(options.id)];
-                // defferedFunctions中的各个函数已经执行完一遍。
-
-                /* 初始化gaeaData的组件的数据 */
-                if (gaeaValid.isNotNull(options.initComponentData) && options.initComponentData) {
-                    // 初始化gaea-ui关联的gaea-data，即数据。例如：编辑页的子表
-                    defferedFunctions.push(gaeaData.component.initData(options.id));
-                }
-                //if (gaeaValid.isNotNull(options.data)) {
-                //    defferedFunctions.push(gaeaData.fieldData.init(options.id, options.data));
-                //    // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
-                //    $("#"+options.id).find("select").trigger("change");
-                //}
+                    gaeaData.dataSet.scanAndInit(options.id)];
                 /**
                  * 【重要】
                  * 至此！上面的方法都执行了。但！不代表上面的方法都执行完了！
@@ -103,11 +90,6 @@ define([
                         //containerId: formId
                         containerId: options.id
                     }, function () {
-                        /**
-                         * 初始化binding后的组件。（或某些组件需要binding后进一步初始化）
-                         * 例如：对可编辑table里面的字段改名，需要binding后，KO才会生成整个table的DOM，这个时候才可以对里面的东东进行操作。
-                         */
-                        gaeaData.component.initAfterBinding(options.id);
                         // 回调定制的函数
                         if (gaeaValid.isNotNull(options.callback) && _.isFunction(options.callback.afterBinding)) {
                             options.callback.afterBinding();

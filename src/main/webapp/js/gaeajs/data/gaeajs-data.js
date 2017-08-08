@@ -788,6 +788,10 @@ define([
         };
         gaeaData.component = {
             /**
+             * 这个其实就是初始化可编辑表格。原来是基于table实现的。最新的已经整合在gaea.ui.grid里面了。这个已经作废了。
+             * 原来是基于KO框架生成可编辑table，限制比较多。
+             * by Iverson 2017年8月8日14:58:06
+             *
              * 初始化页面的组件相关的数据。例如某div的属性：
              data-gaea-data="name:'testList',dataset:'DS_IS_ENABLED', condition:{id:'byId',values:[{ type:'refer',value:'PAGE_CONTEXT.id' }]}, initTiming :'onload'"
              data-gaea-ui="component:'table',isbindGaeaData:true"
@@ -796,33 +800,33 @@ define([
              * @param options 未设计，暂无用
              * @returns deferred object.
              */
-            init: function (divId, options) {
-                var $div = $("#" + divId);
-                var dfd = $.Deferred();// JQuery同步对象
-                /* 遍历所有配置了data-gaea-data的元素 */
-                $div.find("[data-gaea-ui]").each(function (index, element) {
-                    //var $this = $(this);// 默认是下拉选择框，其实可能不是。
-                    //var uiStr = $this.data("gaea-ui");
-                    //var thisUI = gaeaString.parseJSON(uiStr);
-                    //var componentCtId = $this.attr("id");
-
-                    /**
-                     * 把数据转换为table显示
-                     */
-                    //if (gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
-                    //    var dataStr = $this.data("gaea-data");
-                    //    var dataConfig = gaeaString.parseJSON(dataStr);
-                    //    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
-                    //        // 获取数据
-                    //        //var dsData = gaeaData.dataSet.getData(componentCtId);
-                    //        // 初始化table
-                    //        gaeaData.component.table.init(componentCtId);
-                    //    }
-                    //}
-                });
-                dfd.resolve();
-                return dfd.promise();
-            },
+            //init: function (divId, options) {
+            //    var $div = $("#" + divId);
+            //    var dfd = $.Deferred();// JQuery同步对象
+            //    /* 遍历所有配置了data-gaea-data的元素 */
+            //    $div.find("[data-gaea-ui]").each(function (index, element) {
+            //        //var $this = $(this);// 默认是下拉选择框，其实可能不是。
+            //        //var uiStr = $this.data("gaea-ui");
+            //        //var thisUI = gaeaString.parseJSON(uiStr);
+            //        //var componentCtId = $this.attr("id");
+            //
+            //        /**
+            //         * 把数据转换为table显示
+            //         */
+            //        //if (gaeaValid.isNotNull(thisUI.isbindGaeaData) && thisUI.isbindGaeaData) {
+            //        //    var dataStr = $this.data("gaea-data");
+            //        //    var dataConfig = gaeaString.parseJSON(dataStr);
+            //        //    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
+            //        //        // 获取数据
+            //        //        //var dsData = gaeaData.dataSet.getData(componentCtId);
+            //        //        // 初始化table
+            //        //        gaeaData.component.table.init(componentCtId);
+            //        //    }
+            //        //}
+            //    });
+            //    dfd.resolve();
+            //    return dfd.promise();
+            //},
             /**
              * 如果有多个gaea-UI，并发ajax请求，刷新数据。
              * 例如：如果多个子表，会同时刷新数据。
@@ -865,35 +869,35 @@ define([
                     dfd.resolve();
                 //});
                 return dfd.promise();
-            },
+            }
             /**
              * 在KO binding后再初始化。因为有些操作必须在binding后再初始化。
              * 例如：
              * table中的数据的操作，因为binding后KO才会把数据转为table的tr，所以针对数据的操作（例如：input的改名等），都需要在binding后进行。
              * @param containerId
              */
-            initAfterBinding: function (containerId) {
-                var $container = $("#" + containerId);
-                /* 遍历所有配置了data-gaea-data的元素 */
-                //$container.find("[data-gaea-ui]").each(function (index, element) {
-                //    var $this = $(this);// 默认是下拉选择框，其实可能不是。
-                //    var uiStr = $this.data("gaea-ui");
-                //    var thisUI = gaeaString.parseJSON(uiStr);
-                //    var componentCtId = $this.attr("id");// 遍历到当前组件的容器id，一般是一个divId
-                //
-                //    /**
-                //     * 把数据转换为table显示
-                //     */
-                //    var dataStr = $this.data("gaea-data");
-                //    var dataConfig = gaeaString.parseJSON(dataStr);
-                //    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
-                //        if (gaeaValid.isNull(dataConfig.name)) {
-                //            throw "gaea-ui对应的gaea-data的name属性不允许为空！";
-                //        }
-                //        gaeaData.component.table.initAfterBinding(componentCtId, dataConfig);
-                //    }
-                //});
-            }
+            //initAfterBinding: function (containerId) {
+            //    var $container = $("#" + containerId);
+            //    /* 遍历所有配置了data-gaea-data的元素 */
+            //    //$container.find("[data-gaea-ui]").each(function (index, element) {
+            //    //    var $this = $(this);// 默认是下拉选择框，其实可能不是。
+            //    //    var uiStr = $this.data("gaea-ui");
+            //    //    var thisUI = gaeaString.parseJSON(uiStr);
+            //    //    var componentCtId = $this.attr("id");// 遍历到当前组件的容器id，一般是一个divId
+            //    //
+            //    //    /**
+            //    //     * 把数据转换为table显示
+            //    //     */
+            //    //    var dataStr = $this.data("gaea-data");
+            //    //    var dataConfig = gaeaString.parseJSON(dataStr);
+            //    //    if (gaeaString.equalsIgnoreCase(thisUI.component, GAEA_UI_DEFINE.UI.COMPONENT.TABLE)) {
+            //    //        if (gaeaValid.isNull(dataConfig.name)) {
+            //    //            throw "gaea-ui对应的gaea-data的name属性不允许为空！";
+            //    //        }
+            //    //        gaeaData.component.table.initAfterBinding(componentCtId, dataConfig);
+            //    //    }
+            //    //});
+            //}
             /**
              * 这个是和KO binding密切相关的可行编辑的table。之所以不放在ui.grid中，是因为这个重度依赖KO提供行编辑功能。
              * 而且，重点不是在列表展示。所以一些效果的会比较简单，不会有什么排序之类的。
