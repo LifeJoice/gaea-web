@@ -1,8 +1,10 @@
 package org.gaea.security.controller;
 
 import iverson.test.Person;
+import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.poi.ExcelReader;
 import org.gaea.poi.reader.ExcelImportProcessor;
 import org.gaea.security.domain.Authority;
@@ -63,9 +65,24 @@ public class SystemAuthoritiesController {
         return "";
     }
 
+    @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String update(Authority authority) throws ValidationFailedException {
+        systemAuthoritiesService.update(authority);
+        return "";
+    }
+
+    // 加载编辑数据
+    @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String loadDsAuthEditData(@RequestBean(CommonDefinition.PARAM_NAME_SELECTED_ROW) Authority authority) throws ProcessFailedException, IOException {
+        String result = systemAuthoritiesService.loadEditData(authority.getId());
+        return result;
+    }
+
     @RequestMapping(value = "/saveAuthResource", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void saveAuthResource(Authority authority, @RequestBean List<String> resourceIds) {
+    public void saveAuthResource(Authority authority, @RequestBean List<String> resourceIds) throws ValidationFailedException {
         systemAuthoritiesService.saveAuthResource(authority, resourceIds);
     }
 }

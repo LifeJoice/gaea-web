@@ -26,9 +26,9 @@ public class Authority implements Serializable {
     private Integer level = 0;          // 在树中的级别。只是方便管理。
     @Column(name = "DESCRIPTION")
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    @JoinColumn(name = "PARENT_ID")
-    private Authority parent;
+    //    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "PARENT_ID")
+//    private Authority parent;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_AUTHORITIES_RESOURCES", joinColumns = {
@@ -93,13 +93,13 @@ public class Authority implements Serializable {
         this.description = description;
     }
 
-    public Authority getParent() {
-        return parent;
-    }
-
-    public void setParent(Authority parent) {
-        this.parent = parent;
-    }
+//    public Authority getParent() {
+//        return parent;
+//    }
+//
+//    public void setParent(Authority parent) {
+//        this.parent = parent;
+//    }
 
     public List<Resource> getResources() {
         return resources;

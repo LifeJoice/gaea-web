@@ -31,7 +31,7 @@ public class Resource implements Serializable {
 //    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
 //    @JoinColumn(name = "PARENT_ID")
 //    private Resource parent;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+@ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_AUTHORITIES_RESOURCES", joinColumns = {
             @JoinColumn(name = "RESOURCE_ID")

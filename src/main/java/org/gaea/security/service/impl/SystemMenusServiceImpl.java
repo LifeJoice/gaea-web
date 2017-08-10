@@ -1,5 +1,8 @@
 package org.gaea.security.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.ProcessFailedException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.security.domain.Menu;
 import org.gaea.security.dto.MenuDTO;
 import org.gaea.security.repository.SystemMenusRepository;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -24,6 +28,18 @@ public class SystemMenusServiceImpl implements SystemMenusService {
 
     @Override
     public void save(Menu menu) {
+        menu.setId("");// 避免页面端有缓存，新增都应该是空的id
+        systemMenusRepository.save(menu);
+    }
+
+    @Override
+    public void update(Menu inMenu) throws ValidationFailedException {
+        if (inMenu == null || StringUtils.isEmpty(inMenu.getId())) {
+            throw new ValidationFailedException("页面传来的资源对象为空，无法保存！");
+        }
+        Menu menu = systemMenusRepository.findOne(inMenu.getId());
+        // 不覆盖资源权限的配置关系
+        BeanUtils.copyProperties(inMenu, menu, "authorities");
         systemMenusRepository.save(menu);
     }
 
@@ -66,5 +82,30 @@ public class SystemMenusServiceImpl implements SystemMenusService {
             }
         }
         return null;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> loadEditData(String id) throws ProcessFailedException, IOException {
+        if (StringUtils.isEmpty(id)) {
+            throw new IllegalArgumentException("id为空，无法加载编辑数据！");
+        }
+        Map<String, Object> result = new HashMap<String, Object>();
+        Menu menu = systemMenusRepository.findOne(id);
+        if (menu == null) {
+            throw new ProcessFailedException("找不到对应的菜单数据，无法编辑！");
+        }
+        result.put("menu.id", menu.getId());
+        result.put("menu.name", menu.getName());
+        result.put("menu.level", menu.getLevel());
+        if (menu.getParent() != null) {
+            result.put("menu.parent.id", menu.getParent().getId());
+        }
+        if (menu.getResource() != null) {
+            result.put("menu.resource.id", menu.getResource().getId());
+        }
+
+        return result;
+
     }
 }

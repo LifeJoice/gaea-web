@@ -1,13 +1,17 @@
 package org.gaea.security.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.ProcessFailedException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.security.domain.Authority;
 import org.gaea.security.domain.Menu;
 import org.gaea.security.domain.Resource;
 import org.gaea.security.domain.Role;
 import org.gaea.security.dto.MenuDTO;
 import org.gaea.security.service.SystemMenusService;
+import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +64,25 @@ public class SystemMenusController {
     public String save(@RequestBean Menu menu) {
         menu.setStatus(1);
         systemMenusService.save(menu);
+        return "";
+    }
+
+    @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String update(@RequestBean Menu menu) throws ValidationFailedException {
+        menu.setStatus(1);
+        systemMenusService.update(menu);
+        return "";
+    }
+
+    // 加载编辑数据
+    @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String loadDsAuthEditData(@RequestBean(CommonDefinition.PARAM_NAME_SELECTED_ROW) Menu menu) throws ProcessFailedException, IOException {
+        Map result = systemMenusService.loadEditData(menu.getId());
+        if (result != null) {
+            return GaeaJacksonUtils.parse(result);
+        }
         return "";
     }
 
