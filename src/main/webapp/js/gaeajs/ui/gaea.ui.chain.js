@@ -184,6 +184,11 @@ define([
                 // 把名字按'->'分隔符切分，并返回第一个（认为就是root dialog id）。
                 return parentChainKey.split(TEMPLATE.CHAIN.NAME_SEPARATOR)[0];
             },
+            /**
+             * 判断某id（元素）是否为链条的头部（起始位置）
+             * @param id
+             * @returns {boolean} 如果找不到该元素，返回也是false
+             */
             isRoot: function (id) {
                 if (gaeaValid.isNull(id)) {
                     throw "dialog id为空。";
