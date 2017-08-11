@@ -134,6 +134,7 @@ define([
         var dialog = {
             /**
              * 替代原来的create方法。
+             * <p>会负责在一个公共的地方，统一创建一个dialog的div容器。所以传入的id不需要是已存在的div id。</p>
              * @param {object} opts
              * @param {string} opts.id                              就是dialog id
              * @param {string} opts.parentId
@@ -152,32 +153,6 @@ define([
                 if (gaeaValid.isNull(opts.id)) {
                     throw "id为空，无法创建dialog。";
                 }
-                var $dialog = $("#" + opts.id);
-                // create form id
-                opts.formId = dialog.utils.getFormId(opts.id);
-                opts.containerId = opts.formId;
-
-                // init buttons
-                if (gaeaValid.isNull(opts.buttons) || _.keys(opts.buttons) <= 0) {
-                    opts.buttons = dialog.button.initButtons(opts);
-                }
-                //var dialogOpts = _private.getInitOption(opts);
-                //opts.dialogOptions = dialogOpts;
-
-                // 缓存当前dialog的配置
-                $dialog.data("gaea-options", opts);
-                // 添加"data-gaea-ui-dialog"标识和gaea-dialog class
-                // 这对dialog中的组件找父dialog很必要。
-                $("#" + opts.id).attr("data-gaea-ui-dialog", "");
-                $("#" + opts.id).addClass("gaea-dialog");
-
-                // 加入弹出框链
-                // cache options in chain
-                gaeaUIChain.add({
-                    id: opts.id,
-                    parentId: opts.parentId,
-                    options: opts
-                });
 
                 // init HTML
                 if (gaeaValid.isNull(opts.initHtml) || opts.initHtml) {
@@ -195,6 +170,40 @@ define([
                      */
                         // 只是简单初始化，避免抛出undefined错误
                     $("#" + opts.formId).validate();
+                }
+
+                var $dialog = $("#" + opts.id);
+                // create form id
+                opts.formId = dialog.utils.getFormId(opts.id);
+                opts.containerId = opts.formId;
+
+                // init buttons
+                if (gaeaValid.isNull(opts.buttons) || _.keys(opts.buttons) <= 0) {
+                    opts.buttons = dialog.button.initButtons(opts);
+                }
+                //var dialogOpts = _private.getInitOption(opts);
+                //opts.dialogOptions = dialogOpts;
+
+                // 缓存当前dialog的配置
+                //$dialog.data("gaea-options", opts);
+                // 添加"data-gaea-ui-dialog"标识和gaea-dialog class
+                // 这对dialog中的组件找父dialog很必要。
+                $("#" + opts.id).attr("data-gaea-ui-dialog", "");
+                $("#" + opts.id).addClass("gaea-dialog");
+
+                /**
+                 * 弹出框的链式
+                 */
+                // cache options in chain
+                gaeaUIChain.add({
+                    id: opts.id,
+                    parentId: opts.parentId,
+                    options: opts
+                });
+                // 如果是最底层的dialog，则设定一个pageId，用当前时间（毫秒）+3位随机数的一个临时的标志位。
+                // 一般是图片上传有用。因为上传完要回到同个页面补数据再二次submit，需要一个id把数据串起来。
+                if (gaeaUIChain.isRoot(opts.id)) {
+                    opts["pageId"] = (new Date()).getTime().toString() + _.random(100, 999).toString(); // 最终会进cache gaeaOptions
                 }
 
                 /**
@@ -257,24 +266,24 @@ define([
              * @param {string} opts.submitAction                    可空（对于弹出而不是open inOne）。新的弹出框的提交方式。是直接提交到后台，还是只是回写到parent dialog的某个值中
              * @param {string} opts.refInputId                      可空（对于弹出而不是open inOne）。关联的父级dialog的输入框id
              */
-            create: function (opts) {
-                // initOption
-                //var dialogOpts = _private.getInitOption({
-                //    id: opts.id,
-                //    submitUrl: opts.submitUrl,
-                //    submitAction: opts.submitAction,
-                //    refInputId: opts.refInputId
-                //});
-
-                //_options = dialogOpts;
-                //var dialog = _private.createDialog();
-
-                // 这个其实只是获取了button定义
-                //opts = _.extend(opts, dialogOpts);
-                //_options = dialogOpts;
-                var dialog = _private.createDialog(opts);
-                return dialog;
-            },
+            //create: function (opts) {
+            //    // initOption
+            //    //var dialogOpts = _private.getInitOption({
+            //    //    id: opts.id,
+            //    //    submitUrl: opts.submitUrl,
+            //    //    submitAction: opts.submitAction,
+            //    //    refInputId: opts.refInputId
+            //    //});
+            //
+            //    //_options = dialogOpts;
+            //    //var dialog = _private.createDialog();
+            //
+            //    // 这个其实只是获取了button定义
+            //    //opts = _.extend(opts, dialogOpts);
+            //    //_options = dialogOpts;
+            //    var dialog = _private.createDialog(opts);
+            //    return dialog;
+            //},
             /**
              * 创建并打开dialog。
              * @param {object} opts
@@ -541,12 +550,12 @@ define([
                 // 是否需要初始化data。对于新增弹出框不需要，编辑弹出框就需要咯
                 initComponentData: false
             },
-            cache: {
-                update: {
-                    submitData: {}
-                },
-                selectedRow: null // 缓存选中的grid的行数据。这个对crudDialog是必须的。
-            },
+            //cache: {
+            //    update: {
+            //        submitData: {}
+            //    },
+            //    selectedRow: null // 缓存选中的grid的行数据。这个对crudDialog是必须的。
+            //},
             /**
              *
              * @param {Object} options
@@ -583,6 +592,15 @@ define([
                 _.defaults(dialogOpts, _options);
                 _.defaults(dialogOpts, crudDialog.options);
 
+                // 初始化html div容器
+                _private.initHtml({
+                    id: dialogOpts.id,
+                    parentId: dialogOpts.parentId,
+                    openStyle: dialogOpts.openStyle,
+                    submitUrl: dialogOpts.submitUrl
+                });
+                var $dialog = $("#" + dialogOpts.id);
+
                 // 整合传入的options参数和创建dialog的options
                 //var dialogOpts = _.extend(dialogOpts, options);
                 //dialogOpts.triggerOpenJqSelector = "#" + options.button.htmlId;
@@ -609,7 +627,11 @@ define([
                     //parentId:opts.parentId,
                     options: dialogOpts
                 });
-
+                // 如果是最底层的dialog，则设定一个pageId，用当前时间（毫秒）+3位随机数的一个临时的标志位。
+                // 一般是图片上传有用。因为上传完要回到同个页面补数据再二次submit，需要一个id把数据串起来。
+                if (gaeaUIChain.isRoot(dialogOpts.id)) {
+                    dialogOpts["pageId"] = (new Date()).getTime().toString() + _.random(100, 999).toString();
+                }
 
                 //options = _.extend(_.clone(crudDialog.options), options);
                 //var linkObj = options.dialog;
@@ -631,13 +653,13 @@ define([
                 //// 用htmlId作为创建dialog的DIV ID。
                 //dialogOption.id = linkObj.htmlId;
                 //var dlgSelector = "#" + dialogOption.id;
-                _private.initHtml({
-                    id: dialogOpts.id,
-                    parentId: dialogOpts.parentId,
-                    formId: formId,
-                    openStyle: dialogOpts.openStyle,
-                    submitUrl: dialogOpts.submitUrl
-                });
+                //_private.initHtml({
+                //    id: dialogOpts.id,
+                //    parentId: dialogOpts.parentId,
+                //    formId: formId,
+                //    openStyle: dialogOpts.openStyle,
+                //    submitUrl: dialogOpts.submitUrl
+                //});
 
                 // 添加"data-gaea-ui-dialog"标识和"gaea-dialog" class
                 // 这对dialog中的组件找父dialog很必要。
@@ -1439,6 +1461,7 @@ define([
                             // 获取链式操作，前面节点的数据。可能服务端功能需要（一般都需要）。
                             var viewChainData = gaeaView.getViewData($("#gaeaViewId").val());
                             requestData["viewChain"] = JSON.stringify(viewChainData); // 必须json化。因为数据是笼统的，没有严格的对象mapping
+                            requestData["pageId"] = $dialog.data("gaeaOptions").pageId;
 
                             // 把extra的data合并（覆盖）form的data
                             /**
