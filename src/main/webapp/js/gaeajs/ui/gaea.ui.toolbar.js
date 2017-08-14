@@ -842,7 +842,8 @@ define([
                 else if (gaeaString.equalsIgnoreCase("uploader-dialog", refObj.componentName)) {
                     gaeaUploader.init({
                         dialog: refObj,
-                        button: buttonDef
+                        button: buttonDef,
+                        submitUrl: refObj.submitUrl
                     });
                 }
                 /**
