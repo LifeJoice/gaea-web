@@ -13,6 +13,7 @@ import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.repository.SystemDataSetRepository;
 import org.gaea.framework.web.data.repository.SystemDsAuthorityRepository;
 import org.gaea.framework.web.data.service.SystemDataSetMgrService;
+import org.gaea.util.BeanUtils;
 import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +44,33 @@ public class SystemDataSetMgrServiceImpl implements SystemDataSetMgrService {
 
     @Override
     @Transactional
-    public void saveOrUpdate(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException {
+    public void save(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException {
         if (dataSetEntity == null) {
             throw new IllegalArgumentException("数据集为空，无法保存！");
         }
+        // 如果有定义dsDataList，表示该数据集有静态数据。转换成json字符串保存。
+        if (CollectionUtils.isNotEmpty(dsDataList)) {
+            try {
+                String dsData = GaeaJacksonUtils.parse(dsDataList);
+                dataSetEntity.setDsData(dsData);
+            } catch (IOException e) {
+                logger.error("转换数据集静态数据失败！" + e.getMessage(), e);
+                throw new ProcessFailedException("转换数据集静态数据失败！");
+            }
+        }
+        // save
+        systemDataSetRepository.save(dataSetEntity);
+    }
+
+    @Override
+    @Transactional
+    public void update(DataSetEntity inDataSet, List<DataItem> dsDataList) throws ProcessFailedException {
+        if (inDataSet == null || StringUtils.isEmpty(inDataSet.getName())) {
+            throw new IllegalArgumentException("数据集为空，无法保存！");
+        }
+        DataSetEntity dataSetEntity = systemDataSetRepository.findByName(inDataSet.getName());
+        // 不覆盖资源权限的配置关系
+        BeanUtils.copyProperties(inDataSet, dataSetEntity, "id", "name", "dsData", "dsConditionSetEntities", "dsAuthorities");
         // 如果有定义dsDataList，表示该数据集有静态数据。转换成json字符串保存。
         if (CollectionUtils.isNotEmpty(dsDataList)) {
             try {

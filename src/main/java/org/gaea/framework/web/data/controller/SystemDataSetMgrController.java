@@ -46,7 +46,13 @@ public class SystemDataSetMgrController {
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public void save(@RequestBean DataSetEntity dataSet, HttpServletRequest request, @RequestBean("dsDataList") List<DataItem> dsDataList) throws ProcessFailedException {
-        systemDataSetMgrService.saveOrUpdate(dataSet, dsDataList);
+        systemDataSetMgrService.save(dataSet, dsDataList);
+    }
+
+    @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void update(@RequestBean DataSetEntity dataSet, HttpServletRequest request, @RequestBean("dsDataList") List<DataItem> dsDataList) throws ProcessFailedException {
+        systemDataSetMgrService.update(dataSet, dsDataList);
     }
 
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")

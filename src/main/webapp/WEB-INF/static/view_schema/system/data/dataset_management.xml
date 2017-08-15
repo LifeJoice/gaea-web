@@ -45,7 +45,7 @@
                      submit-url="/gaea/data/dataset/add"/>
         <!-- 编辑弹出框 -->
         <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
-                     content-url="/gaea/data/dataset/showCreateUpdateForm" submit-url="/gaea/data/dataset/add"
+                     content-url="/gaea/data/dataset/showCreateUpdateForm" submit-url="/gaea/data/dataset/update"
                      load-data-url="/gaea/data/dataset/load-edit-data"/>
         <!-- 新增数据集权限弹出框 -->
         <!--<crud-dialog id="dsAuthAddDialog" html-id="dsAuthAddDialog" id-field="id"-->

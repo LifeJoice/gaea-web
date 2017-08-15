@@ -16,7 +16,9 @@ import java.util.Map;
  * Created by iverson on 2017/6/1.
  */
 public interface SystemDataSetMgrService {
-    void saveOrUpdate(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException;
+    void save(DataSetEntity dataSetEntity, List<DataItem> dsDataList) throws ProcessFailedException;
+
+    void update(DataSetEntity inDataSet, List<DataItem> dsDataList) throws ProcessFailedException;
 
     Map loadEditData(DataSetEntity dataSet) throws ProcessFailedException;
 

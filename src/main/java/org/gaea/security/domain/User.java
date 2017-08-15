@@ -15,8 +15,8 @@ import java.util.List;
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GenericGenerator(name = "gaeaDateTimeIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeIDGenerator")
-    @GeneratedValue(generator = "gaeaDateTimeIDGenerator")
+    @GenericGenerator(name = "gaeaDateTimeLongIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeLongIDGenerator")
+    @GeneratedValue(generator = "gaeaDateTimeLongIDGenerator")
     private String id;
     @Column(name = "name", nullable = false)
     private String name;
