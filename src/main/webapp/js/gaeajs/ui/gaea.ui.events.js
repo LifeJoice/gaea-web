@@ -85,6 +85,9 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     CRUD_OPEN: "gaeaUI_event_crud_dialog_open",// 打开“新增编辑”dialog
                     CLOSE: "gaeaUI_event_dialog_close"                              // 对应jQuery dialog的close。主要是设定JQ的close会互相覆盖，干脆用自己的事件算了
                 },
+                UPLOADER_DIALOG: {
+                    UPLOAD: "gaeaUI_event_uploader_dialog_upload" // 即刻上传
+                },
                 GRID: {
                     REFRESH_DATA: "gaeaUI_event_grid_refresh_data", // 刷新数据区事件
                     SYNC_GRID_DATA: "gaeaUI_event_grid_sync_grid_data", // 同步数据区的数据事件。一般crud grid需要，因为数据区是可编辑的。

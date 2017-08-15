@@ -191,3 +191,35 @@
     top: calc(50% - 1.25em);
     left: calc(50% - 1.25em);
 }
+
+/* ******************************************************************** gaea uploader 组件的样式 ******************************************************************** */
+/* 文件选择器的选择文件列表 */
+.uploader-list {
+}
+
+/* 单个文件/图片项容器，包括图片、删除按钮、上传状态等整个区块 */
+.uploader-item {
+    display: inline-block; /* 这个保证一行排不下的时候，往第二行继续 */
+    width: 130px;
+    height: 160px;
+    overflow: hidden;
+    text-align: center;
+    margin-left: 15px;
+    margin-top: 2px;
+    box-shadow: 1px 1px 2px #b7b7b7;
+}
+
+.uploader-item > span {
+    display: block;
+    font-size: 14px;
+}
+
+.uploader-list i {
+    cursor: pointer;
+}
+
+.uploader-list i:hover {
+    color: #007eff;
+}
+
+

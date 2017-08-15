@@ -44,8 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -96,6 +95,11 @@ public class DemosController {
         return "/demo/class-crud-form.html";
     }
 
+    /**
+     * class-crud-form-<数字>这是嵌套dialog测试
+     *
+     * @return
+     */
     @RequestMapping(value = "/class-crud-form-2", produces = "plain/text; charset=UTF-8")
     public String showAddClassForm2() {
         return "/demo/class-crud-form-2.html";
@@ -114,6 +118,26 @@ public class DemosController {
     @RequestMapping(value = "/class-crud-form-3-1", produces = "plain/text; charset=UTF-8")
     public String showAddClassForm31() {
         return "/demo/class-crud-form-3-1.html";
+    }
+
+    /**
+     * 班级学生同时编辑管理页面
+     *
+     * @return
+     */
+    @RequestMapping(value = "/class-student-crud-form", produces = "plain/text; charset=UTF-8")
+    public String showAddClassStudentForm() {
+        return "/demo/class-student-crud-form.html";
+    }
+
+    /**
+     * 班级学生同时编辑管理页面 TAB 2
+     *
+     * @return
+     */
+    @RequestMapping(value = "/class-student-crud-form/tab2", produces = "plain/text; charset=UTF-8")
+    public String showAddClassStudentFormTab2() {
+        return "/demo/class-student-crud-form-tab2.html";
     }
 
     /**
@@ -153,6 +177,14 @@ public class DemosController {
     public void saveClass(@RequestBean DemoClassEntity classEntity, HttpServletRequest request, @RequestBean("classRolesList") List<String> classRolesList, @RequestBean("students") List<DemoStudentEntity> studentList) {
         classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
 //        demoClassService.save(classEntity, GaeaWebSecuritySystem.getUserName(request));
+    }
+
+    @RequestMapping(value = "/add-class-student", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void addClassStudent(@RequestBean DemoClassEntity classEntity, String pageId, @RequestBean("classRolesList") List<String> classRolesList, @RequestBean("students") List<DemoStudentEntity> studentList) {
+        System.out.println("------------>>>> save class students.");
+        // 未完成
+//        classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
     }
 
     @RequestMapping(value = "/test", produces = "plain/text; charset=UTF-8")
@@ -198,6 +230,46 @@ public class DemosController {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 上传学生头像图片
+     *
+     * @param files    这个@RequestParam的file，是前端写死的默认约定
+     * @param pageId
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping(value = "/upload-head-img")
+    public void uploadStudentHeadImg(@RequestParam("file") MultipartFile[] files, String pageId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (files != null) {
+            for (MultipartFile file : files) {
+                System.out.println(file.getName());
+                FileOutputStream fos = new FileOutputStream("D:\\temp\\uploadImgTest" + System.currentTimeMillis() + ".jpg");
+                fos.write(file.getBytes());
+                fos.close();
+            }
+        }
+    }
+
+    /**
+     * 对应"测试上传文件"按钮
+     *
+     * @param files
+     * @param pageId
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping(value = "/upload-to-somewhere")
+    public void uploadToSomewhere(@RequestParam("file") MultipartFile[] files, String pageId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (files != null) {
+            for (MultipartFile file : files) {
+                System.out.println("------------>>>>测试随便上传文件到Controller。file name: " + file.getName());
+            }
         }
     }
 

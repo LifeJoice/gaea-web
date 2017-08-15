@@ -56,4 +56,11 @@
             <data-element value="2" text="女"/>
         </data>
     </dataset>
+    <!-- ********************************************** 性别 ********************************************** -->
+    <dataset id="DEMO_STUDENT_IMG_TYPE" cache-type="static">
+        <data>
+            <data-element value="1" text="正面"/>
+            <data-element value="2" text="侧面"/>
+        </data>
+    </dataset>
 </dataset-definition>

@@ -159,7 +159,9 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
                     GaeaDataSet gaeaDataSet = GaeaDataSetUtils.convert(ds);
                     // 不要覆盖columns，这个数据库没有存储的
                     GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(ds.getName());
-                    gaeaDataSet.setColumns(cacheDataSet.getColumns());
+                    if (cacheDataSet != null) {
+                        gaeaDataSet.setColumns(cacheDataSet.getColumns());
+                    }
 
                     gaeaDataSetMap.put(gaeaDataSet.getId(), gaeaDataSet);
                 }

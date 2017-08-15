@@ -1,0 +1,48 @@
+<div id="class-student-tabs" data-gaea-ui-tabs="" data-gaea-ui="component:'tabs' ">
+    <ul>
+        <li><a href="#div-class-student-tab1">基本信息</a></li>
+        <li><a href="/gaea/demo/class-student-crud-form/tab2">班级学生</a></li>
+    </ul>
+    <!-- -------------------------------------------------------------------------------------- tab1 数据集权限 -------------------------------------------------------------------------------------- -->
+    <div id="div-class-student-tab1" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+        <input type="hidden" id="dsAuthorityId" name="dsAuthority.id" value=""><!-- 隐藏id值，当编辑的时候有值！ -->
+        <div class="row">
+            <div class="field-block">
+                <span class="fieldname">班级名称</span>
+            <span class="fieldvalue"><input id="className" name="classEntity.className" value=""
+                                            data-msg-required="名称不能为空"
+                                            required></span>
+            </div>
+            <div class="field-block">
+                <span class="fieldname">第几届</span>
+            <span class="fieldvalue"><input id="termYear" name="classEntity.termYear" value="" type="number" min="2015"
+                                            max="2099"
+                                            step="1" data-msg="输入要求是年份 2015~2099." required></span>
+            </div>
+            <div class="field-block">
+                <span class="fieldname">年级</span>
+            <span class="fieldvalue">
+                <select id="currentYear" name="classEntity.currentYear" data-gaea-data="dataset:'DEMO_PRIMARY_GRADE'">
+                </select>
+            </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="field-block">
+                <span class="fieldname">班级号</span>
+            <span class="fieldvalue">
+                <input id="classNo" name="classEntity.classNo" value="" type="number" min="1" max="99" step="1"
+                       data-msg="输入要求是几班 1~99." data-msg-required="班级号不允许为空" required>
+            </span>
+            </div>
+            <div class="field-block">
+                <span class="fieldname">班角色</span>
+            <span class="fieldvalue">
+                <select id="classRolesList" name="classRolesList"
+                        data-gaea-ui-select2="dataset:'DEMO_CLASS_ROLE',default:{ value:'2' }"
+                        multiple="multiple" required></select>
+            </span>
+            </div>
+        </div>
+    </div>
+</div>

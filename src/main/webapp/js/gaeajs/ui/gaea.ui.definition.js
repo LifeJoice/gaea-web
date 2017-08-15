@@ -31,7 +31,8 @@ define(function () {
                 // 点击是新打开一个弹框
                 NEW_DIALOG: "new_dialog",
                 // 打开 data_filter_dialog
-                DATA_FILTER_DIALOG: "data_filter_dialog"
+                DATA_FILTER_DIALOG: "data_filter_dialog",
+                UPLOADER_DIALOG: "uploader_dialog" // 文件上传弹出框
             },
             SUBMIT_ACTION: {
                 WRITEBACK_IN_ONE: "writeback_in_one",

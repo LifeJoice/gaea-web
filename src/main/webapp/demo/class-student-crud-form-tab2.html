@@ -1,0 +1,32 @@
+<!-- -------------------------------------------------------------------------------------- tab2 班级学生 -------------------------------------------------------------------------------------- -->
+<div id="div-class-student-tab2" class="gaea-form" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">添加学生照片</span>
+            <span class="fieldvalue">
+                <a id="btnUploadHeadImg" class="medium darkslategrey gaea-ui-button"
+                   data-gaea-ui-button="newId:'uploadHeadImgDialog', action:'uploader_dialog', submitUrl:'/gaea/demo/upload-head-img', multiple: true ">上传学生头像</a>
+            </span>
+        </div>
+    </div>
+    <!-- ***********************************************  这个是可编辑从表  *********************************************** -->
+    <div class="row">
+        <div class="grid-field-block">
+            <!--<span class="fieldname">班级学生</span>-->
+            <!-- TODO test。稍后得增加一种样式，适应这种新的grid的布局。-->
+            <div><span class="field-name">学生头像</span></div>
+            <div class="field-value">
+                <div id="stuHeadImgList" class="crud-grid-ct" data-gaea-ui-name="stuHeadImgList"
+                     data-gaea-ui-crud-grid='columns:[
+                         {name:"id",text:"ID", width:120,editable:false
+                         },
+                         {name:"imgUrl",text:"头像图片", width:120
+                         },
+                         {name:"imgType",text:"图片类型", width:120, dataSetId: "DEMO_STUDENT_IMG_TYPE", default:{ value:"1" }
+                         }
+                         ]'>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

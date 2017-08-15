@@ -1425,8 +1425,12 @@ define([
              * dialog的取消按钮的操作。
              * @param {object} opts
              * @param {string} opts.id          dialog id
+             * @param {string} [opts.isDataUnbind=true]     是否需要做数据解绑. 如果dialog里面是表单，gaea可能默认做了data binding，所以需要数据解绑；但如果是个图片上传弹出框，就需要手动设为false了
              */
             close: function (opts) {
+                opts = _.defaults(opts, {
+                    isDataUnbind: true
+                });
                 var formId = dialog.utils.getFormId(opts.id);
                 var $dialogForm = $("#" + formId);
                 /**
@@ -1434,7 +1438,9 @@ define([
                  */
                 dialog.close("#" + opts.id);
                 // 取消数据绑定. 这里也会把dialog的DOM干掉！需要注意！
-                gaeaData.unbind(opts.id);
+                if (opts.isDataUnbind) {
+                    gaeaData.unbind(opts.id);
+                }
                 // 清空表单内容
                 // 彻底删除相关的HTML DOM
                 $dialogForm.html("");

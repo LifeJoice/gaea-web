@@ -2,6 +2,22 @@
  * 基于RequireJS的模块化重构。让依赖更清晰，更简单。
  * Created by iverson on 2016-2-17 11:48:52.
  */
+
+/**
+ * 这个是HTML页面直接定义的Button类。
+ * 即data-gaea-ui-button的定义。
+ * @typedef {object} UiButton
+ * @property {string} id                        button id
+ * @property {string} newId                     看action的配置。如果是新弹出框，则这个值就是新弹出框的id。
+ * @property {string} action                    按钮的操作code。
+ * @property {string} submitAction              按钮如果是新开一个弹框，新弹框点击确认的操作code。
+ * @property {string} writeBack                 按字段名回写的具体配置项. writeback_by_field需要。
+ * @property {string} contentUrl                按钮如果是新开一个弹框，新弹框内容的加载地址。
+ * @property {string} submitUrl                 按钮如果是新开一个弹框，新弹框的提交地址
+ * @property {string} openStyle                 打开方式。new：新弹出一个 inOne：在当前parentId内打开（不弹出）
+ * @property {string} refInputId                关联的父级dialog的输入框id
+ * @property {string} schemaId                  xml schema id
+ */
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
         'gaeajs-ui-definition', "gaeajs-common-utils-string", "gaeajs-ui-events", 'gaeajs-ui-dialog'],
@@ -63,15 +79,7 @@ define([
                  * 把HTML元素配置，转换成对象. 参考：
                  * data-gaea-ui-button="action:'new_dialog', submit-action='writeback_in_one', content-url='/gaea/demo/class-crud-form' "
                  * 配置项：
-                 * @type {object} buttonDef
-                 * @property {string} newId                     看action的配置。如果是新弹出框，则这个值就是新弹出框的id。
-                 * @property {string} action                    按钮的操作code。
-                 * @property {string} submitAction              按钮如果是新开一个弹框，新弹框点击确认的操作code。
-                 * @property {string} writeBack                 按字段名回写的具体配置项. writeback_by_field需要。
-                 * @property {string} contentUrl                按钮如果是新开一个弹框，新弹框内容的加载地址。
-                 * @property {string} openStyle                 打开方式。new：新弹出一个 inOne：在当前parentId内打开（不弹出）
-                 * @property {string} refInputId                关联的父级dialog的输入框id
-                 * @property {string} schemaId                  xml schema id
+                 * @type {UiButton}
                  */
                 var buttonDef = gaeaString.parseJSON(strButtonDef);
                 buttonDef.id = opts.id;
@@ -92,6 +100,11 @@ define([
                      * 弹出数据查询选择窗口的按钮初始化
                      */
                     dataFilterDialogButton.init(buttonDef);
+                } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.ACTION.UPLOADER_DIALOG, buttonDef.action)) {
+                    /**
+                     * 文件上传
+                     */
+                    uploaderButton.init(buttonDef);
                 }
             }
         };
@@ -162,6 +175,37 @@ define([
                 // 不需要初始化dialog里面的form（这不是增删改dialog）
                 opts.initHtml = false;
                 _private.newDialog.commonInit(opts);
+            }
+        };
+
+        // 打开文件上传的按钮
+        var uploaderButton = {
+            /**
+             * 初始化按钮，点击打开上传组件。
+             * @param {UiButton} opts
+             */
+            init: function (opts) {
+                var gaeaUploader = require("gaeajs-uploader");
+                gaeaValid.isNull({check: opts.newId, exception: "如果需要配置打开上传文件弹出框，newId不允许为空！"});
+                // 找当前按钮所在弹框的最外层dialog（避免是嵌套式的dialog）
+                var rootDialog = $("#" + opts.id).parents("[data-gaea-ui-dialog]").filter(":last");
+                var pageId = "";
+                if (gaeaValid.isNotNull(rootDialog)) {
+                    var dialogGaeaOpts = rootDialog.data("gaeaOptions");
+                    pageId = dialogGaeaOpts["pageId"];
+                }
+                gaeaUploader.init({
+                    dialog: {
+                        id: opts.newId
+                    },
+                    button: {
+                        id: opts.id
+                    },
+                    submitUrl: opts.submitUrl,
+                    data: {
+                        pageId: pageId
+                    }
+                });
             }
         };
 
