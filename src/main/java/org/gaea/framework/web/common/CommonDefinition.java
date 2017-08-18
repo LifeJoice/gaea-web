@@ -20,7 +20,7 @@ public class CommonDefinition {
     /* ***************************************** Xml Schema ***************************************** */
     // 系统启动的时候，初始化并缓存的Xml schema
     public static final String PROP_KEY_SYSTEM_XML_SCHEMA_INIT_PATH = "system.schema.init_path";
-
+    // 缓存登录用户的key
     public static final String PROP_KEY_REDIS_USER_LOGIN = "gaea.login.users";
     // 缓存登录用户的角色列表的key
     public static final String PROP_KEY_REDIS_USER_ROLES = "gaea.login.user.roles";

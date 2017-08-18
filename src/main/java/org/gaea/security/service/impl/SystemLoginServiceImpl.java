@@ -40,7 +40,7 @@ public class SystemLoginServiceImpl implements SystemLoginService {
 
         try {
             if (!systemUsersService.isLogin(userDomain.getLoginName())) {
-                systemUsersService.cacheUserRoles(userDomain);
+                systemUsersService.cacheUserAndRoles(userDomain);
             }
         } catch (DataIntegrityViolationException e) {
             logger.error(e.getMessage(), e);

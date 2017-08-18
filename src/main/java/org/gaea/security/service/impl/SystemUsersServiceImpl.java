@@ -11,6 +11,7 @@ import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
+import org.gaea.security.jo.UserJO;
 import org.gaea.security.repository.SystemUsersRepository;
 import org.gaea.security.service.SystemUsersService;
 import org.gaea.util.BeanUtils;
@@ -141,18 +142,33 @@ public class SystemUsersServiceImpl implements SystemUsersService {
     }
 
     /**
-     * 缓存用户角色。主要缓存用户角色的code。
+     * 缓存用户角色和基本用户信息。主要缓存用户角色的code。
      * 到超时时间自动清除缓存。
      *
      * @param user
      * @throws DataIntegrityViolationException
      */
     @Override
-    public void cacheUserRoles(User user) throws DataIntegrityViolationException, SystemConfigException {
+    public void cacheUserAndRoles(User user) throws DataIntegrityViolationException, SystemConfigException {
         if (user != null) {
             List<Role> roleList = user.getRoles();
             if (CollectionUtils.isNotEmpty(roleList)) {
+                String userRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
                 String roleRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_ROLES);
+                // 获取系统配置的默认超时时间。
+                String strTimeOut = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN_TIMEOUT);
+                // cache user
+                if (StringUtils.isNotEmpty(userRootKey)) {
+                    /**
+                     * 真正的key：
+                     * GAEA:LOGIN_USER:<USER_LOGIN_NAME>
+                     */
+                    String realKey = getUserCacheKey(user.getLoginName());
+                    UserJO userJO = new UserJO(); // 缓存的是UserJO对象
+                    BeanUtils.copyProperties(user, userJO);
+                    gaeaCacheOperator.put(realKey, userJO, UserJO.class, strTimeOut);
+                }
+                // cache role list
                 if (StringUtils.isNotEmpty(roleRootKey)) {
                     /**
                      * 真正的key：
@@ -167,8 +183,6 @@ public class SystemUsersServiceImpl implements SystemUsersService {
                         }
                         roles[i] = role.getCode();
                     }
-                    // 获取系统配置的默认超时时间。
-                    String strTimeOut = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN_TIMEOUT);
                     gaeaCacheOperator.put(realKey, roles, String[].class, strTimeOut);
                 }
             }
@@ -191,6 +205,17 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         String key = getUserRoleCacheKey(loginName);
         String[] roles = gaeaCacheOperator.get(key, String[].class);
         return roles;
+    }
+
+    // 获取缓存用户登录信息的key
+    public static String getUserCacheKey(String loginName) throws SystemConfigException {
+        String rootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+        if (StringUtils.isEmpty(rootKey)) {
+            throw new SystemConfigException("找不到配置的用户角色的缓存的根key。配置项：" + CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+        }
+        String realKey = MessageFormat.format("{0}{1}", rootKey, loginName);
+        // 缓存的key应该都是大写的
+        return realKey.toUpperCase();
     }
 
     public String getUserRoleCacheKey(String loginName) throws SystemConfigException {

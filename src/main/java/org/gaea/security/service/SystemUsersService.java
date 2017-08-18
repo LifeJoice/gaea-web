@@ -21,7 +21,7 @@ public interface SystemUsersService {
 
     public User findByLoginName(String username);
 
-    void cacheUserRoles(User user) throws DataIntegrityViolationException, SystemConfigException;
+    void cacheUserAndRoles(User user) throws DataIntegrityViolationException, SystemConfigException;
 
     String[] getCacheUserRoles(String loginName) throws ValidationFailedException, SystemConfigException;
 

@@ -206,6 +206,9 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             throw new InvalidDataException("数据集的id不允许为空！");
         }
         GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(ds.getId());
+        if (gaeaDataSet == null) {
+            throw new ValidationFailedException("无法执行数据集的查询。缓存中获取不到对应的数据集。", "DataSet id: " + ds.getId() + "");
+        }
         if (StringUtils.isBlank(gaeaDataSet.getSql())) {
             return ds;
         }
