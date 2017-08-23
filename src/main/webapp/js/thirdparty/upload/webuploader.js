@@ -6873,7 +6873,7 @@
                     if ( xhr.status >= 200 && xhr.status < 300 ) {
                         me._response = xhr.responseText;
                         return me.trigger('load');
-                    } else if ( xhr.status >= 500 && xhr.status < 600 ) {
+                    } else if (xhr.status >= 500 && xhr.status <= 600) { // 支持一下自定义的600status modify by Iverson 2017年8月19日12:38:30
                         me._response = xhr.responseText;
                         return me.trigger( 'error', 'server' );
                     }
