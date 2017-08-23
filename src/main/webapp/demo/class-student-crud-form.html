@@ -1,7 +1,12 @@
-<div id="class-student-tabs" data-gaea-ui-tabs="" data-gaea-ui="component:'tabs' ">
+<!-- tabs定义，key为某个tab的id，不是指具体内容区的id。 -->
+<div id="class-student-tabs"
+     data-gaea-ui-tabs="tabs:{
+        'tab2-title' :{ registerEvents:[{name:'reload_data', loadDataUrl:'/gaea/demo/class-student-crud-form/tab2/load-data' }] }
+     }">
     <ul>
         <li><a href="#div-class-student-tab1">基本信息</a></li>
-        <li><a href="/gaea/demo/class-student-crud-form/tab2">班级学生</a></li>
+        <!-- id用于绑定reload_data的事件 -->
+        <li id="tab2-title"><a href="/gaea/demo/class-student-crud-form/tab2">班级学生</a></li>
     </ul>
     <!-- -------------------------------------------------------------------------------------- tab1 数据集权限 -------------------------------------------------------------------------------------- -->
     <div id="div-class-student-tab1" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">

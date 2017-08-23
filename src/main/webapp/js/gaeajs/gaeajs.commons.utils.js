@@ -7,10 +7,10 @@
  */
 define([
         "jquery", "underscore", 'underscore-string',
-        'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaeajs-ui-definition"
+        'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaeajs-ui-definition", "gaeajs-ui-notify"
     ],
     function ($, _, _s,
-              gaeaValid, gaeaString, GAEA_UI_DEFINE) {
+              gaeaValid, gaeaString, GAEA_UI_DEFINE, gaeaNotify) {
 
         var utils = {};
 
@@ -372,9 +372,7 @@ define([
                                 return;
                             }
                             // 只有"是否空"检查，才允许条件的propValue为空。否则跳过。
-                            if(gaeaValid.isNull(cond.propValue) &&
-                                !gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NNA, cond.op) &&
-                                !gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NA, cond.op)){
+                            if (gaeaValid.isNull(cond.propValue) && !gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NNA, cond.op) && !gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.QUERY.OP.NA, cond.op)) {
                                 console.debug("filterData里的条件格式不完整。%s", JSON.stringify(cond));
                                 return;
                             }
@@ -483,6 +481,7 @@ define([
             }
         };
 
+        // 和HTML相关的DOM的操作
         utils.dom = {
             /**
              * 检查某id在整个页面是否唯一。
@@ -495,6 +494,60 @@ define([
                     throw "id为空，无法进行元素的唯一性检查！";
                 }
                 return document.querySelectorAll("#" + id).length == 1;
+            }
+        };
+
+        /**
+         * 业务相关的处理, 服务端的返回处理
+         * <p>
+         *     没有返回，当前来说也是成功的一种。具体用default还是success，就看传入，default优先.
+         * </p>
+         * @param {object} responseObj          ajax请求后的错误返回json对象。
+         * @param {object} [opts]
+         * @param {object} opts.fail            失败的相关处理配置
+         * @param {object} opts.fail.baseMsg    错误的基本信息。叠在服务端返回错误的前面。
+         * @param {object} opts.success         成功的相关处理配置
+         * @param {object} opts.success.baseMsg 成功的基本信息。叠在服务端返回成功的前面。
+         * @param {object} opts.default         如果responseObj为空，就用这个
+         * @param {object} opts.default.baseMsg
+         */
+        utils.processResponse = function (responseObj, opts) {
+            if (_.isObject(responseObj)) {
+                var baseMsg = "";
+                if (gaeaValid.isNotNullMultiple(opts, ["fail", "baseMsg"])) {
+                    baseMsg = opts.fail.baseMsg;
+                }
+                if (gaeaString.equalsIgnoreCase(responseObj.status, "600")) {
+                    // 普通错误/验证警告
+                    gaeaNotify.fail(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
+                } else if (gaeaString.equalsIgnoreCase(responseObj.status, "500")) {
+                    // 非普通的异常
+                    gaeaNotify.error(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
+                } else if (gaeaString.equalsIgnoreCase(responseObj.status, "200")) {
+                    // 成功
+                    gaeaNotify.success(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
+                } else {
+                    /**
+                     * 不可识别的状态码, 或者返回的对象不完整（没有状态码）等
+                     */
+                    if (gaeaValid.isNotNull(responseObj.message)) {
+                        gaeaNotify.message(responseObj.message);
+                    } else if (gaeaValid.isNotNull(opts.default)) {
+                        gaeaNotify.message(opts.default.baseMsg);
+                    } else if (gaeaValid.isNotNull(opts.success)) {
+                        gaeaNotify.success(opts.success.baseMsg);
+                    }
+                }
+            } else {
+                /**
+                 * 返回非json对象。需要特殊处理。
+                 * - 没有返回，当前来说也是成功的一种。具体用default还是success，就看传入，default优先
+                 */
+                if (gaeaValid.isNotNull(opts.default)) {
+                    gaeaNotify.message(opts.default.baseMsg);
+                } else if (gaeaValid.isNotNull(opts.success)) {
+                    gaeaNotify.success(opts.success.baseMsg);
+                }
             }
         };
 

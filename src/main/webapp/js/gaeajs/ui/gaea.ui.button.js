@@ -15,14 +15,22 @@
  * @property {string} contentUrl                按钮如果是新开一个弹框，新弹框内容的加载地址。
  * @property {string} submitUrl                 按钮如果是新开一个弹框，新弹框的提交地址
  * @property {string} openStyle                 打开方式。new：新弹出一个 inOne：在当前parentId内打开（不弹出）
+ * @property {boolean} multiple                 uploader有用。是否多选。默认false。
+ * @property {boolean} keepFailed            uploader有用。是否缓存已选过的。
  * @property {string} refInputId                关联的父级dialog的输入框id
  * @property {string} schemaId                  xml schema id
+ * @property {object} onComplete
+ * @property {object} onComplete.trigger        触发的定义
+ * @property {string} onComplete.trigger.target 触发对象
+ * @property {string} onComplete.trigger.event  触发对象的事件
  */
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
-        'gaeajs-ui-definition', "gaeajs-common-utils-string", "gaeajs-ui-events", 'gaeajs-ui-dialog'],
+        'gaeajs-ui-definition', "gaeajs-common-utils-string", "gaeajs-ui-events", 'gaeajs-ui-dialog',
+        'gaeajs-common-utils'],
     function ($, _, gaeaAjax, gaeaValid,
-              GAEA_UI_DEFINE, gaeaString, GAEA_EVENTS, gaeaDialog) {
+              GAEA_UI_DEFINE, gaeaString, GAEA_EVENTS, gaeaDialog,
+              gaeaCommonUtils) {
         var button = {
             /**
              * 创建个按钮的html。简单的HTML拼凑而已。
@@ -72,7 +80,7 @@ define([
                 var strButtonDef = $button.data(GAEA_UI_DEFINE.UI.BUTTON.DEFINE);
                 var $parentContainer = $(opts.parentCtSelector);
                 var parentDialogId;
-                if($parentContainer.length>0){
+                if ($parentContainer.length > 0) {
                     parentDialogId = $parentContainer.attr("id");
                 }
                 /**
@@ -188,12 +196,29 @@ define([
                 var gaeaUploader = require("gaeajs-uploader");
                 gaeaValid.isNull({check: opts.newId, exception: "如果需要配置打开上传文件弹出框，newId不允许为空！"});
                 // 找当前按钮所在弹框的最外层dialog（避免是嵌套式的dialog）
-                var rootDialog = $("#" + opts.id).parents("[data-gaea-ui-dialog]").filter(":last");
+                var $thisButton = $("#" + opts.id);
+                var $rootDialog = $("#" + opts.id).parents("[data-gaea-ui-dialog]").filter(":last");
+                var $myForm = $("#" + opts.id).parents("form").filter(":first");
                 var pageId = "";
-                if (gaeaValid.isNotNull(rootDialog)) {
-                    var dialogGaeaOpts = rootDialog.data("gaeaOptions");
-                    pageId = dialogGaeaOpts["pageId"];
+                var postData = {};
+                // 带上pageId
+                if (gaeaValid.isNotNull($rootDialog)) {
+                    var dialogGaeaOpts = $rootDialog.data("gaeaOptions");
+                    postData.pageId = dialogGaeaOpts["pageId"];
                 }
+
+                // 初始化按钮上的事件, 例如什么onComplete等
+                GAEA_EVENTS.initGaeaEvent(opts);
+
+                // 初始化uploader的onComplete事件（如果有的话）
+                // 在upload完成时，触发按钮的onComplete事件，按钮再触发onComplete里面的target的event
+                var onComplete;
+                if (gaeaValid.isNotNull(opts.onComplete)) {
+                    onComplete = function () {
+                        $thisButton.trigger(GAEA_EVENTS.DEFINE.CALLBACK.ON_COMPLETE);
+                    };
+                }
+
                 gaeaUploader.init({
                     dialog: {
                         id: opts.newId
@@ -202,9 +227,20 @@ define([
                         id: opts.id
                     },
                     submitUrl: opts.submitUrl,
-                    data: {
-                        pageId: pageId
-                    }
+                    multiple: opts.multiple,
+                    keepFailed: opts.keepFailed,
+                    data: gaeaCommonUtils.data.flattenData(postData),
+                    /* 获取数据的回调。在点击上传的时候。 */
+                    getUploadDataFunc: function () {
+                        var $myForm = $("#" + opts.id).parents("form").filter(":first");
+                        // 带上最近一个form的数据
+                        if ($myForm.length > 0) {
+                            postData = $myForm.serializeObject();
+                            return postData;
+                        }
+                        return {};
+                    },
+                    onComplete: onComplete
                 });
             }
         };

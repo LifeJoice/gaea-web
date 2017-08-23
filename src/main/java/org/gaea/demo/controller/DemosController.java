@@ -9,10 +9,7 @@ import org.gaea.demo.entity.DemoClassEntity;
 import org.gaea.demo.entity.DemoStudentEntity;
 import org.gaea.demo.repository.DemoClassRepository;
 import org.gaea.demo.service.DemoClassService;
-import org.gaea.exception.ProcessFailedException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SysLogicalException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
@@ -29,6 +26,7 @@ import org.gaea.security.domain.Resource;
 import org.gaea.security.service.SystemResourcesService;
 import org.gaea.util.BeanUtils;
 import org.gaea.util.GaeaDateTimeUtils;
+import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +138,24 @@ public class DemosController {
         return "/demo/class-student-crud-form-tab2.html";
     }
 
+    // 文件上传完后的数据刷新
+    @RequestMapping(value = "/class-student-crud-form/tab2/load-data", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public String addClassStudentFormTab2LoadData() throws IOException {
+        Map result = new HashMap();
+        List stuHeadImgList = new ArrayList();
+        Map stuHeadImg1 = new HashMap();
+        stuHeadImg1.put("id", "1");
+        stuHeadImg1.put("imgUrl", "/gaea/demo/test_1.jpg");
+        stuHeadImgList.add(stuHeadImg1);
+        Map stuHeadImg2 = new HashMap();
+        stuHeadImg2.put("id", "2");
+        stuHeadImg2.put("imgUrl", "/gaea/demo/test_2.jpg");
+        stuHeadImgList.add(stuHeadImg2);
+        result.put("stuHeadImgList", stuHeadImgList);
+        return GaeaJacksonUtils.parse(result);
+    }
+
     /**
      * action, method=submit的处理。
      *
@@ -244,7 +260,12 @@ public class DemosController {
      * @throws IOException
      */
     @RequestMapping(value = "/upload-head-img")
-    public void uploadStudentHeadImg(@RequestParam("file") MultipartFile[] files, String pageId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @ResponseBody
+    public String uploadStudentHeadImg(@RequestParam("file") MultipartFile[] files, String pageId, @RequestBean DemoClassEntity classEntity, HttpServletRequest request, HttpServletResponse response) throws IOException, ValidationFailedException {
+        // 可以对文件上传前做验证
+        if (classEntity == null || StringUtils.isEmpty(classEntity.getClassName())) {
+            throw new ValidationFailedException("班级名称不允许为空！");
+        }
         if (files != null) {
             for (MultipartFile file : files) {
                 System.out.println(file.getName());
@@ -253,6 +274,7 @@ public class DemosController {
                 fos.close();
             }
         }
+        return "";
     }
 
     /**
@@ -447,7 +469,7 @@ public class DemosController {
              * *********************************************************** TEST 2 利用模板导出任意dataset
              */
             GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getUserName(request));
-            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO",defaultDsContext); // 默认导出1000条
+            List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO", defaultDsContext); // 默认导出1000条
             Map<String, Field> fieldsMap = GaeaExcelUtils.getFields(schemaId);
             //test
             Field field = fieldsMap.get("level");

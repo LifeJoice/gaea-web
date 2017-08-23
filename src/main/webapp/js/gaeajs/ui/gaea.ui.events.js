@@ -14,6 +14,12 @@
  * @property {string} trgSelector                   触发选择器。由这个选择器导致的触发。参考：$(trgSelector).on(...)
  */
 
+/**
+ * @typedef {object} GaeaUiEvent
+ * @property {object} trigger
+ * @property {string} trigger.target    目标
+ * @property {string} trigger.event     事件名
+ */
 
 define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-utils-string"],
     function ($, _, gaeaValid, gaeaString) {
@@ -101,7 +107,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 MULTI_SELECT: {
                     SELECT: "gaeaUI_event_multiselect_select" // 点选中了某项
                 },
-                INIT_COMPLETE: "gaeaUI_event_init_complete" // 针对UI任意组件。初始化完成后（包括UI、数据等等一切）触发。
+                INIT_COMPLETE: "gaeaUI_event_init_complete", // 针对UI任意组件。初始化完成后（包括UI、数据等等一切）触发。
+                RELOAD_DATA: "reload_data"
             },
             /**
              * action操作。
@@ -114,6 +121,13 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 PAGE: {
                     UPDATE: "gaeaEvent_page_context_update"
                 }
+            },
+            /**
+             * Gaea UI 组件的一些通用回调事件名。自定义的。
+             * 不是每一个组件都支持所有的事件，这个必须清楚。
+             */
+            CALLBACK: {
+                ON_COMPLETE: "gaeaEvent_onComplete"   // 完成, 不代表成功
             }
         };
 
@@ -254,6 +268,48 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     return;
                 }
                 events.cache.lastOne = opts.jqSelector;
+            }
+        };
+
+        /**
+         * gaea定义的各种event（onComplete等）的处理
+         * @param {object} opts
+         * @param {object} opts.id          当前元素的id。例如：是一个按钮。
+         * @param {object} opts.onComplete
+         */
+        events.initGaeaEvent = function (opts) {
+            if (gaeaValid.isNull(opts)) {
+                return;
+            }
+            var $this = $("#" + opts.id);
+            if (gaeaValid.isNotNull(opts.onComplete)) {
+                _private.bindOnComplete(opts);
+            }
+        };
+
+        var _private = {
+            /**
+             * 根据onComplete对象定义，绑定一个gaeaEvent_onComplete事件，在触发的时候，进一步触发对应target的event。
+             * @param {object} opts
+             * @param {object} opts.id
+             * @param {GaeaUiEvent} opts.onComplete
+             */
+            bindOnComplete: function (opts) {
+                events.registerListener(events.DEFINE.CALLBACK.ON_COMPLETE, "#" + opts.id, function (event, data) {
+                    gaeaValid.isNull({
+                        check: opts.onComplete.trigger.target,
+                        exception: "定义的组件（" + opts.id + "）的onComplete属性，触发对象（trigger.target）不允许为空！"
+                    });
+                    gaeaValid.isNull({
+                        check: opts.onComplete.trigger.event,
+                        exception: "定义的组件（" + opts.id + "）的onComplete属性，触发事件（trigger.event）不允许为空！"
+                    });
+                    var $target = $(opts.onComplete.trigger.target);
+                    if ($target.length < 1) {
+                        throw "通过onComplete属性定义，要触发的target不存在！options: " + JSON.stringify(opts.onComplete);
+                    }
+                    $target.trigger(opts.onComplete.trigger.event);
+                });
             }
         };
 

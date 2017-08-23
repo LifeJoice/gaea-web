@@ -5,7 +5,8 @@
             <span class="fieldname">添加学生照片</span>
             <span class="fieldvalue">
                 <a id="btnUploadHeadImg" class="medium darkslategrey gaea-ui-button"
-                   data-gaea-ui-button="newId:'uploadHeadImgDialog', action:'uploader_dialog', submitUrl:'/gaea/demo/upload-head-img', multiple: true ">上传学生头像</a>
+                   data-gaea-ui-button="newId:'uploadHeadImgDialog', action:'uploader_dialog', submitUrl:'/gaea/demo/upload-head-img',
+                   multiple: true,keepFailed:true, onComplete: { trigger: {target:'#tab2-title' , event:'reload_data' }} ">上传学生头像</a>
             </span>
         </div>
     </div>

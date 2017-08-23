@@ -47,7 +47,7 @@ define(function () {
             CRUD_GRID: "crud-grid",
             TABLE: "table",
             SELECT: "select",
-            TABS: "tabs",
+            //TABS: "tabs",
             BUTTON: {
                 DEFAULT: "button",
                 BUTTON_GROUP: "button-group"

@@ -5,15 +5,38 @@
  * Created by iverson on 2016-9-7 15:09:46.
  *
  */
+
+/**
+ * 这个是HTML页面直接定义的Tabs类。
+ * 即data-gaea-ui-tabs的定义。
+ * @typedef {object} UiTabs
+ * @property {string} containerId               tab的容器id
+ * @property {Object.<string, UiTab>} tabs      针对每个tab的定义。结构为对象，key为某个tab的id; value为具体的配置项(UiTab)
+ */
+
+/**
+ * 这个是UiTabs.tabs其中的一项的定义。
+ * @typedef {object} UiTab
+ * @property {UiTabEvent[]} registerEvents           注册事件和对应的处理。
+ */
+
+/**
+ *
+ * @typedef {object} UiTabEvent
+ * @property {array} name               事件的名称。value=reload_data|...
+ * @property {array} loadDataUrl      数据加载的地址。对应event name=reload_data
+ */
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
-        "gaeajs-data", "gaeajs-data-content", "gaeajs-ui-form",
+        "gaeajs-data", "gaeajs-data-content", "gaeajs-ui-form", "gaeajs-ui-events", "gaeajs-common-utils-ajax",
+        "gaeajs-common-utils", "gaeajs-ui-notify",
         "jquery-ui-tabs"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
-              gaeaData, gaeaContent, gaeaForm) {
+              gaeaData, gaeaContent, gaeaForm, gaeaEvents, gaeaAjax,
+              gaeaUtils, gaeaNotify) {
 
         var _defaultOpts = {
             initAllTabs: true                   // 是否一开始就初始化所有tabs内容. 对于编辑dialog一开始不初始化所有，提交可能会有内容缺失（如果某些tab没点过）
@@ -32,6 +55,13 @@ define([
                     throw "初始化gaea tabs组件，id不允许为空！";
                 }
                 var $tabs = $("#" + opts.containerId);
+                var strOptions = $tabs.data("gaea-ui-tabs");
+                if (gaeaValid.isNotNull(strOptions)) {
+                    var extraOpts = gaeaString.parseJSON(strOptions);
+                    _.extend(opts, extraOpts);
+                }
+                // cache options
+                $tabs.data("gaea-options", opts);
 
                 /**
                  * create jQuery UI tabs widget.
@@ -76,12 +106,115 @@ define([
                 if (opts.initAllTabs) {
                     _private.initAllTabs($tabs);
                 }
+                // 初始化gaea tabs的特殊功能。例如：像reload_data的事件等，特有的，另外单独初始化。
+                _private.initGaeaTabs(opts);
 
                 _private.bindTabClickEvent($tabs, opts);
             }
         };
 
         var _private = {
+            /**
+             * 初始化gaea tabs的逻辑。
+             * 例如：像reload_data的事件等，特有的，另外单独初始化。
+             * @param {UiTabs} opts
+             * @param {object} opts.tabs    数据结构：
+             tabs:{
+                                                div-class-student-tab2:{ registerEvents:[{name:'reload_data', loadDataUrl : '/gaea/demo/class-student-crud-form/tab2/load-data' }] }
+                                             }
+             */
+            initGaeaTabs: function (opts) {
+                var $tabs = $("#" + opts.containerId);
+                if (gaeaValid.isNull(opts.tabs)) {
+                    return;
+                }
+                // 读取页面配置的tabs。
+                // key: 某个tab的id
+                // tabOpts: 对应的配置对象
+                $.each(opts.tabs, function (key, tabOpts) {
+                    if (gaeaValid.isNull(key) || gaeaValid.isNull(tabOpts)) {
+                        return;
+                    }
+                    var tabId = key;
+                    /* @type {UiTab} */
+                    if (_.isArray(tabOpts.registerEvents)) {
+
+                        // 遍历配置的各个注册事件（registerEvents）
+                        $.each(tabOpts.registerEvents, function (i, regEvent) {
+                            /* @type{UiTabEvent} */
+                            if (gaeaValid.isNull(regEvent.name)) {
+                                throw "Tabs的注册事件name不允许为空！tab container id: " + opts.containerId + " tab id: " + tabId;
+                            }
+                            // 绑定事件（regEvent对象）
+                            _private.bindEvents(opts.containerId, tabId, regEvent);
+                        });
+                    }
+                });
+            },
+            /**
+             * 解析registerEvent事件定义，并针对性的绑定事件
+             * @param containerId
+             * @param registerTabId
+             * @param registerEvent
+             */
+            bindEvents: function (containerId, registerTabId, registerEvent) {
+                //var $tabs = $("#" + containerId);
+                var loadDataUrl = registerEvent.loadDataUrl;
+                // 看看具体是什么事件
+                if (gaeaString.equalsIgnoreCase(gaeaEvents.DEFINE.UI.RELOAD_DATA, registerEvent.name)) {
+                    // reload_data事件
+                    gaeaValid.isNull({
+                        check: registerTabId,
+                        exception: "tab id为空，无法注册reload_data事件！具体配置参考tabs->key=tab id. "
+                    });
+                    gaeaValid.isNull({
+                        check: loadDataUrl,
+                        exception: "load-data-url为空，无法注册reload_data事件！tab id: " + containerId + " id: " + registerTabId
+                    });
+                    if ($("#" + registerTabId).length < 1) {
+                        throw "指定id找不到对应的tab（或里面的div）。id: " + registerTabId;
+                    }
+                    // 绑定reload_data事件
+                    _private.bindReloadDataEvent(registerTabId, loadDataUrl);
+                }
+            },
+            /**
+             * 绑定reload_data事件。
+             * @param bindId
+             * @param reloadTarget
+             * @param loadDataUrl
+             */
+            bindReloadDataEvent: function (bindId, loadDataUrl) {
+
+                var $reloadTarget = $("#" + bindId);
+                var fillDataDivId = bindId;
+                // 事件绑在了tab标签上，需要找对应的标签内容容器id
+                if ($reloadTarget.parent().hasClass("ui-tabs-nav")) {
+                    fillDataDivId = $reloadTarget.attr("aria-controls"); // aria-controls这个是jQuery的组件特性，指向某个tab包含的内容的div id
+                }
+
+                gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.RELOAD_DATA, "#" + bindId, function (event, data) {
+                    var requestData = {};
+
+                    // 数据加载要求同步
+                    gaeaAjax.ajax({
+                        url: loadDataUrl,
+                        async: false, // 同步，否则后面加载内容还有数据集会乱的
+                        data: gaeaUtils.data.flattenData(requestData), // 把数据拍扁。不然传的是对象，服务端无法解析。
+                        success: function (data) {
+                            var gaeaUI = require("gaeajs-ui-commons");
+                            gaeaUI.fillData({
+                                id: fillDataDivId,
+                                data: data
+                            });
+                        },
+                        fail: function (data) {
+                            gaeaNotify.fail(gaeaString.builder.simpleBuild("tab刷新数据（reload）失败！\n%s", JSON.stringify(data)));
+                        }
+                    });
+
+                });
+            },
             /**
              * 填充数据。
              * 其实还是调用通用填充数据，只是对于多tabs来说，除第一个tab外的其他tab由于ajax分开加载，需要在加载完后手动触发填充。
