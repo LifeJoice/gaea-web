@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.*;
 import org.gaea.framework.web.common.CommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
@@ -24,10 +25,11 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * 统一的Controller的异常处理。
  * <p>统一拦截后，做个区分</p>
  * <p>
- *     继承AbstractHandlerExceptionResolver,为了设定exception resolver的顺序, 确保在DefaultHandlerExceptionResolver之前.<br/>
- *     否则一些系统抛出的异常,例如DispatchServlet抛出的异常,会被DefaultHandlerExceptionResolver处理掉, 不好控制.<br/>
- *     by Iverson 2017-4-27
+ * 继承AbstractHandlerExceptionResolver,为了设定exception resolver的顺序, 确保在DefaultHandlerExceptionResolver之前.<br/>
+ * 否则一些系统抛出的异常,例如DispatchServlet抛出的异常,会被DefaultHandlerExceptionResolver处理掉, 不好控制.<br/>
+ * by Iverson 2017-4-27
  * </p>
+ *
  * @author Iverson 2014-5-5 星期一
  */
 @Component
@@ -35,6 +37,8 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
 
     final Logger logger = LoggerFactory.getLogger(GenericExceptionResolver.class);
     private final int ORDER_BEFORE_SPRING_DEFAULT_HANDLER = SystemProperties.getInteger(CommonDefinition.PROP_KEY_EXCEPTION_RESOLVER_ORDER);
+    /* 使用Jackson2框架的工具类。转换JSON输出。 */
+    ObjectMapper mapper = new ObjectMapper();
 
     public GenericExceptionResolver() {
         /**
@@ -47,6 +51,7 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
     /**
      * 可能并不是最佳实践。
      * 这个是实现HandlerExceptionResolver的。不过后来改为继承AbstractHandlerExceptionResolver后，这个就变成内部调用了。
+     *
      * @param request
      * @param response
      * @param handler
@@ -68,12 +73,11 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
             }
             /* 解决返回json乱码的问题 */
             response.setContentType("text/xml;charset=utf-8");
-            /* 使用Jackson2框架的工具类。转换JSON输出。 */
-            ObjectMapper mapper = new ObjectMapper();
             /* 获取请求的头，用以判断是否JSON请求 */
-            Boolean isJson = false, acceptJson = false, xReqJson = false;
+            Boolean isJson = false, acceptJson = false, xReqJson = false, isMultiPart = false;
             String requestHeadType = request.getHeader("accept");
             String xRequestedWith = request.getHeader("X-Requested-With");
+            String contentType = request.getContentType();
             /* 判断是否JSON请求 */
             if (!ValidationUtils.isBlank(requestHeadType)) {
                 acceptJson = requestHeadType.indexOf("application/json") >= 0;
@@ -81,9 +85,14 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
             if (!ValidationUtils.isBlank(xRequestedWith)) {
                 xReqJson = xRequestedWith.indexOf("XMLHttpRequest") >= 0;
             }
-            isJson = acceptJson || xReqJson;
+            if (StringUtils.isNotEmpty(contentType)) {
+                isMultiPart = contentType.indexOf("multipart/form-data") >= 0;
+            }
+            // 如果请求是multiPart的，即上传文件的，则返回统一还是json
+            isJson = (acceptJson || xReqJson) || isMultiPart;
 //        mav.setViewName("MappingJacksonJsonView");
-            Map<String, String> errorMsg = new HashMap<String, String>();
+            Map<String, Object> errorMsg = new HashMap<String, Object>();
+            errorMsg.put("status", response.getStatus());
             errorMsg.put("message", ex.getMessage());
             errorMsg.put("debugMessage", debugMessage);
             mav.addAllObjects(errorMsg);
