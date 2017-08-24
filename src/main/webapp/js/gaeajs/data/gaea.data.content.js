@@ -108,7 +108,8 @@ define([
                         if (gaeaValid.isNotNull(options.data)) {
 
                             gaeaUI.fillData({
-                                id: options.id,
+                                //id: options.id,
+                                target: "#" + options.id,
                                 data: options.data
                             });
 

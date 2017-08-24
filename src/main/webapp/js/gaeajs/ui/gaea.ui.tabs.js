@@ -97,7 +97,8 @@ define([
 
                         // 如果是编辑dialog，填充数据
                         _private.fillData({
-                            id: bindDivId
+                            //id: bindDivId
+                            target: "#" + bindDivId
                         });
                     }
                 });
@@ -204,7 +205,8 @@ define([
                         success: function (data) {
                             var gaeaUI = require("gaeajs-ui-commons");
                             gaeaUI.fillData({
-                                id: fillDataDivId,
+                                //id: fillDataDivId,
+                                target: "#" + fillDataDivId,
                                 data: data
                             });
                         },
@@ -219,21 +221,23 @@ define([
              * 填充数据。
              * 其实还是调用通用填充数据，只是对于多tabs来说，除第一个tab外的其他tab由于ajax分开加载，需要在加载完后手动触发填充。
              * @param {object} opts
-             * @param {object} opts.id                  容器id，要填充区域的id
+             * @param {object} opts.id                  作废了，用target！容器id，要填充区域的id
+             * @param {object} opts.target              要填充数据的区域选择器
              */
             fillData: function (opts) {
-                if ($("#" + opts.id).parents("[data-gaea-ui-dialog]").length < 1) {
+                if ($(opts.target).parents("[data-gaea-ui-dialog]").length < 1) {
                     console.debug("从gaea tabs找不到父级的gaea dialog，无法填充数据！");
                 }
                 // 向上寻找包含这个tab的dialog
-                var $dialog = $("#" + opts.id).parents("[data-gaea-ui-dialog]").first();
+                var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
                 // dialog的gaea options定义，里面有缓存数据
                 var dialogOpts = $dialog.data("gaeaOptions");
                 // 是否有editData，这个一般是crud dialog才会缓存的
                 if (gaeaValid.isNotNull(dialogOpts["editData"])) {
                     var gaeaUI = require("gaeajs-ui-commons");
                     gaeaUI.fillData({
-                        id: opts.id,
+                        //id: opts.id,
+                        target: opts.target,
                         data: dialogOpts["editData"]
                     });
 

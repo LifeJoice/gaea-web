@@ -269,13 +269,14 @@ define([
              *     不支持grid。这个需要组件另外处理。
              * </p>
              * @param {object} opts
-             * @param {string} opts.id                  要填充入的容器（例如div）id
+             * @param {string} opts.id                  作废了！要填充入的容器（例如div）id
+             * @param {string} opts.target                  要填充入的容器（例如div）id
              * @param {string} [opts.name]              父级的前缀。是一串按父级名字拼凑而成的。
              * @param {object} opts.data                要填充的数据
              */
             fillData: function (opts) {
-                if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.id)) {
-                    throw "缺少要填充数据的目标容器id！";
+                if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.target)) {
+                    throw "缺少要填充数据的目标容器target定义！";
                 }
                 if (gaeaValid.isNull(opts.name)) {
                     opts.name = "";
@@ -297,7 +298,7 @@ define([
                     /**
                      * it's array
                      */
-                    var $filterResult = $("#" + opts.id).find("select").filter(jqIgnoreCaseFilter(opts.name));
+                    var $filterResult = $(opts.target).find("select").filter(jqIgnoreCaseFilter(opts.name));
                     if (utils.array.isGenericValue(opts.data) && $filterResult.length > 0) {
                         // 目标对象是select，可以批量填充。不再需要遍历了。
                         $filterResult.val(opts.data);
@@ -338,7 +339,7 @@ define([
                     //var jqSelector = findTemplate({
                     //    NAME: opts.name
                     //});
-                    var $filterResult = $("#" + opts.id).find("input,select,textarea").filter(jqIgnoreCaseFilter(opts.name));
+                    var $filterResult = $(opts.target).find("input,select,textarea").filter(jqIgnoreCaseFilter(opts.name));
                     // 设定值
                     $filterResult.val(opts.data);
                 }

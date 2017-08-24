@@ -1164,13 +1164,13 @@ define([
         gaeaData.fieldData = {
             /**
              * 一般是用在弹出框的编辑数据的情况下。初始化弹框里的字段的数据。
-             * @param divId 弹框的区域
+             * @param {jqSelector} target 弹框的区域.
              * @param dataObj 要填充到区域中的字段的js对象
              * @returns {$.Deffered}
              */
-            init: function (divId, dataObj) {
+            init: function (target, dataObj) {
                 var dfd = $.Deferred();// JQuery同步对象
-                if (gaeaValid.isNull(divId)) {
+                if (gaeaValid.isNull(target)) {
                     console.log("divId为空，无法定位要初始化数据的位置！数据填充失败！");
                     return null;
                 }
@@ -1182,59 +1182,25 @@ define([
                     console.log(_.template("数据填充要求传入的数据为对象，不是数组！放弃填充当前数据：\n<%= data%>")({data: JSON.stringify(dataObj)}));
                     return;
                 }
-                gaeaData.fieldData._setValue(divId, dataObj);
+                gaeaData.fieldData._setValue(target, dataObj);
                 // 这里没有ajax，顺序执行到这里就resolve了
                 dfd.resolve();
                 return dfd.promise();
             },
             /**
              * 遍历dataObj，把里面各个属性值，设置到某个区域（div）里面的对应输入框之类中。
-             * @param divId 要注入的区域id
+             * @param target 要注入的区域id
              * @param dataObj 数据
              * @private
              */
-            _setValue: function (divId, dataObj) {
+            _setValue: function (target, dataObj) {
                 // 调用工具类的填充
                 gaeaCommonUtils.data.fillData({
-                    id: divId,
+                    //id: divId,
+                    target: target,
                     name: "",
                     data: dataObj
                 });
-
-
-                //var $div = $("#" + divId);
-                //// 遍历对象里的每一个属性和值
-                //$.each(dataObj, function (key, fieldValue) {
-                //    if (_.isArray(fieldValue)) {
-                //        $.each(fieldValue, function (idx, val2) {
-                //            gaeaData.fieldData._setValue(divId, val2);
-                //        });
-                //    } else {
-                //        var value = fieldValue;
-                //        // 如果是对象，则可能服务端给数据集转换过了。取其中的value作为值。
-                //        if (_.isObject(fieldValue)) {
-                //            value = fieldValue.value;
-                //        }
-                //        gaeaData.fieldData._setFieldValue($div, key, value);
-                //    }
-                //});
-                //},
-                //_setFieldValue: function ($div, objKey, objValue) {
-                //    if (gaeaValid.isNull(objKey) || gaeaValid.isNull(objValue)) {
-                //        return;
-                //    }
-                //    // 遍历DIV下的所有field，查看是否有对应的可以设置值
-                //    $div.find("input,textarea").each(function (index, element) {
-                //        var $thisElement = $(this);
-                //        var attrNamVal = $thisElement.attr("name");// 元素的name属性值
-                //        // 检查JSON数据中是否有该字段存在
-                //        var hasDataKey = gaeaString.equalsIgnoreCase(attrNamVal, objKey);
-                //        if (hasDataKey) {
-                //            $thisElement.val(objValue);
-                //            return false;// 跳出循环
-                //        }
-                //    });
-                //
             }
         };
         /**

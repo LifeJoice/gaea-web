@@ -86,16 +86,17 @@ define([
             /**
              * 负责所有数据的填充，包括Gaea框架的UI组件的数据填充。
              * @param {object} opts
-             * @param {object} opts.id              container id
+             * @param {object} opts.id              作废了！用target！！container id
+             * @param {jqSelector} opts.target      要填充数据的区域选择器
              * @param {object} opts.data            要填充的数据
              */
             fillData: function (opts) {
-                if (gaeaValid.isNull(opts.id) || gaeaValid.isNull(opts.data)) {
+                if (gaeaValid.isNull(opts.target) || gaeaValid.isNull(opts.data)) {
                     return;
                 }
 
                 // 填充字段（input、textarea、select等）的值
-                gaeaData.fieldData.init(opts.id, opts.data);
+                gaeaData.fieldData.init(opts.target, opts.data);
 
                 /**
                  * Gaea框架的组件数据填充！
@@ -103,7 +104,7 @@ define([
                  */
 
                     // 可编辑表格crud-grid的数据填充
-                $("#" + opts.id).find("[data-gaea-ui-crud-grid]").each(function (key, target) {
+                $(opts.target).find("[data-gaea-ui-crud-grid]").each(function (key, target) {
                     // $(this)是crud-grid的容器，里面有toolbar和grid两个组件。
                     var $gridCt = $(this).children(".gaea-grid-ct");
                     var gridId = $gridCt.attr("id");
