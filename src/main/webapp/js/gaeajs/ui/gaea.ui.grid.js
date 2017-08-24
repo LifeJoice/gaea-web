@@ -962,6 +962,539 @@ define([
             }
         };
 
+        // 可编辑表格功能
+        var _crudGrid = {
+            data: {
+                /**
+                 * crud grid的数据初始化的入口.这里前提是数据已经进入了grid的dom对象的缓存了。
+                 * @param {object} opts
+                 * @param {string} opts.id                      grid容器id
+                 * @param {string} opts.queryAction             查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
+                 */
+                init: function (opts) {
+                    var $gridCt = $("#" + opts.id);
+                    var gridOptions = $gridCt.data("options");
+                    var allData = gridOptions.data;
+                    var filterData = gridOptions.filterData;
+                    /**
+                     * if 有过滤的数据
+                     *      按过滤后的数据填充
+                     * else
+                     *      填充普通的数据（可能是编辑，从服务端带过来的）
+                     */
+                    if (gaeaString.equalsIgnoreCase(opts.queryAction, "query-action-filter")) {
+                        // 复制一个，否则一些配置项会进缓存
+                        opts = _.clone(opts);
+                        // 过滤的，不需要把数据放入data中。否则重置后数据会不准确。
+                        //opts.isNewData = false;
+                        _crudGrid.data._initData(opts, filterData);
+                    } else {
+                        _crudGrid.data._initData(opts, allData);
+                    }
+                    // 尾部添加一个空的
+                    // create an empty object
+                    //opts.rowIndex = 0;
+                    //opts.rowData = _private.crudGrid.data.createEmpty(opts);
+                    //_private.crudGrid.data.addOne(opts);
+                },
+                /**
+                 * 构造crud grid里的数据。注意这是纯粹的数据构造，不会再做其他检查。所以不建议对外调用。
+                 * @param {object} opts
+                 * @param {string} opts.queryAction             查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
+                 * @param {object[]} data                       grid的数据。
+                 * @private
+                 */
+                _initData: function (opts, data) {
+                    var $gridCt = $("#" + opts.id);
+                    var gridOptions = $gridCt.data("options");
+                    // 刚创建crud grid的时候，可能没有数据，所以就忽略
+                    // 还有一种，就是过滤查询后的结果就是空。
+                    if (gaeaValid.isNull(data)) {
+                        // 清除数据
+                        _private.grid.cleanData(opts);
+                        return;
+                    }
+                    if (!_.isArray(data)) {
+                        throw "输入data非数组，无法初始化grid的数据部分。";
+                    }
+                    $.each(data, function (rowIndex, rowObj) {
+                        var options = {
+                            id: gridOptions.id,
+                            name: gridOptions.name,
+                            rowIndex: rowIndex,
+                            rowData: rowObj,
+                            model: gridOptions.model,
+                            columns: gridOptions.columns,
+                            queryAction: opts.queryAction
+                        };
+                        if (gaeaValid.isNotNull(opts.isNewData)) {
+                            options.isNewData = opts.isNewData;
+                        }
+                        // 添加行
+                        _crudGrid.html.addTr(options);
+                    });
+                },
+                /**
+                 * 刷新某个字段的值到缓存中。
+                 * @param {object} opts
+                 * @param {string} opts.id                      grid容器id
+                 * @param {string} opts.target                  包含值的目标对象。例如：一个input。
+                 */
+                refreshOneField: function (opts) {
+                    if (gaeaValid.isNull(opts.target)) {
+                        throw "目标对象为空，无法刷新crud grid缓存的数据。";
+                    }
+                    var $gridCt = $("#" + opts.id);
+                    var gridOptions = $gridCt.data().options;
+                    // 列定义
+                    var columns = gridOptions.columns;
+                    //var $tbBody = $gridCt.find(".tb-body:first");
+                    var $target = $(opts.target);
+                    var $td = $target.parents("td:first");
+                    var $tr = $td.parent();// 提取当前单元格是第几列
+                    // 第几列
+                    var columnIndex = parseInt(_s.replaceAll($td.data("columnid"), "gridcolumn-", "")) - 1;
+                    // 第几行
+                    var rowIndex = parseInt($tr.data("rowindex")) - 1;
+                    // 获取定义的列的字段名, 和值
+                    var fieldName = columns[columnIndex].name;
+                    var fieldValue = $target.val();
+                    // set data
+                    var rowObj = gridOptions.data[rowIndex];
+                    rowObj[fieldName] = fieldValue;
+                },
+                /**
+                 * 创建一个空对象。这个主要是为了往crud grid插入一个空行。
+                 * @param {object} opts
+                 * @param {string} opts.id                      grid容器id
+                 * @param {object} opts.model.fields            列字段的定义,这个是为了匹配data的field key。
+                 */
+                createEmpty: function (opts) {
+                    var result = {};
+                    $.each(opts.model.fields, function (i, iValue) {
+                        var field = this;
+                        result[field.id] = "";
+                    });
+                    return result;
+                }
+                /**
+                 * 获取grid数据区的数据。
+                 * @param {object} opts
+                 * @param {string} opts.id                          grid容器id。
+                 */
+                //getData: function (opts) {
+                //    var $gridCt = $("#" + opts.id);
+                //    var columns = $gridCt.data("options").columns;
+                //    var $tbBody = $gridCt.find(".tb-body:first");
+                //    var result = [];
+                //    $tbBody.find("tr").each(function (i, trObj) {
+                //        var $tr = $(trObj);
+                //        var dataItem = {};
+                //        $tr.children("td").each(function (j, tdObj) {
+                //            var $td = $(tdObj);
+                //            // 提取当前单元格是第几列
+                //            var columnIndex = parseInt(_s.replaceAll($td.data("columnid"), "gridcolumn-", "")) - 1;
+                //            // 获取column定义。不直接用td里面的input定义的name
+                //            var column = columns[columnIndex];
+                //            if ($td.find("input").length > 0) {
+                //                dataItem[column.name] = $td.find("input").val();
+                //            } else {
+                //                dataItem[column.name] = $td.find(".grid-td-div").text();
+                //            }
+                //        });
+                //        result.push(dataItem);
+                //    });
+                //    return result;
+                //}
+            },
+            /**
+             * 这个是对外的接口。和data.addOne的区别是，这个整合了创建空对象和添加两个动作。
+             * 这个会把新创建的对象，插入数据数组的尾部。
+             * @param {object} opts
+             * @param {string} opts.id                          grid容器id
+             * @param {string} [opts.isNewData=true]            如果true，会添加到缓存的data中。如果是filter方式，应该为false。
+             */
+            addNewOne: function (opts) {
+                // 基于原来的配置缓存（列定义等）来创建一个新记录。不会根据新传入的来创建。
+                var gridOptions = $("#" + opts.id).data("options");
+                // 复制一个。不然会把数据带到缓存中去。
+                opts = _.clone(gridOptions);
+                // create an empty object
+                opts.rowData = _crudGrid.data.createEmpty(opts);
+                // add one
+                _crudGrid.html.addTr(opts);
+                // 是否新的行。会加入到grid的总数据集中。
+                //if(opts.isNewData) {
+                gridOptions.data.push(opts.rowData);
+                //}
+                // 给整个grid增加第一条记录的时候，才需要初始化
+                if (gaeaValid.isNotNull(gridOptions.data) && gridOptions.data.length == 1) {
+                    // 设置Grid样式
+                    _private.grid.css.apply(opts);
+                }
+                // 绑定事件，例如：行前复选框
+                _crudGrid.event.bindRowEvents(opts);
+            },
+            /**
+             * 删除指定的行数据。
+             * @param {string} opts.id                      grid容器id
+             * @param {string} opts.
+             */
+            deleteSelected: function (opts) {
+                var selectedRows = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, opts.id);
+                if (_.isArray(selectedRows)) {
+                    var $gridCt = $("#" + opts.id);
+                    var allData = $gridCt.data("options").data;
+                    // 倒序。排序并颠倒。
+                    var sortRows = _.sortBy(selectedRows, "origIndex").reverse();
+                    // 【重要】按倒序删除，否则删了1，整个列表的长度就缩短了，后面的按index删除就不对了。
+                    $.each(sortRows, function (i, row) {
+                        var origIndex = row.origIndex;
+                        if (_.isNumber(origIndex)) {
+                            // 从缓存的总数据中，删除指定的行
+                            allData.splice(origIndex, 1);
+                        }
+                    });
+                    // 触发刷新
+                    $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, {
+                        data: allData,
+                        isNewData: false
+                    });
+                }
+
+            },
+            /**
+             * 绑定crud grid的相关事件。
+             * @param {object} opts
+             */
+            bindingEvents: function (opts) {
+
+                var gridId = opts.id;
+                var $grid = $("#" + gridId);
+                /**
+                 * 注册行选择事件
+                 */
+                    //_grid.row.initSelectEvent();
+                _private.event.bindSelectRow(opts);
+                /**
+                 * 注册重置grid数据事件
+                 * TODO 这个可以保留，但得进一步处理
+                 */
+                //gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.RELOAD, "#" + gridId, function (event, data) {
+                //    gridQuery.doQuery({
+                //        id: gridId
+                //    });
+                //});
+
+
+                /**
+                 * 注册根据数据（一般是查询结果）刷新grid事件
+                 */
+                _private.event.bindRefreshData(opts);
+
+                /**
+                 * 注册行选择缓存所选行数据事件
+                 */
+                _private.event.registerCacheSelectRowData(opts);
+
+                /**
+                 * 注册选择全部事件
+                 */
+                _private.event.bindCheckAll(opts);
+
+                // 初始化上下文插件（可以重复初始化，所以不怕）
+                gaeaContext.init({
+                    id: GAEA_UI_DEFINE.UI.GAEA_CONTEXT.ID
+                });
+            },
+            event: {
+                bindRowEvents: function (opts) {
+                    /**
+                     * 注册行选择事件
+                     */
+                    _private.event.bindSelectRow(opts);
+                }
+                /**
+                 *
+                 * @param {object} opts
+                 * @param {string} opts.id                          grid容器id。
+                 */
+                //bindRefreshCacheData: function (opts) {
+                //    /**
+                //     * 这个比较简单，就是读取整个grid数据区的数据，重建cache的data。
+                //     * 这个一般用在crud grid，因为数据区可能被编辑过。
+                //     */
+                //    gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SYNC_GRID_DATA, "#" + opts.id, function (event, data) {
+                //        var data = _private.crudGrid.data.getData(opts);
+                //        var $gridCt = $("#"+opts.id);
+                //        $gridCt.data("options").filterData = data;
+                //    });
+                //}
+            },
+            html: {
+                /**
+                 * 添加行HTML！注意，这里只处理HTML！
+                 * 把一行数据添加到grid的数据区中，用于包括：
+                 * - 刚开始初始化数据区的时候
+                 * - 过滤后重新填充数据区数据
+                 * - 新增一行空白数据的时候
+                 * @param {object} opts
+                 * @param {string} opts.id                          crud grid容器。这个是最外层的容器，里面应该还有toolbar和真正grid的容器。
+                 * @param {string} opts.name                        crud grid的编辑的所有数据的根name
+                 * @param {int} opts.rowIndex                       第几行。从0开始。有输入就以输入为主。否则根据当前缓存数据数组+1.
+                 * @param {object} opts.rowData                     一行的数据。
+                 * @param {int} [opts.rowData.origIndex]            如果是检索过的数据，会有原数组中位置的index。这个会覆盖rowIndex。
+                 * @param {string} [opts.isNewData=true]            如果true，会添加到缓存的data中。如果是filter方式，应该为false。
+                 * @param {string} opts.queryAction                 查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
+                 */
+                addTr: function (opts) {
+                    opts = _.extend(_.clone(defaultOpts.crudGrid.addNewOne), opts);
+                    var $gridCt = $("#" + opts.id);
+                    var gridOptions = $gridCt.data().options;
+                    var $tbBody = $gridCt.find(".tb-body:first");
+                    // 获取row index
+                    // 优先级：原始序号(必须是filter查询) > 指定序号(批量插入指定) > 当前最后一条(如果可以确定) > 第0条
+                    var rowIndex = 0;
+                    if (gaeaValid.isNotNull(opts.rowData.origIndex) && gaeaString.equalsIgnoreCase(opts.queryAction, "query-action-filter")) {
+                        rowIndex = opts.rowData.origIndex;
+                    } else if (gaeaValid.isNotNull(opts.rowIndex)) {
+                        rowIndex = opts.rowIndex;
+                    } else if (gaeaValid.isNotNull(gridOptions.data)) {
+                        rowIndex = gridOptions.data.length;
+                    }
+                    // 生成tr
+                    $tbBody.append("<tr data-rowindex='" + (rowIndex + 1) + "'>");
+                    var $lastTr = $tbBody.find("tr:last");
+
+                    // 添加到缓存的data中
+                    if (gaeaValid.isNull(gridOptions.data)) {
+                        gridOptions.data = [];
+                    }
+
+                    /**
+                     * 遍历字段定义（这个基本都是要展示的，如果遍历column有些不需要展示就得跳过，比较麻烦），生成行的每个单元格。
+                     */
+                    $.each(gridOptions.model.fields, function (i, iValue) {
+                        /**
+                         * @type {GaeaColumn}
+                         */
+                        var column = _.extend(_.clone(defaultOpts.column), gridOptions.columns[i]);
+                        var field = this;
+                        // create a td
+                        _crudGrid.html.addTd($lastTr, column, field, rowIndex, i, opts.rowData, opts);
+                    });
+
+                    // 给行末尾添加一个单元格，负责撑开剩余空间，让表格可以width 100%
+                    $tbBody.find("tr:last").append("<td></td>");
+                    // 生成行前操作区。判断是否有工作流。有的话生成'查看工作流'的按钮
+                    _wf.html.addTrButtons(rowIndex, opts);
+
+                    $tbBody.append("</tr>");
+                },
+                /**
+                 * 添加可编辑表格（crud-grid）的一个单元格. copy from addTr.
+                 * @param {jqObject} $tr            jQuery对象。行。新增的td就会加在这里面。
+                 * @param {GaeaColumn} column       服务端返回的列定义对象。
+                 * @param {object} field            服务端返回的字段定义。
+                 * @param {string} rowIndex         第几行。关系到行前复选框的name里面的序号，和行input的name里面的序号等
+                 * @param {string} columnIndex      第几列。
+                 * @param {object} rowData          行数据。
+                 * @param {object} opts             其他的配置
+                 * @param {string} opts.id          grid的容器id。对于crud-grid，是gaea-ui-crud-grid定义位置id。
+                 */
+                addTd: function ($tr, column, field, rowIndex, columnIndex, rowData, opts) {
+
+                    var columnHtmId = "gridcolumn-" + (columnIndex + 1); // column的序列化从1开始吧
+                    // 生成CheckBox id
+                    var checkBoxId = opts.id + "-cbx-" + rowIndex;
+                    // 第一列，生成复选框。
+                    if (columnIndex == 0) {
+                        $tr.append("<td class='checkbox'>" +
+                            "<div class=\"row-check\">" +
+                            "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
+                                // Label里面的都是复选框的效果元素。
+                            "<label id='gaea-cb-label-" + columnIndex + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
+                            "</label>" +
+                            "</div>" +
+                            "</td>");
+                    }
+
+                    //var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
+                    // create input 'name'
+                    var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
+                    var value;
+
+                    // 初始单元格的容器
+                    var $td = $(gaeaString.builder.simpleBuild('<td class="grid-td" data-columnid="%s"><div class="grid-td-div"></div></td>', columnHtmId));
+                    $tr.append($td);
+
+                    // 获取当前要填充的值
+                    // 遍历数据（一行）中每一列的值，如果id和当前列id一致就是。
+                    $.each(rowData, function (key, val) {
+                        //var cellText = cell;
+                        //if (_.isObject(cell)) {
+                        //    if (gaeaValid.isNull(cell.text)) {
+                        //        console.warn("grid单元格是对象，但text却为空( text为系统默认的显示文本 )。 cell: %s", JSON.stringify(cell));
+                        //    }
+                        //    cellText = cell.text;
+                        //}
+                        // 如果数据中的key和field（grid数据结构定义）中的设置一致（即类似data.columnname = grid.columnname），则把值复制到表格中。
+                        if (gaeaString.equalsIgnoreCase(field.id, key)) {
+                            value = val;
+                        }
+                    });
+                    // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
+
+                    // 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
+                    _crudGrid.html.createTdContent($td, {
+                        id: opts.id,
+                        inputId: inputName,
+                        column: column,
+                        field: field,
+                        inputValue: value
+                    });
+
+                },
+                /**
+                 * 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
+                 * @param {jqObject} $td
+                 * @param {object} opts
+                 * @param {string} opts.id                  grid容器id
+                 * @param {string} opts.inputId             生成的input框的id和name（共用）
+                 * @param {string} opts.inputValue
+                 * @param {GaeaColumn} opts.column
+                 * @param {object} field                    服务端返回的字段定义。
+                 * @private
+                 */
+                createTdContent: function ($td, opts) {
+                    var $cellCt = $td.children(".grid-td-div");
+                    var value = opts.inputValue;
+
+                    // 通过工具方法，获取真正的值。因为gaea的值还有可能是表达式等……
+                    value = gaeaData.utils.getRealValue(value, opts.column.value);
+
+                    /**
+                     * 初始化 数据集下拉框/输入框/...
+                     */
+                    if (gaeaValid.isNotNull(opts.column.dataSetId)) {
+                        //var gaeaSelect2 = require("gaeajs-ui-select2");
+                        require(["gaeajs-ui-select2"], function (gaeaSelect2) {
+
+                            gaeaSelect2.createAndInit({
+                                jqSelector: $cellCt,
+                                htmlId: opts.inputId,
+                                htmlName: opts.inputId,
+                                dataSetId: opts.column.dataSetId,
+                                fieldId: opts.field.id,
+                                // --------->>>> 下面是init方法需要配置项
+                                // 这个是创建了<select>元素后，元素的选择器
+                                selectJqSelector: "#" + gaeaString.format.getValidName(opts.inputId),
+                                default: opts.column.default,
+                                value: value
+                            });
+
+                            //$.when(
+                            //    gaeaSelect2.preInitHtmlAndData({
+                            //    jqSelector: $cellCt,
+                            //    htmlId: opts.inputId,
+                            //    htmlName: opts.inputId,
+                            //    dataSetId: opts.column.dataSetId,
+                            //    fieldId: opts.field.id
+                            //})
+                            //).done(
+                            //    gaeaSelect2.init({
+                            //        jqSelector: "#"+gaeaString.format.getValidName(opts.inputId),
+                            //        default: opts.column.default,
+                            //        value: value
+                            //    }));
+                        });
+                    } else {
+                        // create input box
+                        // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
+                        $cellCt.append(gaeaInput.create({
+                            id: opts.inputId,
+                            name: opts.inputId,
+                            class: "crud-grid-input",
+                            dataType: opts.column.dataType,
+                            value: value,
+                            editable: opts.column.editable,
+                            validator: opts.column.validator,// 校验定义
+                            onChange: function (event) {
+                                // 刷新缓存的值
+                                _crudGrid.data.refreshOneField({
+                                    id: opts.id,
+                                    target: this // 当前change的对象
+                                });
+                            }
+                        }));
+                    }
+
+                    //var $tdInput = $("#" + gaeaString.format.getValidName(opts.inputId));
+
+                    // 如果不可编辑
+                    if (!opts.column.editable) {
+                        //    // create input box
+                        //    $cellCt.append(gaeaInput.create({
+                        //        id: opts.inputId,
+                        //        name: opts.inputId,
+                        //        class: "crud-grid-input",
+                        //        dataType: opts.column.dataType,
+                        //        value: opts.inputValue,
+                        //        validator: opts.column.validator,// 校验定义
+                        //        onChange: function (event) {
+                        //            // 刷新缓存的值
+                        //            _private.crudGrid.data.refreshOneField({
+                        //                id: opts.id,
+                        //                target: this // 当前change的对象
+                        //            });
+                        //        }
+                        //    }));
+                        //} else {
+                        $td.addClass("non-editable");
+                        //// 不可编辑
+                        //$tdInput.prop("readonly", true);
+                        //// init Html first
+                        //// 如果手动设定了值，以手动设定的值为准
+                        //// AI.TODO 这里设定值，越界了！应该放到gaeaInput里面去统一处理！
+                        //if (gaeaValid.isNotNull(opts.column.value)) {
+                        //    //$cellCt.append(gaeaContext.getValue(opts.column.value));
+                        //    $tdInput.val(gaeaContext.getValue(opts.column.value));
+                        //}
+                        /**
+                         * if 是图片的话，处理图片。
+                         * 初始化lightGallery图片查看插件放到整个table初始化完成后。
+                         */
+                        if (gaeaString.equalsIgnoreCase(opts.column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
+                            //$td.addClass("");
+
+                            $cellCt.find("img").each(function (i, element) {
+                                var $img = $(this);
+                                // 原图链接
+                                var src = $img.attr("src");
+                                var thumbnailSrc = src; // 缩略图src
+                                // 加前缀
+                                if (gaeaValid.isNotNull(opts.column.imgSrcPrefix)) {
+                                    src = opts.column.imgSrcPrefix + src;
+                                }
+                                // 加后缀
+                                if (gaeaValid.isNotNull(opts.column.imgSrcSuffix)) {
+                                    src = src + opts.column.imgSrcSuffix;
+                                }
+                                // 缩略图, 叠加一般性后缀
+                                if (gaeaValid.isNotNull(opts.column.imgThumbnailSuffix)) {
+                                    thumbnailSrc = src + opts.column.imgSrcSuffix;
+                                }
+                                // 修改src为缩略图
+                                $img.attr("src", thumbnailSrc);
+                                // 包上<a>标签, lightGallery控件需要
+                                $img.wrap('<a href="' + src + '">');
+                            });
+                        }
+                    }
+                }
+            }
+        };
+
         /**
          * 私有方法
          */
@@ -1088,7 +1621,7 @@ define([
                         /**
                          * crud grid
                          */
-                        _private.crudGrid.data.init(opts);
+                        _crudGrid.data.init(opts);
                     } else {
                         _private.grid.createTableData(opts);
                     }
@@ -1227,7 +1760,7 @@ define([
                     var componentName = $gridCt.data("options").component;
                     if (gaeaString.equalsIgnoreCase(componentName, GAEA_UI_DEFINE.UI.COMPONENT.CRUD_GRID)) {
                         // crud grid的事件绑定。比较简单，不需要什么分页、每页多少条等等事件
-                        _private.crudGrid.bindingEvents(opts);
+                        _crudGrid.bindingEvents(opts);
                     } else {
                         _grid._bindingEvents(opts);
                     }
@@ -1462,537 +1995,6 @@ define([
                         //$gridDataBody.mCustomScrollbar({
                         //    theme: "dark-3"
                         //});
-                    }
-                }
-            },
-            crudGrid: {
-                data: {
-                    /**
-                     * crud grid的数据初始化的入口.这里前提是数据已经进入了grid的dom对象的缓存了。
-                     * @param {object} opts
-                     * @param {string} opts.id                      grid容器id
-                     * @param {string} opts.queryAction             查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
-                     */
-                    init: function (opts) {
-                        var $gridCt = $("#" + opts.id);
-                        var gridOptions = $gridCt.data("options");
-                        var allData = gridOptions.data;
-                        var filterData = gridOptions.filterData;
-                        /**
-                         * if 有过滤的数据
-                         *      按过滤后的数据填充
-                         * else
-                         *      填充普通的数据（可能是编辑，从服务端带过来的）
-                         */
-                        if (gaeaString.equalsIgnoreCase(opts.queryAction, "query-action-filter")) {
-                            // 复制一个，否则一些配置项会进缓存
-                            opts = _.clone(opts);
-                            // 过滤的，不需要把数据放入data中。否则重置后数据会不准确。
-                            //opts.isNewData = false;
-                            _private.crudGrid.data._initData(opts, filterData);
-                        } else {
-                            _private.crudGrid.data._initData(opts, allData);
-                        }
-                        // 尾部添加一个空的
-                        // create an empty object
-                        //opts.rowIndex = 0;
-                        //opts.rowData = _private.crudGrid.data.createEmpty(opts);
-                        //_private.crudGrid.data.addOne(opts);
-                    },
-                    /**
-                     * 构造crud grid里的数据。注意这是纯粹的数据构造，不会再做其他检查。所以不建议对外调用。
-                     * @param {object} opts
-                     * @param {string} opts.queryAction             查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
-                     * @param {object[]} data                       grid的数据。
-                     * @private
-                     */
-                    _initData: function (opts, data) {
-                        var $gridCt = $("#" + opts.id);
-                        var gridOptions = $gridCt.data("options");
-                        // 刚创建crud grid的时候，可能没有数据，所以就忽略
-                        // 还有一种，就是过滤查询后的结果就是空。
-                        if (gaeaValid.isNull(data)) {
-                            // 清除数据
-                            _private.grid.cleanData(opts);
-                            return;
-                        }
-                        if (!_.isArray(data)) {
-                            throw "输入data非数组，无法初始化grid的数据部分。";
-                        }
-                        $.each(data, function (rowIndex, rowObj) {
-                            var options = {
-                                id: gridOptions.id,
-                                name: gridOptions.name,
-                                rowIndex: rowIndex,
-                                rowData: rowObj,
-                                model: gridOptions.model,
-                                columns: gridOptions.columns,
-                                queryAction: opts.queryAction
-                            };
-                            if (gaeaValid.isNotNull(opts.isNewData)) {
-                                options.isNewData = opts.isNewData;
-                            }
-                            // 添加行
-                            _private.crudGrid.html.addTr(options);
-                        });
-                    },
-                    /**
-                     * 刷新某个字段的值到缓存中。
-                     * @param {object} opts
-                     * @param {string} opts.id                      grid容器id
-                     * @param {string} opts.target                  包含值的目标对象。例如：一个input。
-                     */
-                    refreshOneField: function (opts) {
-                        if (gaeaValid.isNull(opts.target)) {
-                            throw "目标对象为空，无法刷新crud grid缓存的数据。";
-                        }
-                        var $gridCt = $("#" + opts.id);
-                        var gridOptions = $gridCt.data().options;
-                        // 列定义
-                        var columns = gridOptions.columns;
-                        //var $tbBody = $gridCt.find(".tb-body:first");
-                        var $target = $(opts.target);
-                        var $td = $target.parents("td:first");
-                        var $tr = $td.parent();// 提取当前单元格是第几列
-                        // 第几列
-                        var columnIndex = parseInt(_s.replaceAll($td.data("columnid"), "gridcolumn-", "")) - 1;
-                        // 第几行
-                        var rowIndex = parseInt($tr.data("rowindex")) - 1;
-                        // 获取定义的列的字段名, 和值
-                        var fieldName = columns[columnIndex].name;
-                        var fieldValue = $target.val();
-                        // set data
-                        var rowObj = gridOptions.data[rowIndex];
-                        rowObj[fieldName] = fieldValue;
-                    },
-                    /**
-                     * 创建一个空对象。这个主要是为了往crud grid插入一个空行。
-                     * @param {object} opts
-                     * @param {string} opts.id                      grid容器id
-                     * @param {object} opts.model.fields            列字段的定义,这个是为了匹配data的field key。
-                     */
-                    createEmpty: function (opts) {
-                        var result = {};
-                        $.each(opts.model.fields, function (i, iValue) {
-                            var field = this;
-                            result[field.id] = "";
-                        });
-                        return result;
-                    }
-                    /**
-                     * 获取grid数据区的数据。
-                     * @param {object} opts
-                     * @param {string} opts.id                          grid容器id。
-                     */
-                    //getData: function (opts) {
-                    //    var $gridCt = $("#" + opts.id);
-                    //    var columns = $gridCt.data("options").columns;
-                    //    var $tbBody = $gridCt.find(".tb-body:first");
-                    //    var result = [];
-                    //    $tbBody.find("tr").each(function (i, trObj) {
-                    //        var $tr = $(trObj);
-                    //        var dataItem = {};
-                    //        $tr.children("td").each(function (j, tdObj) {
-                    //            var $td = $(tdObj);
-                    //            // 提取当前单元格是第几列
-                    //            var columnIndex = parseInt(_s.replaceAll($td.data("columnid"), "gridcolumn-", "")) - 1;
-                    //            // 获取column定义。不直接用td里面的input定义的name
-                    //            var column = columns[columnIndex];
-                    //            if ($td.find("input").length > 0) {
-                    //                dataItem[column.name] = $td.find("input").val();
-                    //            } else {
-                    //                dataItem[column.name] = $td.find(".grid-td-div").text();
-                    //            }
-                    //        });
-                    //        result.push(dataItem);
-                    //    });
-                    //    return result;
-                    //}
-                },
-                /**
-                 * 这个是对外的接口。和data.addOne的区别是，这个整合了创建空对象和添加两个动作。
-                 * 这个会把新创建的对象，插入数据数组的尾部。
-                 * @param {object} opts
-                 * @param {string} opts.id                          grid容器id
-                 * @param {string} [opts.isNewData=true]            如果true，会添加到缓存的data中。如果是filter方式，应该为false。
-                 */
-                addNewOne: function (opts) {
-                    // 基于原来的配置缓存（列定义等）来创建一个新记录。不会根据新传入的来创建。
-                    var gridOptions = $("#" + opts.id).data("options");
-                    // 复制一个。不然会把数据带到缓存中去。
-                    opts = _.clone(gridOptions);
-                    // create an empty object
-                    opts.rowData = _private.crudGrid.data.createEmpty(opts);
-                    // add one
-                    _private.crudGrid.html.addTr(opts);
-                    // 是否新的行。会加入到grid的总数据集中。
-                    //if(opts.isNewData) {
-                    gridOptions.data.push(opts.rowData);
-                    //}
-                    // 给整个grid增加第一条记录的时候，才需要初始化
-                    if (gaeaValid.isNotNull(gridOptions.data) && gridOptions.data.length == 1) {
-                        // 设置Grid样式
-                        _private.grid.css.apply(opts);
-                    }
-                    // 绑定事件，例如：行前复选框
-                    _private.crudGrid.event.bindRowEvents(opts);
-                },
-                /**
-                 * 删除指定的行数据。
-                 * @param {string} opts.id                      grid容器id
-                 * @param {string} opts.
-                 */
-                deleteSelected: function (opts) {
-                    var selectedRows = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, opts.id);
-                    if (_.isArray(selectedRows)) {
-                        var $gridCt = $("#" + opts.id);
-                        var allData = $gridCt.data("options").data;
-                        // 倒序。排序并颠倒。
-                        var sortRows = _.sortBy(selectedRows, "origIndex").reverse();
-                        // 【重要】按倒序删除，否则删了1，整个列表的长度就缩短了，后面的按index删除就不对了。
-                        $.each(sortRows, function (i, row) {
-                            var origIndex = row.origIndex;
-                            if (_.isNumber(origIndex)) {
-                                // 从缓存的总数据中，删除指定的行
-                                allData.splice(origIndex, 1);
-                            }
-                        });
-                        // 触发刷新
-                        $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, {
-                            data: allData,
-                            isNewData: false
-                        });
-                    }
-
-                },
-                /**
-                 * 绑定crud grid的相关事件。
-                 * @param {object} opts
-                 */
-                bindingEvents: function (opts) {
-
-                    var gridId = opts.id;
-                    var $grid = $("#" + gridId);
-                    /**
-                     * 注册行选择事件
-                     */
-                        //_grid.row.initSelectEvent();
-                    _private.event.bindSelectRow(opts);
-                    /**
-                     * 注册重置grid数据事件
-                     * TODO 这个可以保留，但得进一步处理
-                     */
-                    //gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.RELOAD, "#" + gridId, function (event, data) {
-                    //    gridQuery.doQuery({
-                    //        id: gridId
-                    //    });
-                    //});
-
-
-                    /**
-                     * 注册根据数据（一般是查询结果）刷新grid事件
-                     */
-                    _private.event.bindRefreshData(opts);
-
-                    /**
-                     * 注册行选择缓存所选行数据事件
-                     */
-                    _private.event.registerCacheSelectRowData(opts);
-
-                    /**
-                     * 注册选择全部事件
-                     */
-                    _private.event.bindCheckAll(opts);
-
-                    // 初始化上下文插件（可以重复初始化，所以不怕）
-                    gaeaContext.init({
-                        id: GAEA_UI_DEFINE.UI.GAEA_CONTEXT.ID
-                    });
-                },
-                event: {
-                    bindRowEvents: function (opts) {
-                        /**
-                         * 注册行选择事件
-                         */
-                        _private.event.bindSelectRow(opts);
-                    }
-                    /**
-                     *
-                     * @param {object} opts
-                     * @param {string} opts.id                          grid容器id。
-                     */
-                    //bindRefreshCacheData: function (opts) {
-                    //    /**
-                    //     * 这个比较简单，就是读取整个grid数据区的数据，重建cache的data。
-                    //     * 这个一般用在crud grid，因为数据区可能被编辑过。
-                    //     */
-                    //    gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SYNC_GRID_DATA, "#" + opts.id, function (event, data) {
-                    //        var data = _private.crudGrid.data.getData(opts);
-                    //        var $gridCt = $("#"+opts.id);
-                    //        $gridCt.data("options").filterData = data;
-                    //    });
-                    //}
-                },
-                html: {
-                    /**
-                     * 添加行HTML！注意，这里只处理HTML！
-                     * 把一行数据添加到grid的数据区中，用于包括：
-                     * - 刚开始初始化数据区的时候
-                     * - 过滤后重新填充数据区数据
-                     * - 新增一行空白数据的时候
-                     * @param {object} opts
-                     * @param {string} opts.id                          crud grid容器。这个是最外层的容器，里面应该还有toolbar和真正grid的容器。
-                     * @param {string} opts.name                        crud grid的编辑的所有数据的根name
-                     * @param {int} opts.rowIndex                       第几行。从0开始。有输入就以输入为主。否则根据当前缓存数据数组+1.
-                     * @param {object} opts.rowData                     一行的数据。
-                     * @param {int} [opts.rowData.origIndex]            如果是检索过的数据，会有原数组中位置的index。这个会覆盖rowIndex。
-                     * @param {string} [opts.isNewData=true]            如果true，会添加到缓存的data中。如果是filter方式，应该为false。
-                     * @param {string} opts.queryAction                 查询的操作类型。是过滤数据，还是重置。value= query-action-filter|...
-                     */
-                    addTr: function (opts) {
-                        opts = _.extend(_.clone(defaultOpts.crudGrid.addNewOne), opts);
-                        var $gridCt = $("#" + opts.id);
-                        var gridOptions = $gridCt.data().options;
-                        var $tbBody = $gridCt.find(".tb-body:first");
-                        // 获取row index
-                        // 优先级：原始序号(必须是filter查询) > 指定序号(批量插入指定) > 当前最后一条(如果可以确定) > 第0条
-                        var rowIndex = 0;
-                        if (gaeaValid.isNotNull(opts.rowData.origIndex) && gaeaString.equalsIgnoreCase(opts.queryAction, "query-action-filter")) {
-                            rowIndex = opts.rowData.origIndex;
-                        } else if (gaeaValid.isNotNull(opts.rowIndex)) {
-                            rowIndex = opts.rowIndex;
-                        } else if (gaeaValid.isNotNull(gridOptions.data)) {
-                            rowIndex = gridOptions.data.length;
-                        }
-                        // 生成tr
-                        $tbBody.append("<tr data-rowindex='" + (rowIndex + 1) + "'>");
-                        var $lastTr = $tbBody.find("tr:last");
-
-                        // 添加到缓存的data中
-                        if (gaeaValid.isNull(gridOptions.data)) {
-                            gridOptions.data = [];
-                        }
-
-                        /**
-                         * 遍历字段定义（这个基本都是要展示的，如果遍历column有些不需要展示就得跳过，比较麻烦），生成行的每个单元格。
-                         */
-                        $.each(gridOptions.model.fields, function (i, iValue) {
-                            /**
-                             * @type {GaeaColumn}
-                             */
-                            var column = _.extend(_.clone(defaultOpts.column), gridOptions.columns[i]);
-                            var field = this;
-                            // create a td
-                            _private.crudGrid.html.addTd($lastTr, column, field, rowIndex, i, opts.rowData, opts);
-                        });
-
-                        // 给行末尾添加一个单元格，负责撑开剩余空间，让表格可以width 100%
-                        $tbBody.find("tr:last").append("<td></td>");
-                        // 生成行前操作区。判断是否有工作流。有的话生成'查看工作流'的按钮
-                        _wf.html.addTrButtons(rowIndex, opts);
-
-                        $tbBody.append("</tr>");
-                    },
-                    /**
-                     * 添加可编辑表格（crud-grid）的一个单元格. copy from addTr.
-                     * @param {jqObject} $tr            jQuery对象。行。新增的td就会加在这里面。
-                     * @param {GaeaColumn} column       服务端返回的列定义对象。
-                     * @param {object} field            服务端返回的字段定义。
-                     * @param {string} rowIndex         第几行。关系到行前复选框的name里面的序号，和行input的name里面的序号等
-                     * @param {string} columnIndex      第几列。
-                     * @param {object} rowData          行数据。
-                     * @param {object} opts             其他的配置
-                     * @param {string} opts.id          grid的容器id。对于crud-grid，是gaea-ui-crud-grid定义位置id。
-                     */
-                    addTd: function ($tr, column, field, rowIndex, columnIndex, rowData, opts) {
-
-                        var columnHtmId = "gridcolumn-" + (columnIndex + 1); // column的序列化从1开始吧
-                        // 生成CheckBox id
-                        var checkBoxId = opts.id + "-cbx-" + rowIndex;
-                        // 第一列，生成复选框。
-                        if (columnIndex == 0) {
-                            $tr.append("<td class='checkbox'>" +
-                                "<div class=\"row-check\">" +
-                                "<input type='checkbox' id='" + checkBoxId + "' class='dark'>" +
-                                    // Label里面的都是复选框的效果元素。
-                                "<label id='gaea-cb-label-" + columnIndex + "' for='" + checkBoxId + "'>" +       // label的for和checkbox的id绑定
-                                "</label>" +
-                                "</div>" +
-                                "</td>");
-                        }
-
-                        //var hasNotMatchedField = true;  // 有定义、没数据的字段。必须用空单元格填充。
-                        // create input 'name'
-                        var inputName = gaeaString.builder.simpleBuild("%s[%s].%s", opts.name, rowIndex, field.id);
-                        var value;
-
-                        // 初始单元格的容器
-                        var $td = $(gaeaString.builder.simpleBuild('<td class="grid-td" data-columnid="%s"><div class="grid-td-div"></div></td>', columnHtmId));
-                        $tr.append($td);
-
-                        // 获取当前要填充的值
-                        // 遍历数据（一行）中每一列的值，如果id和当前列id一致就是。
-                        $.each(rowData, function (key, val) {
-                            //var cellText = cell;
-                            //if (_.isObject(cell)) {
-                            //    if (gaeaValid.isNull(cell.text)) {
-                            //        console.warn("grid单元格是对象，但text却为空( text为系统默认的显示文本 )。 cell: %s", JSON.stringify(cell));
-                            //    }
-                            //    cellText = cell.text;
-                            //}
-                            // 如果数据中的key和field（grid数据结构定义）中的设置一致（即类似data.columnname = grid.columnname），则把值复制到表格中。
-                            if (gaeaString.equalsIgnoreCase(field.id, key)) {
-                                value = val;
-                            }
-                        });
-                        // 有定义列、没数据的（连数据项也没有，不是指空数据），也需要有个空列占位
-
-                        // 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
-                        _private.crudGrid.html.createTdContent($td, {
-                            id: opts.id,
-                            inputId: inputName,
-                            column: column,
-                            field: field,
-                            inputValue: value
-                        });
-
-                    },
-                    /**
-                     * 填充TD里面的内容。包括是否可编辑（创建input输入框）、是否初始化日期控件、是否引用了上下文的值等。
-                     * @param {jqObject} $td
-                     * @param {object} opts
-                     * @param {string} opts.id                  grid容器id
-                     * @param {string} opts.inputId             生成的input框的id和name（共用）
-                     * @param {string} opts.inputValue
-                     * @param {GaeaColumn} opts.column
-                     * @param {object} field                    服务端返回的字段定义。
-                     * @private
-                     */
-                    createTdContent: function ($td, opts) {
-                        var $cellCt = $td.children(".grid-td-div");
-                        var value = opts.inputValue;
-
-                        // 通过工具方法，获取真正的值。因为gaea的值还有可能是表达式等……
-                        value = gaeaData.utils.getRealValue(value, opts.column.value);
-
-                        /**
-                         * 初始化 数据集下拉框/输入框/...
-                         */
-                        if (gaeaValid.isNotNull(opts.column.dataSetId)) {
-                            //var gaeaSelect2 = require("gaeajs-ui-select2");
-                            require(["gaeajs-ui-select2"], function (gaeaSelect2) {
-
-                                gaeaSelect2.createAndInit({
-                                    jqSelector: $cellCt,
-                                    htmlId: opts.inputId,
-                                    htmlName: opts.inputId,
-                                    dataSetId: opts.column.dataSetId,
-                                    fieldId: opts.field.id,
-                                    // --------->>>> 下面是init方法需要配置项
-                                    // 这个是创建了<select>元素后，元素的选择器
-                                    selectJqSelector: "#" + gaeaString.format.getValidName(opts.inputId),
-                                    default: opts.column.default,
-                                    value: value
-                                });
-
-                                //$.when(
-                                //    gaeaSelect2.preInitHtmlAndData({
-                                //    jqSelector: $cellCt,
-                                //    htmlId: opts.inputId,
-                                //    htmlName: opts.inputId,
-                                //    dataSetId: opts.column.dataSetId,
-                                //    fieldId: opts.field.id
-                                //})
-                                //).done(
-                                //    gaeaSelect2.init({
-                                //        jqSelector: "#"+gaeaString.format.getValidName(opts.inputId),
-                                //        default: opts.column.default,
-                                //        value: value
-                                //    }));
-                            });
-                        } else {
-                            // create input box
-                            // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
-                            $cellCt.append(gaeaInput.create({
-                                id: opts.inputId,
-                                name: opts.inputId,
-                                class: "crud-grid-input",
-                                dataType: opts.column.dataType,
-                                value: value,
-                                editable: opts.column.editable,
-                                validator: opts.column.validator,// 校验定义
-                                onChange: function (event) {
-                                    // 刷新缓存的值
-                                    _private.crudGrid.data.refreshOneField({
-                                        id: opts.id,
-                                        target: this // 当前change的对象
-                                    });
-                                }
-                            }));
-                        }
-
-                        //var $tdInput = $("#" + gaeaString.format.getValidName(opts.inputId));
-
-                        // 如果不可编辑
-                        if (!opts.column.editable) {
-                            //    // create input box
-                            //    $cellCt.append(gaeaInput.create({
-                            //        id: opts.inputId,
-                            //        name: opts.inputId,
-                            //        class: "crud-grid-input",
-                            //        dataType: opts.column.dataType,
-                            //        value: opts.inputValue,
-                            //        validator: opts.column.validator,// 校验定义
-                            //        onChange: function (event) {
-                            //            // 刷新缓存的值
-                            //            _private.crudGrid.data.refreshOneField({
-                            //                id: opts.id,
-                            //                target: this // 当前change的对象
-                            //            });
-                            //        }
-                            //    }));
-                            //} else {
-                            $td.addClass("non-editable");
-                            //// 不可编辑
-                            //$tdInput.prop("readonly", true);
-                            //// init Html first
-                            //// 如果手动设定了值，以手动设定的值为准
-                            //// AI.TODO 这里设定值，越界了！应该放到gaeaInput里面去统一处理！
-                            //if (gaeaValid.isNotNull(opts.column.value)) {
-                            //    //$cellCt.append(gaeaContext.getValue(opts.column.value));
-                            //    $tdInput.val(gaeaContext.getValue(opts.column.value));
-                            //}
-                            /**
-                             * if 是图片的话，处理图片。
-                             * 初始化lightGallery图片查看插件放到整个table初始化完成后。
-                             */
-                            if (gaeaString.equalsIgnoreCase(opts.column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
-                                //$td.addClass("");
-
-                                $cellCt.find("img").each(function (i, element) {
-                                    var $img = $(this);
-                                    // 原图链接
-                                    var src = $img.attr("src");
-                                    var thumbnailSrc = src; // 缩略图src
-                                    // 加前缀
-                                    if (gaeaValid.isNotNull(opts.column.imgSrcPrefix)) {
-                                        src = opts.column.imgSrcPrefix + src;
-                                    }
-                                    // 加后缀
-                                    if (gaeaValid.isNotNull(opts.column.imgSrcSuffix)) {
-                                        src = src + opts.column.imgSrcSuffix;
-                                    }
-                                    // 缩略图, 叠加一般性后缀
-                                    if (gaeaValid.isNotNull(opts.column.imgThumbnailSuffix)) {
-                                        thumbnailSrc = src + opts.column.imgSrcSuffix;
-                                    }
-                                    // 修改src为缩略图
-                                    $img.attr("src", thumbnailSrc);
-                                    // 包上<a>标签, lightGallery控件需要
-                                    $img.wrap('<a href="' + src + '">');
-                                });
-                            }
-                        }
                     }
                 }
             },
@@ -2366,8 +2368,8 @@ define([
                 getQueryConditions: gridQuery.parser.getQueryConditions
             },
             crudGrid: {
-                addNewOne: _private.crudGrid.addNewOne,
-                deleteSelected: _private.crudGrid.deleteSelected
+                addNewOne: _crudGrid.addNewOne,
+                deleteSelected: _crudGrid.deleteSelected
                 //setValues: _private.crudGrid.setValues // 就没实现过！
             }
         };
