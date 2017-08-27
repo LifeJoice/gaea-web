@@ -38,6 +38,8 @@ public class SchemaColumn {
     private String imgSrcPrefix; // 图片列，自动为<img>标签的src加上的前缀
     private String imgSrcSuffix; // 图片列，自动为<img>标签的src加上的后缀
     private String imgThumbnailSuffix; // 缩略图后缀。图片列，自动为<img>标签的src加上的后缀作为缩略图。
+    /* 空的替换符. 即对于结果为null的，要替换成什么显示。 */
+    private String nullTo = null;
 
     // 构造方法
 
@@ -206,5 +208,13 @@ public class SchemaColumn {
 
     public void setImgThumbnailSuffix(String imgThumbnailSuffix) {
         this.imgThumbnailSuffix = imgThumbnailSuffix;
+    }
+
+    public String getNullTo() {
+        return nullTo;
+    }
+
+    public void setNullTo(String nullTo) {
+        this.nullTo = nullTo;
     }
 }

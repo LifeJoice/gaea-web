@@ -63,7 +63,7 @@
             <column id="name" name="name" label="名称" db-column-name="name"
                     visible="true" sortable="false" html-width="300" data-type="String"/>
             <column id="primaryTable" name="primaryTable" label="主数据表" db-column-name="PRIMARY_TABLE"
-                    visible="true" sortable="false" html-width="120" data-type="String"/>
+                    visible="true" sortable="false" null-to="无" html-width="120" data-type="String"/>
             <column id="authorityType" name="authorityType" label="权限校验方式" db-column-name="AUTHORITY_TYPE"
                     visible="true" sortable="false" html-width="120" data-type="string"
                     dataset-id="DS_DATASET_AUTHORITY_TYPE">

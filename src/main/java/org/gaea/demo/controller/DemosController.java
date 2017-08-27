@@ -146,11 +146,13 @@ public class DemosController {
         List stuHeadImgList = new ArrayList();
         Map stuHeadImg1 = new HashMap();
         stuHeadImg1.put("id", "1");
-        stuHeadImg1.put("imgUrl", "/gaea/demo/test_1.jpg");
+        stuHeadImg1.put("imgUrl", "<img src='/img/pictures/B_74/1000007457/887167010178_1497506095022.jpg'>" +
+                "<img src='/img/pictures/B_74/1000007457/1_n_n_1501482761321.jpg'>" +
+                "<img src='/img/pictures/B_74/1000007457/5-prdl_887167010178_(4)_n.jpg'>");
         stuHeadImgList.add(stuHeadImg1);
         Map stuHeadImg2 = new HashMap();
         stuHeadImg2.put("id", "2");
-        stuHeadImg2.put("imgUrl", "/gaea/demo/test_2.jpg");
+        stuHeadImg2.put("imgUrl", "<img src='/img/pictures/B_100000862/1000069489/prdl_15238181005_900_1_1501135385635.jpg'>");
         stuHeadImgList.add(stuHeadImg2);
         result.put("stuHeadImgList", stuHeadImgList);
         return GaeaJacksonUtils.parse(result);

@@ -79,6 +79,15 @@ public class DataSetConvertHelper {
                 if (isDsTranslate) {
                     newValue = getValueFromDS(newValue, column.getDataSetId());
                 }
+                // 空值的处理
+                // 默认把空改为''. 如果你非要看null，你也可以在null-to定义
+                if (newValue == null) {
+                    if (column.getNullTo() != null) {
+                        newValue = column.getNullTo();
+                    } else {
+                        newValue = "";
+                    }
+                }
                 oneResultMap.put(column.getName(), newValue);   // 按新名字放入原值
             }
             newResultMapList.add(oneResultMap);
@@ -212,8 +221,8 @@ public class DataSetConvertHelper {
      * 例如：
      * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
      *
-     * @param value        原始值。这个一般为string。
-     * @param dataSetId    数据集id。通过获取数据集的数据，返回匹配value的项。
+     * @param value     原始值。这个一般为string。
+     * @param dataSetId 数据集id。通过获取数据集的数据，返回匹配value的项。
      * @return
      */
     private static Object getValueFromDS(Object value, String dataSetId) {
