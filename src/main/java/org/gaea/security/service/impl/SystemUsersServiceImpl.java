@@ -53,7 +53,7 @@ public class SystemUsersServiceImpl implements SystemUsersService {
             throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
         }
         // 新增
-        user.setId("");
+        user.setId(null);
 //        User user = inUser;
         // 如果有注册加密器，则加密后存储；否则就是明文存储。
         if (passwordEncoder != null) {
@@ -68,7 +68,7 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         if (StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getPassword())) {
             throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
         }
-        if (StringUtils.isEmpty(inUser.getId())) {
+        if (inUser.getId() == null) {
             throw new ValidationFailedException("没有获得用户id，也许是未选择用户记录。");
         }
 
@@ -79,6 +79,19 @@ public class SystemUsersServiceImpl implements SystemUsersService {
             user.setPassword(passwordEncoder.encode(inUser.getPassword()));
         }
         systemUsersRepository.save(user);
+    }
+
+    @Override
+    public User loadEditData(User userEntity) throws ValidationFailedException {
+        if (userEntity == null || userEntity.getId() == null) {
+            throw new IllegalArgumentException("用户或用户id为空，无法加载编辑数据！");
+        }
+//        Map<String, Object> result = new HashMap<String, Object>();
+        User user = systemUsersRepository.findOne(userEntity.getId());
+        if (user == null) {
+            throw new ValidationFailedException("用户id不存在！无法编辑！");
+        }
+        return user;
     }
 
     @Override

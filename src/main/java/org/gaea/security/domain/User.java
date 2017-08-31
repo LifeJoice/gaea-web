@@ -1,5 +1,6 @@
 package org.gaea.security.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -17,13 +18,14 @@ public class User implements Serializable {
     @Id
     @GenericGenerator(name = "gaeaDateTimeLongIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeLongIDGenerator")
     @GeneratedValue(generator = "gaeaDateTimeLongIDGenerator")
-    private String id;
+    private Long id;
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "login_name", unique = true, nullable = false)
     private String loginName;
     @Column(name = "password")
     private String password;
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_USERS_ROLES", joinColumns = {
@@ -37,14 +39,14 @@ public class User implements Serializable {
     }
 
     public User(String id) {
-        this.id = id;
+        this.id = Long.parseLong(id);
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

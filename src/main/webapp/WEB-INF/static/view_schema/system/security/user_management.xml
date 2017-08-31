@@ -54,7 +54,8 @@
         <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
         <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/add" />
         <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
-                     content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/update"/>
+                     content-url="/gaea/security/user/showCreateUpdateForm" submit-url="/gaea/security/user/update"
+                     load-data-url="/gaea/security/user/load-edit-data"/>
         <!--<crud-dialog id="editAuthResDialog" html-id="editAuthResDialog" id-field="id" content-url="/gaea/security/user/showAuthResource" submit-url="/gaea/security/user/saveAuthResource" />-->
         <!--如果一个grid没有primary-key=true的字段，是无法和工作流结合的-->
         <!--display-undefined-column:如果dataset有的一个字段，但下面没有对应的column元素，是否以json传给页面。默认false-->

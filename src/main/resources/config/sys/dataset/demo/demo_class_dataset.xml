@@ -63,4 +63,10 @@
             <data-element value="2" text="侧面"/>
         </data>
     </dataset>
+    <!-- ********************************************** 导出学生信息 ********************************************** -->
+    <dataset id="DS_DEMO_EXCEL_IMPORT_STUDENT" primary-table="DEMO_RESOURCES" authority-type="0">
+        <data-sql>
+            <![CDATA[SELECT stu.* FROM demo_student stu where rownum<100]]>
+        </data-sql>
+    </dataset>
 </dataset-definition>

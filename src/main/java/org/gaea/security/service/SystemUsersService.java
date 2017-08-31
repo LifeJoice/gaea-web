@@ -30,4 +30,6 @@ public interface SystemUsersService {
     void delete(List<User> userList) throws ValidationFailedException;
 
     void update(User user) throws ValidationFailedException;
+
+    User loadEditData(User userEntity) throws ValidationFailedException;
 }

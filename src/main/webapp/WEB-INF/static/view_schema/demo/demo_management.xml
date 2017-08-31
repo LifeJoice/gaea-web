@@ -71,7 +71,7 @@
             <button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="wfDialog"/>
             <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected"/>
             <!--<button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />--><!-- 老的方式，不要了。重构采用action。 -->
-            <button id="btnImport" name="btnImport" html-value="测试导入"/>
+            <button id="btnImport" name="btnImport" html-value="导入Excel" link-view-id="importExcelDialog"/>
             <button id="btnUpload" name="btnUpload" html-value="测试上传文件" link-view-id="uploaderDialog"/>
             <button id="btnExcelExport2" name="btnExcelExport2" html-value="导出当前页面数据2" action="export-excel"
                     submit-type="formSubmit"/>
@@ -114,6 +114,14 @@
                         submit-url="/gaea/demo/submitAction" msg="提交到某个地方"/>
                 <button id="btnImport5" name="btnImport5" html-value="测试按钮组5" submit-url="/gaea/demo/test5"/>
                 <button id="btnDel2" name="btnDel2" html-value="删除2" action="deleteSelected"/>
+                <button id="btnGetExcelImportTemplate" name="btnGetExcelImportTemplate" html-value="获取导入模板"
+                        submit-type="formSubmit">
+                    <button-action method="excelExportByTemplate">
+                        <param name="excelTemplateId" value="DEMO_EXCEL_IMPORT_TEMPLATE"/>
+                        <param name="dataSetId" value="DS_DEMO_EXCEL_IMPORT_STUDENT"/>
+                        <param name="withData" value="false"/>
+                    </button-action>
+                </button>
             </button-group>
             <!--</button-list>-->
         </actions>
@@ -141,6 +149,9 @@
                      submit-url="/gaea/demo/add-class"/>
         <uploader-dialog id="uploaderDialog" html-id="uploaderDialog" content-url=""
                          submit-url="/gaea/demo/upload-to-somewhere"/>
+        <!-- 导入Excel -->
+        <uploader-dialog id="importExcelDialog" html-id="importExcelDialog" content-url=""
+                         submit-url="/gaea/demo/excel-import"/>
         <!-- 这是新页面。一般意味着跳转。 -->
         <view id="newView" title=""/>
 

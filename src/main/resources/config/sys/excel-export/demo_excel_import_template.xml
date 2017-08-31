@@ -1,0 +1,28 @@
+<!--Excel自定义模板的导出参考。-->
+<!--file-name为空，自动生成带日期的文件名。-->
+<excel-template id="DEMO_EXCEL_IMPORT_TEMPLATE" file-name="">
+    <block dataset-id="DS_DEMO_EXCEL_IMPORT_STUDENT">
+        <!--name相当于id，在Block范围内必须唯一！-->
+        <!--width
+        是为字符数。不是像素或其他。而且，这个和字体还有关系。不同字体会导致同样的width，实际效果却不一样。-->
+        <!--cellValueTransferBy
+        默认默认1 就是object.toString-->
+        <!--2 // 默认按数据集的value（Item.value）转换-->
+        <!--3 // 默认按数据集的text（Item.text）转换-->
+        <!--其中3需要配合dataset-id一起用。只有数据集有相关的映射关系，才能把值转换成另一个。-->
+        <field name="id" title="菜单ID" db-column-name="id"
+               width="10" data-type="string" title-comment="ID"/>
+        <field name="name" title="学生名称" db-column-name="name"
+               width="10" data-type="string" title-comment="学生名"/>
+        <field name="stuNo" title="学号" db-column-name="stu_No"
+               width="10" data-type="string"/>
+        <field name="entranceTime" title="入学时间" db-column-name="entrance_Time"
+               width="10" data-type="date"/>
+        <field name="birthday" title="出生日期" db-column-name="birthday"
+               width="10" data-type="date"/>
+        <field name="address" title="家庭住址" db-column-name="address"
+               width="10" data-type="string"/>
+        <field name="sex" title="性别" db-column-name="sex"
+               width="10" data-type="string" dataset-id="DEMO_STUDENT_SEX" cellValueTransferBy="ds_text"/>
+    </block>
+</excel-template>

@@ -279,6 +279,24 @@ public class DemosController {
         return "";
     }
 
+    @RequestMapping(value = "/excel-import")
+    @ResponseBody
+    public String excelImport(@RequestParam("file") MultipartFile[] files, String pageId, @RequestBean DemoClassEntity classEntity, HttpServletRequest request, HttpServletResponse response) throws IOException, ValidationFailedException {
+        // 可以对文件上传前做验证
+//        if (classEntity == null || StringUtils.isEmpty(classEntity.getClassName())) {
+//            throw new ValidationFailedException("班级名称不允许为空！");
+//        }
+        if (files != null) {
+            for (MultipartFile file : files) {
+                System.out.println(file.getName());
+                List<Map<String, String>> data = excelReader.getData(file.getInputStream());
+                List<DemoStudentEntity> studentEntityList = excelReader.getData(file.getInputStream(), DemoStudentEntity.class);
+                System.out.println("--------->>>> data size: " + data.size());
+            }
+        }
+        return "";
+    }
+
     /**
      * 对应"测试上传文件"按钮
      *

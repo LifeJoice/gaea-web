@@ -8,6 +8,6 @@ import java.util.List;
 /**
  * Created by iverson on 2016-8-3 14:14:19.
  */
-public interface SystemUsersRepository extends CrudRepository<User,String> {
+public interface SystemUsersRepository extends CrudRepository<User, Long> {
     List<User> findByLoginName(String loginName);
 }
