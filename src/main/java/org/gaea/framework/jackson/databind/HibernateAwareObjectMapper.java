@@ -9,7 +9,11 @@ package org.gaea.framework.jackson.databind;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+
+import java.math.BigDecimal;
 
 /**
  * Jackson JSON processor which handles Hibernate
@@ -32,6 +36,8 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
          */
 //        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         registerModule(getHibernate4Module());
+        // 解决Long以数值传到前端，JavaScript精度丢失问题
+        registerModule(getLongParseModule());
     }
 
     private Module getHibernate4Module() {
@@ -40,5 +46,20 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
         hibernateModule.enable(Hibernate4Module.Feature.SERIALIZE_IDENTIFIER_FOR_LAZY_NOT_LOADED_OBJECTS);
 //        hibernateModule.disable(Hibernate4Module.Feature.FORCE_LAZY_LOADING);
         return hibernateModule;
+    }
+
+    /**
+     * 创建一个处理Long的数值的处理模块。
+     * 解决Long以数值传到前端，JavaScript精度丢失问题
+     *
+     * @return
+     */
+    private Module getLongParseModule() {
+        // 普通ObjectMapper初始化
+        // 针对Long和BigDecimal的，转换为String。因为太长的大数，前端JavaScript会精度丢失
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(Long.class, ToStringSerializer.instance); // ToStringSerializer线程安全
+        simpleModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
+        return simpleModule;
     }
 }
