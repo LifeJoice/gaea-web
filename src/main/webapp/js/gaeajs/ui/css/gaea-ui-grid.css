@@ -42,6 +42,7 @@ AI.TODO 后面可以把所有grid的列头都利用这种方式自适应。之�
 .gaea-grid-body {
     margin-top: 3px;
     font-size: 13px;
+    height: 90%;
 }
 
 /* 表格 */

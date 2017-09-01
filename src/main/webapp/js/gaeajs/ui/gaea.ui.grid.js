@@ -1961,9 +1961,10 @@ define([
                         //}
                         //$gridDataBody.height(finalHeight);
                         // 初始化滚动条，利用第三方插件 malihu-custom-scrollbar-plugin
-                        //$gridDataBody.mCustomScrollbar({
-                        //    theme: "dark-3"
-                        //});
+                        $gridDataBody.mCustomScrollbar({
+                            axis: "y",
+                            theme: "dark-3"
+                        });
                     }
                 }
             },
