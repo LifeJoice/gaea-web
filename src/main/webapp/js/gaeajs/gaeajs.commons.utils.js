@@ -298,10 +298,22 @@ define([
                     /**
                      * it's array
                      */
-                    var $filterResult = $(opts.target).find("select").filter(jqIgnoreCaseFilter(opts.name));
+                    var $filterResult = $(opts.target).find("select").filter(jqIgnoreCaseFilter(opts.name)); // find by name
+                    var $cbxFilter = $(opts.target).find("[type='checkbox']").filter(jqIgnoreCaseFilter(opts.name));
+                    // 普通的值+是select、checkbox的，就直接填充
+                    // 否则递归
                     if (utils.array.isGenericValue(opts.data) && $filterResult.length > 0) {
                         // 目标对象是select，可以批量填充。不再需要遍历了。
                         $filterResult.val(opts.data);
+                    } else if (utils.array.isGenericValue(opts.data) && $cbxFilter.length > 0) {
+                        $cbxFilter.each(function () {
+                            var $this = $(this);
+                            $.each(opts.data, function (i, value) {
+                                if (gaeaString.equalsIgnoreCase(value, $this.val())) {
+                                    $this.prop("checked", true);
+                                }
+                            });
+                        });
                     } else {
                         // 目标不是select，或者数组里面的是对象等其他复杂数据
                         $.each(opts.data, function (i, iObj) {
@@ -340,8 +352,15 @@ define([
                     //    NAME: opts.name
                     //});
                     var $filterResult = $(opts.target).find("input,select,textarea").filter(jqIgnoreCaseFilter(opts.name));
+                    // radio的选择器
+                    var $radioFilter = $filterResult.filter("[type='radio']");
                     // 设定值
-                    $filterResult.val(opts.data);
+                    if ($radioFilter.length > 0) {
+                        $radioFilter.filter("[value='" + opts.data + "']").prop("checked", true);
+                    } else {
+                        // 普通输入框，直接用val方法设置
+                        $filterResult.val(opts.data);
+                    }
                 }
             },
             /**
