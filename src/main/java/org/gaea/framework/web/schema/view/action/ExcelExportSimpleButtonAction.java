@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.PageResult;
@@ -68,7 +68,7 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
             ActionParam<List<QueryCondition>> queryConditionsParam = actionParamMap.get("queryConditions");
             String schemaId = schemaIdParam.getValue();
             List<QueryCondition> queryConditionList = queryConditionsParam.getValue();
-            int limitQty = Integer.parseInt(SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_EXPORT_LIMIT));
+            int limitQty = Integer.parseInt(SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_EXPORT_LIMIT));
 
             // 通过通用查询接口，查询数据。默认查询数量，以配置文件为准。
             PageResult result = commonViewQueryService.query(schemaId, queryConditionList, new SchemaGridPage(1, limitQty), loginName); // 默认导出1000条
@@ -81,7 +81,7 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
              * 其实就是，除非withData=false，否则都会查询data
              */
 //                data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), null, excelTemplateParam.getValue()); // 默认导出1000条
-            File file = excelExport.export(data, "", fieldsDefineMap, "", SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
+            File file = excelExport.export(data, "", fieldsDefineMap, "", SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
             return file;
         } catch (SysLogicalException e) {
             logger.debug(e.getMessage(), e);

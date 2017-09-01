@@ -4,7 +4,7 @@ import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.dialect.Oracle10gDialect;
 import org.gaea.db.dialect.SQLServer2008Dialect;
 import org.gaea.exception.InvalidDataException;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class GaeaDataBase {
      * @throws InvalidDataException
      */
     public String getPageSql(final String sql, String primaryTable, int startPos, int pageSize) throws InvalidDataException {
-        String dataBaseName = SystemProperties.get(CommonDefinition.PROP_KEY_SYSTEM_DATABASE);
+        String dataBaseName = SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_DATABASE);
         if (DATABASE_NAME_ORACLE.equalsIgnoreCase(dataBaseName)) {
             return oracle10gDialect.getPageSql(sql, primaryTable, startPos, pageSize);
         } else if (DATABASE_NAME_MYSQL.equalsIgnoreCase(dataBaseName)) {

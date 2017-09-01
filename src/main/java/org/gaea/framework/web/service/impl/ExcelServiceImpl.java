@@ -2,7 +2,7 @@ package org.gaea.framework.web.service.impl;
 
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.*;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.service.SchemaDataService;
@@ -56,7 +56,7 @@ public class ExcelServiceImpl implements ExcelService {
             logger.trace("传入data为空，无法执行导出！");
             return;
         }
-        File file = excelExport.export(data, "", fieldDefMap, "", SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
+        File file = excelExport.export(data, "", fieldDefMap, "", SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
         GaeaWebUtils.writeFileToResponse(file, response);
     }
 }

@@ -11,7 +11,7 @@ import org.gaea.data.dataset.service.GaeaDataSetService;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.*;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.domain.DsConditionSetEntity;
@@ -122,8 +122,8 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
                          *      如果 dataSet != null
                          *          用XML 转换的 dataset 覆盖数据库的。
                          */
-                        String initBase = SystemProperties.get(CommonDefinition.PROP_KEY_SYSTEM_DATASET_INIT_BASE);
-                        if (CommonDefinition.PROP_VALUE_INIT_BASE_XML.equalsIgnoreCase(initBase)) {
+                        String initBase = SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_DATASET_INIT_BASE);
+                        if (WebCommonDefinition.PROP_VALUE_INIT_BASE_XML.equalsIgnoreCase(initBase)) {
                             logger.info("系统配置数据库存在同名的数据集, name={}, 尝试用XML的数据集覆盖.", gaeaDataSet.getId());
                             // 同步新的（gaeaDataSet）数据集到数据库并覆盖老的（dataSetEntity）
                             syncDataSetToDb(gaeaDataSet, dataSetEntity);

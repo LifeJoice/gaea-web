@@ -4,11 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
-import org.gaea.framework.web.common.CommonDefinition;
-import org.gaea.security.domain.Authority;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.security.domain.Menu;
-import org.gaea.security.domain.Resource;
-import org.gaea.security.domain.Role;
 import org.gaea.security.dto.MenuDTO;
 import org.gaea.security.service.SystemMenusService;
 import org.gaea.util.GaeaJacksonUtils;
@@ -78,7 +75,7 @@ public class SystemMenusController {
     // 加载编辑数据
     @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String loadDsAuthEditData(@RequestBean(CommonDefinition.PARAM_NAME_SELECTED_ROW) Menu menu) throws ProcessFailedException, IOException {
+    public String loadDsAuthEditData(@RequestBean(WebCommonDefinition.PARAM_NAME_SELECTED_ROW) Menu menu) throws ProcessFailedException, IOException {
         Map result = systemMenusService.loadEditData(menu.getId());
         if (result != null) {
             return GaeaJacksonUtils.parse(result);

@@ -1,8 +1,6 @@
 package org.gaea.demo.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.db.QueryCondition;
 import org.gaea.demo.dto.DemoClassDTO;
 import org.gaea.demo.entity.DemoClassEntity;
@@ -11,7 +9,7 @@ import org.gaea.demo.repository.DemoClassRepository;
 import org.gaea.demo.service.DemoClassService;
 import org.gaea.exception.*;
 import org.gaea.framework.web.bind.annotation.RequestBean;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
@@ -22,10 +20,8 @@ import org.gaea.poi.ExcelReader;
 import org.gaea.poi.domain.Field;
 import org.gaea.poi.export.ExcelExport;
 import org.gaea.poi.reader.ExcelImportProcessor;
-import org.gaea.security.domain.Resource;
 import org.gaea.security.service.SystemResourcesService;
 import org.gaea.util.BeanUtils;
-import org.gaea.util.GaeaDateTimeUtils;
 import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -497,7 +493,7 @@ public class DemosController {
             fieldsMap.put("level", field);
             // test end
 //            excelExport.export("EXCEL_EXPORT_DEMO",result.getContent()); // 利用模板导出
-            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR)); // 利用模板导出
+            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR)); // 利用模板导出
 //            excelExport.export(result.getContent(),"Iverson测试excel导出",fieldsMap,null); // 一般性导出(可以用于通用导出)
 //            return result;
         } catch (SysLogicalException e) {

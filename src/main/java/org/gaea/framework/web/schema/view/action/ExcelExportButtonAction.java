@@ -8,7 +8,7 @@ import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.GaeaWebSystem;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.Action;
@@ -91,7 +91,7 @@ public class ExcelExportButtonAction implements Action<File> {
                     throw new ProcessFailedException("数据为空，无法执行导出操作。");
                 }
             }
-            file = excelExport.export(excelTemplateParam.getValue(), data, SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
+            file = excelExport.export(excelTemplateParam.getValue(), data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
         } catch (SysLogicalException e) {
             logger.debug(e.getMessage(), e);
             throw new ValidationFailedException("系统逻辑错误！请联系管理员处理。");

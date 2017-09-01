@@ -5,9 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
-import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.*;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
@@ -72,7 +71,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
     public synchronized void init() throws IOException, SysInitException {
 
         // 读取配置的路径对应的文件。支持classpath:/com/**/*.xml这样的模糊匹配
-        Resource[] arrayR = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(SystemProperties.get(CommonDefinition.PROP_KEY_SYSTEM_XML_SCHEMA_INIT_PATH));
+        Resource[] arrayR = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_XML_SCHEMA_INIT_PATH));
         Map<String, GaeaXmlSchema> allGaeaXmlSchemaMap = new HashMap<String, GaeaXmlSchema>();
             /* 读取XML文件，把DataSet读取和转换处理。 */
         if (arrayR != null) {

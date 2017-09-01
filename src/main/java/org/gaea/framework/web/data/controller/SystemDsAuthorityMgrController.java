@@ -7,7 +7,7 @@ import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.data.authority.entity.DsAuthConditionEntity;
 import org.gaea.framework.web.data.authority.entity.DsAuthConditionSetEntity;
 import org.gaea.framework.web.data.authority.entity.DsAuthorityEntity;
@@ -68,7 +68,7 @@ public class SystemDsAuthorityMgrController {
         queryConditionDTO.getValues().add(value);
         queryConditionDTOList.add(queryConditionDTO);
 
-        request.setAttribute(CommonDefinition.PARAM_NAME_QUERY_CONDITIONSETS, queryConditionDTOList);
+        request.setAttribute(WebCommonDefinition.PARAM_NAME_QUERY_CONDITIONSETS, queryConditionDTOList);
         return "system/data/ds_authority_management.xml";
     }
 
@@ -87,7 +87,7 @@ public class SystemDsAuthorityMgrController {
     // 新增数据集权限
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void saveDsAuthority(@RequestBean(value = CommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
+    public void saveDsAuthority(@RequestBean(value = WebCommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
                                 @RequestBean DsAuthorityEntity dsAuthority, @RequestBean DsAuthConditionSetEntity dsAuthCondSet,
                                 @RequestBean List<String> dsAuthRoleIds,
                                 @RequestBean("authConditionList") List<DsAuthConditionEntity> dsAuthConditionList) throws ProcessFailedException, ValidationFailedException {
@@ -96,7 +96,7 @@ public class SystemDsAuthorityMgrController {
             throw new ValidationFailedException("获取不到页面操作的整个链条，无法新增数据集权限。");
         }
         Map<String, Object> parentView = (Map<String, Object>) viewChain.get(0);
-        Map<String, Object> selectedRowMap = (Map<String, Object>) parentView.get(CommonDefinition.PARAM_NAME_SELECTED_ROW);
+        Map<String, Object> selectedRowMap = (Map<String, Object>) parentView.get(WebCommonDefinition.PARAM_NAME_SELECTED_ROW);
         String dataSetId = String.valueOf(selectedRowMap.get("id"));
         if (StringUtils.isEmpty(dataSetId)) {
             throw new ValidationFailedException("获取不到对应的数据集信息，无法新增数据集权限。");
@@ -124,7 +124,7 @@ public class SystemDsAuthorityMgrController {
     // 更新数据集权限
     @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void updateDsAuthority(@RequestBean(value = CommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
+    public void updateDsAuthority(@RequestBean(value = WebCommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
                                   @RequestBean DsAuthorityEntity dsAuthority, @RequestBean DsAuthConditionSetEntity dsAuthCondSet,
                                   @RequestBean List<String> dsAuthRoleIds,
                                   @RequestBean("authConditionList") List<DsAuthConditionEntity> dsAuthConditionList) throws ProcessFailedException, ValidationFailedException {
@@ -133,7 +133,7 @@ public class SystemDsAuthorityMgrController {
             throw new ValidationFailedException("获取不到页面操作的整个链条，无法新增数据集权限。");
         }
         Map<String, Object> parentView = (Map<String, Object>) viewChain.get(0);
-        Map<String, Object> selectedRowMap = (Map<String, Object>) parentView.get(CommonDefinition.PARAM_NAME_SELECTED_ROW);
+        Map<String, Object> selectedRowMap = (Map<String, Object>) parentView.get(WebCommonDefinition.PARAM_NAME_SELECTED_ROW);
         String dataSetId = String.valueOf(selectedRowMap.get("id"));
         if (StringUtils.isEmpty(dataSetId)) {
             throw new ValidationFailedException("获取不到对应的数据集信息，无法新增数据集权限。");
@@ -168,7 +168,7 @@ public class SystemDsAuthorityMgrController {
     // 删除数据集权限
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void delete(@RequestBean(value = CommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
+    public void delete(@RequestBean(value = WebCommonDefinition.PARAM_NAME_VIEW_CHAIN, dataType = RequestBeanDataType.JSON) List viewChain,
                        @RequestBean("selectedRows") List<DsAuthorityEntity> dsAuthorityList) throws ProcessFailedException, ValidationFailedException {
         systemDsAuthorityMgrService.delete(dsAuthorityList);
     }
@@ -176,7 +176,7 @@ public class SystemDsAuthorityMgrController {
     // 加载数据，编辑数据集权限
     @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String loadDsAuthEditData(@RequestBean(CommonDefinition.PARAM_NAME_SELECTED_ROW) DsAuthorityEntity dsAuthority) throws ProcessFailedException, IOException {
+    public String loadDsAuthEditData(@RequestBean(WebCommonDefinition.PARAM_NAME_SELECTED_ROW) DsAuthorityEntity dsAuthority) throws ProcessFailedException, IOException {
         Map result = systemDsAuthorityMgrService.loadEditData(dsAuthority.getId());
         if (result != null) {
             return GaeaJacksonUtils.parse(result);

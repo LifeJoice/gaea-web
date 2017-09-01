@@ -2,7 +2,7 @@ package org.gaea.springframework.web.servlet.view;
 
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.GaeaException;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.schema.service.GaeaXmlViewService;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.util.GaeaExceptionUtils;
@@ -48,7 +48,7 @@ public class GaeaHtmlView extends AbstractUrlBasedView {
         String viewHtml = "";
         try {
             // 获取Controller传过来的额外条件，需要拼接到XML Schema的DataSet作为条件
-            List<DataSetCommonQueryConditionDTO> queryConditionDTOList = (List<DataSetCommonQueryConditionDTO>) request.getAttribute(CommonDefinition.PARAM_NAME_QUERY_CONDITIONSETS);
+            List<DataSetCommonQueryConditionDTO> queryConditionDTOList = (List<DataSetCommonQueryConditionDTO>) request.getAttribute(WebCommonDefinition.PARAM_NAME_QUERY_CONDITIONSETS);
 
             viewHtml = gaeaXmlViewService.getViewContent(getApplicationContext(), resourceFilePath, loginName, queryConditionDTOList);
         } catch (ClassCastException e) {

@@ -1,22 +1,15 @@
 package org.gaea.security.controller;
 
-import iverson.test.Person;
-import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.poi.ExcelReader;
-import org.gaea.poi.domain.Workbook;
 import org.gaea.poi.reader.ExcelImportProcessor;
 import org.gaea.security.domain.Resource;
 import org.gaea.security.service.SystemResourcesService;
-import org.gaea.util.GaeaDateTimeUtils;
-import org.gaea.util.GaeaJacksonUtils;
-import org.gaea.util.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -80,7 +71,7 @@ public class SystemResourcesController {
     // 加载编辑数据
     @RequestMapping(value = "/load-edit-data", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String loadDsAuthEditData(@RequestBean(CommonDefinition.PARAM_NAME_SELECTED_ROW) Resource resource) throws ProcessFailedException, IOException {
+    public String loadDsAuthEditData(@RequestBean(WebCommonDefinition.PARAM_NAME_SELECTED_ROW) Resource resource) throws ProcessFailedException, IOException {
         String result = systemResourcesService.loadEditData(resource.getId());
 //        if (result != null) {
 //            return GaeaJacksonUtils.parse(result);

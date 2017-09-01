@@ -10,14 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.*;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 
@@ -36,7 +34,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
 
     final Logger logger = LoggerFactory.getLogger(GenericExceptionResolver.class);
-    private final int ORDER_BEFORE_SPRING_DEFAULT_HANDLER = SystemProperties.getInteger(CommonDefinition.PROP_KEY_EXCEPTION_RESOLVER_ORDER);
+    private final int ORDER_BEFORE_SPRING_DEFAULT_HANDLER = SystemProperties.getInteger(WebCommonDefinition.PROP_KEY_EXCEPTION_RESOLVER_ORDER);
     /* 使用Jackson2框架的工具类。转换JSON输出。 */
     ObjectMapper mapper = new ObjectMapper();
 

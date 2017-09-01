@@ -4,7 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.Condition;
 import org.gaea.data.dataset.domain.ConditionSet;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.data.authority.entity.DsAuthConditionEntity;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 
@@ -32,7 +32,7 @@ public class DsAuthConditionSetJO implements Serializable {
         if (conditionSet == null || dataSetEntity == null || StringUtils.isEmpty(dataSetEntity.getName())) {
             throw new IllegalArgumentException("conditionSet为空，或dataset name（即）为空，是无法构建conditionSet entity的。");
         }
-        this.name = dataSetEntity.getName() + CommonDefinition.COMMON_DATASET_NAME_SEPARATOR + conditionSet.getId();
+        this.name = dataSetEntity.getName() + WebCommonDefinition.COMMON_DATASET_NAME_SEPARATOR + conditionSet.getId();
         this.appendSql = conditionSet.getAppendSql();
         List<Condition> conditionList = CollectionUtils.isEmpty(conditionSet.getConditions()) ? null : conditionSet.getConditions();
     }

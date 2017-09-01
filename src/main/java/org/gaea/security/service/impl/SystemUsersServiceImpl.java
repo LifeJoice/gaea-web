@@ -7,7 +7,7 @@ import org.gaea.cache.GaeaCacheOperator;
 import org.gaea.exception.DataIntegrityViolationException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
@@ -166,10 +166,10 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         if (user != null) {
             List<Role> roleList = user.getRoles();
             if (CollectionUtils.isNotEmpty(roleList)) {
-                String userRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
-                String roleRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_ROLES);
+                String userRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+                String roleRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_ROLES);
                 // 获取系统配置的默认超时时间。
-                String strTimeOut = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN_TIMEOUT);
+                String strTimeOut = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN_TIMEOUT);
                 // cache user
                 if (StringUtils.isNotEmpty(userRootKey)) {
                     /**
@@ -222,9 +222,9 @@ public class SystemUsersServiceImpl implements SystemUsersService {
 
     // 获取缓存用户登录信息的key
     public static String getUserCacheKey(String loginName) throws SystemConfigException {
-        String rootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+        String rootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
         if (StringUtils.isEmpty(rootKey)) {
-            throw new SystemConfigException("找不到配置的用户角色的缓存的根key。配置项：" + CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+            throw new SystemConfigException("找不到配置的用户角色的缓存的根key。配置项：" + WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
         }
         String realKey = MessageFormat.format("{0}{1}", rootKey, loginName);
         // 缓存的key应该都是大写的
@@ -232,9 +232,9 @@ public class SystemUsersServiceImpl implements SystemUsersService {
     }
 
     public String getUserRoleCacheKey(String loginName) throws SystemConfigException {
-        String roleRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_ROLES);
+        String roleRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_ROLES);
         if (StringUtils.isEmpty(roleRootKey)) {
-            throw new SystemConfigException("找不到配置的用户角色的缓存的根key。配置项：" + CommonDefinition.PROP_KEY_REDIS_USER_ROLES);
+            throw new SystemConfigException("找不到配置的用户角色的缓存的根key。配置项：" + WebCommonDefinition.PROP_KEY_REDIS_USER_ROLES);
         }
         String realKey = MessageFormat.format("{0}:{1}", roleRootKey, loginName);
         // 缓存的key应该都是大写的

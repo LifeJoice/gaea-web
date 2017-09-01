@@ -6,20 +6,18 @@ import org.gaea.exception.SysInitException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.GaeaWebSystem;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.security.jo.UserJO;
 import org.gaea.security.service.impl.SystemUsersServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  * 负责处理web应用的所有安全相关的最通用的功能。
@@ -57,10 +55,10 @@ public class GaeaWebSecuritySystem {
      * @throws ValidationFailedException
      */
     public static UserJO getLoginUser() throws SysInitException, SystemConfigException, ValidationFailedException {
-        String userRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+        String userRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
         String loginName = getUserName();
         if (StringUtils.isEmpty(userRootKey)) {
-            throw new SysInitException("系统未初始化'缓存用户登录的root key'。配置项：" + CommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
+            throw new SysInitException("系统未初始化'缓存用户登录的root key'。配置项：" + WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
         }
         if (StringUtils.isEmpty(loginName)) {
             throw new ValidationFailedException("获取不到当前用户的登录名，无法查询缓存的登录用户信息！");

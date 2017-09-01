@@ -9,7 +9,7 @@ import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
@@ -319,7 +319,7 @@ public class ModernAvenueProductDemosController {
             fieldsMap.put("level", field);
             // test end
 //            excelExport.export("EXCEL_EXPORT_DEMO",result.getContent()); // 利用模板导出
-            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(CommonDefinition.PROP_KEY_EXCEL_BASE_DIR)); // 利用模板导出
+            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR)); // 利用模板导出
 //            excelExport.export(result.getContent(),"Iverson测试excel导出",fieldsMap,null); // 一般性导出(可以用于通用导出)
 //            return result;
         } catch (SysLogicalException e) {

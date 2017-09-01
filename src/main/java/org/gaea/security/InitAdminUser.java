@@ -4,7 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.SysInitException;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,9 +56,9 @@ public class InitAdminUser {
     @Transactional
     public void initAdminUser() throws SysInitException {
         // 默认是否初始化admin账号、初始化admin的用户名、密码，都是从.properties文件中获取
-        String isInitStr = SystemProperties.get(CommonDefinition.PROP_KEY_USER_ADMIN_INIT);
-        String defaultAdminName = SystemProperties.get(CommonDefinition.PROP_KEY_USER_ADMIN_USERNAME);
-        String defaultAdminPassword = SystemProperties.get(CommonDefinition.PROP_KEY_USER_ADMIN_PASSWORD);
+        String isInitStr = SystemProperties.get(WebCommonDefinition.PROP_KEY_USER_ADMIN_INIT);
+        String defaultAdminName = SystemProperties.get(WebCommonDefinition.PROP_KEY_USER_ADMIN_USERNAME);
+        String defaultAdminPassword = SystemProperties.get(WebCommonDefinition.PROP_KEY_USER_ADMIN_PASSWORD);
 
         // 默认不初始化
         boolean isInit = BooleanUtils.toBooleanObject(isInitStr) == null ? false : Boolean.parseBoolean(isInitStr);

@@ -3,7 +3,7 @@ package org.gaea.event;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.SysInitException;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class GaeaEventPublisherImpl implements GaeaEventPublisher {
      */
     public void publishSimpleEvent(GaeaEvent event) throws SysInitException {
         // 获取系统配置，看是用什么事件框架
-        String eventFramework = SystemProperties.get(CommonDefinition.PROP_KEY_SYSTEM_EVENT_FRAMEWORK);
+        String eventFramework = SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_EVENT_FRAMEWORK);
         if (CommonEventDefinition.EVENT_FRAMEWORK_SPRING.equalsIgnoreCase(eventFramework)) {
             applicationContext.publishEvent(event);
         } else {

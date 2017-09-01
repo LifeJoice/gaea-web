@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.cache.CacheFactory;
 import org.gaea.cache.CacheOperator;
 import org.gaea.exception.SysInitException;
-import org.gaea.framework.web.common.CommonDefinition;
+import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.framework.web.config.SystemProperties;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class GaeaSchemaCache {
         if (StringUtils.isEmpty(id)) {
             throw new IllegalArgumentException("id为空，无法获取缓存的XML Schema！");
         }
-        String redisRootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_GAEA_SCHEMA_DEF);
+        String redisRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_GAEA_SCHEMA_DEF);
         CacheOperator cacheOperator = cacheFactory.getCacheOperator();
         GaeaXmlSchema gaeaXmlSchema = cacheOperator.getHashValue(redisRootKey, id, GaeaXmlSchema.class);
         if (gaeaXmlSchema == null) {
@@ -53,7 +53,7 @@ public class GaeaSchemaCache {
     public void cache(Map<String, GaeaXmlSchema> gaeaXmlSchemaMap) throws SysInitException {
         CacheOperator cacheOperator = cacheFactory.getCacheOperator();
         if (gaeaXmlSchemaMap != null && gaeaXmlSchemaMap.size() > 0) {
-            String rootKey = SystemProperties.get(CommonDefinition.PROP_KEY_REDIS_GAEA_SCHEMA_DEF);
+            String rootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_GAEA_SCHEMA_DEF);
             cacheOperator.put(rootKey, gaeaXmlSchemaMap, GaeaXmlSchema.class);
         }
     }
