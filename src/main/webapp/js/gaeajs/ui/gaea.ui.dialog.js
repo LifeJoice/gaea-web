@@ -14,7 +14,7 @@ define([
               gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
               gaeaUI, gaeaMultiSelect, gaeaCommon, gaeaComponents,
-              gaeaCommonUtils, gaeaContext, gaeaDataFilterDialog, gaeaGrid,
+              gaeaUtils, gaeaContext, gaeaDataFilterDialog, gaeaGrid,
               gaeaContent, gaeaUIChain) {
 
 
@@ -1123,7 +1123,7 @@ define([
                     gaeaAjax.ajax({
                         url: opts.loadDataUrl,
                         async: false, // 同步，否则后面加载内容还有数据集会乱的
-                        data: gaeaCommonUtils.data.flattenData(requestData), // 把数据拍扁。不然传的是对象，服务端无法解析。
+                        data: gaeaUtils.data.flattenData(requestData), // 把数据拍扁。不然传的是对象，服务端无法解析。
                         success: function (data) {
                             result = data;
                         },
@@ -1480,7 +1480,7 @@ define([
                             // 提交
                             gaeaAjax.post({
                                 url: options.submitUrl,
-                                data: gaeaCommonUtils.data.flattenData(requestData),
+                                data: gaeaUtils.data.flattenData(requestData),
                                 success: function (data) {
                                     gaeaNotify.message("保存成功。");
                                     // 刷新grid数据
@@ -1493,7 +1493,17 @@ define([
                                     dialog.close("#" + options.id);
                                 },
                                 fail: function (data) {
-                                    gaeaNotify.error("保存失败！");
+                                    //gaeaNotify.error("保存失败！");
+                                    var responseObj = JSON.parse(data.responseText);
+                                    // 处理请求返回结果, 包括成功和失败
+                                    gaeaUtils.processResponse(responseObj, {
+                                        fail: {
+                                            baseMsg: "处理失败！"
+                                        },
+                                        success: {
+                                            baseMsg: "操作已经成功！"
+                                        }
+                                    });
                                 }
                             });
                             //// 刷新数据，其实这里应该优化一下，不该不关三七二十一就刷新
@@ -2189,16 +2199,16 @@ define([
          * @param {function} opts.close
          */
         _private.createDialog = function (opts) {
+            var $dialog = $("#" + opts.id);
+            // 克隆一下，否则由于指针的关系会不确定。
+            var newOpts = _.defaults(_.clone(opts), _options);
+            // cache options
+            $dialog.data("gaea-options", newOpts);
             // 初始化Dialog
             // openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
             if (gaeaValid.isNotNull(opts.openStyle) && !gaeaString.equalsIgnoreCase(opts.openStyle, "new")) {
                 return;
             }
-            //var that = this;
-            //var dialogDivSelector = "#" + _options.id;
-            var $dialog = $("#" + opts.id);
-            // 克隆一下，否则由于指针的关系会不确定。
-            var newOpts = _.defaults(_.clone(opts), _options);
             //var newOpts = $dialog.data("gaea-options");
 
             // 定义close事件
@@ -2213,8 +2223,6 @@ define([
             };
             //初始化弹出框
             var jqDialog = $dialog.gaeaDialog(newOpts);
-            // cache options
-            $dialog.data("gaea-options", newOpts);
             //var dialog = $dialog.gaeaDialog({
             //    autoOpen: _options.autoOpen,
             //    resizable: _options.resizable,
