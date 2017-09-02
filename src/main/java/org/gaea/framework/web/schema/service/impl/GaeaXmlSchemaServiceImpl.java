@@ -7,7 +7,7 @@ import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.*;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;

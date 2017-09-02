@@ -7,7 +7,7 @@ import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.security.jo.UserJO;
 import org.gaea.security.service.impl.SystemUsersServiceImpl;
 import org.slf4j.Logger;

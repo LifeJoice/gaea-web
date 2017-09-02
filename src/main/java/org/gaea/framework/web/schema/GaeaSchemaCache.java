@@ -5,7 +5,7 @@ import org.gaea.cache.CacheFactory;
 import org.gaea.cache.CacheOperator;
 import org.gaea.exception.SysInitException;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,7 +3,7 @@ package org.gaea.framework.web.service.impl;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.*;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.service.CommonViewQueryService;

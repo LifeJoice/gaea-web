@@ -8,7 +8,7 @@ import org.gaea.exception.DataIntegrityViolationException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
 import org.gaea.security.jo.UserJO;

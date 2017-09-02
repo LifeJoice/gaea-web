@@ -5,7 +5,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.SysInitException;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
 import org.gaea.security.repository.SystemRolesRepository;

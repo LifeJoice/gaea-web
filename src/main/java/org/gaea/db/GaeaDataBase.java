@@ -1,11 +1,11 @@
 package org.gaea.db;
 
+import org.gaea.config.SystemProperties;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.dialect.Oracle10gDialect;
 import org.gaea.db.dialect.SQLServer2008Dialect;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

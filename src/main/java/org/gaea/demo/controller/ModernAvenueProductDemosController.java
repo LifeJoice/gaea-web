@@ -10,7 +10,7 @@ import org.gaea.exception.SysLogicalException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;

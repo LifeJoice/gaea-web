@@ -1,11 +1,12 @@
 package org.gaea.framework.web.schema.view.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.gaea.config.SystemProperties;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.framework.web.config.SystemProperties;
+import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
