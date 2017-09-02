@@ -1,5 +1,6 @@
 package org.gaea.security.extend;
 
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.security.service.SystemUsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,7 +33,11 @@ public class GaeaUserDetailsService implements UserDetailsService {
         auths = systemUsersService.findUserAuthorities(username);
         String password = null;
         //取得用户的密码
-        password = systemUsersService.findPasswordByLoginName(username);
+        try {
+            password = systemUsersService.findPasswordByLoginName(username);
+        } catch (ValidationFailedException e) {
+            throw new UsernameNotFoundException(e.getMessage(), e);
+        }
         return new User(username, password, true, true, true, true, auths);
     }
 }

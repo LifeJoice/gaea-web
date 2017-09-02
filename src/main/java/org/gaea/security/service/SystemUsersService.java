@@ -17,7 +17,7 @@ public interface SystemUsersService {
 
     public Collection<GrantedAuthority> findUserAuthorities(String loginName);
 
-    public String findPasswordByLoginName(String loginName);
+    public String findPasswordByLoginName(String loginName) throws ValidationFailedException;
 
     public User findByLoginName(String username);
 

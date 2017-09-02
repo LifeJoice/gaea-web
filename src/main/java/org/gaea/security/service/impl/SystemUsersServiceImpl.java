@@ -18,6 +18,7 @@ import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.GrantedAuthority;
@@ -122,12 +123,16 @@ public class SystemUsersServiceImpl implements SystemUsersService {
     }
 
     @Override
-    public String findPasswordByLoginName(String loginName) {
+    public String findPasswordByLoginName(String loginName) throws ValidationFailedException {
         String sql = "SELECT PASSWORD FROM GAEA_SYS_USERS WHERE LOGIN_NAME=:LOGIN_NAME";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("LOGIN_NAME", loginName);
-        String password = namedParameterJdbcTemplate.queryForObject(sql, params, String.class);
-        return password;
+        try {
+            String password = namedParameterJdbcTemplate.queryForObject(sql, params, String.class);
+            return password;
+        } catch (IncorrectResultSizeDataAccessException e) {
+            throw new ValidationFailedException("对应的账号不止一个！loginName: " + loginName, e);
+        }
     }
 
     @Override
