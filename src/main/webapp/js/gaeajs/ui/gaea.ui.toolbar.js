@@ -634,12 +634,18 @@ define([
                                 url: submitUrl,
                                 data: newRow,
                                 success: function (data) {
-                                    gaeaNotify.message(msg + "操作成功。");
+                                    // 处理请求返回结果, 包括成功和失败
+                                    gaeaUtils.processResponse(JSON.parse(data.responseText), {
+                                        success: {
+                                            baseMsg: "操作成功！"
+                                        }
+                                    });
                                     // 刷新grid数据
                                     $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
                                 },
                                 fail: function (data) {
-                                    gaeaNotify.error(msg + "操作失败！");
+                                    // 处理请求返回结果, 包括成功和失败
+                                    gaeaUtils.processResponse(JSON.parse(data.responseText));
                                 }
                             });
                         });
