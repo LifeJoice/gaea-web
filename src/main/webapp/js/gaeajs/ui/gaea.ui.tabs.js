@@ -186,7 +186,9 @@ define([
              * @param loadDataUrl
              */
             bindReloadDataEvent: function (bindId, loadDataUrl) {
-
+                var $dialog = _utils.findMyDialog({
+                    target: "#" + bindId
+                });
                 var $reloadTarget = $("#" + bindId);
                 var fillDataDivId = bindId;
                 // 事件绑在了tab标签上，需要找对应的标签内容容器id
@@ -194,8 +196,24 @@ define([
                     fillDataDivId = $reloadTarget.attr("aria-controls"); // aria-controls这个是jQuery的组件特性，指向某个tab包含的内容的div id
                 }
 
+                // 注册reload_data事件
                 gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.RELOAD_DATA, "#" + bindId, function (event, data) {
-                    var requestData = {};
+                    /**
+                     * reload_data带上的数据：
+                     <p>
+                     tabs在reload_data的时候，把表单数据带上。
+                     这对于图片上传完，再改，再上传……反反复复之后的数据一致性，才可以控制。
+                     补充：
+                     还需要表单当前的数据。
+                     因为当编辑的时候，例如像图片，reload_data一次后，如果删除了，又添加了图片，这个时候，第二次reload_data会不知道之前删除动作。
+                     </p>
+                     */
+                    var requestData = $dialog.find("form:first").serializeObject(); // 获取dialog下的第一个form的数据
+                    var gaeaView = require("gaeajs-ui-view");
+                    // 获取链式操作，前面节点的数据。可能服务端功能需要（一般都需要）。
+                    var viewChainData = gaeaView.getViewData($("#gaeaViewId").val());
+                    requestData["viewChain"] = JSON.stringify(viewChainData); // 必须json化。因为数据是笼统的，没有严格的对象mapping
+                    requestData["pageId"] = $dialog.data("gaeaOptions").pageId;
 
                     // 数据加载要求同步
                     gaeaAjax.ajax({
@@ -229,7 +247,8 @@ define([
                     console.debug("从gaea tabs找不到父级的gaea dialog，无法填充数据！");
                 }
                 // 向上寻找包含这个tab的dialog
-                var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
+                //var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
+                var $dialog = _utils.findMyDialog(opts);
                 // dialog的gaea options定义，里面有缓存数据
                 var dialogOpts = $dialog.data("gaeaOptions");
                 // 是否有editData，这个一般是crud dialog才会缓存的
@@ -279,6 +298,20 @@ define([
                         });
                     }
                 });
+            }
+        };
+
+        var _utils = {
+            /**
+             * 从target往上找，找到我所属的dialog
+             * @param {object} opts
+             * @param {object} opts.target              要填充数据的区域选择器
+             * @returns {*|jQuery}
+             */
+            findMyDialog: function (opts) {
+                // 向上寻找包含这个tab的dialog
+                var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
+                return $dialog;
             }
         };
         /**
