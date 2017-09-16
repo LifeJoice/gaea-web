@@ -106,6 +106,9 @@ define(["jquery", "underscore", 'underscore-string'], function ($, _, _s) {
     _public.isNotNullMultiple = function (rootObj, objLevelArray) {
         var parent = this;
         var isNotNull = false;
+        if (_public.isNull(rootObj)) {
+            return false;
+        }
         // 检查当前对象属性中是否有该对象
         $.each(rootObj, function (key, val) {
             if (parent.isNotNull(objLevelArray[0])) {
