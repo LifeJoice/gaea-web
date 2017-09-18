@@ -88,7 +88,7 @@ define([
                     var parentChain = _private.pickEndWith(opts.parentId);
                     var newKeyTemplate = _.template(TEMPLATE.CHAIN.NAME);
                     if (_.isNull(parentChain)) {
-                        throw "通过parent id，找不到要加入的已存在的弹框链。id: " + opts.parentId;
+                        throw "通过parent id，找不到要加入的已存在的弹框链。parent id: " + opts.parentId;
                     }
                     // 命名当前弹框的操作链名称
                     var newKey = newKeyTemplate({
