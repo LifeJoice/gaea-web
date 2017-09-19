@@ -183,12 +183,12 @@ define([
                  * @param origExp
                  */
                 convertEL: function (origExp) {
-                    origExp = origExp.replace("{gaea#and}", "&&");
-                    origExp = origExp.replace("{gaea#or}", "||");
-                    origExp = origExp.replace("{gaea#gt}", ">");
-                    origExp = origExp.replace("{gaea#lt}", "<");
-                    origExp = origExp.replace("{gaea#ge}", ">=");
-                    origExp = origExp.replace("{gaea#le}", "<=");
+                    origExp = _s.replaceAll(origExp, "{gaea#and}", "&&");
+                    origExp = _s.replaceAll(origExp, "{gaea#or}", "||");
+                    origExp = _s.replaceAll(origExp, "{gaea#gt}", ">");
+                    origExp = _s.replaceAll(origExp, "{gaea#lt}", "<");
+                    origExp = _s.replaceAll(origExp, "{gaea#ge}", ">=");
+                    origExp = _s.replaceAll(origExp, "{gaea#le}", "<=");
                     return origExp;
                 }
             }
