@@ -12,12 +12,12 @@ define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
         "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid',
-        "gaeajs-data", "gaeajs-ui-tabs"
+        "gaeajs-data", "gaeajs-ui-tabs", "gaeajs-ui-selectTree"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
               gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid,
-              gaeaData, gaeaTabs) {
+              gaeaData, gaeaTabs, gaeaSelectTree) {
 
         /**
          * 服务端的View对象的定义。
@@ -66,6 +66,10 @@ define([
                 _private.initGaeaTabs(ctSelector);
                 // 初始化crud grid
                 _private.crudGrid.init({
+                    target: ctSelector
+                });
+                // 初始化select tree
+                _private.selectTree.init({
                     target: ctSelector
                 });
 
@@ -435,6 +439,58 @@ define([
                             "size": "small"
                         }]
                 });
+            }
+        };
+
+        // 下拉树多选组件
+        _private.selectTree = {
+            /**
+             * 初始化gaea select tree（下拉树多选组件）.
+             * @param {object} opts
+             * @param {jqObject|jqSelector} opts.target
+             * @returns {*}
+             */
+            init: function (opts) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(opts.target)) {
+                    dfd.resolve();
+                    return dfd.promise();
+                }
+
+                // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
+                var attrName = "data-" + GAEA_UI_DEFINE.UI.SELECT_TREE_DEFINE;
+                // 找有gaeaUI select tree定义的元素( <div data-gaea-ui-select-tree=*** ...> )
+                var selectTreeTmpl = _.template("[<%= ATTR_NAME %>]");
+
+                // 遍历所有select tree组件
+                $(opts.target).find(selectTreeTmpl({
+                    ATTR_NAME: attrName
+                })).each(function (idx, obj) {
+                    var id = $(obj).attr("id"); // 例如：mars-hq-categoryName-ct
+                    gaeaValid.isNull({
+                        check: id,
+                        exception: "创建select tree组件的div id不允许为空！"
+                    });
+                    /**
+                     * debug
+                     * 检查是否有重复元素！
+                     * 这个很重要。否则会有一些莫名其妙的问题。
+                     */
+                    if (!gaeaUtils.dom.checkUnique(id)) {
+                        console.debug("创建select tree组件，元素根据id查找不唯一。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
+
+                    // 初始化
+                    var selectTreeOpts = {
+                        target: this
+                    };
+                    //require(["gaeajs-ui-selectTree"], function (gaeaSelectTree) {
+                    gaeaSelectTree.init(selectTreeOpts);
+                    //});
+                });
+                dfd.resolve();
+                return dfd.promise();
             }
         };
 

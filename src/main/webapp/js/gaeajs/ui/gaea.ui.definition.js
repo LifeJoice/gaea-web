@@ -47,6 +47,7 @@ define(function () {
             CRUD_GRID: "crud-grid",
             TABLE: "table",
             SELECT: "select",
+            SELECT_TREE: "select-tree", // component name
             //TABS: "tabs",
             BUTTON: {
                 DEFAULT: "button",
@@ -59,6 +60,7 @@ define(function () {
                 DATA_FILTER_DIALOG: "data_filter_dialog"
             }
         },
+        SELECT_TREE_DEFINE: "gaea-ui-select-tree", // 直接在html中的定义属性名
         DIALOG: {
             // todo 慢慢重构到component去
             TYPE: {
@@ -81,6 +83,11 @@ define(function () {
         },
         INPUT: {
             CLASS: "gaea-query-field"
+        },
+        QUERY: {
+            // 定义在具体的查询输入元素（select、input、textarea……）上。
+            // 解决上面的gaea-query-field下有多个输入项（针对select-tree组件这种多输入元素的），区分不出哪个是要取值提交给服务端查询
+            INPUT_FIELD_CLASS: "query-input-field"
         },
         BUTTON_GROUP: {
             TEMPLATE: {

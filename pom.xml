@@ -6,7 +6,7 @@
 
     <groupId>org.gaea</groupId>
     <artifactId>gaea-web</artifactId>
-    <version>0.5.1.0-SNAPSHOT</version>
+    <version>0.5.2.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.gaea</groupId>
             <artifactId>gaea-common-db</artifactId>
-            <version>${gaea.common.version}</version>
+            <version>0.5.2.0-SNAPSHOT</version>
         </dependency>
         <!--Gaea框架的POI包。负责导入导出。-->
         <dependency>

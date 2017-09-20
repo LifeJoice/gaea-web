@@ -8,11 +8,11 @@
 define([
         "jquery", "underscore", "underscore-string", "gaeajs-common-utils-validate", "gaeajs-common-utils-string",
         "gaeajs-ui-events", "gaeajs-common-utils", "gaea-system-url", "gaeajs-common-utils-ajax", "gaeajs-ui-notify",
-        "gaeajs-ui-definition", "gaeajs-ui-input", "gaeajs-ui-plugins"
+        "gaeajs-ui-definition", "gaeajs-ui-input", "gaeajs-ui-plugins", "gaeajs-ui-commons"
     ],
     function ($, _, _s, gaeaValid, gaeaString,
               gaeaEvents, gaeaUtils, SYS_URL, gaeaAjax, gaeaNotify,
-              GAEA_UI_DEFINE, gaeaInput, gaeaPlugins) {
+              GAEA_UI_DEFINE, gaeaInput, gaeaPlugins, gaeaUI) {
         /**
          * @type {object} QueryCondition
          * @property {string} QueryCondition.propName       属性名
@@ -142,32 +142,8 @@ define([
                     query.event.bindEvents(opts);
                 }
 
-                //query.view.event.bindSubmitQuery(opts);
-                ////$gridCt.find("#headqueryOK").click(function () {
-                ////    // 收起查询区
-                ////    query.view.hide(opts);
-                ////    //_query.hide(opts);
-                ////    var queryConditions = query.parser.getQueryConditions(opts);
-                ////    //var queryConditions = gridQuery.parser.getQueryConditions(opts);
-                ////    query.doQuery({
-                ////        id: opts.id,
-                ////        queryConditions: queryConditions
-                ////    });
-                ////    //gridQuery.doQuery({
-                ////    //    id: opts.id,
-                ////    //    queryConditions: queryConditions
-                ////    //});
-                ////});
-                //// 【3】 点击列头，展示查询区。但忽略“选择全部”按钮区。
-                //query.event.bindShowSimpleQuery(opts);
-                //// 设定查询区的比较符按钮点击操作，和相关的触发事件。
-                //query.event.setQueryCompareButtonTrigger(opts);
-                ////_query.view.event.setQueryCompareButtonTrigger(opts);
-                //query.event.bindQueryCompareButtonEvent(opts);
-                ////_query.view.event.bindQueryCompareButtonEvent(opts);
-                //// 【4】 初始化快捷查询区的gaea UI组件（例如：select2等）
-                //query.view.initGaeaUI(opts);
-                ////_query.view.initGaeaUI(opts);
+                // 初始化快捷查询区的gaea UI组件（例如：select2等）
+                query.view.initGaeaUI(opts);
             },
             /**
              * 把快速查询区的所有查询条件清空！
@@ -269,6 +245,9 @@ define([
                                 initDataSet: true,
                                 multiple: column.queryCondition.multiple
                             });
+                        } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT_TREE, column.queryCondition.component)) {
+                            // 初始化各种组件（其中就包括select tree）
+                            gaeaUI.initGaeaUI("#" + opts.id + " #" + columnHtmId);
                         }
                     }
                 }
@@ -307,7 +286,10 @@ define([
                 $gridCt.find("#mars-headquery-inputs").find("." + GAEA_UI_DEFINE.UI.INPUT.CLASS).each(function (index) {
                     var queryCondition = {};
                     var $gaeaInput = $(this);
-                    var $input = $gaeaInput.find("input,select").first();
+                    // TODO 以后改为直接获取所有.query-input-field的拼凑查询即可(下面的三元操作符就可以去掉)；不要再用.gaea-query-field，这个容器太大了。
+                    // 以.query-input-field优先（因为select-tree组件有多个输入项），没有再用原逻辑
+                    var $input = $gaeaInput.find("." + GAEA_UI_DEFINE.UI.QUERY.INPUT_FIELD_CLASS).length > 0 ?
+                        $gaeaInput.find("." + GAEA_UI_DEFINE.UI.QUERY.INPUT_FIELD_CLASS) : $gaeaInput.find("input,select").first();
                     var inputValue = query.parser.getValue($gaeaInput);
                     var inputVal = inputValue.value; // 值
                     /**
@@ -411,9 +393,9 @@ define([
                 //_query.view.event.setQueryCompareButtonTrigger(opts);
                 query.event.registerQueryOnCondChange(opts);
                 //_query.view.event.bindQueryCompareButtonEvent(opts);
-                // 【4】 初始化快捷查询区的gaea UI组件（例如：select2等）
-                query.view.initGaeaUI(opts);
-                //_query.view.initGaeaUI(opts);
+                //// 【4】 初始化快捷查询区的gaea UI组件（例如：select2等）
+                //query.view.initGaeaUI(opts);
+                ////_query.view.initGaeaUI(opts);
             },
             /**
              * 绑定点击头部，展示快捷查询区的事件。
@@ -519,8 +501,8 @@ define([
                     query.event.setQueryCompareButtonTrigger(opts);
                     // 暂未实现，选择了关系符就立刻查询过滤
                     //query.event.registerQueryOnCondChange(opts);
-                    // 初始化快捷查询区的gaea UI组件（例如：select2等）
-                    query.view.initGaeaUI(opts);
+                    //// 初始化快捷查询区的gaea UI组件（例如：select2等）
+                    //query.view.initGaeaUI(opts);
                 },
                 /**
                  * 点击快捷查询的"确定"，执行查询。

@@ -220,6 +220,12 @@ AI.TODO 后面可以把所有grid的列头都利用这种方式自适应。之�
     right: 0;
 }
 
+/* multi-select-tree组件 */
+.head-query-column.select-tree {
+    /* 下拉的选择框，需要超出可视 */
+    overflow: visible;
+}
+
 .head-query-column span {
     display: block;
     margin: 0 auto; /* 水平居中 */

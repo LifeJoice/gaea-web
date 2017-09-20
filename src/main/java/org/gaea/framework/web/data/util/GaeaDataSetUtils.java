@@ -59,7 +59,9 @@ public class GaeaDataSetUtils {
         }
 
         GaeaDataSet gaeaDataSet = new GaeaDataSet();
+        GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(origDataSetEntity.getName());
         Where where = new Where();
+        // dataFormat不覆盖。数据库没有这个定义！
         BeanUtils.copyProperties(origDataSetEntity, gaeaDataSet, "dsAuthorities");
         // 数据库的name才是缓存里的id。TODO 后面得重构。GaeaDataSet也有name。
         gaeaDataSet.setId(origDataSetEntity.getName());
@@ -91,6 +93,10 @@ public class GaeaDataSetUtils {
                 newDsAuthorities.add(dsAuthorityImpl);
             }
             gaeaDataSet.setDsAuthorities(newDsAuthorities);
+        }
+        // 复制dataFormat
+        if (cacheDataSet != null && cacheDataSet.getDataFormat() != null) {
+            gaeaDataSet.setDataFormat(cacheDataSet.getDataFormat());
         }
         return gaeaDataSet;
     }

@@ -1578,6 +1578,21 @@ define([
             },
             getFormId: function (dialogId) {
                 return dialogId + "-form";
+            },
+            /**
+             * 从target往上找，找到我所属的dialog
+             * @param {jqSelector} target              要填充数据的区域选择器
+             * @returns {*|jQuery}
+             */
+            findRootDialog: function (target) {
+                var $target = $(target);
+                // 检查本身是不是就是root dialog
+                var $dialog = $target.filter("[data-gaea-ui-dialog]").first(); // 用filter可以查询包括本身
+                // 向上寻找包含这个tab的dialog
+                if ($dialog.length < 1) {
+                    $dialog = $(target).parents("[data-gaea-ui-dialog]").first();
+                }
+                return $dialog;
             }
         };
 
@@ -2278,6 +2293,9 @@ define([
             preInitHtml: dialog.preInitHtml,
             commonDialog: {
                 confirm: commonDialog.confirm
+            },
+            utils: {
+                findRootDialog: dialog.utils.findRootDialog
             }
         };
     });

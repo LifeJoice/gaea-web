@@ -110,7 +110,10 @@
             <column id="sku" name="sku" label="SKU" db-column-name="SKU"
                     visible="true" sortable="false" html-width="120" data-type="string"/>
             <column id="categoryName" name="categoryName" label="品类名称" db-column-name="CATEGORYNAME"
-                    visible="true" sortable="false" html-width="80" data-type="string"/>
+                    visible="true" sortable="false" html-width="200" data-type="string"
+                    dataset-id="DS_DEMO_PRODUCT_CATEGORY">
+                <query-condition component="select-tree"/>
+            </column>
             <column id="brandName" name="brandName" label="品牌名称" db-column-name="BRANDNAME"
                     visible="true" sortable="false" html-width="120" data-type="string"/>
             <column id="initialPrice" name="initialPrice" label="原价" db-column-name="initialPrice"

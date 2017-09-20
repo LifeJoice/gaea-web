@@ -17,6 +17,7 @@ import org.gaea.framework.web.data.authority.DsAuthorityResult;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.service.SystemDataSetAuthorityService;
 import org.gaea.framework.web.data.service.SystemDataSetService;
+import org.gaea.framework.web.data.util.DataFormatHelper;
 import org.gaea.framework.web.data.util.DataSetConvertHelper;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
@@ -314,7 +315,11 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
         // convert/format data
         // 基于XML SCHEMA的结果集格式转换，如果有传过来XML SCHEMA ID的话
         if (columnDefineMap != null && CollectionUtils.isNotEmpty(newDataList)) {
+            // 转换结果的变量名
             newDataList = DataSetConvertHelper.changeDbColumnNameInData(newDataList, columnDefineMap, displayUndefinedColumn, isDsTranslate);
+        } else if (gaeaDataSet.getDataFormat() != null) {
+            // 转换成某种自定义的json的数据结构
+            newDataList = DataFormatHelper.dataFormat(newDataList, gaeaDataSet.getDataFormat());
         }
         return newDataList;
     }

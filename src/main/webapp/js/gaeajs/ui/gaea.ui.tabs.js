@@ -186,9 +186,8 @@ define([
              * @param loadDataUrl
              */
             bindReloadDataEvent: function (bindId, loadDataUrl) {
-                var $dialog = _utils.findMyDialog({
-                    target: "#" + bindId
-                });
+                var gaeaDialog = require("gaeajs-ui-dialog");
+                var $dialog = gaeaDialog.utils.findRootDialog("#" + bindId);
                 var $reloadTarget = $("#" + bindId);
                 var fillDataDivId = bindId;
                 // 事件绑在了tab标签上，需要找对应的标签内容容器id
@@ -243,12 +242,13 @@ define([
              * @param {object} opts.target              要填充数据的区域选择器
              */
             fillData: function (opts) {
+                var gaeaDialog = require("gaeajs-ui-dialog");
                 if ($(opts.target).parents("[data-gaea-ui-dialog]").length < 1) {
                     console.debug("从gaea tabs找不到父级的gaea dialog，无法填充数据！");
                 }
                 // 向上寻找包含这个tab的dialog
                 //var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
-                var $dialog = _utils.findMyDialog(opts);
+                var $dialog = gaeaDialog.utils.findRootDialog(opts.target);
                 // dialog的gaea options定义，里面有缓存数据
                 var dialogOpts = $dialog.data("gaeaOptions");
                 // 是否有editData，这个一般是crud dialog才会缓存的
@@ -301,19 +301,19 @@ define([
             }
         };
 
-        var _utils = {
-            /**
-             * 从target往上找，找到我所属的dialog
-             * @param {object} opts
-             * @param {object} opts.target              要填充数据的区域选择器
-             * @returns {*|jQuery}
-             */
-            findMyDialog: function (opts) {
-                // 向上寻找包含这个tab的dialog
-                var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
-                return $dialog;
-            }
-        };
+        //var _utils = {
+        //    /**
+        //     * 从target往上找，找到我所属的dialog
+        //     * @param {object} opts
+        //     * @param {object} opts.target              要填充数据的区域选择器
+        //     * @returns {*|jQuery}
+        //     */
+        //    findMyDialog: function (opts) {
+        //        // 向上寻找包含这个tab的dialog
+        //        var $dialog = $(opts.target).parents("[data-gaea-ui-dialog]").first();
+        //        return $dialog;
+        //    }
+        //};
         /**
          * 返回接口定义。
          */

@@ -78,10 +78,12 @@ define([
                 }
                 var $button = $("#" + opts.id);
                 var strButtonDef = $button.data(GAEA_UI_DEFINE.UI.BUTTON.DEFINE);
-                var $parentContainer = $(opts.parentCtSelector);
+                // 获取最外层弹出框
+                var $rootDialog = gaeaDialog.utils.findRootDialog(opts.parentCtSelector);
+                //var $parentContainer = $(opts.parentCtSelector);
                 var parentDialogId;
-                if ($parentContainer.length > 0) {
-                    parentDialogId = $parentContainer.attr("id");
+                if ($rootDialog.length > 0) {
+                    parentDialogId = $rootDialog.attr("id");
                 }
                 /**
                  * 把HTML元素配置，转换成对象. 参考：

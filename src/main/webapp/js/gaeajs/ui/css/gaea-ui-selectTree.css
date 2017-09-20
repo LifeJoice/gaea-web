@@ -1,0 +1,224 @@
+/**********************************************************************************************************
+                                        Gaea下拉复选树组件
+ **********************************************************************************************************/
+.multi-select-tree {
+    /*border: solid 1px;*/
+    padding: 1px 0px 0px 0;
+    /* 确保不要超出父容器 */
+    position: relative;
+    /* 确保在grid的query中，图层要比grid高 */
+    z-index: 1;
+}
+
+/* 选择结果区 */
+.multi-select-tree .inputbox {
+    height: 26px;
+    display: flex;
+    /* 假装整个是个一体化的输入框 */
+    background-color: #fff;
+}
+
+/* 覆盖grid.query的(.head-query-column span)css定义 */
+.multi-select-tree .inputbox span {
+    width: max-content;
+    white-space: nowrap;
+}
+
+.multi-select-tree .inputbox .selected {
+    background-color: #fff;
+    /*height: 26px;*/
+    overflow: hidden;
+    display: flex;
+    /*padding-right: 35px;*/
+    /* 重写gird.query的css（不要居中） */
+    margin: inherit;
+    /* 控制选中项太多，不要超出了 */
+    /* 绝对定位。确保和选择结果叠在一起。选择结果浮在输入框上面。*/
+    position: absolute;
+    /* 最大宽度控制。留点给输入框，不然点不到啊 */
+    max-width: 90%;
+    z-index: 1;
+}
+
+/* 输入框 */
+.multi-select-tree .inputbox .tree-input {
+    /*margin-left: 1px;*/
+    /*width:20px;*/
+    /* 重写gird.query的css（不要居中） */
+    margin: inherit;
+    /* 绝对定位。确保和选择结果叠在一起。选择结果浮在输入框上面。*/
+    position: absolute;
+}
+
+/* 真的form值对应的select元素 */
+.multi-select-tree .inputbox .tree-input select {
+    display: none; /* 不显示. form提交有就好。 */
+}
+
+.multi-select-tree .tree-input input {
+    /*height:auto;*/
+}
+
+/* 选中的项 */
+.multi-select-tree .inputbox .choose-item {
+    border: solid 1px;
+    padding: 2px;
+    /*display: block;*/
+    display: flex;
+    float: left;
+    /*margin-left: 5px;*/
+    /* 重写gird.query的margin（不要居中） */
+    margin: 1px;
+    position: relative;
+}
+
+/* 针对快捷查询区的特定样式 */
+.mars-tb-head-query .multi-select-tree .inputbox .choose-item {
+    border-color: #0589bf;
+    color: #085777;
+}
+
+.multi-select-tree .item-close {
+    cursor: pointer;
+    padding-left: 5px;
+}
+
+/* 选中的项的文字*/
+.multi-select-tree .item-text {
+    line-height: 18px;
+    font-size: 14px;
+}
+
+.multi-select-tree .selectbox-ct {
+    overflow: hidden;
+    height: 0;
+    -webkit-transition: height 150ms ease-in;
+    -moz-transition: height 150ms ease-in;
+    -o-transition: height 150ms ease-in;
+    transition: height 150ms ease-in;
+}
+
+.selectbox-ct.show {
+    min-height: 300px;
+    /* TODO 暂时先这样，太多没有滚动条。后面有了滚动条就可以不要了。 */
+    height: auto;
+    /*width: 100%;*/
+    background-color: #fff;
+    /* 确保里面的各层级显示在一行 */
+    display: inline-flex;
+    padding: 5px;
+    border: 1px solid #eaeaea;
+    box-shadow: 2px 2px 6px -3px #000;
+}
+
+.parent-list {
+    height: 100%;
+    min-width: 150px;
+    /*float: left;*/
+}
+
+.parent-list > span, .children-list > span {
+    display: block;
+}
+
+.children-list {
+    height: 100%;
+    min-width: 150px;
+    /*float: left;*/
+    /*-webkit-transition: width 500ms ease-in;*/
+    /*-moz-transition: width 500ms ease-in;*/
+    /*-ms-transition: width 500ms ease-in;*/
+    /*-o-transition: width 500ms ease-in;*/
+    /*transition: width 500ms ease-in;*/
+}
+
+.children-list.hidden {
+    /*width:0;*/
+    display: none;
+
+    /*-webkit-transition: width 500ms ease-in;*/
+    /*-moz-transition: width 500ms ease-in;*/
+    /*-ms-transition: width 500ms ease-in;*/
+    /*-o-transition: width 500ms ease-in;*/
+    /*transition: all 500ms ease-in;*/
+}
+
+.children-list > span > i {
+    float: right;
+    line-height: 22px;
+}
+
+.children-list.hidden.show {
+    width: 150px;
+}
+
+.to-parent {
+    display: table;
+    float: left;
+    width: 30px;
+    height: 100%;
+}
+
+.to-parent:hover {
+    cursor: pointer;
+    background-color: aquamarine;
+}
+
+.to-parent .middle-ct {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.to-parent.hidden {
+    display: none;
+}
+
+/*.fa-check .hidden{*/
+/*display: none;*/
+
+/*}*/
+.multi-select-tree span.item {
+    width: 150px;
+    height: 22px;
+}
+
+.multi-select-tree span.item:hover {
+    background-color: cadetblue;
+    cursor: pointer;
+}
+
+.multi-select-tree span.item .fa-check {
+    display: none;
+    /*margin-right:16px;*/
+}
+
+/* 移动到item的时候，显示check选择按钮 */
+.multi-select-tree span.item:hover > .action .fa-check {
+    display: block;
+    /*margin-right:16px;*/
+}
+
+.multi-select-tree span.item .text {
+    font-size: 14px;
+    line-height: 22px;
+    width: 100px;
+    display: block;
+    overflow: hidden;
+    float: left;
+    /*超出则显示省略号……*/
+    text-overflow: ellipsis;
+    /*不换行*/
+    white-space: nowrap;
+}
+
+.multi-select-tree span.item .action {
+    float: right;
+    width: 40px;
+}
+
+.multi-select-tree span.action i {
+    float: right;
+    padding-right: 5px;
+    line-height: 20px;
+}

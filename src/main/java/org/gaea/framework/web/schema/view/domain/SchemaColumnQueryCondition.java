@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 public class SchemaColumnQueryCondition implements Serializable {
     // 组件名称。需要跟前端框架一一对应
-    private String component;
+    private String component; // select|select-tree
     // 是否可以多选。默认单选。
     private boolean isMultiple = false;
 

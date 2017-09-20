@@ -84,4 +84,59 @@
     <!--<data-element value="6" text="六年级"/>-->
     <!--</data>-->
     <!--</dataset>-->
+
+    <dataset id="DS_DEMO_PRODUCT_CATEGORY" cache-type="auto" authority-type="0">
+        <data-sql>
+            <![CDATA[
+            SELECT CT.ID,
+                   CT.NAME,
+                   CT.PARENTID,
+                   CT2.ID lv2Id,
+                   CT2.NAME lv2Name,
+                   CT2.PARENTID lv2ParentId
+              FROM PRODUCT_CATEGORY CT
+              LEFT JOIN PRODUCT_CATEGORY CT2
+                ON CT.ID = CT2.PARENTID
+            WHERE CT.PARENTID = 1
+            ORDER BY CT.ID
+    ]]>
+        </data-sql>
+        <!--定义查询出来的结果集的字段名转换-->
+        <!--<columns-define>-->
+        <!--<column name="value" db-column-name="ID" data-type="String"/>-->
+        <!--<column name="text" db-column-name="NAME" data-type="String"/>-->
+        <!--</columns-define>-->
+        <!-- 特定的数据格式化 -->
+        <data-format>
+            <node type="list">
+                <node name="id" from-name="ID" primary="true"/>
+                <node name="value" from-name="NAME"/>
+                <node name="text" from-name="NAME" primary="true"/>
+                <node name="items">
+                    <!--<condition-set>-->
+                    <!--<and propName="$id" op="eq" propValue="$lv2ParentId"></and>-->
+                    <!--</condition-set>-->
+                    <node name="id" from-name="lv2Id"/>
+                    <node name="value" from-name="lv2Name"/>
+                    <node name="text" from-name="lv2Name" primary="true"/>
+                </node>
+            </node>
+        </data-format>
+        <!--定义条件-->
+        <where>
+            <!-- 数据集权限编辑的“可选角色”和“已选角色”-->
+            <condition-set id="selectable" append-sql=" r.id not in (select r.id
+                      from gaea_sys_roles r
+                      left join gaea_sys_ds_authorities_roles dsAuthRole
+                        on dsauthrole.role_id = r.id
+                      left join gaea_sys_ds_authorities dsAuth
+                        on dsAuth.id = dsauthrole.ds_authority_id
+                      left join gaea_sys_dataset ds
+                        on ds.id = dsAuth.Dataset_Id
+                     WHERE :DS_EQ_COND :DS_AUTH_EQ_COND )">
+                <none propName="ds.name" op="eq" placeholder="DS_EQ_COND"></none>
+                <and propName="dsAuth.name" op="eq" placeholder="DS_AUTH_EQ_COND"></and>
+            </condition-set>
+        </where>
+    </dataset>
 </dataset-definition>

@@ -37,12 +37,12 @@ define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-ui-button', 'gaea-system-url', "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
         "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils", "gaeajs-data",
-        "gaeajs-ui-grid-query", "gaeajs-ui-commons",
+        "gaeajs-ui-grid-query", "gaeajs-ui-selectTree",
         "jquery-mCustomScrollbar", "jquery-lightGallery"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaButton, SYS_URL, gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
               GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils, gaeaData,
-              gridQuery, gaeaUI) {
+              gridQuery, gaeaSelectTree) {
 
         // 默认的opts参数值的统一定义
         var defaultOpts = {
@@ -187,6 +187,19 @@ define([
                                     dataSetId: column.dataSetId,
                                     fieldId: field.id
                                 });
+                            } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT_TREE, column.queryCondition.component)) {
+                                var selectTreeOpts = {
+                                    target: oneQueryInputCtSelector,
+                                    htmlId: inputId,
+                                    htmlName: inputId,
+                                    dataSetId: column.dataSetId,
+                                    fieldId: field.id,
+                                    multiple: column.queryCondition.multiple
+                                };
+                                //require(["gaeajs-ui-selectTree"], function (gaeaSelectTree) {
+                                //    gaeaSelectTree.initHtml(selectTreeOpts);
+                                gaeaSelectTree.preInit(selectTreeOpts);
+                                //});
                             }
                         } else {
                             /**
