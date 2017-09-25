@@ -61,6 +61,7 @@ define(function () {
             }
         },
         SELECT_TREE_DEFINE: "gaea-ui-select-tree", // 直接在html中的定义属性名
+        RADIO_DEFINE: "gaea-ui-radio", // 直接在html中的radio定义
         DIALOG: {
             // todo 慢慢重构到component去
             TYPE: {

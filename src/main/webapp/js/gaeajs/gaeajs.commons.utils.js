@@ -310,7 +310,7 @@ define([
                             var $this = $(this);
                             $.each(opts.data, function (i, value) {
                                 if (gaeaString.equalsIgnoreCase(value, $this.val())) {
-                                    $this.prop("checked", true);
+                                    $this.prop("checked", true).trigger("change");
                                 }
                             });
                         });
@@ -356,7 +356,7 @@ define([
                     var $radioFilter = $filterResult.filter("[type='radio']");
                     // 设定值
                     if ($radioFilter.length > 0) {
-                        $radioFilter.filter("[value='" + opts.data + "']").prop("checked", true);
+                        $radioFilter.filter("[value='" + opts.data + "']").prop("checked", true).trigger("change");
                     } else {
                         // 普通输入框，直接用val方法设置
                         $filterResult.val(opts.data);

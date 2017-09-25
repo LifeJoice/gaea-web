@@ -109,7 +109,8 @@
     /*width:160px;*/
 }
 
-.gaea-form .fieldvalue input, .gaea-form textarea, .gaea-form .fieldvalue select, .gaea-form label.error {
+/* 针对输入框，但不包括radio, checkbox */
+.gaea-form .fieldvalue input:not([type=radio]):not([type=checkbox]), .gaea-form textarea, .gaea-form .fieldvalue select, .gaea-form label.error {
     /*height:30px;*/
     width: 100%; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
     -webkit-box-sizing: border-box;
@@ -159,3 +160,23 @@ label.error {
 /*input.one-field, textarea.one-field {*/
 /*width: 100%;*/
 /*}*/
+
+/* ******************************************************************** 在表单中的radio的样式 ******************************************************************** */
+
+.gaea-form .gaea-ui-radio input {
+    /* 由于有了自定义的radio，html input radio就隐藏 */
+    display: none;
+}
+
+.gaea-form .gaea-ui-radio.fa-check-square-o,
+.gaea-form .gaea-ui-radio.fa-square-o {
+    /* 这个和.gaea-form .row .fieldname的高度一致即可。保证居中。 */
+    line-height: 30px;
+    /* 选中按钮的大小 */
+    font-size: 1.5em;
+}
+
+.gaea-form .gaea-ui-radio.fa-check-square-o {
+    /* 选中的颜色 */
+    color: green;
+}

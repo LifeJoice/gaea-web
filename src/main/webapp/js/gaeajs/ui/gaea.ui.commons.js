@@ -12,12 +12,12 @@ define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
         "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid',
-        "gaeajs-data", "gaeajs-ui-tabs", "gaeajs-ui-selectTree"
+        "gaeajs-data", "gaeajs-ui-tabs", "gaeajs-ui-selectTree", "gaeajs-ui-events"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
               gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid,
-              gaeaData, gaeaTabs, gaeaSelectTree) {
+              gaeaData, gaeaTabs, gaeaSelectTree, gaeaEvents) {
 
         /**
          * 服务端的View对象的定义。
@@ -72,6 +72,8 @@ define([
                 _private.selectTree.init({
                     target: ctSelector
                 });
+                // 初始化radio。系统默认的太丑了，而且还有样式问题
+                _private.radio.init(ctSelector);
 
                 return gaeaMultiSelect.init(ctSelector);
             },
@@ -491,6 +493,96 @@ define([
                 });
                 dfd.resolve();
                 return dfd.promise();
+            }
+        };
+
+        // radio单选样式初始化
+        _private.radio = {
+            /**
+             * 初始化gaea自己样子的radio。传统的radio有点丑。
+             * <p>
+             *     功能的区别不大。主要是gaea radio只支持“选中|不选”两种状态。
+             *     因为对于超过2两种，推荐用下拉列表做；对于checkbox的，推荐用下拉多选做。
+             * </p>
+             * @param ctSelector
+             */
+            init: function (ctSelector) {
+                var $container = $(ctSelector);
+                var componentName = "data-" + GAEA_UI_DEFINE.UI.RADIO_DEFINE;
+                $container.find("[" + componentName + "]").each(function (i, radioObj) {
+                    var $gaeaRadio = $(radioObj);
+                    var num = $gaeaRadio.children("input[type='radio']").length;
+                    var optsStr = $gaeaRadio.data(GAEA_UI_DEFINE.UI.RADIO_DEFINE); // = data-gaea-ui-radio
+                    var opts = gaeaString.parseJSON(optsStr);
+                    var defaultValue = gaeaValid.isNull(opts.default) ? undefined : opts.default.value;
+                    if (gaeaValid.isNull(opts.checked) || gaeaValid.isNull(opts.checked.value)) {
+                        throw "配置gaea-ui-radio组件，checked属性不允许为空！";
+                    }
+                    // 选中/不选择的html input radio
+                    var $checkedE = $gaeaRadio.find("[value='" + opts.checked.value + "']");
+                    var $notCheckedE = $gaeaRadio.find("input[value!='" + opts.checked.value + "']");
+                    // 只有两个项。那就是：是否启用之类的
+                    if (num != 2) {
+                        throw "所需的input(radio)数量不对！gaea-ui-radio有且只有两个input(radio)元素！";
+                    }
+                    // 默认值和选中值是同一个，则默认选中
+                    if (gaeaString.equalsIgnoreCase(opts.checked.value, defaultValue)) {
+                        $gaeaRadio.addClass("fa fa-check-square-o");
+                    } else {
+                        $gaeaRadio.addClass("fa fa-square-o");
+                    }
+                    // 点击，切换选中/没选中状态，和值
+                    _private.radio.bindClickEvent($gaeaRadio, $notCheckedE, $checkedE);
+                    // 注册form load data时，数据填充时的处理
+                    _private.radio.bindOnChange($gaeaRadio, opts.checked.value);
+                });
+            },
+            /**
+             * 点击切换状态，和里面input radio的状态。
+             * @param $gaeaRadio
+             * @param $notCheckedE
+             * @param $checkedE
+             */
+            bindClickEvent: function ($gaeaRadio, $notCheckedE, $checkedE) {
+                // 如果是不可编辑（例如查看），则不需要绑定click事件
+                if ($gaeaRadio.children("input[type='radio'][disabled='disabled']").length > 0) {
+                    return;
+                }
+                // 点击，切换选中/没选中状态，和值
+                gaeaEvents.registerListener("click", $gaeaRadio, function () {
+                    if ($gaeaRadio.hasClass("fa-check-square-o")) {
+                        // 选中 -> 不选中
+                        $notCheckedE.prop("checked", true); // 这里不能触发change啊！切记！
+                        $gaeaRadio.removeClass("fa-check-square-o").addClass("fa-square-o");
+                    } else {
+                        // 没选中 -> 选中
+                        $checkedE.prop("checked", true);
+                        $gaeaRadio.removeClass("fa-square-o").addClass("fa-check-square-o");
+                    }
+                });
+            },
+            bindOnChange: function ($gaeaRadio, checkedItemValue) {
+                // 注册form load data时，数据填充时的处理
+                gaeaEvents.registerListener("change", $gaeaRadio.find("input[type='radio']"), function () {
+                    // 这个只针对表单初始化的fillData, 不能用于gaea radio的click，否则会形成死循环：点了又触发改变、改变又触发点击。。。
+                    _private.radio._changeStyle($gaeaRadio, checkedItemValue, $(this).val());
+                });
+            },
+            /**
+             * 根据值切换选中/不选中状态
+             * @param $gaeaRadio
+             * @param checkedItemValue  选中的radio的初始值。
+             * @param val               实际的值。
+             * @private
+             */
+            _changeStyle: function ($gaeaRadio, checkedItemValue, val) {
+                if (gaeaString.equalsIgnoreCase(checkedItemValue, val)) {
+                    // 选中
+                    $gaeaRadio.removeClass("fa-square-o").addClass("fa-check-square-o");
+                } else {
+                    // 不选中
+                    $gaeaRadio.addClass("fa-square-o").removeClass("fa-check-square-o");
+                }
             }
         };
 
