@@ -29,6 +29,7 @@ define([
          * @param {object} opts.button schema的button定义。其中应该也包含了buttonAction，但还是单独吧。
          * @param {object} opts.buttonAction 某个button的某个action
          * @param {object} opts.data 要POST到后台的数据. 应该必须有schemaId。
+         * @param {object} opts.dialog  dialog定义。如果点击是打开dialog。
          */
         actions.init = function (opts) {
 
@@ -36,6 +37,7 @@ define([
             opts.id = buttonDef.htmlId;
             opts.action = buttonDef.action;
             var $button = $("#" + buttonDef.htmlId);
+            var dialogOpts = gaeaValid.isNull(opts.dialog) ? {} : opts.dialog;
 
             /**
              * 【1】通用校验框架
@@ -110,7 +112,7 @@ define([
                 //opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
                 //actions.crudDialog.update.do(opts);
 
-            } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD)) {
+            } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.ADD) || gaeaString.equalsIgnoreCase("crud-dialog", dialogOpts.componentName)) {
                 actions.crudDialog.bindAddTrigger(opts);
                 //// 定义grid id，方便获取selected row的数据（编辑）。
                 //opts.gridId = GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID;
@@ -120,6 +122,10 @@ define([
                 //    actions.deleteSelected.doRealDelete(opts);
                 //} else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.CRUD.PSEUDO_DELETE_SELECTED)) {// 和上面的DELETE_SELECTED基本一样，就是请求的接口不一样
                 //    actions.deleteSelected.doPseudoDelete(opts);
+            } else if (gaeaString.equalsIgnoreCase("crud-dialog", dialogOpts.componentName)) {
+                // TODO 现在只是暂时把crud-dialog未定义action的转到这个方法来。后面需要重构到一个更合适的入口。
+                // 先借用了update action的入口
+                actions.crudDialog.bindUpdateTrigger(opts);
             } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
                 actions.excel.bindExportTrigger(opts);
             }
@@ -496,6 +502,7 @@ define([
             },
             /**
              * 触发add这个行为。
+             * TODO add和update都一样，合成一个！另外，也整合crud-dialog的入口。
              * @param opts
              */
             add: {

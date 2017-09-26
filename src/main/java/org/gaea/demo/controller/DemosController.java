@@ -1,5 +1,6 @@
 package org.gaea.demo.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
 import org.gaea.demo.dto.DemoClassDTO;
@@ -172,17 +173,19 @@ public class DemosController {
     /**
      * 编辑班级的数据加载。
      *
-     * @param id
+     * @param classObj
      * @param request
      * @return
      */
     @RequestMapping(value = "/get-class", method = RequestMethod.POST)
     @ResponseBody
-    public DemoClassDTO loadClass(String id, HttpServletRequest request) {
-        DemoClassEntity classEntity = demoClassRepository.findOne(id);
+    public DemoClassDTO loadClass(@RequestBean("selectedRow") DemoClassEntity classObj, HttpServletRequest request) {
+        DemoClassEntity classEntity = demoClassRepository.findOne(classObj.getId());
         DemoClassDTO demoClassDTO = new DemoClassDTO();
         BeanUtils.copyProperties(classEntity, demoClassDTO, "students", "classRoles");
-        demoClassDTO.setClassRolesList(Arrays.asList(classEntity.getClassRoles().split(",")));
+        if (StringUtils.isNotEmpty(classEntity.getClassRoles())) {
+            demoClassDTO.setClassRolesList(Arrays.asList(classEntity.getClassRoles().split(",")));
+        }
         return demoClassDTO;
     }
 

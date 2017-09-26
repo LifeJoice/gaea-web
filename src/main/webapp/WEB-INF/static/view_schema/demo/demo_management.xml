@@ -66,6 +66,7 @@
             <button id="btnNewClass" name="btnNewClass" html-value="新增班级" link-view-id="classCrudDialog" action="add"/>
             <button id="btnEditClass" name="btnEditClass" html-value="编辑班级" link-view-id="classEditDialog"
                     action="update"/>
+            <button id="btnViewClass" name="btnViewClass" html-value="查看班级" link-view-id="classViewDialog"/>
             <button id="btnNewClassStu" name="btnNewClassStu" html-value="新增班级学生" link-view-id="classStuNewDialog"
                     action="add"/>
             <button id="btnApproved" name="btnApproved" html-value="审批" link-view-id="wfDialog"/>
@@ -144,6 +145,8 @@
                      submit-url="/gaea/demo/add-class-student"/>
         <crud-dialog id="classCrudDialog" html-id="classCrudDialog" content-url="/gaea/demo/class-crud-form"
                      submit-url="/gaea/demo/add-class"/>
+        <crud-dialog id="classViewDialog" html-id="classViewDialog" id-field="id"
+                     content-url="/gaea/demo/class-crud-form" load-data-url="/gaea/demo/get-class" editable="false"/>
         <crud-dialog id="classEditDialog" html-id="classEditDialog" id-field="id"
                      content-url="/gaea/demo/class-crud-form" load-data-url="/gaea/demo/get-class"
                      submit-url="/gaea/demo/add-class"/>

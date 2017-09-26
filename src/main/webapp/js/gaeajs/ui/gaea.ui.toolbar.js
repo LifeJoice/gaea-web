@@ -313,10 +313,13 @@ define([
                     //}
 
                     // 最后初始化submitUrl
-                    // 理论上，一个button不应该同时有linkViewId、submitUrl
-                    _private.button.initSubmit({
-                        id: thisButton.htmlId
-                    });
+                    if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.BUTTON.DEFAULT, thisButton.componentName)) {
+                        // 普通按钮
+                        // 理论上，一个button不应该同时有linkViewId、submitUrl
+                        _private.button.initSubmit({
+                            id: thisButton.htmlId
+                        });
+                    }
                 });
             },
             /**
@@ -859,6 +862,10 @@ define([
                     // toolbar button id
                     refObj.buttonId = buttonDef.htmlId;
                     refObj.action = buttonDef.action;
+                    // 对于只查看的弹出框，没有action，但需要数据加载
+                    if (gaeaValid.isNotNull(refObj.loadDataUrl)) {
+                        refObj.initComponentData = true;
+                    }
                     gaeaDialog.initCrudDialog(refObj);
                 }
                 /**

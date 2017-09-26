@@ -34,6 +34,7 @@ define([
          * @property {string} submitUrl                     点确定提交的url
          * @property {string} loadDataUrl                   内容对应的数据的加载url
          * @property {string} componentName                 组件名。value：wf-dialog|crud-dialog|
+         * @property {boolean} editable                     dialog的内容是否可编辑
          * @property {object} data                          弹出框相关的数据。例如：编辑框，对应的就是编辑的记录的数据。
          * @property {object} extraSubmitData               点击提交（确定）时，一并提交的数据。
          * @property {function} close                       关闭时的回调
@@ -128,6 +129,7 @@ define([
             success: null,
             fail: null,
             cancel: null,
+            editable: true,                     // 是否可编辑。默认true
             buttons: {}
         };
 
@@ -569,26 +571,10 @@ define([
              * @param {string} options.parentId
              * @param {string} options.submitAction         提交方式。这个是关系嵌入式dialog的打开方式。
              * @param {string} options.refInputId           和submitAction有关，如果是回写的话，这个关联input id就会有所用。
+             * @param {boolean} options.editable            dialog的内容是否可编辑
              */
             init: function (dialogOpts) {
 
-                //var dialogId = options.dialog.htmlId;
-                ////var dialogOption = _.clone(linkObj);
-                ////// 整合创建dialog option和系统默认的dialog option
-                ////dialogOption = _.extend(_options, dialogOption);
-                ////// 整合传入的options参数和创建dialog的options
-                ////dialogOption = _.extend(dialogOption, options);
-                ////dialogOption.triggerOpenJqSelector = "#" + buttonDef.htmlId;
-                ////// 用htmlId作为创建dialog的DIV ID。
-                ////dialogOption.id = linkObj.htmlId;
-
-
-                // initOption
-                //var dialogOpts = options.dialog;
-                //dialogOpts = _.extend(_options, dialogOpts);
-
-                // init default
-                //var dialogOpts = _.defaults(options, _options);
                 _.defaults(dialogOpts, _options);
                 _.defaults(dialogOpts, crudDialog.options);
 
@@ -612,14 +598,9 @@ define([
                     id: dialogOpts.id,
                     submitUrl: dialogOpts.submitUrl,
                     submitAction: dialogOpts.submitAction,
-                    refInputId: dialogOpts.refInputId
+                    refInputId: dialogOpts.refInputId,
+                    editable: dialogOpts.editable
                 });
-                //var dialogOpts = _private.getInitOption({
-                //    id: options.dialog.htmlId,
-                //    submitUrl: options.dialog.submitUrl,
-                //    submitAction: options.submitAction,
-                //    refInputId: options.refInputId
-                //});
 
                 // 加入弹出框链
                 gaeaUIChain.add({
@@ -633,33 +614,15 @@ define([
                     dialogOpts["pageId"] = (new Date()).getTime().toString() + _.random(100, 999).toString();
                 }
 
-                //options = _.extend(_.clone(crudDialog.options), options);
-                //var linkObj = options.dialog;
-                //var buttonDef = options.button;
-                //// 获取某grid选中的行
-                //var selectedRow = gaeaContext.getValue("selectedRow", options.id);
-                //crudDialog.cache.selectedRow = selectedRow;
                 if (gaeaValid.isNull(dialogOpts.id)) {
                     throw "没有htmlId(对于页面DIV ID)，无法创建Dialog。";
                 }
 
                 var formId = dialog.utils.getFormId(dialogOpts.id);
-                if ($("#" + formId).length > 0) {
-                    console.error("form id已存在！如果有多个同名form id，jQuery validate插件可能会无法处理。id: " + formId);
-                }
+                //if ($("#" + formId).length > 0) {
+                //    console.error("form id已存在！如果有多个同名form id，jQuery validate插件可能会无法处理。id: " + formId);
+                //}
                 dialogOpts.formId = formId;
-                ////dialogDef = linkObj;
-                //var dialogOption = _.clone(linkObj);
-                //// 用htmlId作为创建dialog的DIV ID。
-                //dialogOption.id = linkObj.htmlId;
-                //var dlgSelector = "#" + dialogOption.id;
-                //_private.initHtml({
-                //    id: dialogOpts.id,
-                //    parentId: dialogOpts.parentId,
-                //    formId: formId,
-                //    openStyle: dialogOpts.openStyle,
-                //    submitUrl: dialogOpts.submitUrl
-                //});
 
                 // 添加"data-gaea-ui-dialog"标识和"gaea-dialog" class
                 // 这对dialog中的组件找父dialog很必要。
@@ -1324,19 +1287,158 @@ define([
              * @param {string} options.refInputId                   关联的父级dialog的输入框id
              * @param {string} options.data                         form之外的数据，如果和form里面的同名则会覆盖。
              * @param {string} options.component                    组件名。例如，对于data_filter_dialog，确定按钮的功能又不一样。
+             * @param {boolean} options.editable                    dialog的内容是否可编辑
              * @returns {{确定: buttons."确定", 取消: buttons."取消"}}
              */
             initButtons: function (options) {
                 var $dialog = $("#" + options.id);
                 var $dialogForm = $dialog.find("form:first");
                 var formId = $dialogForm.attr("id");
-                //var cacheOptions = $dialog.data("gaea-options");
-                //if (gaeaValid.isNotNull(cacheOptions)) {
-                //    options = _.extend(cacheOptions, options);
-                //}
 
-                //options.formId = dialog.utils.getFormId(options.id);
-                //var $dialogForm = $("#" + options.formId);
+                if (options.editable) {
+                    return dialog.button.getGenericButtons(options);
+                    // 重构移到getGenericButtons去了 -------------------------------------------------------------------------------------------------->>>>
+                    //var okFunction = null; // 确定按钮的方法
+                    //
+                    ///**
+                    // * 确定按钮
+                    // */
+                    //if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.SUBMIT_ACTION.WRITEBACK_IN_ONE, options.submitAction)) {
+                    //    /**
+                    //     * ----> 回写上一个弹框的一个字段
+                    //     */
+                    //    if (gaeaString.equalsIgnoreCase(options.component, GAEA_UI_DEFINE.UI.COMPONENT.DIALOG.DATA_FILTER_DIALOG)) {
+                    //        okFunction = function () {
+                    //            dialog.button.dataFilterDialog.okFunction(options);
+                    //        }
+                    //    } else {
+                    //        // 回写的弹出框也需要进行校验
+                    //        okFunction = function () {
+                    //            // 调用校验框架，校验ok才继续。
+                    //            gaeaCommon.gaeaValidate.validate({
+                    //                containerId: formId,// 校验的范围（某表单）
+                    //                // 成功回调
+                    //                success: function () {
+                    //                    // 执行业务逻辑
+                    //                    _private.inOne.writeBackInOne(options);
+                    //                    // 关闭
+                    //                    _private.inOne.close(options);
+                    //                    // 替换按钮
+                    //                    _private.inOne.replaceParentButton(options);
+                    //                }
+                    //            });
+                    //        }
+                    //    }
+                    //} else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.SUBMIT_ACTION.WRITEBACK_BY_FIELD, options.submitAction)) {
+                    //    /**
+                    //     * ----> 回写上一个弹框匹配的字段，field by field
+                    //     */
+                    //        // 回写的弹出框也需要进行校验
+                    //    okFunction = function () {
+                    //        // 调用校验框架，校验ok才继续。
+                    //        gaeaCommon.gaeaValidate.validate({
+                    //            containerId: formId,// 校验的范围（某表单）
+                    //            // 成功回调
+                    //            success: function () {
+                    //                // 执行业务逻辑, 按字段名回填。
+                    //                _private.inOne.writeBackByField(options);
+                    //                // 关闭
+                    //                _private.inOne.close(options);
+                    //                // 替换按钮
+                    //                _private.inOne.replaceParentButton(options);
+                    //            }
+                    //        });
+                    //    }
+                    //} else {
+                    //    /**
+                    //     * ----> 其他无法识别的，默认根据url提交。
+                    //     */
+                    //    okFunction = function () {
+                    //        dialog.button.action.submit(options);
+                    //    }
+                    //}
+                    //
+                    ///**
+                    // * 取消按钮
+                    // * 普通的取消功能不需要了。dialog.open自带了初始化关闭相关的事宜（主要涉及数据解绑等）
+                    // */
+                    //var cancelFunction = null;
+                    //if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.SUBMIT_ACTION.WRITEBACK_IN_ONE, options.submitAction)) {
+                    //    cancelFunction = function () {
+                    //        _private.inOne.close(options);
+                    //        // 替换按钮
+                    //        _private.inOne.replaceParentButton(options);
+                    //    }
+                    //} else {
+                    //    cancelFunction = function () {
+                    //        $("#" + options.id).trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CLOSE);
+                    //    }
+                    //}
+                    //
+                    //var buttons = {
+                    //    "确定": okFunction,
+                    //    "取消": cancelFunction
+                    //};
+                    //
+                    //return buttons;
+
+                    //    重构移到getGenericButtons去了 end <<<< --------------------------------------------------------------------------------------------------
+                } else {
+                    return dialog.button.getNonEditableButtons(options.id);
+                }
+            },
+            /**
+             * dialog的取消按钮的操作。
+             * @param {object} opts
+             * @param {string} opts.id          dialog id
+             * @param {string} [opts.isDataUnbind=true]     是否需要做数据解绑. 如果dialog里面是表单，gaea可能默认做了data binding，所以需要数据解绑；但如果是个图片上传弹出框，就需要手动设为false了
+             */
+            close: function (opts) {
+                opts = _.defaults(opts, {
+                    isDataUnbind: true
+                });
+                var formId = dialog.utils.getFormId(opts.id);
+                var $dialogForm = $("#" + formId);
+                /**
+                 * 必须首先关闭dialog。否则后面的操作会把整个dialog的DOM删除。jQuery dialog的事件就统统失效了。
+                 */
+                dialog.close("#" + opts.id);
+                // 取消数据绑定. 这里也会把dialog的DOM干掉！需要注意！
+                if (opts.isDataUnbind) {
+                    gaeaData.unbind(opts.id);
+                }
+                // 清空表单内容
+                // 彻底删除相关的HTML DOM
+                $dialogForm.html("");
+            },
+            /**
+             * dialog的内容不可编辑对应的按钮。
+             *
+             * @param dialogId
+             * @returns {{取消: *}}
+             */
+            getNonEditableButtons: function (dialogId) {
+                /**
+                 * 取消按钮
+                 * 普通的取消功能不需要了。dialog.open自带了初始化关闭相关的事宜（主要涉及数据解绑等）
+                 */
+                var cancelFunction = function () {
+                    $("#" + dialogId).trigger(GAEA_EVENTS.DEFINE.UI.DIALOG.CLOSE);
+                };
+
+                var buttons = {
+                    "取消": cancelFunction
+                };
+
+                return buttons;
+            },
+            /**
+             * 普通弹出框的默认按钮生成。
+             * @param options
+             * @returns {{确定: *, 取消: *}}
+             */
+            getGenericButtons: function (options) {
+
                 var okFunction = null; // 确定按钮的方法
 
                 /**
@@ -1420,30 +1522,6 @@ define([
                 };
 
                 return buttons;
-            },
-            /**
-             * dialog的取消按钮的操作。
-             * @param {object} opts
-             * @param {string} opts.id          dialog id
-             * @param {string} [opts.isDataUnbind=true]     是否需要做数据解绑. 如果dialog里面是表单，gaea可能默认做了data binding，所以需要数据解绑；但如果是个图片上传弹出框，就需要手动设为false了
-             */
-            close: function (opts) {
-                opts = _.defaults(opts, {
-                    isDataUnbind: true
-                });
-                var formId = dialog.utils.getFormId(opts.id);
-                var $dialogForm = $("#" + formId);
-                /**
-                 * 必须首先关闭dialog。否则后面的操作会把整个dialog的DOM删除。jQuery dialog的事件就统统失效了。
-                 */
-                dialog.close("#" + opts.id);
-                // 取消数据绑定. 这里也会把dialog的DOM干掉！需要注意！
-                if (opts.isDataUnbind) {
-                    gaeaData.unbind(opts.id);
-                }
-                // 清空表单内容
-                // 彻底删除相关的HTML DOM
-                $dialogForm.html("");
             },
             /**
              * 按钮的一些操作定义。
@@ -2173,9 +2251,9 @@ define([
                 var formId = dialog.utils.getFormId(opts.id);
 
                 opts.formId = formId;
-                if ($("#" + formId).length > 0) {
-                    console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + formId);
-                }
+                //if ($("#" + formId).length > 0) {
+                //    console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + formId);
+                //}
                 _private.initHtml(opts);
 
                 /**

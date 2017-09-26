@@ -27,6 +27,7 @@ define([
              //* @param {string} options.id                               弹框的div id
              * @param {string} options.containerId                      弹框的div id
              * @param {string} options.contentUrl                       内容url地址
+             * @param {boolean} options.editable                        dialog的内容是否可编辑
              * @param {string} options.data
              * @param {string} options.initComponentData                初始化组件的数据，例如：子表的关联，新增不需要初始化，编辑就需要。
              * @param {object} options.callback
@@ -62,7 +63,7 @@ define([
              * @param {Object} options
              * @param {string} options.id                               弹框的div id
              //* @param {string} options.containerId                      弹框的div id
-             //* @param {string} options.contentUrl                       内容url地址
+             * @param {boolean} options.editable                        dialog的内容是否可编辑
              * @param {string} options.data
              * @param {string} options.initComponentData                初始化组件的数据，例如：子表的关联，新增不需要初始化，编辑就需要。
              * @param {object} options.callback
@@ -99,7 +100,7 @@ define([
                          * 这个只是纯粹UI的初始化，例如：button，或者数据已经存在的情况。
                          */
                         var gaeaUI = require("gaeajs-ui-commons");
-                        gaeaUI.initGaeaUI("#" + options.id);
+                        gaeaUI.initGaeaUI("#" + options.id, options.editable);
                         /**
                          * fill data
                          * 必须在initGaeaUI后，甚至一切后，因为，得等数据集初始化完、KO binding后生成某些DOM、然后第三方插件初始化了（例如select2），再去改数据，这样KO、第三方插件才不会出错。

@@ -50,10 +50,13 @@ define([
             /**
              *
              * @param {string} ctSelector               容器的JQ选择器
+             * @param {boolean} editable                （dialog的）内容是否可编辑
              * @returns {*}
              */
-            initGaeaUI: function (ctSelector) {
+            initGaeaUI: function (ctSelector, editable) {
                 var dfd = $.Deferred();// JQuery同步对象
+                // 先处理内容是否可编辑
+                gaeaCommons.utils.setEditable(ctSelector, editable);
                 // 没有相关的组件，也是需要resolve的
                 if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
@@ -147,6 +150,24 @@ define([
                     target = _.findWhere(inViews.views, {id: linkViewId});
                 }
                 return target;
+            },
+            /**
+             * 控制某容器下的input、select等是否可编辑
+             * @param ctSelector
+             * @param editable
+             */
+            setEditable: function (ctSelector, editable) {
+                var $container = $(ctSelector);
+                // 找不到容器，返回
+                if ($container.length < 1) {
+                    return;
+                }
+
+                if (!editable) {
+                    // 不可编辑
+                    // 当前简单disabled掉。如果是自己的组件，再进一步根据disabled去判断，再进一步禁用。
+                    $container.find("input, select").prop("disabled", true);
+                }
             }
         };
 
