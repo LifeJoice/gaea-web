@@ -29,7 +29,9 @@ import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.framework.web.service.CommonViewQueryService;
+import org.gaea.security.jo.UserJO;
 import org.gaea.util.BeanUtils;
 import org.gaea.util.MathUtils;
 import org.slf4j.Logger;
@@ -88,6 +90,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             filters = new ArrayList<QueryCondition>();
         }
         try {
+            UserJO loginUser = GaeaWebSecuritySystem.getLoginUser();
             DataSet dataSet = gaeaXmlSchema.getSchemaData().getDataSetList().get(0);
             if (dataSet == null || StringUtils.isEmpty(dataSet.getId())) {
                 throw new SystemConfigException("XML Schema的DataSet配置错误。没有配置DataSet或DataSet缺少id。SchemaId : " + schemaId);
@@ -114,7 +117,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
             authorityConditionSet.getConditions().addAll(convertToConditions(filters));
             // 构建默认的SQL中表达式要用的上下文对象
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
             pageResult = gaeaSqlProcessor.query(sql, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
 
             List<Map<String, Object>> dataList = pageResult.getContent();
@@ -189,8 +192,9 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * @throws SystemConfigException
      */
     @Override
-    public PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
+    public PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException {
         if (gaeaDataSet != null) {
+            UserJO loginUser = GaeaWebSecuritySystem.getLoginUser();
 //            if (authConditions == null) {
 //                authConditions = new ArrayList<QueryCondition>();
 //            }
@@ -203,15 +207,16 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 //                authorityConditionSet.getConditions().addAll(originConditions);
 //            }
             // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
             return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
         }
         return null;
     }
 
     @Override
-    public PageResult query(GaeaDataSet gaeaDataSet, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException {
+    public PageResult query(GaeaDataSet gaeaDataSet, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException {
         if (gaeaDataSet != null) {
+            UserJO loginUser = GaeaWebSecuritySystem.getLoginUser();
             LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> newSortConditionSetMap = new LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO>(); // 新的排顺序的条件集的map
             if (conditionSetMap == null) {
                 conditionSetMap = new LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO>();
@@ -230,7 +235,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             newSortConditionSetMap.putAll(conditionSetMap);
 
             // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
             return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), newSortConditionSetMap, page, defaultDsContext);
         }
         return null;

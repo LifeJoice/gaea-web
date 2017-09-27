@@ -487,7 +487,7 @@ public class DemosController {
             /**
              * *********************************************************** TEST 2 利用模板导出任意dataset
              */
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getUserName(request));
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getLoginUser().getLoginName(), String.valueOf(GaeaWebSecuritySystem.getLoginUser().getId()));
             List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO", defaultDsContext); // 默认导出1000条
             Map<String, Field> fieldsMap = GaeaExcelUtils.getFields(schemaId);
             //test
@@ -505,6 +505,8 @@ public class DemosController {
         } catch (SysInitException e) {
             logger.error("系统初始化异常！", e);
         } catch (ProcessFailedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (SystemConfigException e) {
             logger.error(e.getMessage(), e);
         }
     }

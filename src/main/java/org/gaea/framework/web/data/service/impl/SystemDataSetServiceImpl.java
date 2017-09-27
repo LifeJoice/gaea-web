@@ -221,6 +221,8 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
             ds.setTotalElements(pageResultSet.getTotalElements());
         } catch (InvalidDataException e) {
             logger.info("系统动态查询失败。" + e.getMessage());
+        } catch (SysInitException e) {
+            logger.info("系统动态查询失败。" + e.getMessage());
         }
         return ds;
     }

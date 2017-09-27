@@ -3,17 +3,16 @@ package org.gaea.framework.web.schema.view.action;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.exception.ProcessFailedException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SysLogicalException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.schema.Action;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.framework.web.service.ExcelService;
 import org.gaea.poi.export.ExcelExport;
+import org.gaea.security.jo.UserJO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +74,7 @@ public class ExcelExportButtonAction implements Action<File> {
             throw new ValidationFailedException("无法获取button action的dataSetId。无法导出操作！");
         }
         try {
+            UserJO loginUser = GaeaWebSecuritySystem.getLoginUser();
             // 这个本身不是一个托管给Spring的bean。所以需要通过静态方法获取上下文的bean。
             ExcelService excelService = GaeaWebSystem.getBean(ExcelService.class);
             ExcelExport excelExport = GaeaWebSystem.getBean(ExcelExport.class);
@@ -85,7 +85,7 @@ public class ExcelExportButtonAction implements Action<File> {
              * 其实就是，除非withData=false，否则都会查询data
              */
             if (withDataParam == null || BooleanUtils.toBooleanObject(withDataParam.getValue()) == null || BooleanUtils.toBooleanObject(withDataParam.getValue())) {
-                GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginName);
+                GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
                 data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), excelTemplateParam.getValue(), defaultDsContext); // 默认导出1000条
                 if (data == null) {
                     throw new ProcessFailedException("数据为空，无法执行导出操作。");
@@ -97,6 +97,8 @@ public class ExcelExportButtonAction implements Action<File> {
             throw new ValidationFailedException("系统逻辑错误！请联系管理员处理。");
         } catch (SysInitException e) {
             logger.error("系统初始化异常！", e);
+        } catch (SystemConfigException e) {
+            logger.error(e.getMessage(), e);
         }
         return file;
     }

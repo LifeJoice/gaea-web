@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.db.QueryCondition;
 import org.gaea.demo.entity.DemoClassEntity;
 import org.gaea.demo.service.DemoClassService;
-import org.gaea.exception.ProcessFailedException;
-import org.gaea.exception.SysInitException;
-import org.gaea.exception.SysLogicalException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.config.SystemProperties;
@@ -310,7 +307,7 @@ public class ModernAvenueProductDemosController {
             /**
              * *********************************************************** TEST 2 利用模板导出任意dataset
              */
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getUserName(request));
+            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getLoginUser().getLoginName(), String.valueOf(GaeaWebSecuritySystem.getLoginUser().getId()));
             List<Map<String, Object>> data = excelService.queryByConditions(null, "DS_EXCEL_EXPORT_DEMO", "EXCEL_EXPORT_DEMO", defaultDsContext); // 默认导出1000条
             Map<String, Field> fieldsMap = GaeaExcelUtils.getFields(schemaId);
             //test
@@ -328,6 +325,8 @@ public class ModernAvenueProductDemosController {
         } catch (SysInitException e) {
             logger.error("系统初始化异常！", e);
         } catch (ProcessFailedException e) {
+            logger.error(e.getMessage(), e);
+        } catch (SystemConfigException e) {
             logger.error(e.getMessage(), e);
         }
     }

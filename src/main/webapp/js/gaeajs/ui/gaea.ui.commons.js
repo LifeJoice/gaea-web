@@ -56,7 +56,9 @@ define([
             initGaeaUI: function (ctSelector, editable) {
                 var dfd = $.Deferred();// JQuery同步对象
                 // 先处理内容是否可编辑
-                gaeaCommons.utils.setEditable(ctSelector, editable);
+                if (gaeaValid.isNotNull(editable)) {
+                    gaeaCommons.utils.setEditable(ctSelector, editable);
+                }
                 // 没有相关的组件，也是需要resolve的
                 if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();

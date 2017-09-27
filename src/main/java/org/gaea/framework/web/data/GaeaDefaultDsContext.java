@@ -28,15 +28,17 @@ import java.util.Map;
 public class GaeaDefaultDsContext {
     private final Logger logger = LoggerFactory.getLogger(GaeaDefaultDsContext.class);
     private Map<String, GaeaDsContextBean> contextBeans = new HashMap<String, GaeaDsContextBean>();
+    private String loginUserId;
     private String loginName;
 
     public GaeaDefaultDsContext() {
         init();
     }
 
-    public GaeaDefaultDsContext(String loginName) {
+    public GaeaDefaultDsContext(String loginName, String loginUserId) {
         init();
         this.loginName = loginName;
+        this.loginUserId = loginUserId;
     }
 
     /**
@@ -52,6 +54,14 @@ public class GaeaDefaultDsContext {
 
     public Map<String, GaeaDsContextBean> getContextBeans() {
         return contextBeans;
+    }
+
+    public String getLoginUserId() {
+        return loginUserId;
+    }
+
+    public void setLoginUserId(String loginUserId) {
+        this.loginUserId = loginUserId;
     }
 
     public String getLoginName() {
