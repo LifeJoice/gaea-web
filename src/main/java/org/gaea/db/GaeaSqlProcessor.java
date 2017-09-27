@@ -81,7 +81,7 @@ public class GaeaSqlProcessor {
 
     /**
      * 根据SQL，把conditions主动组装条件加到SQL上，然后查询出结果。
-     *
+     * <p>这个是没分页的<p/>
      * @param sql
      * @param conditionSet      可以为空。
      * @param queryConditionDTO 可以为空。查询条件对象，包含若干where ... and ... and ...
@@ -153,6 +153,13 @@ public class GaeaSqlProcessor {
         if (StringUtils.isNotEmpty(whereCause)) {
             sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause).toString();
         }
+        /* 转换SQL里面的表达式 */
+        /**
+         * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
+         * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
+         */
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext);
+        // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
     }
@@ -199,6 +206,13 @@ public class GaeaSqlProcessor {
         if (StringUtils.isNotEmpty(whereCause)) {
             sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause.toString()).toString();
         }
+        /* 转换SQL里面的表达式 */
+        /**
+         * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
+         * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
+         */
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext);
+        // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
     }

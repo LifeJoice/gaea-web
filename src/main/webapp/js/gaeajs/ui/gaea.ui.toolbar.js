@@ -637,8 +637,12 @@ define([
                                 url: submitUrl,
                                 data: newRow,
                                 success: function (data) {
+                                    var respObj = {};
+                                    if (gaeaValid.isNotNull(data.responseText)) {
+                                        respObj = JSON.parse(data.responseText);
+                                    }
                                     // 处理请求返回结果, 包括成功和失败
-                                    gaeaUtils.processResponse(JSON.parse(data.responseText), {
+                                    gaeaUtils.processResponse(respObj, {
                                         success: {
                                             baseMsg: "操作成功！"
                                         }

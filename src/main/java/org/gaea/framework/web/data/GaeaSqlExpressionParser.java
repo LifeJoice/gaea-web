@@ -38,6 +38,7 @@ public class GaeaSqlExpressionParser {
      * @return
      */
     public String parse(String sql, GaeaDefaultDsContext defaultDsContext) {
+        String newSql = sql;
         if (defaultDsContext == null) {
             defaultDsContext = new GaeaDefaultDsContext();
         }
@@ -47,7 +48,11 @@ public class GaeaSqlExpressionParser {
 //        EvaluationContext context = new StandardEvaluationContext();
 //        GaeaDefaultDsContext dsContext = new GaeaDefaultDsContext("Iverson");
 //        context.setVariable("gaeaDsContext",dsContext);
-        String newSql = expression.getValue(defaultDsContext).toString();
+        if (defaultDsContext != null) {
+            newSql = expression.getValue(defaultDsContext).toString();
+        } else {
+            newSql = expression.getValue().toString();
+        }
         logger.trace("准备对sql里的表达式进行处理。处理后：\n{}", newSql);
 //        System.out.println(expression.getValue(dsContext));
         return newSql;
