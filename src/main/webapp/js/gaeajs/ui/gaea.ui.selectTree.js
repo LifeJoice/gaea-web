@@ -22,15 +22,19 @@ define([
         "gaeajs-ui-commons", "gaeajs-ui-multiselect", "gaeajs-common", "gaeajs-ui-tabs",
         "gaeajs-common-utils", "gaeajs-context", "gaeajs-ui-dataFilterDialog", "gaeajs-ui-grid",
         "gaeajs-data-content", "gaeajs-ui-chain",
-        'gaea-jqui-dialog', "jquery-serializeObject", "jquery-ui-effects-all"],
+        'gaea-jqui-dialog', "jquery-serializeObject", "jquery-ui-effects-all", "jquery-ui-position"],
     function ($, _, _s, gaeaAjax, gaeaValid,
               gaeaData, gaeaEvents, gaeaForm, gaeaString,
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
               gaeaUI, gaeaMultiSelect, gaeaCommon, gaeaComponents,
               gaeaUtils, gaeaContext, gaeaDataFilterDialog, gaeaGrid,
-              gaeaContent, gaeaUIChain, mod1, mod2, mod3) {
+              gaeaContent, gaeaUIChain, mod1, mod2, mod3, mod4) {
 
         var _private = {};
+
+        var selectedLiId = "";
+        var firstParentLiId = "";// 记录左上角的第一个Li的id。即父级的第一个的id。为了过渡到下一级、或者到上一级时查找用。
+        var displayedFirstItemId = ""; // 第一个列表中，展示中的item id。一般是第一个带自己的item id。当然也可能是hover过的item id。
 
         var selectTree = {
             _defaultOpts: {
@@ -106,13 +110,13 @@ define([
                     '</span>' +
                         //'<div class="selected">' +
                         //'</div>' +
-                    '</div>' +
-                    '<div class="selectbox-ct">' +
-                    '<div id="div-to-parent" class="to-parent hidden"><div class="middle-ct"><i class="fa fa-chevron-left" aria-hidden="true"></i></div></div>' +
                     '</div>';
+                //'<div class="selectbox-ct">' +
+                //'<div id="div-to-parent" class="to-parent hidden"><div class="middle-ct"><i class="fa fa-chevron-left" aria-hidden="true"></i></div></div>' +
+                //'</div>';
                 var htmlTmpl = _.template(selectTreeHtmlTmpl);
                 $selectTreeCt.html(htmlTmpl({
-                    ID: opts.htmlId,
+                    ID: gaeaString.format.getValidName("input_" + opts.htmlId), // id可能有特殊字符(.之类的)
                     NAME: opts.htmlName,
                     FIELD_ID: opts.fieldId,
                     CLASS: GAEA_UI_DEFINE.UI.QUERY.INPUT_FIELD_CLASS
@@ -125,6 +129,9 @@ define([
             init: function (opts) {
                 gaeaValid.isNull({check: opts.target, exception: "target参数为空，无法初始化select tree组件！"});
                 var $selectTreeCt = $(opts.target);
+                if (!gaeaUtils.dom.checkUnique($selectTreeCt.attr("id"))) {
+                    throw "select tree id不唯一，会导致下拉列表无法正常关闭等问题。id: " + $selectTreeCt.attr("id");
+                }
                 // 从data-gaea-ui-select-tree获取配置信息
                 var strOptions = $selectTreeCt.data(GAEA_UI_DEFINE.UI.SELECT_TREE_DEFINE);
                 if (gaeaValid.isNotNull(strOptions)) {
@@ -200,7 +207,7 @@ define([
             /**
              * 初始化下拉的内容
              */
-            _private.initDataPanel($selectTree);
+            //_private.initDataPanel($selectTree);
             /**
              * 显示下面的列表
              */
@@ -254,10 +261,22 @@ define([
 
         };
 
+        /**
+         * 初始化下拉框的html，和点击选中的事件处理。
+         * @param $selectTree
+         */
         _private.initDataPanel = function ($selectTree) {
-            var $selectBox = $selectTree.find(".selectbox-ct");
+            var $selectBox = $('<div class="selectbox-ct">' +
+                '<div id="div-to-parent" class="to-parent hidden"><div class="middle-ct"><i class="fa fa-chevron-left" aria-hidden="true"></i></div></div>' +
+                '</div>');
+            $("body").append($selectBox);
+
+
+            //var $selectBox = $selectTree.find(".selectbox-ct");
+            // 数据还是从具体的某个multi-select-tree下面读
+            var $dataCt = $selectTree.find(".data-ct");
             // 记录左上角的第一个Li的id。
-            var refId = $(".data-ct ul:first > li:first").attr("id");
+            var refId = $dataCt.find("ul:first > li:first").attr("id");
             firstParentLiId = refId;
             displayedFirstItemId = refId;
             //var $parentList = $('<div class="parent-list"></div>');
@@ -268,7 +287,7 @@ define([
             //    var text = $li[0].childNodes[0].nodeValue;
             //    $parentList.append('<span data-refid="' + liId + '">' + text + '</span>');
             //});
-            var $parentList = _private.getParentList($selectTree, $(".data-ct ul:first"), false);
+            var $parentList = _private.getParentList($selectTree, $dataCt.find("ul:first"), false);
             // 初始化第一项的子级
             //$(".data-ct ul:first > li:first > ul > li").each(function (index, arrObj) {
             //    var $li = $(this);
@@ -283,7 +302,7 @@ define([
             //});
 
 
-            var $firstUl = _private.getListFirstWithSubItem({
+            var $firstUl = _private.getListFirstWithSubItem($selectTree, {
                 level: 2 // 这里获取的是子列表要显示的item的ul。不是当前的第一个ul。
             });
             //var ulId = $(".data-ct ul:first > li:first > ul:first").attr("id");
@@ -398,6 +417,8 @@ define([
          */
         _private.getParentList = function ($selectTree, $ul, isHidden) {
             var hiddenStyle = "";
+            // 全局公用一个下拉框
+            var $selectBox = $(".selectbox-ct");
             if (isHidden) {
                 hiddenStyle = 'style="display: none;"';
             }
@@ -438,7 +459,7 @@ define([
                         // 更新。当前（子列表）显示的是哪个parentId
                         displayedFirstItemId = refId;
                         var $childrenList = _private.getChildrenListBySpan($selectTree, $item);
-                        var $selectBox = $(".selectbox-ct");
+                        //var $selectBox = $(".selectbox-ct");
                         /**
                          * 【重要】这里需要一个比较复杂的处理。
                          * 由于下面是用了JQuery的方法制造动画，JQuery会给有动画的对象（例如children-list）包一个外部的div。
@@ -453,7 +474,7 @@ define([
                         var $toParent = $selectBox.children("#div-to-parent").detach();
                         var $parentList = $selectBox.children(".parent-list").detach();
                         // 停止动画
-                        $(".children-list").stop(true, true);
+                        $selectBox.find(".children-list").stop(true, true);
                         // 清空整个数据列表区.
                         $selectBox.html("");
                         //$selectBox.html("<div class='parent-list'>"+parentListHtml+"</div>");
@@ -470,7 +491,8 @@ define([
 
 
                         //$(".children-list").addClass("show");
-                        $(".children-list").show("slide", {direction: "right"}, 200);
+                        // 刷新下一级（例如二级）列表
+                        $selectBox.children(".children-list").show("slide", {direction: "right"}, 200);
                         _private.bindChildrenSelectEvent($selectTree);
                     })
                 }
@@ -480,7 +502,7 @@ define([
 
         _private.getChildrenListBySpan = function ($selectTree, $item) {
             var refid = $item.data("refid");
-            var $li = $("#" + refid);
+            var $li = $selectTree.find("#" + refid);
             var $ul = $li.children("ul:first");
             return _private.getChildrenList($selectTree, {
                 dataUlId: $ul.attr("id"),
@@ -502,7 +524,7 @@ define([
                 cssStyle = "display: none;";
             }
             var $childrenList = $('<div class="children-list" style="' + cssStyle + '"></div>');
-            var $ul = $("#" + dataUlId);
+            var $ul = $selectTree.find("#" + dataUlId);
             // 初始化第一项的子级
             $ul.children("li").each(function (index, arrObj) {
                 var $li = $(this);
@@ -673,8 +695,8 @@ define([
             //$(".children-list").removeClass("hidden").addClass("show");
             //$(".test").append("<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span>");
             //$(".test").addClass("show");
-            $("#testArea").append('<div class="test"></div>');
-            $(".test").show("slide", {direction: "right"}, 1000);
+            //$("#testArea").append('<div class="test"></div>');
+            //$(".test").show("slide", {direction: "right"}, 1000);
         };
 
         //_private.bindClickChildrenEvent = function() {
@@ -711,10 +733,26 @@ define([
          */
         _private.bindShowAndHide = function ($selectTree) {
             var $inputbox = $selectTree.find(".inputbox");
-            var $selectbox = $selectTree.find(".selectbox-ct");
+            //var $selectbox = $selectTree.find(".selectbox-ct");
+            // 用.multi-select-tree的id作为关闭触发key
             var closeSelector = "#" + $selectTree.attr("id");
-            $inputbox.find("input").focusin(function () {
+
+            // 处理点击组件、打开下拉列表事件
+            $inputbox.find("input").focusin(function (event) {
+                var $input = $(this);
+                // 初始化下拉框
+                _private.initDataPanel($selectTree);
+
+                // 全局公用一个下拉
+                var $selectbox = $(".selectbox-ct");
                 $selectbox.toggleClass("show");
+                // position定位，需要（配合定位）元素是已显现的才行
+                $selectbox.position({
+                    my: "left top",
+                    at: "left bottom",
+                    of: "#" + this.id
+                });
+
                 // 打开的时候，设定自己；然后后面就可以做全局的自动收起。
                 //var closeSelector = "#"+$selectTree.attr("id");
                 gaeaEvents.autoClose.setMe({
@@ -723,10 +761,23 @@ define([
                 //$("#testArea").append('<div class="test"></div>');
             });
 
-
-            gaeaEvents.autoClose.registerAutoClose(closeSelector, function () {
-                $selectbox.removeClass("show");
-            });
+            /**
+             * 注册自动关闭。
+             * 这里的closeSelector是监听器监控的对象。会对每一下鼠标点击判断，是否点击离开了$(closeSelector)容器。
+             * 如果是，则触发回调函数。
+             */
+            var closeFunction = function (event) {
+                // 点击下拉列表里面的项，就不要关闭了
+                if ($(event.target).parents(".selectbox-ct").length > 0) {
+                    return;
+                }
+                var $selectbox = $(".selectbox-ct");
+                //$selectbox.removeClass("show");
+                // 因为全局公用一个，每次隐藏其实就是移除
+                $selectbox.remove();
+            };
+            // 先注册全局的自动关闭
+            gaeaEvents.autoClose.registerAutoClose(closeSelector, closeFunction);
         };
 
         _private.bindClickToParentEvent = function ($selectTree) {
@@ -740,7 +791,8 @@ define([
         };
 
         _private.bindSelectEvent = function ($selectTree) {
-            $(".multi-select-tree .item .action .fa-check").click(function () {
+            var $selectBox = $(".selectbox-ct");
+            $selectBox.find(".item .action .fa-check").click(function () {
                 var $checkButton = $(this);
                 var $item = $checkButton.parent().parent();
                 //var text = $item[0].childNodes[0].nodeValue;
@@ -753,7 +805,9 @@ define([
 
         // TODO 这个和上面的方法是一样的。重构合成一个。当然为了避免事件重复绑定，应该在选择器上控制一下。
         _private.bindChildrenSelectEvent = function ($selectTree) {
-            $(".multi-select-tree .children-list .item .action .fa-check").click(function () {
+            // 全局公用一个下拉框
+            var $selectBox = $(".selectbox-ct");
+            $selectBox.find(".children-list .item .action .fa-check").click(function () {
                 var $checkButton = $(this);
                 var $item = $checkButton.parent().parent();
                 //var text = $item[0].childNodes[0].nodeValue;
@@ -806,11 +860,11 @@ define([
             return $li.children("ul:first").length > 0 && $li.children("ul:first").children("li").length > 0;
         };
 
-        _private.getListFirstWithSubItem = function (opts) {
+        _private.getListFirstWithSubItem = function ($selectTree, opts) {
             var level = opts.level;
             var jqUlSelectorTmpl = _.template(".data-ct ul[data-level=<%= LEVEL %>]");
             var $result = null;
-            $(jqUlSelectorTmpl({
+            $selectTree.find(jqUlSelectorTmpl({
                 LEVEL: level
             })).each(function () {
                 var $ul = $(this);

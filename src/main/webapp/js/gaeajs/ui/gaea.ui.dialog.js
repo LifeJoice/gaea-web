@@ -171,7 +171,7 @@ define([
                      * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                      */
                         // 只是简单初始化，避免抛出undefined错误
-                    $("#" + opts.formId).validate();
+                    //$("#" + opts.formId).validate();
                 }
 
                 var $dialog = $("#" + opts.id);
@@ -196,7 +196,7 @@ define([
                 /**
                  * 弹出框的链式
                  */
-                // cache options in chain
+                    // cache options in chain
                 gaeaUIChain.add({
                     id: opts.id,
                     parentId: opts.parentId,
@@ -307,16 +307,32 @@ define([
              * @param {string} opts.openStyle                   打开方式。new：新弹出一个 inOne：在当前parentId内打开（不弹出）
              * @param {string} [opts.position]                  打开位置。否则默认。
              * @param {string} opts.submitUrl                   点击确认按钮提交的url
+             * @param {string} opts.formId                      弹出框内的表单form的id
              * @param {string} opts.dialogOptions               初始化弹出框的option对象（height,width,autoOpen,按钮等）。要用于打开后的缓存。
              */
             open: function (opts) {
                 if (gaeaValid.isNull(opts.id)) {
                     throw "id为空，无法打开弹出框。";
                 }
+                if (gaeaValid.isNull(opts.formId)) {
+                    throw "dialog内的form id为空，无法打开弹出框（因为要做通用校验）。";
+                }
                 var $dialog = $("#" + opts.id);
+                var $dialogForm = $("#" + opts.formId);
                 // TODO 这个_options好像extend了好多次，看看前面的extend可否去掉
                 //opts = _.extend(_options, opts);
                 var opts = $dialog.data("gaea-options");
+
+                /**
+                 * 简单初始化jQuery.validate，并不是进行校验。
+                 * 创建了dialog html后，对里面的form也得做validate的初始化。否则jQuery.validate插件会报错：
+                 * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
+                 * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
+                 */
+                if (gaeaValid.isNull($dialogForm.data("validator"))) { // 未初始化过
+                    // 只是简单初始化，避免抛出undefined错误
+                    $dialogForm.validate();
+                }
 
                 //// 初始化Dialog
                 //// openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
@@ -640,9 +656,9 @@ define([
                     //}
                     //dialogOpts.formId = formId;
                     // 只是简单初始化，避免抛出undefined错误
-                require(["jquery-validate"], function () {
-                    $("#" + formId).validate();
-                });
+                //require(["jquery-validate"], function () {
+                //    $("#" + formId).validate();
+                //});
                 // 检查当前页面有没有对应的DIV，没有创建一个。
                 //dialog.utils.createDialogDiv({
                 //    id: dialogOption.id,
@@ -2263,7 +2279,7 @@ define([
                  * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                  */
                     // 只是简单初始化，避免抛出undefined错误
-                $("#" + formId).validate();
+                //$("#" + formId).validate();
             } else {
                 throw "openStyle不等于inOne，或缺失parentId，都会导致无法进行HTML预初始化。";
             }

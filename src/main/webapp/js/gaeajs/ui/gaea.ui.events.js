@@ -223,8 +223,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 // 还没注册，可以注册
                 if (!events.cache.isRegisterAutoClose) {
                     // 这个把选择器定位在document可能会比较耗性能。还是定位在内容区比较好。
-                    //$(document).mouseup(function (e) {
-                    $(".main-right").mouseup(function (e) {
+                    $(document).mouseup(function (e) {
+                        //$(".main-right").mouseup(function (e) {
 
                         // 检查当前
                         if (gaeaValid.isNull(events.cache.lastOne)) {
@@ -246,7 +246,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                              *      display=none
                              */
                             if (_.isFunction(closeFunc)) {
-                                closeFunc();
+                                closeFunc(e);
                             } else {
                                 container.hide();
                             }

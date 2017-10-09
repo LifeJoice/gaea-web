@@ -10,6 +10,11 @@
     z-index: 1;
 }
 
+/* 弹出框表单中的组件，宽度必须设置100%.否则选中的结果显示不出来。 */
+.gaea-dialog form .multi-select-tree {
+    width: 100%;
+}
+
 /* 选择结果区 */
 .multi-select-tree .inputbox {
     height: 26px;
@@ -89,7 +94,8 @@
     font-size: 14px;
 }
 
-.multi-select-tree .selectbox-ct {
+/* 全局唯一的下拉框，共享的 */
+.selectbox-ct {
     overflow: hidden;
     height: 0;
     -webkit-transition: height 150ms ease-in;
@@ -109,6 +115,8 @@
     padding: 5px;
     border: 1px solid #eaeaea;
     box-shadow: 2px 2px 6px -3px #000;
+    /* dialog的z-index是101，确保盖过dialog */
+    z-index: 110;
 }
 
 .parent-list {
@@ -178,28 +186,30 @@
 /*display: none;*/
 
 /*}*/
-.multi-select-tree span.item {
+
+/* --------------------------- >>>> item，为下拉列表的项 <<<< --------------------------- */
+.selectbox-ct span.item {
     width: 150px;
     height: 22px;
 }
 
-.multi-select-tree span.item:hover {
+.selectbox-ct span.item:hover {
     background-color: cadetblue;
     cursor: pointer;
 }
 
-.multi-select-tree span.item .fa-check {
+.selectbox-ct span.item .fa-check {
     display: none;
     /*margin-right:16px;*/
 }
 
 /* 移动到item的时候，显示check选择按钮 */
-.multi-select-tree span.item:hover > .action .fa-check {
+.selectbox-ct span.item:hover > .action .fa-check {
     display: block;
     /*margin-right:16px;*/
 }
 
-.multi-select-tree span.item .text {
+.selectbox-ct span.item .text {
     font-size: 14px;
     line-height: 22px;
     width: 100px;
@@ -212,12 +222,12 @@
     white-space: nowrap;
 }
 
-.multi-select-tree span.item .action {
+.selectbox-ct span.item .action {
     float: right;
     width: 40px;
 }
 
-.multi-select-tree span.action i {
+.selectbox-ct span.action i {
     float: right;
     padding-right: 5px;
     line-height: 20px;
