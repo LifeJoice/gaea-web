@@ -85,7 +85,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 uploader._initDialog(dialogOptions);
                 // get dialog container
                 var $dialog = $("#" + dialogOptions.id);
-                $dialog.data("gaea-options", opts);
+                _.extend($dialog.data("gaea-options"), opts); // 经dialog组件初始化后，dialog.data有opts没有的信息，例如formId
                 // init uploader HTML
                 var $list = $('<div id="thelist" class="uploader-list"></div>');
                 $dialog.append($list);
@@ -94,7 +94,7 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 _uploader = new baiduUploader.Uploader(uploaderOpts);
                 // 注册点击处理
                 // 如果需要keepFailed，并且WebUploader的错误队列里面有文件，则添加回文件列表页面
-                _private.registerOpenUploader(buttonOptions, dialogOptions, _uploader, opts.keepFailed);
+                _private.registerOpenUploader(buttonOptions, $dialog.data("gaeaOptions"), _uploader, opts.keepFailed);
 
                 //_uploader = new webuploader.Uploader({
                 //    // swf文件路径
@@ -356,7 +356,8 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                     //console.log("Go. Open dialog.");
                     // 打开dialog
                     gaeaDialog.open({
-                            id: dialogOptions.id
+                            id: dialogOptions.id,
+                            formId: dialogOptions.formId
                         }
                         //"#" + dialogOptions.htmlId
                     );

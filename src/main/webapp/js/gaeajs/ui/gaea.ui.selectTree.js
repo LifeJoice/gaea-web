@@ -116,7 +116,7 @@ define([
                 //'</div>';
                 var htmlTmpl = _.template(selectTreeHtmlTmpl);
                 $selectTreeCt.html(htmlTmpl({
-                    ID: gaeaString.format.getValidName("input_" + opts.htmlId), // id可能有特殊字符(.之类的)
+                    ID: ("input_" + _s.replaceAll(opts.htmlId, "\\.", "")), // id可能有特殊字符(.之类的)
                     NAME: opts.htmlName,
                     FIELD_ID: opts.fieldId,
                     CLASS: GAEA_UI_DEFINE.UI.QUERY.INPUT_FIELD_CLASS
