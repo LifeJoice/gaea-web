@@ -6,14 +6,15 @@
  */
 define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
-        "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string",
-        "gaeajs-ui-definition", "gaeajs-ui-view", "gaea-system-url", 'gaeajs-ui-notify',
+        "gaeajs-data", "gaeajs-ui-events", "gaeajs-ui-form", "gaeajs-common-utils-string", "gaeajs-context",
+        "gaeajs-ui-definition", "gaeajs-common-utils", "gaea-system-url", 'gaeajs-ui-notify',
         "gaeajs-ui-commons",
         'gaea-jqui-dialog', "jquery-serializeObject", "jquery-ui-effects-all"],
     function ($, _, _s, gaeaAjax, gaeaValid,
-              gaeaData, GAEA_EVENTS, gaeaForm, gaeaString,
-              GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
-              gaeaUI) {
+              gaeaData, GAEA_EVENTS, gaeaForm, gaeaString, gaeaContext,
+              GAEA_UI_DEFINE, gaeaUtils, SYS_URL, gaeaNotify,
+              gaeaUI,
+              mod1, mod2, mod3) {
 
         var _private = {};
 
@@ -152,8 +153,12 @@ define([
          */
         _private.loadContent = function (options, callback) {
             var $container = $("#" + options.containerId);
+            // 发送服务端的数据
+            var requestData = {
+                selectedRows: gaeaContext.getValue("selectedRows", GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID)
+            };
             // jquery.get才能返回一个jqXHR对象。作同步用。
-            return $.get(options.contentUrl, function (data) {
+            return $.get(options.contentUrl, gaeaUtils.data.flattenData(requestData), function (data) {
                 // debug. 加载的内容不能有（含data-gaea-data-bind-area的元素）id重复.
                 gaeaData.utils.debug.checkViewModel({
                     containerId: options.containerId,
