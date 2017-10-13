@@ -24,5 +24,5 @@ public interface GaeaXmlSchemaService {
 
     String getJsonSchema(String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO, String loginName) throws SysInitException, ValidationFailedException, InvalidDataException, SystemConfigException, SysLogicalException, ProcessFailedException;
 
-    LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> getConditionSets(GaeaDataSet gaeaDataSet, List<DataSetCommonQueryConditionDTO> queryConditionDTOList, boolean isStrictMatchAll) throws ProcessFailedException;
+    LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> getConditionSets(GaeaDataSet gaeaDataSet, List<DataSetCommonQueryConditionDTO> queryConditionDTOList, boolean isStrictMatchAll) throws ProcessFailedException, SysInitException;
 }

@@ -37,6 +37,10 @@ public class SystemXmlSchemaController {
             throw new InvalidDataException("缺少Schema id，无法获取schema定义和数据！");
         }
         String loginName = GaeaWebSecuritySystem.getUserName(request);
+        // 有时候页面可能会带些空值过来，这样的条件对象是不可用的
+        if (queryConditionDTO != null && StringUtils.isEmpty(queryConditionDTO.getId())) {
+            queryConditionDTO = null;
+        }
         String jsonSchema = gaeaXmlSchemaService.getJsonSchema(schemaId, queryConditionDTO, loginName);
 
         return jsonSchema;

@@ -240,7 +240,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
      * @throws ProcessFailedException
      */
     @Override
-    public LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> getConditionSets(GaeaDataSet gaeaDataSet, List<DataSetCommonQueryConditionDTO> queryConditionDTOList, boolean isStrictMatchAll) throws ProcessFailedException {
+    public LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> getConditionSets(GaeaDataSet gaeaDataSet, List<DataSetCommonQueryConditionDTO> queryConditionDTOList, boolean isStrictMatchAll) throws ProcessFailedException, SysInitException {
         if (gaeaDataSet == null || queryConditionDTOList == null) {
             return null;
         }
@@ -254,7 +254,10 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
         for (DataSetCommonQueryConditionDTO queryConditionDTO : queryConditionDTOList) {
             ConditionSet findCondSet = null;
             for (String condSetId : dsConditionSets.keySet()) {
-                if (queryConditionDTO.getId().equalsIgnoreCase(condSetId)) {
+                if (StringUtils.isEmpty(condSetId)) {
+                    throw new SysInitException("系统缓存的数据集定义的条件，缺乏id。");
+                }
+                if (condSetId.equalsIgnoreCase(queryConditionDTO.getId())) {
                     findCondSet = dsConditionSets.get(condSetId);
                 }
             }
