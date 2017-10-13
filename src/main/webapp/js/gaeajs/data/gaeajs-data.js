@@ -440,7 +440,7 @@ define([
                                     value: val
                                 });
                             }
-                        } else if (gaeaString.equalsIgnoreCase(value.type, "static")) {
+                        } else if (gaeaString.equalsIgnoreCase(condValue.type, "static")) {
                             queryValues.push({
                                 type: condValue.type,
                                 value: condValue.value

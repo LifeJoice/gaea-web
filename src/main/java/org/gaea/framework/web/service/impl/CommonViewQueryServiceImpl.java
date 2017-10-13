@@ -127,12 +127,12 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             pageResult.setContent(dataList);
 
             // 设置翻页相关数据
-            Long pageRowCount = dataSet.getTotalElements();                                                     // 总记录数
+            Long pageRowCount = pageResult.getTotalElements();                                                     // 总记录数
             Double pageCount = Math.ceil(MathUtils.div(pageRowCount.doubleValue(), Double.valueOf(page.getSize())));     // 多少页
-            pageResult.setTotalElements(pageRowCount);
+//            pageResult.setTotalElements(pageRowCount);
             pageResult.setTotalPages(pageCount.intValue());
-            pageResult.setPage(page.getPage());
-            pageResult.setSize(page.getSize());
+//            pageResult.setPage(page.getPage());
+//            pageResult.setSize(page.getSize());
 
             return pageResult;
         } catch (SystemConfigException e) {
@@ -410,6 +410,9 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                                     condition.getOp(), condition.getPropValue()).toString());
                 }
                 SchemaColumn schemaColumn = GaeaSchemaUtils.getViewColumn(grid, condition.getPropName());
+                if (schemaColumn == null) {
+                    throw new ValidationFailedException("无法执行查询！根据页面的条件，找不到对应grid的列。");
+                }
                 String dbName = schemaColumn.getDbColumnName();
                 condition.setPropName(dbName);
                 condition.setDataType(schemaColumn.getDataType());

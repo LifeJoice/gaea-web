@@ -29,6 +29,8 @@ require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', '
         };
         // 创建grid组件
         viewSchema.initData.grid.id = "gaea-grid-ct";
+        viewSchema.initData.grid.preConditions = viewSchema.initData.views.preConditions; // 前置条件，如果有的话。一般链式view（下级页面）/data-filter-dialog等会有前置条件。前置条件过滤数据，一般也就会在grid中体现。
+        viewSchema.initData.grid.schemaId = viewSchema.initData.id; // schema id, 定义了grid。通用查询的时候、dataFilterDialog等都需要
         gaeaGrid.create(viewSchema.initData.grid);
         // 初始化 TOOLBAR
         gaeaToolbar.create({

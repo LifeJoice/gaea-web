@@ -4,7 +4,6 @@ import org.gaea.data.dataset.domain.ConditionSet;
 import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.*;
-import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.springframework.context.ApplicationContext;
 import org.xml.sax.SAXException;
@@ -23,7 +22,7 @@ public interface GaeaXmlSchemaService {
 
     String getJsonSchema(GaeaXmlSchema gaeaXML, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws ValidationFailedException, InvalidDataException, SystemConfigException;
 
-    String getJsonSchema(String schemaId, String loginName) throws SysInitException, ValidationFailedException, InvalidDataException, SystemConfigException;
+    String getJsonSchema(String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO, String loginName) throws SysInitException, ValidationFailedException, InvalidDataException, SystemConfigException, SysLogicalException, ProcessFailedException;
 
     LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> getConditionSets(GaeaDataSet gaeaDataSet, List<DataSetCommonQueryConditionDTO> queryConditionDTOList, boolean isStrictMatchAll) throws ProcessFailedException;
 }

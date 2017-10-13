@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GaeaSchemaCache {
     private final Logger logger = LoggerFactory.getLogger(GaeaSchemaCache.class);
 
-    private final Map<String, GaeaXmlSchema> schemaCache = new ConcurrentHashMap<String, GaeaXmlSchema>();
+    //    private final Map<String, GaeaXmlSchema> schemaCache = new ConcurrentHashMap<String, GaeaXmlSchema>();
     @Autowired
     private CacheFactory cacheFactory;
 
@@ -40,14 +40,21 @@ public class GaeaSchemaCache {
         CacheOperator cacheOperator = cacheFactory.getCacheOperator();
         GaeaXmlSchema gaeaXmlSchema = cacheOperator.getHashValue(redisRootKey, id, GaeaXmlSchema.class);
         if (gaeaXmlSchema == null) {
-            logger.debug("获取缓存模板失败！redis root key:{} hash key:{}", redisRootKey, id);
+            logger.warn("获取缓存的模板失败（为空）！redis root key:{} hash key:{}", redisRootKey, id);
         }
         // 暂时先兼容以下老框架，因为对于controller和view的xml schema是实时解析的。后面改为统一全部从缓存获取。
-        return gaeaXmlSchema == null ? schemaCache.get(id) : gaeaXmlSchema;
+//        return gaeaXmlSchema == null ? schemaCache.get(id) : gaeaXmlSchema;
+        return gaeaXmlSchema;
     }
 
-    public void put(String id, GaeaXmlSchema gaeaXmlSchema) {
-        schemaCache.put(id, gaeaXmlSchema);
+    public void put(String id, GaeaXmlSchema gaeaXmlSchema) throws SysInitException {
+//        schemaCache.put(id, gaeaXmlSchema);
+        if (StringUtils.isEmpty(id) || gaeaXmlSchema == null) {
+            throw new IllegalArgumentException("id/xml schema对象为空，无法缓存XML Schema！");
+        }
+        String redisRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_GAEA_SCHEMA_DEF);
+        CacheOperator cacheOperator = cacheFactory.getCacheOperator();
+        cacheOperator.putHashValue(redisRootKey, id, gaeaXmlSchema, GaeaXmlSchema.class);
     }
 
     public void cache(Map<String, GaeaXmlSchema> gaeaXmlSchemaMap) throws SysInitException {

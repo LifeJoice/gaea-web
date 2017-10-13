@@ -8,11 +8,11 @@
 define([
         "jquery", "underscore", "underscore-string", "gaeajs-common-utils-validate", "gaeajs-common-utils-string",
         "gaeajs-ui-events", "gaeajs-common-utils", "gaea-system-url", "gaeajs-common-utils-ajax", "gaeajs-ui-notify",
-        "gaeajs-ui-definition", "gaeajs-context"
+        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-data"
     ],
     function ($, _, _s, gaeaValid, gaeaString,
               gaeaEvent, gaeaUtils, SYS_URL, gaeaAjax, gaeaNotify,
-              GAEA_UI_DEFINE, gaeaContext) {
+              GAEA_UI_DEFINE, gaeaContext, gaeaData) {
 
 
         var dataFilterDialog = {
@@ -29,6 +29,7 @@ define([
              * @param {string} opts.contentUrl
              * @param {string} opts.refInputId                      关联的父级dialog的输入框id
              * @param {string} opts.schemaId                        xml schema id
+             * @param {object} opts.condition                       条件
              * @returns {*}
              */
             loadContent: function (opts) {
@@ -41,8 +42,14 @@ define([
                 $dialog.html("");
 
                 var dfd = $.Deferred();// JQuery同步对象
+                // 发送服务端的请求数据
+                var queryCondition = {};
+                if (gaeaValid.isNotNull(opts.condition)) {
+                    queryCondition = gaeaData.parseCondition(opts.condition);
+                }
                 var queryData = {
-                    schemaId: opts.schemaId
+                    schemaId: opts.schemaId,
+                    conditions: JSON.stringify(queryCondition)
                 };
 
                 // 数据加载要求同步
@@ -57,6 +64,8 @@ define([
                             gaeaNotify.error("加载Schema grid定义失败！返回定义为空，无法创建grid！");
                         }
                         var gridOptions = data.grid;
+                        gridOptions.schemaId = data.id; // schema id, 定义了grid。通用查询的时候、dataFilterDialog等都需要
+                        gridOptions.preConditions = data.views.preConditions; // 前置条件，如果有的话。一般链式view（下级页面）/data-filter-dialog等会有前置条件。前置条件过滤数据，一般也就会在grid中体现。
                         /**
                          * 高度计算方式。value = page|dialog
                          * page：根据document.body.scrollHeight去计算，一般用于整个页面的，列表页。

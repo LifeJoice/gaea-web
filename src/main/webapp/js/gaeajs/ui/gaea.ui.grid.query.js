@@ -56,13 +56,15 @@ define([
                     exception: "调用查询组件，(grid)id不允许为空！否则无法刷新数据。"
                 });
                 var $grid = $("#" + opts.id);
+                var gridOptions = $grid.data("options");
                 //var that = this;
                 // 拼凑最终的查询对象
                 var queryData = {
-                    urSchemaId: $("#urSchemaId").val(),
+                    //urSchemaId: $("#urSchemaId").val(),
+                    urSchemaId: gridOptions.schemaId,
                     filters: opts.queryConditions,
                     page: opts.pageCondition,
-                    preConditions: _private.getPreConditions() // 前置条件。一般（下钻）子页面有。
+                    preConditions: _private.getPreConditions(opts.id) // 前置条件。一般（下钻）子页面有。
                 };
                 // 获取SchemaId。对于Grid查询必须。
                 //queryConditions.urSchemaId = $("#urSchemaId").val();
@@ -608,18 +610,21 @@ define([
 
         /**
          * 获取前置的查询条件。这一般是在view链式操作的子view中。
-         //* @param opts
+         *
+         * @param gridId
          * @returns {*}
          */
-        _private.getPreConditions = function () {
+        _private.getPreConditions = function (gridId) {
+            var $grid = $("#" + gridId);
             var result;
-            var $view = $("[data-gaea-ui-view]:first");
+            //var $view = $("[data-gaea-ui-view]:first");
             /**
              * @type {ServerView}
              */
-            var viewOptions = $view.data("gaeaOptions");
-            if (gaeaValid.isNotNull(viewOptions.preConditions)) {
-                result = JSON.stringify(viewOptions.preConditions);
+            //var viewOptions = $view.data("gaeaOptions");
+            var gridOptions = $grid.data("options");
+            if (gaeaValid.isNotNull(gridOptions.preConditions)) {
+                result = JSON.stringify(gridOptions.preConditions);
             }
             return result;
         };

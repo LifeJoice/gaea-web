@@ -38,7 +38,7 @@ public class WebCommonDefinition {
 
     /**
      * =============================================================================================================================================
-     *                                                              properties 用户相关
+     * properties 用户相关
      * =============================================================================================================================================
      */
     // boolean。是否初始化admin账号。取值参考Boolean.parseBoolean, 应该是T、F、Y、N、TRUE、FALSE等都可以
@@ -58,7 +58,7 @@ public class WebCommonDefinition {
     // ------------------------------ 从页面传来的一些通用值、对象的param name ------------------------------
     public static final String PARAM_NAME_SELECTED_ROW = "selectedRow"; // 列表页选择的一行（是最后一次选择）
     public static final String PARAM_NAME_SELECTED_ROWS = "selectedRows"; // 列表页选择的多行
-
+    public static final String PARAM_NAME_CONDITIONS = "conditions"; // 前端传来的gaea框架条件的参数名
     // 对于需要从Controller层传递条件给到GaeaHtmlView，进行View渲染时处理的传值的param name。
     public static final String PARAM_NAME_QUERY_CONDITIONSETS = "QUERY_CONDITIONSET";
 }

@@ -595,6 +595,8 @@ public class GaeaSqlProcessor {
         }
         pageResult.setContent(content);
         pageResult.setTotalElements(total);
+        pageResult.setPage(page.getPage());
+        pageResult.setSize(page.getSize());
         return pageResult;
     }
 }

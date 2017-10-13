@@ -221,13 +221,13 @@ public class DataSetConvertHelper {
      * 例如：
      * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
      *
-     * @param value     原始值。这个一般为string。
+     * @param origValue     原始值。这个一般为string。
      * @param dataSetId 数据集id。通过获取数据集的数据，返回匹配value的项。
      * @return
      */
-    private static Object getValueFromDS(Object value, String dataSetId) {
-        Object newValue = value;
-        if (value != null) {
+    private static Object getValueFromDS(Object origValue, String dataSetId) {
+        Object newValue = origValue;
+        if (origValue != null) {
             if (StringUtils.isNotEmpty(dataSetId)) {
                 GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSetId);
                 if (gaeaDataSet != null) {
@@ -235,7 +235,7 @@ public class DataSetConvertHelper {
                     if (dsDatas != null) {
                         // 遍历数据集
                         for (DataItem dataItem : dsDatas) {
-                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(value))) {
+                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(origValue))) {
                                 newValue = dataItem;
                             }
                         }

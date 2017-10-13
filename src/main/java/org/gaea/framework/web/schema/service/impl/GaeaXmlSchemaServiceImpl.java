@@ -9,6 +9,7 @@ import org.gaea.exception.*;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.data.service.SystemDataSetService;
+import org.gaea.framework.web.data.util.GaeaDataSetUtils;
 import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.GaeaXmlSchemaProcessor;
 import org.gaea.framework.web.schema.SystemCacheFactory;
@@ -22,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
@@ -30,10 +33,7 @@ import javax.annotation.PostConstruct;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by iverson on 2017/3/30.
@@ -70,26 +70,68 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
      */
     public synchronized void init() throws IOException, SysInitException {
 
-        // 读取配置的路径对应的文件。支持classpath:/com/**/*.xml这样的模糊匹配
-        Resource[] arrayR = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_XML_SCHEMA_INIT_PATH));
-        Map<String, GaeaXmlSchema> allGaeaXmlSchemaMap = new HashMap<String, GaeaXmlSchema>();
-            /* 读取XML文件，把DataSet读取和转换处理。 */
-        if (arrayR != null) {
-            for (Resource r : arrayR) {
-                GaeaXmlSchema gaeaXmlSchema = null;
-                try {
-                    gaeaXmlSchema = gaeaXmlSchemaProcessor.parseXml(r);
-                } catch (Exception e) {
-                    logger.error("Gaea xml schema初始化失败！" + e.getMessage(), e);
-                }
-                if (gaeaXmlSchema != null) {
-                    allGaeaXmlSchemaMap.put(gaeaXmlSchema.getId(), gaeaXmlSchema);
-                }
-            }
+        /**
+         * 从原始property文件获取真正要加载property的文件位置
+         * 支持多个文件。配置项里用“,”隔开即可。
+         */
+        String allXmlSchemaLocations = SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_XML_SCHEMA_INIT_PATH);
+        if (StringUtils.isNotEmpty(allXmlSchemaLocations)) {
+            String[] resourceLocations = allXmlSchemaLocations.split(",");
+            // 遍历配置的每一个路径
+            for (String location : resourceLocations) {
 
-            // cache
-            gaeaSchemaCache.cache(allGaeaXmlSchemaMap);
+                // 读取配置的路径对应的文件。支持classpath:/com/**/*.xml这样的模糊匹配
+                Resource[] arrayR = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(location);
+                Map<String, GaeaXmlSchema> allGaeaXmlSchemaMap = new HashMap<String, GaeaXmlSchema>();
+                /* 读取XML文件，把DataSet读取和转换处理。 */
+                if (arrayR != null) {
+                    // 遍历（模糊）路径下的每一个文件
+                    for (Resource r : arrayR) {
+                        GaeaXmlSchema gaeaXmlSchema = null;
+                        try {
+                            gaeaXmlSchema = gaeaXmlSchemaProcessor.parseXml(r);
+                        } catch (Exception e) {
+                            logger.error("Gaea xml schema初始化失败！" + e.getMessage(), e);
+                        }
+                        if (gaeaXmlSchema != null) {
+                            allGaeaXmlSchemaMap.put(gaeaXmlSchema.getId(), gaeaXmlSchema);
+                        }
+                    }
+
+                    // cache
+                    gaeaSchemaCache.cache(allGaeaXmlSchemaMap);
+                }
+
+
+//                Resource r = loader.getResource(location);
+//                if (r.exists()) {
+//                    Properties p = null;
+//                    p = PropertiesLoaderUtils.loadProperties(new EncodedResource(r, "UTF-8"));
+//                    // 把properties文件里的值，放到全局的map中缓存
+//                    initProperties(p, location);
+//                }
+            }
         }
+//        // 读取配置的路径对应的文件。支持classpath:/com/**/*.xml这样的模糊匹配
+//        Resource[] arrayR = ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources(SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_XML_SCHEMA_INIT_PATH));
+//        Map<String, GaeaXmlSchema> allGaeaXmlSchemaMap = new HashMap<String, GaeaXmlSchema>();
+//            /* 读取XML文件，把DataSet读取和转换处理。 */
+//        if (arrayR != null) {
+//            for (Resource r : arrayR) {
+//                GaeaXmlSchema gaeaXmlSchema = null;
+//                try {
+//                    gaeaXmlSchema = gaeaXmlSchemaProcessor.parseXml(r);
+//                } catch (Exception e) {
+//                    logger.error("Gaea xml schema初始化失败！" + e.getMessage(), e);
+//                }
+//                if (gaeaXmlSchema != null) {
+//                    allGaeaXmlSchemaMap.put(gaeaXmlSchema.getId(), gaeaXmlSchema);
+//                }
+//            }
+//
+//            // cache
+//            gaeaSchemaCache.cache(allGaeaXmlSchemaMap);
+//        }
     }
 
     /**
@@ -158,6 +200,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
      * 这个XML schema的定义是读缓存的，数据集的数据是实时查询的。
      *
      * @param schemaId
+     * @param queryConditionDTO
      * @param loginName 对应的数据集的数据权限过滤用
      * @return
      * @throws SysInitException
@@ -166,7 +209,8 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
      * @throws SystemConfigException
      */
     @Override
-    public String getJsonSchema(String schemaId, String loginName) throws SysInitException, ValidationFailedException, InvalidDataException, SystemConfigException {
+    public String getJsonSchema(String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO, String loginName)
+            throws SysInitException, ValidationFailedException, InvalidDataException, SystemConfigException, SysLogicalException, ProcessFailedException {
         if (StringUtils.isEmpty(schemaId)) {
             throw new IllegalArgumentException("schema id为空，无法获取schema的定义！");
         }
@@ -174,7 +218,16 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
         if (gaeaXmlSchema == null) {
             throw new ValidationFailedException("找不到对应的Schema。请检查是否缺少了相关的配置/放错了位置/命名错误等。");
         }
-        return getJsonSchema(gaeaXmlSchema, loginName, null);
+        if (gaeaXmlSchema.getSchemaData() == null || CollectionUtils.isEmpty(gaeaXmlSchema.getSchemaData().getDataSetList())) {
+            throw new ValidationFailedException("XML Schema定义缺少<data>部分。请检查是否缺少了相关的配置/放错了位置/命名错误等。");
+        }
+        // 如果某些查询条件（queryConditionDTOList）在系统的数据集定义中缺少，略过（虽然这样会导致查询条件的缺少）
+        List<DataSetCommonQueryConditionDTO> queryConditionDTOList = new ArrayList<DataSetCommonQueryConditionDTO>();
+        if (queryConditionDTO != null) {
+            queryConditionDTOList.add(queryConditionDTO);
+        }
+        LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap = getConditionSets(GaeaDataSetUtils.getGaeaDataSet(schemaId), queryConditionDTOList, true); // 要求严格匹配条件，找不到对应的ConditionSet抛出异常
+        return getJsonSchema(gaeaXmlSchema, loginName, conditionSetMap);
     }
 
     /**
@@ -197,7 +250,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
         }
         Map<String, ConditionSet> dsConditionSets = gaeaDataSet.getWhere().getConditionSets();
         LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> resultMap = new LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO>();
-        // 遍历
+        // 遍历（页面传来）条件对象
         for (DataSetCommonQueryConditionDTO queryConditionDTO : queryConditionDTOList) {
             ConditionSet findCondSet = null;
             for (String condSetId : dsConditionSets.keySet()) {
