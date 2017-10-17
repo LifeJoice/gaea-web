@@ -119,6 +119,12 @@ define(function () {
             DATA_TYPE_TIME: "time",
             DATA_TYPE_DATETIME: "datetime",
             DATA_TYPE_IMG: "img"
+        },
+        WRITEBACK: {
+            // 回填数据的方式
+            WRITEBACK_MODE: {
+                APPEND: "append" // 增量
+            }
         }
     };
     var PAGE = {

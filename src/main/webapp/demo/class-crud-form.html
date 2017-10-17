@@ -68,7 +68,9 @@
             <span class="fieldvalue">
                 <!--<input id="gridSelectResult" name="gridSelectResult" value="" type="hidden">-->
                 <a id="btnDataFilterDialog" class="medium darkslategrey button"
-                   data-gaea-ui-button="newId:'dataFilterDialog', action:'data_filter_dialog', openStyle:'inOne', submitAction:'writeback_in_one',refInputId:'studentList', schemaId:'SCHEMA_DEMO_DATA_FILTER' ">新增</a>
+                   data-gaea-ui-button="newId:'dataFilterDialog', action:'data_filter_dialog', openStyle:'inOne', submitAction:'writeback_in_one', refInputId:'studentList', schemaId:'SCHEMA_DEMO_DATA_FILTER',
+                   writeBack:{writeBackMode:'append'},
+                    condition:{id:'filterDialogByName',values:[{ type:'static',value:'华' }] }">新增</a>
             </span>
         </div>
     </div>
@@ -87,7 +89,7 @@
             <span class="">
                 <div id="studentList" data-gaea-ui-name="students"
                      data-gaea-ui-crud-grid='columns:[
-                     {name:"name",text:"姓名", editable:true,width:120,dataType:"string"},
+                     {name:"name",text:"姓名", editable:true,width:120,dataType:"string", primaryKey:"true"},
                      {name:"sex",text:"性别", width:80, dataSetId: "DEMO_STUDENT_SEX", default:{ value:"2" }},
                      {name:"stuNo",text:"学号", width:60, validator: { html: {type:"number","data-msg":"非空。输入要求是数值。",required:"required" } }
                      },

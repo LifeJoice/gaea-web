@@ -88,10 +88,11 @@ define([
              * 从data-filter-dialog回到上级dialog的时候需要。
              * @param {string} gridId       grid容器id
              * @param {object} data         要刷新的数据
+             * @param {string} isNewData 数据回填的方式：替换or增量
              */
-            triggerGridRefresh: function (gridId, data) {
+            triggerGridRefresh: function (gridId, data, isNewData) {
                 require(["gaeajs-ui-grid"], function (gaeaGrid) {
-                    gaeaGrid.data.reset(gridId, data);
+                    gaeaGrid.data.reset(gridId, data, isNewData);
                 });
             }
         };
@@ -142,7 +143,7 @@ define([
              * @param {string} opts.parentId
              * @param {string} opts.openStyle
              * @param {string} opts.submitAction                    新的弹出框的提交方式。是直接提交到后台，还是只是回写到parent dialog的某个值中
-             * @param {string} opts.writeBack
+             * @param {UiButton.WriteBack} opts.writeBack
              * @param {string} opts.submitUrl
              * @param {string} opts.contentUrl
              * @param {string} opts.refInputId                      关联的父级dialog的输入框id
@@ -1946,7 +1947,10 @@ define([
                      */
                     if ($target.find(".gaea-grid").hasClass("crud-grid")) {
                         var gridCtId = $target.find(".gaea-grid-ct").attr("id");
-                        _private.triggerGridRefresh(gridCtId, data);
+                        // 根据配置的数据回写方式，决定回填过来的是增量数据，还是替换当前数据
+                        var isNewData = gaeaString.equalsIgnoreCase(opts.writeBack.writeBackMode, GAEA_UI_DEFINE.UI.WRITEBACK.WRITEBACK_MODE.APPEND) ? true : false;
+                        // 触发表格刷新数据
+                        _private.triggerGridRefresh(gridCtId, data, isNewData);
                     } else {
                         // 保存时得json转一下，否则变成[ Object object ]这样了
                         $target.val(JSON.stringify(data));
@@ -1959,11 +1963,7 @@ define([
              * @param {string} opts.formId
              * @param {string} opts.submitAction
              * @param {string} opts.refInputId
-             * @param {object} opts.writeBack               按字段名回写的具体配置项
-             * @param {string} opts.writeBack.fromCtId      源容器的id
-             * @param {string} opts.writeBack.fromFieldPrefix
-             * @param {string} opts.writeBack.toCtId        源容器的id
-             * @param {string} opts.writeBack.toFieldPrefix
+             * @param {UiButton.WriteBack} opts.writeBack               按字段名回写的具体配置项
              */
             writeBackByField: function (opts) {
                 if (gaeaValid.isNull(opts.writeBack.fromCtId) || gaeaValid.isNull(opts.writeBack.toCtId)) {

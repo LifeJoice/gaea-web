@@ -425,8 +425,12 @@ define([
                  * 触发grid刷新。原有的数据将会被抛弃。
                  * @param {string} gridId       grid容器id
                  * @param {object} data         要刷新的数据
+                 * @param {string} isNewData 数据回填的方式：替换or增量
                  */
-                reset: function (gridId, data) {
+                reset: function (gridId, data, isNewData) {
+                    if (gaeaValid.isNull(isNewData)) {
+                        isNewData = false;
+                    }
                     if (gaeaValid.isNull(gridId)) {
                         throw "grid id为空，无法重置grid的数据！";
                     }
@@ -435,7 +439,7 @@ define([
                     $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, {
                         data: data,
                         // 是否额外的新增数据。这个不是指替换，指添加。
-                        isNewData: false
+                        isNewData: isNewData
                     });
                 }
             },
@@ -950,32 +954,32 @@ define([
                     return;
                 }
                 // init img column
-                    var $cellCt = $td.children(".grid-td-div");
-                    // add img tag class
-                    $cellCt.addClass("img-cell");
+                var $cellCt = $td.children(".grid-td-div");
+                // add img tag class
+                $cellCt.addClass("img-cell");
 
-                    $cellCt.find("img").each(function (i, element) {
-                        var $img = $(this);
-                        // 原图链接
-                        var src = $img.attr("src");
-                        var thumbnailSrc = src; // 缩略图src
-                        // 加前缀
-                        if (gaeaValid.isNotNull(columnImgSrcPrefix)) {
-                            src = columnImgSrcPrefix + src;
-                        }
-                        // 加后缀
-                        if (gaeaValid.isNotNull(columnImgSrcSuffix)) {
-                            src = src + columnImgSrcSuffix;
-                        }
-                        // 缩略图, 叠加一般性后缀
-                        if (gaeaValid.isNotNull(columnImgThumbnailSuffix)) {
-                            thumbnailSrc = src + columnImgThumbnailSuffix;
-                        }
-                        // 修改src为缩略图
-                        $img.attr("src", thumbnailSrc);
-                        // 包上<a>标签, lightGallery控件需要
-                        $img.wrap('<a href="' + src + '">');
-                    });
+                $cellCt.find("img").each(function (i, element) {
+                    var $img = $(this);
+                    // 原图链接
+                    var src = $img.attr("src");
+                    var thumbnailSrc = src; // 缩略图src
+                    // 加前缀
+                    if (gaeaValid.isNotNull(columnImgSrcPrefix)) {
+                        src = columnImgSrcPrefix + src;
+                    }
+                    // 加后缀
+                    if (gaeaValid.isNotNull(columnImgSrcSuffix)) {
+                        src = src + columnImgSrcSuffix;
+                    }
+                    // 缩略图, 叠加一般性后缀
+                    if (gaeaValid.isNotNull(columnImgThumbnailSuffix)) {
+                        thumbnailSrc = src + columnImgThumbnailSuffix;
+                    }
+                    // 修改src为缩略图
+                    $img.attr("src", thumbnailSrc);
+                    // 包上<a>标签, lightGallery控件需要
+                    $img.wrap('<a href="' + src + '">');
+                });
                 //}
             }
         };
@@ -1126,6 +1130,7 @@ define([
                 //}
             },
             /**
+             * 一般用于crud-grid的“添加”按钮。每次添加都是append。
              * 这个是对外的接口。和data.addOne的区别是，这个整合了创建空对象和添加两个动作。
              * 这个会把新创建的对象，插入数据数组的尾部。
              * @param {object} opts
@@ -1761,6 +1766,20 @@ define([
                         $gridCt.find(".img-cell").lightGallery();
                     });
                 },
+                /**
+                 * 获取一个grid中，有定义primaryKey的列。取name组成数组返回。
+                 * @param $gridCt
+                 * @returns {Array} name的数组
+                 */
+                getPrimaryKeys: function ($gridCt) {
+                    var keys = [];
+                    $.each($gridCt.data("options").columns, function (i, column) {
+                        if (column.primaryKey) {
+                            keys.push(column.name);
+                        }
+                    });
+                    return keys;
+                },
                 row: {
                     /**
                      * 创建行操作区，包括行前操作区（按钮区），行尾操作区（按钮区）
@@ -2196,6 +2215,16 @@ define([
                         // 刷新缓存数据
                         // 如果是刷空（清空），则以空数组判断。如果是undefined/null，还是不能触发清空！
                         if (gaeaValid.isNotNull(data.data) || _.isArray(data.data)) {
+                            // 如果是额外的数据，增量，则要做增量合并
+                            if (gaeaValid.isNotNull($gridCt.data("options").data) && gaeaValid.isNotNull(data.isNewData) && data.isNewData) {
+                                //data.data = $gridCt.data("options").data.concat(data.data);
+                                var keys = _private.grid.getPrimaryKeys($gridCt);
+                                // 合并当前数据，和新数据
+                                data.data = gaeaUtils.array.combine($gridCt.data("options").data, data.data, {
+                                    keys: keys,
+                                    removeDuplicate: true
+                                });
+                            }
                             $gridCt.data("options").data = data.data;
                         }
                         // 缓存过滤后的数据到grid中

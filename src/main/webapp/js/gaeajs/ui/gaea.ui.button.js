@@ -11,7 +11,7 @@
  * @property {string} newId                     看action的配置。如果是新弹出框，则这个值就是新弹出框的id。
  * @property {string} action                    按钮的操作code。
  * @property {string} submitAction              按钮如果是新开一个弹框，新弹框点击确认的操作code。
- * @property {string} writeBack                 按字段名回写的具体配置项. writeback_by_field需要。
+ * @property {UiButton.WriteBack} writeBack                 按字段名回写的具体配置项. writeback_by_field需要。
  * @property {string} contentUrl                按钮如果是新开一个弹框，新弹框内容的加载地址。
  * @property {string} submitUrl                 按钮如果是新开一个弹框，新弹框的提交地址
  * @property {string} openStyle                 打开方式。new：新弹出一个 inOne：在当前parentId内打开（不弹出）
@@ -24,6 +24,16 @@
  * @property {string} onComplete.trigger.target 触发对象
  * @property {string} onComplete.trigger.event  触发对象的事件
  */
+/**
+ * 这个是HTML页面直接定义的Button类其中writeBack对象的定义。
+ * 定义了嵌入式弹出框数据回写等一些规则。
+ * @typedef {object} UiButton.WriteBack
+ * @param {string} fromCtId      源容器的id
+ * @param {string} fromFieldPrefix
+ * @param {string} toCtId        源容器的id
+ * @param {string} toFieldPrefix
+ * @param {string} writeBackMode        cover|append.默认为cover（覆盖）.也可以选append附加。
+ */
 define([
         "jquery", "underscore", 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate',
         'gaeajs-ui-definition', "gaeajs-common-utils-string", "gaeajs-ui-events", 'gaeajs-ui-dialog',
@@ -31,7 +41,13 @@ define([
     function ($, _, gaeaAjax, gaeaValid,
               GAEA_UI_DEFINE, gaeaString, GAEA_EVENTS, gaeaDialog,
               gaeaCommonUtils) {
+
         var button = {
+            _default: {
+                writeBack: {
+                    writeBackMode: 'cover' // 默认弹出框回写数据的方式，覆盖。
+                }
+            },
             /**
              * 创建个按钮的html。简单的HTML拼凑而已。
              * @param {object} btnOptions
@@ -94,6 +110,7 @@ define([
                 var buttonDef = gaeaString.parseJSON(strButtonDef);
                 buttonDef.id = opts.id;
                 buttonDef.parentDialogId = parentDialogId;
+                _.defaults(buttonDef, button._default); // 默认值初始化
                 if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.BUTTON.ACTION.NEW_DIALOG, buttonDef.action)) {
                     /**
                      * 弹出新窗口的按钮初始化

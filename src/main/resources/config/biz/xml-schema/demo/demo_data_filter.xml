@@ -17,6 +17,8 @@
                     visible="true" sortable="false" html-width="300" data-type="string"/>
             <column id="sex" name="sex" label="性别" db-column-name="SEX"
                     visible="true" sortable="false" html-width="60" data-type="string" dataset-id="DEMO_STUDENT_SEX"/>
+            <column id="stuNo" name="stuNo" label="学号" db-column-name="STU_NO"
+                    visible="true" sortable="false" html-width="60" data-type="string"/>
             <column id="entranceTime" name="entranceTime" label="入学时间" db-column-name="ENTRANCE_TIME"
                     visible="true" sortable="true" html-width="180" data-type="date"
                     datetime-format="yyyy-MM-dd HH:mm"/>

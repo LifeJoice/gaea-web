@@ -46,12 +46,26 @@ define([
         utils.array = {
             /**
              * 合并两个数组并返回。
-             * @param arr1
-             * @param arr2
-             * @returns {Array}
+             * 如果有removeDuplicate配置项，并且keys不为空，则数组2会根据keys判断数组1中是否有同样值的对象，有的话就不合并。
+             *
+             * @param {Array} arr1                              可以为对象，自动转换为数组。
+             * @param {Array} arr2                              可以为对象，自动转换为数组。
+             * @param {object} [opts]
+             * @param {string[]} opts.keys                      arr1/arr2的元素的某些属性的集合。配合removeDuplicate，移除数组中重复的值。
+             * @param {boolean} opts.removeDuplicate=false      移除合并数组重复的。这个取决于另一个参数keys。
+             * @returns {Array} 如果两个数组参数为空，则返回空；如果只是其中一个为空，则返回另一个；
              */
-            combine: function (arr1, arr2) {
+            combine: function (arr1, arr2, opts) {
+                if (gaeaValid.isNull(arr1) && gaeaValid.isNull(arr2)) {
+                    return;
+                }
                 var result = new Array();
+                opts = gaeaValid.isNull(opts) ? {} : opts; // 初始化undefined的
+                // 初始化默认配置
+                _.defaults(opts, {
+                    removeDuplicate: false
+                });
+                // 处理数组1
                 if (gaeaValid.isNotNull(arr1)) {
                     // 如果不是数组，转换成数组合并
                     if (!_.isArray(arr1)) {
@@ -59,12 +73,48 @@ define([
                     }
                     result = result.concat(arr1);
                 }
+                // 处理数组2
                 if (gaeaValid.isNotNull(arr2)) {
                     // 如果不是数组，转换成数组合并
                     if (!_.isArray(arr2)) {
                         arr2 = [arr2];
                     }
-                    result = result.concat(arr2);
+                    /**
+                     * if 需要剔除两个数组中重复的
+                     * else 直接整合
+                     */
+                    if (opts.removeDuplicate && _.isArray(opts.keys) && opts.keys.length > 0) {
+                        // 遍历数组2, 处理重复
+                        $.each(arr2, function (i, newVal) {
+                            var hasDuplicate = false; // 是否有重复值
+                            // 遍历数组1，对比有没有重复的。没有重复的才加入
+                            $.each(arr1, function (j, existVal) {
+                                $.each(opts.keys, function (m, key) {
+                                    // 如果key为空，不比较
+                                    if (gaeaValid.isNull(key)) {
+                                        throw "合并数组，不允许为空的key！keys: " + JSON.stringify(opts.keys);
+                                    }
+                                    // 比较数组1和数组2的值，是否有重复的。这个得把所有key遍历一遍，因为多个key表示多个条件and。
+                                    // 如果多个key，上一个判断为true，可能下一个为false
+                                    if (gaeaString.equalsIgnoreCase(newVal[key], existVal[key])) {
+                                        hasDuplicate = true;
+                                    } else {
+                                        hasDuplicate = false;
+                                    }
+                                });
+                                // 如果已经找到重复的，就不需要继续检查后面的了。否则后面的检查会把hasDuplicate重置。
+                                if (hasDuplicate) {
+                                    return false;
+                                }
+                            });
+                            // 所有key验证过，不重复
+                            if (!hasDuplicate) {
+                                result.push(newVal);
+                            }
+                        });
+                    } else {
+                        result = result.concat(arr2);
+                    }
                 }
                 return result;
             },
