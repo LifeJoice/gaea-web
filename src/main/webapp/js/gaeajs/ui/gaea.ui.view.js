@@ -143,6 +143,7 @@ define([
              */
             cleanCache: function (opts) {
                 gaeaContext.setValue("selectedRow", "gaea-grid-ct", {});
+                gaeaContext.setValue("selectedRows", "gaea-grid-ct", {});
             },
             viewChainData: {
                 /**
