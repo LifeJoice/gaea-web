@@ -24,6 +24,7 @@ public class SchemaViews implements Serializable {
     private SchemaGridJO gridJO;
     private List<SchemaDialog> dialogs;
     private SchemaActions actions;
+    // view需要引入的css和js的清单
     private SchemaImport imports;
     private List<SchemaViews> views;
 

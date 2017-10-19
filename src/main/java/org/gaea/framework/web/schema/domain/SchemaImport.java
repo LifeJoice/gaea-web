@@ -19,35 +19,37 @@ public class SchemaImport implements Serializable {
     private List<Import> headLastImportList = null;
     private List<Import> cssImportList = null;
     private List<Import> bodyendImportList = null;
-//    public static final String DEFAULT_PARENT_PATH = "/static/";
+    //    public static final String DEFAULT_PARENT_PATH = "/static/";
+    // 页面完成后才加载的js
+    private List<Import> domLastImportJs;
 
-    public void addheadFirstJsImport(String src){
+    public void addheadFirstJsImport(String src) {
         Import imp = new Import(src);
         getHeadFirstImportList().add(imp);
     }
 
-    public void addheadLastJsImport(String src){
+    public void addheadLastJsImport(String src) {
         Import imp = new Import(src);
         getHeadLastImportList().add(imp);
     }
 
-    public void addbodyendJsImport(String src){
+    public void addbodyendJsImport(String src) {
         Import imp = new Import(src);
         getBodyendImportList().add(imp);
     }
 
-    public void addCssImport(String src){
+    public void addCssImport(String src) {
         Import imp = new Import(src);
         getCssImportList().add(imp);
     }
 
     @JsonIgnore
-    public String getStrHeadFirstJsImport(){
+    public String getStrHeadFirstJsImport() {
         return getStrJsImport(getHeadFirstImportList());
     }
 
     @JsonIgnore
-    public String getStrheadLastImport(){
+    public String getStrheadLastImport() {
         StringBuilder result = new StringBuilder("");
         // 把headLastList转换为js import
         result.append(getStrJsImport(getHeadLastImportList()));
@@ -58,53 +60,64 @@ public class SchemaImport implements Serializable {
     }
 
     @JsonIgnore
-    public String getStrBodyendImport(){
+    public String getStrBodyendImport() {
         return getStrJsImport(getBodyendImportList());
     }
 
     @JsonIgnore
-    public String getStrCssImport(List<Import> importList){
+    public String getStrCssImport(List<Import> importList) {
         StringBuilder result = new StringBuilder("");
-        for(Import imp: importList){
+        for (Import imp : importList) {
             result.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"").append(imp.getSrc()).append("\" />");
         }
         return result.toString();
     }
 
     @JsonIgnore
-    protected String getStrJsImport(List<Import> importList){
+    protected String getStrJsImport(List<Import> importList) {
         StringBuilder result = new StringBuilder("");
-        for(Import imp:importList){
+        for (Import imp : importList) {
             result.append("<script src=\"").append(imp.getSrc()).append("\"></script>");
         }
         return result.toString();
     }
 
     public List<Import> getHeadFirstImportList() {
-        if(this.headFirstImportList ==null){
+        if (this.headFirstImportList == null) {
             this.headFirstImportList = new ArrayList<Import>();
         }
         return headFirstImportList;
     }
 
     public List<Import> getCssImportList() {
-        if(this.cssImportList ==null){
+        if (this.cssImportList == null) {
             this.cssImportList = new ArrayList<Import>();
         }
         return cssImportList;
     }
 
     public List<Import> getBodyendImportList() {
-        if(this.bodyendImportList ==null){
+        if (this.bodyendImportList == null) {
             this.bodyendImportList = new ArrayList<Import>();
         }
         return bodyendImportList;
     }
 
     public List<Import> getHeadLastImportList() {
-        if(this.headLastImportList ==null){
+        if (this.headLastImportList == null) {
             this.headLastImportList = new ArrayList<Import>();
         }
         return headLastImportList;
+    }
+
+    public List<Import> getDomLastImportJs() {
+        if (domLastImportJs == null) {
+            domLastImportJs = new ArrayList<Import>();
+        }
+        return domLastImportJs;
+    }
+
+    public void setDomLastImportJs(List<Import> domLastImportJs) {
+        this.domLastImportJs = domLastImportJs;
     }
 }

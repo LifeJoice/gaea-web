@@ -1,6 +1,7 @@
 package org.gaea.framework.web.schema.view.jo;
 
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.framework.web.schema.domain.Import;
 import org.gaea.framework.web.schema.domain.SchemaImport;
 import org.gaea.framework.web.schema.domain.view.SchemaActions;
 import org.gaea.framework.web.schema.domain.view.SchemaDialog;
@@ -28,6 +29,7 @@ public class SchemaViewJO implements Serializable {
     private SchemaActionsJO actions;
     private List<SchemaViewJO> views;
     private List<DataSetCommonQueryConditionDTO> preConditions; // 前置条件。如果是下钻的页面，例如从一个列表页跳到第二个列表页，则第二个列表页很可能带着某些第一个列表页的前置条件。
+    private SchemaImport imports;
 
     public List<SchemaDialogJO> getDialogs() {
         if (dialogs == null) {
@@ -108,5 +110,13 @@ public class SchemaViewJO implements Serializable {
 
     public void setPreConditions(List<DataSetCommonQueryConditionDTO> preConditions) {
         this.preConditions = preConditions;
+    }
+
+    public SchemaImport getImports() {
+        return imports;
+    }
+
+    public void setImports(SchemaImport imports) {
+        this.imports = imports;
     }
 }

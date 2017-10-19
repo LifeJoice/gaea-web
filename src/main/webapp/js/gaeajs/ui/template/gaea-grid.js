@@ -41,6 +41,17 @@ require(['jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', '
         if (gaeaValid.isNotNullMultiple(viewSchema.initData, ["views", "title"])) {
             $("#view-title").html(viewSchema.initData.views.title);
         }
+        // 加载dom完成后才要的js
+        if (gaeaValid.isNotNullMultiple(viewSchema.initData, ["views", "imports", "domLastImportJs"])) {
+            if (_.isArray(viewSchema.initData.views.imports.domLastImportJs)) {
+                $.each(viewSchema.initData.views.imports.domLastImportJs, function (i, importObj) {
+                    if (gaeaValid.isNotNull(importObj.src)) {
+                        $.getScript(importObj.src);
+                    }
+                });
+
+            }
+        }
 
     });
 

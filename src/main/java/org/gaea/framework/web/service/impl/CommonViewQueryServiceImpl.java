@@ -410,13 +410,14 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                                     condition.getOp(), condition.getPropValue()).toString());
                 }
                 SchemaColumn schemaColumn = GaeaSchemaUtils.getViewColumn(grid, condition.getPropName());
-                if (schemaColumn == null) {
-                    throw new ValidationFailedException("无法执行查询！根据页面的条件，找不到对应grid的列。");
+                if (schemaColumn != null) {
+//                    throw new ValidationFailedException("无法执行查询！根据页面的条件，找不到对应grid的列。");
+//                }
+                    String dbName = schemaColumn.getDbColumnName();
+                    condition.setPropName(dbName);
+                    condition.setDataType(schemaColumn.getDataType());
+                    condition.setOp(condition.getOp());
                 }
-                String dbName = schemaColumn.getDbColumnName();
-                condition.setPropName(dbName);
-                condition.setDataType(schemaColumn.getDataType());
-                condition.setOp(condition.getOp());
             }
         }
     }

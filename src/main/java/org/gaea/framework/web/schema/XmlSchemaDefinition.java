@@ -40,4 +40,10 @@ public class XmlSchemaDefinition {
     public static String BUTTON_ACTION_NAME = "button-action"; // "button"的子元素。
     public static String BUTTON_VALIDATORS_NAME = "validators"; // 校验规则的容器元素
     public static String BUTTON_ACTION_VALIDATOR_NAME = "action-validator";
+    /**
+     * ********************************************************************************************************************************************************
+     * JavaScript/Css
+     * ********************************************************************************************************************************************************
+     */
+    public static String IMPORT_JS_PERIOD_DOM_LAST = "dom-last"; // 页面完成后，才加载的js
 }

@@ -1,13 +1,11 @@
 package org.gaea.framework.web.schema.convertor;
 
 import org.gaea.exception.InvalidDataException;
-import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.XmlSchemaDefinition;
-import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.schema.domain.Import;
 import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.framework.web.schema.view.jo.SchemaGridJO;
 import org.gaea.util.GaeaXmlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -78,21 +76,29 @@ public class XmlViewsConvertor implements SchemaConvertor<SchemaViews> {
     }
 
     // 转换XML中的import元素。
-    private void convertImports(SchemaViews schemaViews, Node viewNode) {
+    private void convertImports(SchemaViews schemaViews, Node viewNode) throws InvalidDataException {
         Map<String, String> attributes = GaeaXmlUtils.getAttributes(viewNode);
         if (XmlSchemaDefinition.IMPORT_JAVASCRIPT_NAME.equals(viewNode.getNodeName())) {
-            String position = attributes.get("position");
-            if ("headfirst".equals(position)) {
-                if (!StringUtils.isBlank(attributes.get("src"))) {
-                    schemaViews.getImports().addheadFirstJsImport(attributes.get("src"));
-                }
-            } else if ("bodyend".equals(position)) {
-                if (!StringUtils.isBlank(attributes.get("src"))) {
-                    schemaViews.getImports().addbodyendJsImport(attributes.get("src"));
-                }
-            } else {      // 其他无论是为空还是设置headlast,都按headlast处理
-                if (!StringUtils.isBlank(attributes.get("src"))) {
-                    schemaViews.getImports().addheadLastJsImport(attributes.get("src"));
+            Import importJs = new Import();
+            importJs = GaeaXmlUtils.copyAttributesToBean(viewNode, importJs, Import.class);
+            // 有period定义的，和没有的，分开处理
+            if (XmlSchemaDefinition.IMPORT_JS_PERIOD_DOM_LAST.equalsIgnoreCase(importJs.getPeriod())) {
+                // 整个页面加载完才load的js。主要是为了gaea一些元素，例如按钮，构建完了才能附加的js。
+                schemaViews.getImports().getDomLastImportJs().add(importJs);
+            } else {
+//            String position = attributes.get("position");
+                if ("headfirst".equals(importJs.getPosition())) {
+                    if (!StringUtils.isBlank(importJs.getSrc())) {
+                        schemaViews.getImports().addheadFirstJsImport(importJs.getSrc());
+                    }
+                } else if ("bodyend".equals(importJs.getPosition())) {
+                    if (!StringUtils.isBlank(importJs.getSrc())) {
+                        schemaViews.getImports().addbodyendJsImport(importJs.getSrc());
+                    }
+                } else {      // 其他无论是为空还是设置headlast,都按headlast处理
+                    if (!StringUtils.isBlank(importJs.getSrc())) {
+                        schemaViews.getImports().addheadLastJsImport(importJs.getSrc());
+                    }
                 }
             }
         } else if (XmlSchemaDefinition.IMPORT_CSS_NAME.equals(viewNode.getNodeName())) {
