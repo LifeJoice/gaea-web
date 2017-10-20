@@ -1097,7 +1097,8 @@ define([
                 } else {
                     // 请求服务端的数据
                     var requestData = {
-                        selectedRow: gaeaContext.getValue("selectedRow", opts.gridId)
+                        selectedRow: gaeaContext.getValue("selectedRow", opts.gridId),
+                        selectedRows: gaeaContext.getValue("selectedRows", opts.gridId)
                     };
                     // 数据加载要求同步
                     gaeaAjax.ajax({

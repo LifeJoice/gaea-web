@@ -281,9 +281,13 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
             if (gaeaValid.isNull(opts)) {
                 return;
             }
-            var $this = $("#" + opts.id);
+            var $target = $("#" + opts.id);
             if (gaeaValid.isNotNull(opts.onComplete)) {
+                opts.gaeaEventName = "onComplete"; // 这个必须和html元素上的data-gaea-ui-xx的事件名对上。否则opts里面没有对应的属性值。
                 _private.bindOnComplete(opts);
+            } else if (gaeaValid.isNotNull(opts["onChange"])) {
+                opts.gaeaEventName = "onChange"; // 这个必须和html元素上的data-gaea-ui-xx的事件名对上。否则opts里面没有对应的属性值。
+                _private.bindOnChange(opts);
             }
         };
 
@@ -292,24 +296,76 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * 根据onComplete对象定义，绑定一个gaeaEvent_onComplete事件，在触发的时候，进一步触发对应target的event。
              * @param {object} opts
              * @param {object} opts.id
+             * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。
              * @param {GaeaUiEvent} opts.onComplete
              */
             bindOnComplete: function (opts) {
                 events.registerListener(events.DEFINE.CALLBACK.ON_COMPLETE, "#" + opts.id, function (event, data) {
-                    gaeaValid.isNull({
-                        check: opts.onComplete.trigger.target,
-                        exception: "定义的组件（" + opts.id + "）的onComplete属性，触发对象（trigger.target）不允许为空！"
-                    });
-                    gaeaValid.isNull({
-                        check: opts.onComplete.trigger.event,
-                        exception: "定义的组件（" + opts.id + "）的onComplete属性，触发事件（trigger.event）不允许为空！"
-                    });
-                    var $target = $(opts.onComplete.trigger.target);
-                    if ($target.length < 1) {
-                        throw "通过onComplete属性定义，要触发的target不存在！options: " + JSON.stringify(opts.onComplete);
-                    }
-                    $target.trigger(opts.onComplete.trigger.event);
+                    // 通用处理
+                    _private.doGaeaEvent(opts);
+
+                    //gaeaValid.isNull({
+                    //    check: opts.onComplete.trigger.target,
+                    //    exception: "定义的组件（" + opts.id + "）的onComplete属性，触发对象（trigger.target）不允许为空！"
+                    //});
+                    //gaeaValid.isNull({
+                    //    check: opts.onComplete.trigger.event,
+                    //    exception: "定义的组件（" + opts.id + "）的onComplete属性，触发事件（trigger.event）不允许为空！"
+                    //});
+                    //var $target = $(opts.onComplete.trigger.target);
+                    //if ($target.length < 1) {
+                    //    throw "通过onComplete属性定义，要触发的target不存在！options: " + JSON.stringify(opts.onComplete);
+                    //}
+                    //$target.trigger(opts.onComplete.trigger.event);
                 });
+            },
+            /**
+             * 绑定gaea event通用处理onChange的处理。
+             * 例如针对：data-gaea-ui-select="onChange: { trigger: {target:'#tab2-title' , event:'reload_data' }}"
+             * @param {object} opts
+             * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。
+             */
+            bindOnChange: function (opts) {
+                var $target = $("#" + opts.id);
+                events.registerListener("change", "#" + opts.id, function (event, data) {
+                    // 通用处理
+                    _private.doGaeaEvent(opts);
+                });
+            },
+            /**
+             * 处理gaea event的逻辑。
+             * <b>
+             *     这个只是绑定对象事件触发后的逻辑处理。本身不负责绑定事件工作。
+             * </b>
+             * <p>
+             * 所谓gaea event，是指绑定的某个元素的一些设置，可以通过这些设置去把一个元素的状态改变，触发另一个（些）元素的事件。
+             * 例如：
+             * 对于某个select，有：
+             * data-gaea-ui-select="onChange: { trigger: {target:'#tab2-title' , event:'reload_data' }}"
+             * 就定义了change时，触发某个tab的reload data。
+             * </p>
+             * @param {object} opts
+             * @param {object} opts.id
+             * @param {string} opts.gaeaEventName           gaea框架的定义在页面元素上的名称。非javascript的事件名
+             */
+            doGaeaEvent: function (opts) {
+                /**
+                 * @type {GaeaUiEvent}
+                 */
+                var gaeaEventDef = opts[opts.gaeaEventName];
+                gaeaValid.isNull({
+                    check: gaeaEventDef.trigger.target,
+                    exception: "定义的组件（" + opts.id + "）的gaea通用事件机制:" + opts.gaeaEventName + "，触发对象（trigger.target）不允许为空！"
+                });
+                gaeaValid.isNull({
+                    check: gaeaEventDef.trigger.event,
+                    exception: "定义的组件（" + opts.id + "）的gaea通用事件机制:" + opts.gaeaEventName + "，触发事件（trigger.event）不允许为空！"
+                });
+                var $target = $(gaeaEventDef.trigger.target);
+                if ($target.length < 1) {
+                    throw "通过:" + opts.gaeaEventName + "属性定义，要触发的target不存在！options: " + JSON.stringify(gaeaEventDef);
+                }
+                $target.trigger(gaeaEventDef.trigger.event);
             }
         };
 

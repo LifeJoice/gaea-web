@@ -124,6 +124,12 @@
             $(".btn-submit").click(function () {
                 $("#myform").submit();
             });
+            // 回车也提交
+            $(document).keydown(function (event) {
+                if(event.which==13){
+                    $("#myform").submit();
+                }
+            });
         });
     </script>
 </head>

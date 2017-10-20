@@ -100,6 +100,9 @@ define(function () {
                 SUB_BUTTON_HTML: '<li id="<%= ID %>" data-url="<%= URL %>"><%=TEXT %></li>'
             }
         },
+        SELECT: {
+            DEFINE: "gaea-ui-select"
+        },
         SELECT2: {
             DEFINE: "gaea-ui-select2"
         },

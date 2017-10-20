@@ -65,6 +65,8 @@ define([
                 }
                 // 初始化按钮(在html中通过data-gaea-ui-button配置的)
                 _private.initGaeaButton(ctSelector);
+                // 初始化select. 其实select非组件，不需要初始化。这个主要初始化一些绑定在上面的通用gaea event。
+                _private.initSelect(ctSelector);
                 // 初始化select2插件
                 _private.initSelect2(ctSelector);
                 // 初始化tabs插件
@@ -213,6 +215,48 @@ define([
                 return dfd.promise();
             },
             /**
+             * 初始化select.
+             * select本身不需要通过这个方法初始化，而是通过数据集。但它还有一些额外的，例如绑定一些事件等，通过这个初始化。
+             * @param ctSelector
+             * @returns {*}
+             */
+            initSelect: function (ctSelector) {
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(ctSelector)) {
+                    dfd.resolve();
+                    return dfd.promise();
+                }
+                // data-gaea-ui-select
+                var attrName = "data-" + GAEA_UI_DEFINE.UI.SELECT.DEFINE;
+                // 找gaeaUI按钮的jq选择器条件( <select data-gaea-ui-select2=*** ...> )
+                var gaeaSelectTemplate = _.template("select[<%= ATTR_NAME %>]");
+                // 查找所有按钮，遍历并初始化
+                $(ctSelector).find(gaeaSelectTemplate({
+                    ATTR_NAME: attrName
+                })).each(function (i, eachSelectObj) {
+                    var $select = $(eachSelectObj);
+                    var id = $select.attr("id");
+                    var configStr = $select.data(GAEA_UI_DEFINE.UI.SELECT.DEFINE); // = data-gaea-ui-select
+                    var opts = gaeaString.parseJSON(configStr);
+                    opts.id = id;
+                    // 检查是否有重复元素！
+                    if (!gaeaUtils.dom.checkUnique(id)) {
+                        console.debug("select根据id查找不唯一。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
+
+                    // 初始化按钮上的事件, 例如什么onComplete等
+                    gaeaEvents.initGaeaEvent(opts);
+
+                    // 请求gaea select2模块进行初始化
+                    //gaeaSelect2.init({
+                    //    jqSelector: "#" + id
+                    //});
+                });
+                dfd.resolve();
+                return dfd.promise();
+            },
+            /**
              * 初始化jQuery select2插件。
              * @param ctSelector
              * @returns {*}
@@ -224,7 +268,7 @@ define([
                     dfd.resolve();
                     return dfd.promise();
                 }
-                // data-gaea-ui-button（这个是gaeaUI的按钮的特殊定义属性）
+                // data-gaea-ui-select2
                 var attrName = "data-" + GAEA_UI_DEFINE.UI.SELECT2.DEFINE;
                 // 找gaeaUI按钮的jq选择器条件( <select data-gaea-ui-select2=*** ...> )
                 var buttonFilterTemplate = _.template("select[<%= ATTR_NAME %>]");
