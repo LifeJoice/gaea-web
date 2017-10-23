@@ -114,7 +114,10 @@ define([
                     CONTEXT[rootKey] = {};
                 }
                 // set key->id value
-                if (gaeaValid.isNull(id) || arguments.length < 3) {
+                if (arguments.length == 1) {
+                    // 只有一个参数，直接叠加值
+                    _.extend(CONTEXT, value);
+                } else if (gaeaValid.isNull(id) || arguments.length < 3) {
                     CONTEXT[rootKey] = value;
                 } else {
                     CONTEXT[rootKey][id] = value;

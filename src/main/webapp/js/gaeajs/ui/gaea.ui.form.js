@@ -49,5 +49,28 @@ define([
                 }
             }
         };
+
+        /**
+         * 获取某个dialog（例如data-filter-dialog）相关的dialog的form的数据，作为gaeaContext构造查询条件。
+         * 怎么找关联的dialog？通过dialog弹出链找到最顶级的dialog，下面的第一个form。
+         * 因为像data-filter-dialog这种，它不是构建在顶级dialog里面的，不能直接通过元素父级找。
+         * @param {string} dialogId
+         */
+        _gaeaForm.getRelateFormData = function (dialogId) {
+            var gaeaUIChain = require("gaeajs-ui-chain");
+            var rootDialogId = gaeaUIChain.getRootId(dialogId);
+            var $rootDialog = $("#" + rootDialogId);
+            var result = {};
+            if ($rootDialog.length > 0 && $rootDialog.find("form:first").length > 0) {
+                var $form = $rootDialog.find("form:first");
+                if (gaeaValid.isNull($form.attr("id"))) {
+                    return result;
+                }
+                var formId = $form.attr("id");
+                result[formId] = $form.serializeObject();
+            }
+            return result;
+        };
+
         return _gaeaForm;
     });

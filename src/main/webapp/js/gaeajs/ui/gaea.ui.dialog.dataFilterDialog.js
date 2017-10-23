@@ -8,11 +8,11 @@
 define([
         "jquery", "underscore", "underscore-string", "gaeajs-common-utils-validate", "gaeajs-common-utils-string",
         "gaeajs-ui-events", "gaeajs-common-utils", "gaea-system-url", "gaeajs-common-utils-ajax", "gaeajs-ui-notify",
-        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-data"
+        "gaeajs-ui-definition", "gaeajs-context", "gaeajs-data", "gaeajs-ui-form"
     ],
     function ($, _, _s, gaeaValid, gaeaString,
               gaeaEvent, gaeaUtils, SYS_URL, gaeaAjax, gaeaNotify,
-              GAEA_UI_DEFINE, gaeaContext, gaeaData) {
+              GAEA_UI_DEFINE, gaeaContext, gaeaData, gaeaForm) {
 
 
         var dataFilterDialog = {
@@ -45,6 +45,11 @@ define([
                 // 发送服务端的请求数据
                 var queryCondition = {};
                 if (gaeaValid.isNotNull(opts.condition)) {
+                    // 获取本dialog关联的顶级dialog的form的数据，作为上下文（方便查询框架获取form的值作为查询条件的值）
+                    var extraFormData = gaeaForm.getRelateFormData(opts.id);
+                    // 写入上下文环境变量，让下面的查询条件可以获取
+                    gaeaContext.setValue(extraFormData);
+                    // 构造查询条件对象。利用上面的form的值。
                     queryCondition = gaeaData.parseCondition(opts.condition);
                 }
                 var queryData = {
