@@ -4,9 +4,9 @@
  * Iverson
  */
 require([
-    'jquery', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-notify',
+    'jquery', "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-notify', "gaeajs-common-utils-string",
     "gaea-system-url"
-], function ($, gaeaAjax, gaeaValid, gaeaNotify,
+], function ($, _, _s, gaeaAjax, gaeaValid, gaeaNotify, gaeaString,
              URL) {
     // 初始化消息提示组件
     gaeaNotify.init();
@@ -101,7 +101,13 @@ require([
             $("#gaea-event-ct").remove();
             $(".main-right").append('<span id="gaea-event-ct" style="display: none;">Gaea事件的绑定对象(不显示)</span>');
             // 加载功能内容
-            $(".gaea-sys-content").load($(this).data("href"));
+            var requestData = {};
+            $(".gaea-sys-content").load($(this).data("href"), requestData, function (responseText, textStatus, XMLHttpRequest) {
+                // 404错误，跳转失败页面
+                if (gaeaString.equalsIgnoreCase("404", XMLHttpRequest.status)) {
+                    $(".gaea-sys-content").load("/system/404.html");
+                }
+            });
         }
     });
 });
