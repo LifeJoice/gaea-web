@@ -413,11 +413,7 @@ define([
              * 外部方法。解析配置的查询条件。
              * <b>注意</b>
              * 这个方法提供有限的转换！像级联类型的还无法提供转换！
-             * @param configCondition 对象。格式：condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}
-             *              id
-             *              values[]
-             *                  type
-             *                  value
+             * @param {object} configCondition 对象。格式：condition:{id:'byId',values:[{ type:'pageContext',value:'id' }]}
              * @returns {{}}
              */
             parseCondition: function (configCondition) {
