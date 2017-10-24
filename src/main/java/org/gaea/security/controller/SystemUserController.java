@@ -34,6 +34,12 @@ public class SystemUserController {
         return "system/security/user_management.xml";
     }
 
+    @RequestMapping(value = "/showCreateForm", produces = "plain/text; charset=UTF-8")
+    public String showCreateForm() {
+        return "/gaea-system/security/user/add-form.html";
+    }
+
+
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
         return "/gaea-system/security/user/crud-form.html";
