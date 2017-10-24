@@ -1,5 +1,6 @@
 package org.gaea.security.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
@@ -36,6 +37,11 @@ public class SystemUserController {
     @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
     public String showCreateUpdateForm() {
         return "/gaea-system/security/user/crud-form.html";
+    }
+
+    @RequestMapping(value = "/showUpdatePasswordForm", produces = "plain/text; charset=UTF-8")
+    public String showUpdatePasswordForm() {
+        return "/gaea-system/security/user/password-edit-form.html";
     }
 
     /**
@@ -75,7 +81,16 @@ public class SystemUserController {
     @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public void update(User user) throws ValidationFailedException {
-        systemUsersService.update(user);
+        systemUsersService.updateWithoutPassword(user);
+    }
+
+    @RequestMapping(value = "/update-password", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void updatePassword(User user, String passwordAgain) throws ValidationFailedException {
+        if (StringUtils.isEmpty(user.getPassword()) || !user.getPassword().equals(passwordAgain)) {
+            throw new ValidationFailedException("两次输入的密码不一致！");
+        }
+        systemUsersService.updatePassword(user);
     }
 
     @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")

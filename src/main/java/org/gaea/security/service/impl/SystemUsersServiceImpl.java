@@ -53,6 +53,10 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         if (StringUtils.isEmpty(user.getName()) || StringUtils.isEmpty(user.getName()) || StringUtils.isEmpty(user.getPassword())) {
             throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
         }
+        List<User> userList = systemUsersRepository.findByLoginName(user.getLoginName());
+        if (userList.size() > 0) {
+            throw new ValidationFailedException("用户登录名已经存在！");
+        }
         // 新增
         user.setId(null);
 //        User user = inUser;
@@ -65,8 +69,8 @@ public class SystemUsersServiceImpl implements SystemUsersService {
 
     @Override
     @Transactional
-    public void update(User inUser) throws ValidationFailedException {
-        if (StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getPassword())) {
+    public void updateWithoutPassword(User inUser) throws ValidationFailedException {
+        if (StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getName())) {
             throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
         }
         if (inUser.getId() == null) {
@@ -74,7 +78,26 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         }
 
         User user = systemUsersRepository.findOne(inUser.getId());
-        BeanUtils.copyProperties(inUser, user, "roles");
+        BeanUtils.copyProperties(inUser, user, "roles", "password");
+        // 如果有注册加密器，则加密后存储；否则就是明文存储。
+//        if (passwordEncoder != null) {
+//            user.setPassword(passwordEncoder.encode(inUser.getPassword()));
+//        }
+//        systemUsersRepository.updateWithoutPassword(user.getLoginName(),user.getName(), user.getId());
+        systemUsersRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(User inUser) throws ValidationFailedException {
+//        if (StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getName()) || StringUtils.isEmpty(inUser.getPassword())) {
+//            throw new ValidationFailedException("用户名/登录名/密码不允许为空！");
+//        }
+        if (inUser.getId() == null) {
+            throw new ValidationFailedException("没有获得用户id，也许是未选择用户记录。");
+        }
+
+        User user = systemUsersRepository.findOne(inUser.getId());
         // 如果有注册加密器，则加密后存储；否则就是明文存储。
         if (passwordEncoder != null) {
             user.setPassword(passwordEncoder.encode(inUser.getPassword()));

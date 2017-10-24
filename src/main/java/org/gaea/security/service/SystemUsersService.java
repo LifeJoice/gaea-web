@@ -5,6 +5,7 @@ import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.security.domain.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +30,10 @@ public interface SystemUsersService {
 
     void delete(List<User> userList) throws ValidationFailedException;
 
-    void update(User user) throws ValidationFailedException;
+    void updateWithoutPassword(User user) throws ValidationFailedException;
+
+    @Transactional
+    void updatePassword(User inUser) throws ValidationFailedException;
 
     User loadEditData(User userEntity) throws ValidationFailedException;
 }
