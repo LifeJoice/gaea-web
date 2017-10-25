@@ -955,31 +955,33 @@ define([
                         options.data = editData;
                     }
 
-                    //dialog.loadContent(options);
-                    gaeaContent.loadContent(options);
-                    // init
-                    _private.createDialog(options);
-
-                    // 如果是update操作，在表单中嵌入id的值
-                    // crud dialog都带上selectedRow数据
-                    //if (gaeaString.equalsIgnoreCase(options.action, GAEA_UI_DEFINE.ACTION.CRUD.UPDATE)) {
                     /**
-                     * @type {DialogGaeaOptions}
+                     * 加载HTML内容，初始化里面的数据集、复选框组件、按钮等，包括按钮相关的进一步打开弹出框等
                      */
-                    var dialogDataOpts = $dialog.data("gaeaOptions");
-                    if (gaeaValid.isNull(dialogDataOpts.extraSubmitData)) {
-                        dialogDataOpts.extraSubmitData = {};
-                    }
-                    // get selected row id
-                    var selectedRowId = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", gridId));
-                    var selectedRow = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']", gridId));
-                    // set to submit extra data, for update
-                    dialogDataOpts.extraSubmitData.id = selectedRowId;
-                    dialogDataOpts.extraSubmitData.selectedRow = selectedRow;
-                    //}
+                    $.when(gaeaContent.loadContent(options)).done(function () {
+                        // init
+                        _private.createDialog(options);
 
-                    //dialog.createAndOpen(options);
-                    dialog.open(options);
+                        // 如果是update操作，在表单中嵌入id的值
+                        // crud dialog都带上selectedRow数据
+                        /**
+                         * @type {DialogGaeaOptions}
+                         */
+                        var dialogDataOpts = $dialog.data("gaeaOptions");
+                        if (gaeaValid.isNull(dialogDataOpts.extraSubmitData)) {
+                            dialogDataOpts.extraSubmitData = {};
+                        }
+                        // get selected row id
+                        var selectedRowId = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", gridId));
+                        var selectedRow = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']", gridId));
+                        // set to submit extra data, for update
+                        dialogDataOpts.extraSubmitData.id = selectedRowId;
+                        dialogDataOpts.extraSubmitData.selectedRow = selectedRow;
+                        //}
+
+                        //dialog.createAndOpen(options);
+                        dialog.open(options);
+                    });
                 });
             },
             /**

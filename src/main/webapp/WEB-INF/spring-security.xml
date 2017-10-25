@@ -29,6 +29,8 @@
 实现用户、角色、权限、资源的数据库管理。  -->
         <custom-filter ref="gaea-filter" before="FILTER_SECURITY_INTERCEPTOR"/>
         <csrf disabled="true"/>
+        <!-- （自定义）对于验证拒绝的处理器 -->
+        <access-denied-handler ref="gaeaAccessDeniedHandler"/>
     </http>
 
     <!-- 登录验证器 -->
@@ -110,4 +112,5 @@
     <!--</authentication-manager>-->
 
     <!--<global-method-security pre-post-annotations="enabled"/>-->
+    <b:bean id="gaeaAccessDeniedHandler" class="org.gaea.security.extend.GaeaAccessDeniedHandler"/>
 </b:beans>

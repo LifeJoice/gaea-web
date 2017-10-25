@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.*;
+import org.gaea.framework.web.common.ResponseJsonMessage;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.config.SystemProperties;
 import org.gaea.util.ValidationUtils;
@@ -89,18 +90,22 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
             // 如果请求是multiPart的，即上传文件的，则返回统一还是json
             isJson = (acceptJson || xReqJson) || isMultiPart;
 //        mav.setViewName("MappingJacksonJsonView");
-            Map<String, Object> errorMsg = new HashMap<String, Object>();
-            errorMsg.put("status", response.getStatus());
-            errorMsg.put("message", ex.getMessage());
-            errorMsg.put("debugMessage", debugMessage);
-            mav.addAllObjects(errorMsg);
+//            Map<String, Object> errorMsg = new HashMap<String, Object>();
+//            errorMsg.put("status", response.getStatus());
+//            errorMsg.put("message", ex.getMessage());
+//            errorMsg.put("debugMessage", debugMessage);
+//            mav.addAllObjects(errorMsg);
+            ResponseJsonMessage responseJsonMessage = new ResponseJsonMessage(response.getStatus(), ex.getMessage(), debugMessage);
+            mav.addObject(responseJsonMessage);
             /**
              * 对请求类型进行区分: 1. 如果是json请求，将结果转换成json返回。 2. 如果不是json请求，则需要跳转页面。
              */
             if (isJson) {
-                mapper.writeValue(response.getWriter(), errorMsg);
+//                mapper.writeValue(response.getWriter(), errorMsg);
+                mapper.writeValue(response.getWriter(), responseJsonMessage);
             } else {
-                return new ModelAndView("error", errorMsg);
+//                return new ModelAndView("error", errorMsg);
+                return new ModelAndView("error", responseJsonMessage.toMap());
             }
         } catch (IOException iox) {
             logger.error("自定义的Spring MVC的异常拦截器发生异常！", iox);

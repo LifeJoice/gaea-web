@@ -2,6 +2,8 @@ package org.gaea.security.extend;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.ValidationFailedException;
+import org.gaea.security.domain.Authority;
+import org.gaea.security.domain.Resource;
 import org.gaea.security.service.SystemAuthoritiesService;
 import org.gaea.security.service.SystemResourcesService;
 import org.slf4j.Logger;
@@ -113,36 +115,40 @@ public class GaeaFilterInvocationSecurityMetadataSource implements FilterInvocat
         // 在Web服务器启动时，提取系统中的所有权限。
 //        sql = "select authority_name from pub_authorities";
         // TODO 优化一下。这里找Authority应该可以和下面的查询Resource一句就查出。
-        List<String> authorities = systemAuthoritiesService.findCodeList();
+//        List<String> authorities = systemAuthoritiesService.findCodeList();
+        List<Authority> authorityList = systemAuthoritiesService.findAllWithResource();
 
         /**
          * 应当是资源为key， 权限为value。 资源通常为url， 权限就是那些以ROLE_为前缀的角色。 一个资源可以由多个权限来访问。
          */
         resourceMap = new ConcurrentHashMap<String, Collection<ConfigAttribute>>();   // 资源权限对照表。资源url：权限集合（权限1、权限2）……
 
-        for (String auth : authorities) {
-            ConfigAttribute ca = new SecurityConfig(auth);
+//        for (String auth : authorities) {
+        for (Authority auth : authorityList) {
+            ConfigAttribute ca = new SecurityConfig(auth.getCode());
+            List<Resource> resources = auth.getResources();
             // 通过权限Authority找资源Resource
-            List<String> resources = systemResourcesService.findByAuthorityCode(auth);
+//            List<String> resources = systemResourcesService.findByAuthorityCode(auth);
             // 遍历资源
-            for (String res : resources) {
-                if (StringUtils.isEmpty(res)) {
+            for (Resource res : resources) {
+                if (res == null || StringUtils.isEmpty(res.getResourceUrl())) {
                     throw new ValidationFailedException("系统资源表（GAEA_SYS_RESOURCES）的RESOURCE_URL为空！无法初始化系统权限资源关系！");
                 }
+                String resourceUrl = res.getResourceUrl();
                 /**
                  * if 如果已经存在相关的resource_url
                  *      将权限Authority增加到key=resource_url的value中。
                  * else
                  *      new一个，并添加。
                  */
-                if (resourceMap.containsKey(res)) {
-                    Collection<ConfigAttribute> value = resourceMap.get(res);
+                if (resourceMap.containsKey(resourceUrl)) {
+                    Collection<ConfigAttribute> value = resourceMap.get(resourceUrl);
                     value.add(ca);
-                    resourceMap.put(res, value);
+                    resourceMap.put(resourceUrl, value);
                 } else {
                     Collection<ConfigAttribute> atts = new ArrayList<ConfigAttribute>();
                     atts.add(ca);
-                    resourceMap.put(res, atts);
+                    resourceMap.put(resourceUrl, atts);
                 }
 
             }

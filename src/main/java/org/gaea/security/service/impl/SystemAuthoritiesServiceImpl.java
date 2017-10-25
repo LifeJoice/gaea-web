@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,11 +34,17 @@ public class SystemAuthoritiesServiceImpl implements SystemAuthoritiesService {
      *
      * @return
      */
+//    @Override
+//    public List<String> findCodeList() {
+//        String sql = "SELECT CODE FROM GAEA_SYS_AUTHORITIES";
+//        List<String> codeList = namedParameterJdbcTemplate.queryForList(sql, new MapSqlParameterSource(), String.class);
+//        return codeList;
+//    }
+
     @Override
-    public List<String> findCodeList() {
-        String sql = "SELECT CODE FROM GAEA_SYS_AUTHORITIES";
-        List<String> codeList = namedParameterJdbcTemplate.queryForList(sql, new MapSqlParameterSource(), String.class);
-        return codeList;
+    public List<Authority> findAllWithResource() {
+        List<Authority> authorityList = authoritiesRepository.findAllWithResource();
+        return authorityList;
     }
 
     @Override

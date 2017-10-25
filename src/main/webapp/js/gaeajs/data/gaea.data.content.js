@@ -159,6 +159,7 @@ define([
             };
             // jquery.get才能返回一个jqXHR对象。作同步用。
             return $.get(options.contentUrl, gaeaUtils.data.flattenData(requestData), function (data) {
+                // ------------------------------------>>>> 成功处理
                 // debug. 加载的内容不能有（含data-gaea-data-bind-area的元素）id重复.
                 gaeaData.utils.debug.checkViewModel({
                     containerId: options.containerId,
@@ -173,6 +174,13 @@ define([
                 // 最后回调的定义
                 if (_.isFunction(callback)) {
                     callback();
+                }
+            }).fail(function (response) {
+                // ------------------------------------>>>> 失败处理
+                var responseObj = JSON.parse(response.responseText);
+                // 检查是否没有权限操作
+                if (gaeaString.equalsIgnoreCase(responseObj.status, "403")) {
+                    gaeaNotify.fail(responseObj.message);
                 }
             });
         };
