@@ -654,6 +654,98 @@ define([
         };
 
         /**
+         * 图片显示的简单功能封装。
+         * 就是给我一堆url，帮忙在一个div里面放一些图片而已。
+         * 使用的场景：gaea.ui.grid的单元格里面的图片等。
+         */
+        gaeaCommons.img = {
+            //    init: _private.img.init
+            //};
+            //_private.img = {
+            /**
+             * 初始化单元格是图片类型的。
+             * 会做类型判断。
+             * @param {jqObject} $imgCt                         例如：grid的td, 或者某个div
+             * @param {Object} opts
+             * @param {string} opts.dataType
+             * @param {string} opts.imgSrcPrefix
+             * @param {string} opts.imgSrcSuffix
+             * @param {string} opts.imgThumbnailSuffix
+             * @param {string} [opts.value]
+             */
+            init: function ($imgCt, opts) {
+                if (gaeaValid.isNull($imgCt)) {
+                    return;
+                }
+                // 默认值初始化
+                _.defaults(opts, {
+                    dataType: GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG
+                });
+                //createTdContent: function ($td, opts) {
+                // 非图片列的，略过
+                if (!gaeaString.equalsIgnoreCase(opts.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
+                    return;
+                }
+                //var $cellCt = $imgCt.children(".grid-td-div");
+                // init img html
+                // 先把URL之类的，转换成html < img>元素
+                var formattedImgValue = gaeaCommons.img.imgTextFormat(opts.value);
+                $imgCt.html(formattedImgValue); // 必须先把值填充进去！
+
+                // add img tag class
+                $imgCt.addClass("img-cell");
+
+                $imgCt.find("img").each(function (i, element) {
+                    var $img = $(this);
+                    // 原图链接
+                    var src = $img.attr("src");
+                    var thumbnailSrc = src; // 缩略图src
+                    // 加前缀
+                    if (gaeaValid.isNotNull(opts.imgSrcPrefix)) {
+                        src = opts.imgSrcPrefix + src;
+                    }
+                    // 加后缀
+                    if (gaeaValid.isNotNull(opts.imgSrcSuffix)) {
+                        src = src + opts.imgSrcSuffix;
+                    }
+                    // 缩略图, 叠加一般性后缀
+                    if (gaeaValid.isNotNull(opts.imgThumbnailSuffix)) {
+                        thumbnailSrc = src + opts.imgThumbnailSuffix;
+                    }
+                    // 修改src为缩略图
+                    $img.attr("src", thumbnailSrc);
+                    // 包上<a>标签, lightGallery控件需要
+                    $img.wrap('<a href="' + src + '">');
+                });
+                //}
+            },
+            /**
+             * 把服务端传来的单元格的值，转换为符合图片的方式。
+             * 例如：
+             * /img/pictures/B_67/116916021_111/prdl_116916021_111_(02).jpg    -->    < img src='/img/pictures/B_67/116916021_111/prdl_116916021_111_(02).jpg'>
+             * @param origCellText  几种类型：/img/1.jpg | < img src='/img/1.jpg'>< img src='/img/2.jpg'>
+             * @returns {string}    返回统一格式化：< img src='/img/1.jpg'>< img src='/img/2.jpg'>
+             */
+            imgTextFormat: function (origCellText) {
+                var result = "";
+                if (gaeaValid.isNull(origCellText)) {
+                    return;
+                }
+                $.each(origCellText.split(","), function (i, origUrl) {
+                    var url = origUrl;
+                    // 如果服务端传来的单元格的值，没有<img>标签，就加上（例如：/img/pictures/B_67/116916021_111/prdl_116916021_111_(02).jpg）
+                    if (origUrl.indexOf("<img") < 0) {
+                        var imgTmpl = _.template('<img src="<%= SRC %>">');
+                        url = imgTmpl({
+                            SRC: origUrl
+                        });
+                    }
+                    result = result.concat(url);
+                });
+                return result;
+            }
+        };
+        /**
          * 返回接口定义。
          */
         return gaeaCommons;

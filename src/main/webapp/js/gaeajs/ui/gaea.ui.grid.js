@@ -37,12 +37,12 @@ define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
         'gaeajs-ui-button', 'gaea-system-url', "gaeajs-ui-events", 'gaeajs-common-utils-string', "gaeajs-ui-plugins", "gaeajs-ui-input",
         "gaeajs-ui-definition", "gaeajs-context", "gaeajs-ui-notify", "gaeajs-common-utils", "gaeajs-data",
-        "gaeajs-ui-grid-query", "gaeajs-ui-selectTree",
+        "gaeajs-ui-grid-query", "gaeajs-ui-selectTree", "gaeajs-ui-commons",
         "jquery-mCustomScrollbar", "jquery-lightGallery"],
     function ($, _, _s, gaeaAjax, gaeaValid, gaeaDT,
               gaeaButton, SYS_URL, gaeaEvents, gaeaString, gaeaPlugins, gaeaInput,
               GAEA_UI_DEFINE, gaeaContext, gaeaNotify, gaeaUtils, gaeaData,
-              gridQuery, gaeaSelectTree) {
+              gridQuery, gaeaSelectTree, gaeaUI, mod1, mod2) {
 
         // 默认的opts参数值的统一定义
         var defaultOpts = {
@@ -940,48 +940,50 @@ define([
              * 初始化单元格是图片类型的。
              * 会做类型判断。
              * @param {jqObject} $td
-             * @param {object} opts
-             * @param {string} opts.id                  grid容器id
-             * @param {string} opts.inputId             生成的input框的id和name（共用）
-             * @param {string} opts.inputValue
-             * @param {GaeaColumn} opts.column
-             * @private
+             * @param {string} columnDataType
+             * @param {string} columnImgSrcPrefix
+             * @param {string} columnImgSrcSuffix
+             * @param {string} columnImgThumbnailSuffix
+             * @param {string} [cellValue]
              */
-            initImgTd: function ($td, columnDataType, columnImgSrcPrefix, columnImgSrcSuffix, columnImgThumbnailSuffix) {
-                //createTdContent: function ($td, opts) {
-                // 非图片列的，略过
-                if (!gaeaString.equalsIgnoreCase(columnDataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
-                    return;
-                }
-                // init img column
-                var $cellCt = $td.children(".grid-td-div");
-                // add img tag class
-                $cellCt.addClass("img-cell");
-
-                $cellCt.find("img").each(function (i, element) {
-                    var $img = $(this);
-                    // 原图链接
-                    var src = $img.attr("src");
-                    var thumbnailSrc = src; // 缩略图src
-                    // 加前缀
-                    if (gaeaValid.isNotNull(columnImgSrcPrefix)) {
-                        src = columnImgSrcPrefix + src;
-                    }
-                    // 加后缀
-                    if (gaeaValid.isNotNull(columnImgSrcSuffix)) {
-                        src = src + columnImgSrcSuffix;
-                    }
-                    // 缩略图, 叠加一般性后缀
-                    if (gaeaValid.isNotNull(columnImgThumbnailSuffix)) {
-                        thumbnailSrc = src + columnImgThumbnailSuffix;
-                    }
-                    // 修改src为缩略图
-                    $img.attr("src", thumbnailSrc);
-                    // 包上<a>标签, lightGallery控件需要
-                    $img.wrap('<a href="' + src + '">');
-                });
-                //}
-            }
+            //initImgTd: function ($td, columnDataType, columnImgSrcPrefix, columnImgSrcSuffix, columnImgThumbnailSuffix, cellValue) {
+            //    //createTdContent: function ($td, opts) {
+            //    // 非图片列的，略过
+            //    if (!gaeaString.equalsIgnoreCase(columnDataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
+            //        return;
+            //    }
+            //    // init img column
+            //    var $cellCt = $td.children(".grid-td-div");
+            //    var formattedImgValue = tools.imgTextFormat(cellValue);
+            //    $cellCt.html(formattedImgValue); // 必须先把值填充进去！
+            //
+            //    // add img tag class
+            //    $cellCt.addClass("img-cell");
+            //
+            //    $cellCt.find("img").each(function (i, element) {
+            //        var $img = $(this);
+            //        // 原图链接
+            //        var src = $img.attr("src");
+            //        var thumbnailSrc = src; // 缩略图src
+            //        // 加前缀
+            //        if (gaeaValid.isNotNull(columnImgSrcPrefix)) {
+            //            src = columnImgSrcPrefix + src;
+            //        }
+            //        // 加后缀
+            //        if (gaeaValid.isNotNull(columnImgSrcSuffix)) {
+            //            src = src + columnImgSrcSuffix;
+            //        }
+            //        // 缩略图, 叠加一般性后缀
+            //        if (gaeaValid.isNotNull(columnImgThumbnailSuffix)) {
+            //            thumbnailSrc = src + columnImgThumbnailSuffix;
+            //        }
+            //        // 修改src为缩略图
+            //        $img.attr("src", thumbnailSrc);
+            //        // 包上<a>标签, lightGallery控件需要
+            //        $img.wrap('<a href="' + src + '">');
+            //    });
+            //    //}
+            //}
         };
 
         // 可编辑表格功能
@@ -1419,8 +1421,15 @@ define([
                         /**
                          * 初始化图片列
                          */
-                        $cellCt.html(value); // 必须先把值填充进去！
-                        _grid.html.initImgTd($td, column.dataType, column.imgSrcPrefix, column.imgSrcSuffix, column.imgThumbnailSuffix);
+                            //$cellCt.html(value); // 必须先把值填充进去！
+                        gaeaUI.img.init($td.children(".grid-td-div"), {
+                            dataType: column.dataType,
+                            imgSrcPrefix: column.imgSrcPrefix,
+                            imgSrcSuffix: column.imgSrcSuffix,
+                            imgThumbnailSuffix: column.imgThumbnailSuffix,
+                            value: value
+                        });
+                        //_grid.html.initImgTd($td, column.dataType, column.imgSrcPrefix, column.imgSrcSuffix, column.imgThumbnailSuffix, value);
                     } else {
                         // 其他的，统统输入框
                         // 无论是否编辑都需要用input添放数据。这样提交的时候才会带上数据。
@@ -1685,7 +1694,14 @@ define([
                                     $tbBody.find("tr:last").append($td);
                                     // create td content
                                     if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_IMG)) {
-                                        _grid.html.initImgTd($td, column.dataType, column.imgSrcPrefix, column.imgSrcSuffix, column.imgThumbnailSuffix);
+                                        //_grid.html.initImgTd($td, column.dataType, column.imgSrcPrefix, column.imgSrcSuffix, column.imgThumbnailSuffix, cellText);
+                                        gaeaUI.img.init($td.children(".grid-td-div"), {
+                                            dataType: column.dataType,
+                                            imgSrcPrefix: column.imgSrcPrefix,
+                                            imgSrcSuffix: column.imgSrcSuffix,
+                                            imgThumbnailSuffix: column.imgThumbnailSuffix,
+                                            value: cellText
+                                        });
                                     }
                                 }
                             });

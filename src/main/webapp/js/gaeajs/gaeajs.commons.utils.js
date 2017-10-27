@@ -332,11 +332,13 @@ define([
                     opts.name = "";
                 }
                 var SEPERATOR = ".";
+                // 一个html dom元素的name比较、检索器
                 var jqIgnoreCaseFilter = function (argName) {
                     return function () {
-                        var name = argName;
+                        var name = argName; // 要搜索的name
                         var $this = $(this);
-                        return gaeaString.equalsIgnoreCase(name, $this.attr("name"));
+                        var gaeaName = $this.data("gaea-ui-name"); // 某些gaea组件，会用这个作为name
+                        return gaeaString.equalsIgnoreCase(name, $this.attr("name")) || gaeaString.equalsIgnoreCase(name, gaeaName);
                     };
                 };
                 // array必须在前，因为_.isObject会把array也当object的
@@ -394,8 +396,15 @@ define([
                         utils.data.fillData(newOpts);
                     });
                 } else {
+                    var gaeaUI = require("gaeajs-ui-commons");
                     /**
                      * it's value
+                     * 目标可能有几种
+                     * <ul>
+                     *     <li>普通input, select之类的，可以直接把值set到value</li>
+                     *     <li>radio，不能set value的。而且还有gaea特定样式的radio</li>
+                     *     <li>图片类img。必须把url转换成img。</li>
+                     * </ul>
                      */
                     //var findTemplate = _.template("[name='<%=NAME%>']");
                     //var jqSelector = findTemplate({
@@ -404,9 +413,17 @@ define([
                     var $filterResult = $(opts.target).find("input,select,textarea").filter(jqIgnoreCaseFilter(opts.name));
                     // radio的选择器
                     var $radioFilter = $filterResult.filter("[type='radio']");
+                    // gaea img的选择器
+                    var $gaeaImgFilter = $(opts.target).find("[data-" + GAEA_UI_DEFINE.UI.IMG_DEFINE + "]").filter(jqIgnoreCaseFilter(opts.name));
                     // 设定值
                     if ($radioFilter.length > 0) {
                         $radioFilter.filter("[value='" + opts.data + "']").prop("checked", true).trigger("change");
+                    } else if ($gaeaImgFilter.length > 0) {
+                        // 填充表单里面的图片字段
+                        var optsStr = $gaeaImgFilter.data(GAEA_UI_DEFINE.UI.IMG_DEFINE); // = data-gaea-ui-img
+                        var imgOpts = gaeaString.parseJSON(optsStr);
+                        imgOpts.value = opts.data;
+                        gaeaUI.img.init($gaeaImgFilter, imgOpts);
                     } else {
                         // 普通输入框，直接用val方法设置
                         $filterResult.val(opts.data);
