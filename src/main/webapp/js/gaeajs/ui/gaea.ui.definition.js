@@ -63,6 +63,7 @@ define(function () {
         SELECT_TREE_DEFINE: "gaea-ui-select-tree", // 直接在html中的定义属性名
         RADIO_DEFINE: "gaea-ui-radio", // 直接在html中的radio定义
         IMG_DEFINE: "gaea-ui-img", // 直接在html中的img定义
+        INPUT_DEFINE: "gaea-ui-input", // 直接在html中的gaea input定义
         DIALOG: {
             // todo 慢慢重构到component去
             TYPE: {

@@ -15,7 +15,8 @@ define([
               GAEA_UI_DEFINE, gaeaView, SYS_URL, gaeaNotify,
               gaeaUI, gaeaMultiSelect, gaeaCommon, gaeaComponents,
               gaeaUtils, gaeaContext, gaeaDataFilterDialog, gaeaGrid,
-              gaeaContent, gaeaUIChain) {
+              gaeaContent, gaeaUIChain,
+              mod1, mod2, mod3) {
 
 
         /**
@@ -109,7 +110,7 @@ define([
             id: null,
             title: null,
             renderTo: null,
-            width: 940,                         // 默认宽度
+            width: 940,                         // 第二优先级默认宽度；第一优先级，以dialog的div容器的初始宽度(.gaea-ui-dialog的宽度)为默认宽度
             height: document.body.scrollHeight * 0.85,                        // 默认高度, 页面高度的85%. 设了高度后，jquery.ui.dialog会去调整内页的高度。
             maxHeight: 550, // 最大高度。这个关系自动生产高度的弹出框的最大高度。
             // 默认弹出位置
@@ -171,7 +172,7 @@ define([
                      * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
                      * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                      */
-                        // 只是简单初始化，避免抛出undefined错误
+                    // 只是简单初始化，避免抛出undefined错误
                     //$("#" + opts.formId).validate();
                 }
 
@@ -651,12 +652,12 @@ define([
                  * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
                  * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                  */
-                    //var formId = dialog.utils.getFormId(dialogOpts.id);
-                    //if (!gaeaCommonUtils.dom.checkUnique(formId)) {
-                    //    console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + formId);
-                    //}
-                    //dialogOpts.formId = formId;
-                    // 只是简单初始化，避免抛出undefined错误
+                //var formId = dialog.utils.getFormId(dialogOpts.id);
+                //if (!gaeaCommonUtils.dom.checkUnique(formId)) {
+                //    console.error("form id不唯一，jQuery validate插件可能会无法处理。id: " + formId);
+                //}
+                //dialogOpts.formId = formId;
+                // 只是简单初始化，避免抛出undefined错误
                 //require(["jquery-validate"], function () {
                 //    $("#" + formId).validate();
                 //});
@@ -2281,7 +2282,7 @@ define([
                  * jquery.validate.js:404 Uncaught TypeError: Cannot read property 'settings' of undefined(…)
                  * 不知道为什么它会自动对form进行关联（虽然不会校验），虽然都还没有启用它。
                  */
-                    // 只是简单初始化，避免抛出undefined错误
+                // 只是简单初始化，避免抛出undefined错误
                 //$("#" + formId).validate();
             } else {
                 throw "openStyle不等于inOne，或缺失parentId，都会导致无法进行HTML预初始化。";
@@ -2314,6 +2315,8 @@ define([
             var $dialog = $("#" + opts.id);
             // 克隆一下，否则由于指针的关系会不确定。
             var newOpts = _.defaults(_.clone(opts), _options);
+            // 设定width。这个本来默认写在js里，但感觉不好。那样CSS控制不了。所以用.gaea-ui-dialog的宽度作为默认。
+            newOpts.width = gaeaValid.isNotNull($dialog.width) ? $dialog.width : _options.width;
             // cache options
             $dialog.data("gaea-options", newOpts);
             // 初始化Dialog

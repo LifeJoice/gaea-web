@@ -53,6 +53,8 @@
  */
 .gaea-dialog {
     height: 100%;
+    /* 这个是dialog的默认宽度。包括打开后的默认宽度。 */
+    width: 940px;
 }
 
 

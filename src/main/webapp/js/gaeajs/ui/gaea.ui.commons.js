@@ -12,12 +12,12 @@ define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition',
         "gaeajs-ui-multiselect", "gaeajs-ui-button", "gaeajs-common-utils", "gaeajs-ui-select2", 'gaeajs-ui-grid',
-        "gaeajs-data", "gaeajs-ui-tabs", "gaeajs-ui-selectTree", "gaeajs-ui-events"
+        "gaeajs-data", "gaeajs-ui-tabs", "gaeajs-ui-selectTree", "gaeajs-ui-events", "gaeajs-ui-input"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE,
               gaeaMultiSelect, gaeaButton, gaeaUtils, gaeaSelect2, gaeaGrid,
-              gaeaData, gaeaTabs, gaeaSelectTree, gaeaEvents) {
+              gaeaData, gaeaTabs, gaeaSelectTree, gaeaEvents, gaeaInput) {
 
         /**
          * 服务端的View对象的定义。
@@ -81,6 +81,8 @@ define([
                 });
                 // 初始化radio。系统默认的太丑了，而且还有样式问题
                 _private.radio.init(ctSelector);
+                // 初始化输入框。其实主要是带有日期等输入框，需要特殊的初始化
+                _private.initInput(ctSelector);
 
                 return gaeaMultiSelect.init(ctSelector);
             },
@@ -333,6 +335,58 @@ define([
                 });
                 dfd.resolve();
                 return dfd.promise();
+            },
+            /**
+             * 初始化input框类的组件。
+             * 一般的input不需要通过这个初始化。主要是日期控件。
+             * @param ctSelector
+             * @returns {*}
+             */
+            initInput: function (ctSelector) {
+
+                var dfd = $.Deferred();// JQuery同步对象
+                // 没有相关的组件，也是需要resolve的
+                if (gaeaValid.isNull(ctSelector)) {
+                    dfd.resolve();
+                    return dfd.promise();
+                }
+                // data-gaea-ui-input（这个是gaeaUI的input的特殊定义属性）
+                var componentName = "data-" + GAEA_UI_DEFINE.UI.INPUT_DEFINE;
+                // 查找所有gaea input，遍历并初始化
+                $(ctSelector).find("[" + componentName + "]").each(function (i, eachTabObj) {
+                    var $inputCt = $(eachTabObj);
+                    var containerId = $inputCt.attr("id");
+                    gaeaValid.isNull({check: containerId, exception: "容器id为空！无法创建gaea input相关（日期等）的组件。"});
+                    var name = $inputCt.data("gaea-ui-name");
+                    var id = name;
+                    var configStr = $inputCt.data(GAEA_UI_DEFINE.UI.INPUT_DEFINE); // = data-gaea-ui-input
+                    var opts = gaeaString.parseJSON(configStr);
+                    if (gaeaValid.isNull(name)) {
+                        throw "gaea input组件的data-gaea-ui-name不允许为空！";
+                    }
+                    /**
+                     * debug
+                     * 检查是否有重复元素！
+                     * 这个很重要。否则会有一些莫名其妙的问题。
+                     */
+                    if ($("#" + id).length > 0) {
+                        console.warn("gaea input组件根据id查找已存在。很可能会导致系统功能异常，请检查相关页面定义。id：%s", id);
+                    }
+
+                    // 请求gaea.ui.tabs模块进行初始化
+                    gaeaInput.create({
+                        containerId: containerId,
+                        id: id,
+                        name: name,
+                        //class: "crud-grid-input",
+                        dataType: opts.dataType
+                        //editable: opts.column.editable,
+                        //validator: opts.column.validator
+                    });
+                });
+                dfd.resolve();
+                return dfd.promise();
+
             }
         };
 
