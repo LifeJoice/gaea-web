@@ -2111,7 +2111,7 @@ define([
                     var gridId = opts.id;
                     var $gridCt = $("#" + opts.id);
 
-                    gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.SELECT, "#" + opts.id, function (event, data) {
+                    gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.GRID.CACHE_SELECTED_ROW_DATA, "#" + opts.id, function (event, data) {
                         // 【1】刷新selectedRows（每次覆盖）
                         var rowIndexes = _private.grid.getSelectedIndexes({
                             id: gridId
@@ -2180,23 +2180,32 @@ define([
                             $gridCt.find("tbody tr .row-check").children(":checkbox").prop("checked", false);
                             // 选中当前行复选框
                             $tr.find(".row-check").children(":checkbox").prop("checked", "true");
-                            // "行"选中
+                            //// "行"选中
+                            // 移除所有的"行"选中样式
                             $(".tb-body tr").removeClass("selected");
-                            $tr.addClass("selected");
-                            // 获取选中行数据（selectedRow）
-                            $tr.find(".row-check").children(":checkbox").val($tr.data("rowindex") - 1);
-                            selectedRow = gridOptions.data[($tr.data("rowindex") - 1)];
-                            selectedRow.index = $tr.data("rowindex");
+                            // ----------------------------------------------->>>> 这些不能放这里，否则直接勾选checkbox的时候会丢失selectedRow的数据
+                            //$tr.addClass("selected");
+                            //// 获取选中行数据（selectedRow）
+                            //$tr.find(".row-check").children(":checkbox").val($tr.data("rowindex") - 1);
+                            //selectedRow = gridOptions.data[($tr.data("rowindex") - 1)];
+                            //selectedRow.index = $tr.data("rowindex");
                             // 这个只是为了兼容老代码
-                            _grid._setSelectRow(selectedRow);
+                            //_grid._setSelectRow(selectedRow);
                             //_grid.options.listeners.select(selectedRow);
+                            // <<<< -----------------------------------------------
                         }
+                        // "行"选中
+                        $tr.addClass("selected");
+                        // 获取选中行数据（selectedRow）
+                        $tr.find(".row-check").children(":checkbox").val($tr.data("rowindex") - 1);
+                        selectedRow = gridOptions.data[($tr.data("rowindex") - 1)];
+                        selectedRow.index = $tr.data("rowindex");
                         /**
                          * 触发选中事件。基于事件去影响相关的其他组件或元素。
                          * 例如：
                          * 选中后，也许删除按钮需要知道选中的是哪行，之类的……
                          */
-                        $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.SELECT, {
+                        $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.CACHE_SELECTED_ROW_DATA, {
                             selectedRow: selectedRow
                         });
                     });

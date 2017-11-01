@@ -98,7 +98,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     REFRESH_DATA: "gaeaUI_event_grid_refresh_data", // 刷新数据区事件
                     SYNC_GRID_DATA: "gaeaUI_event_grid_sync_grid_data", // 同步数据区的数据事件。一般crud grid需要，因为数据区是可编辑的。
                     RELOAD: "gaeaUI_event_grid_reload", // 刷新grid数据的事件。无需参数。
-                    SELECT: "gaeaUI_event_grid_select",  // 选中了grid的某一行的事件
+                    //SELECT: "gaeaUI_event_grid_select",  // 选中了grid的某一行的事件 // 可以留以后用
+                    CACHE_SELECTED_ROW_DATA: "gaeaUI_event_grid_cache_selectedRow_data",  // 选中了grid的某一行，然后触发缓存该行的数据(selectedRow等)的事件
                     GLOBAL_LAST_SELECT_FINISHED: "gaeaUI_event_grid_global_last_select_finished"  // 全局事件！不绑定具体grid。选中了grid的某一行的事件, 并且完成了把选中行数据缓存等工作
                 },
                 /**
