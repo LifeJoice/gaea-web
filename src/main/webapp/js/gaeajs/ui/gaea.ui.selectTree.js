@@ -125,6 +125,7 @@ define([
             /**
              *
              * @param {SelectTreeGaeaOptions} opts
+             * @returns {*|jqXHR} 以_private.initData的jqXHR对象为最终同步对象
              */
             init: function (opts) {
                 gaeaValid.isNull({check: opts.target, exception: "target参数为空，无法初始化select tree组件！"});
@@ -164,7 +165,7 @@ define([
                 }
                 // 初始化数据
                 // 同步调用获取数据.
-                _private.initData({
+                return _private.initData({
                     dataSetId: opts.dataSetId,
                     //condition: opts.condition,
                     success: function (data) {
@@ -172,6 +173,23 @@ define([
                         _private.init($selectTreeCt, data);
                         //dfd.resolve();
                     }
+                });
+            },
+            /**
+             * 给select tree组件设定值
+             * @param {jqObject} $selectTree
+             * @param {array} valArray          不是数组也行。自动转为数组。
+             */
+            setValue: function ($selectTree, valArray) {
+                if (gaeaValid.isNull($selectTree)) {
+                    return;
+                }
+                if (!_.isArray(valArray)) {
+                    valArray = [valArray];
+                }
+                $.each(valArray, function (i, val) {
+                    var valObj = _private.getByValue($selectTree, val);
+                    _private.addSelect($selectTree, valObj.text, val);
                 });
             }
         };
@@ -876,7 +894,21 @@ define([
             return $result;
         };
 
-
+        /**
+         * 通过value，找到树的节点值并返回。（一个值至少包含有text,val等属性）
+         * @param $selectTree
+         * @param val
+         */
+        _private.getByValue = function ($selectTree, val) {
+            if (gaeaValid.isNull($selectTree) || gaeaValid.isNull(val)) {
+                return;
+            }
+            var text = $selectTree.find(".data-ct").find("[data-value=" + val + "]").first().text();
+            return {
+                val: val,
+                text: text
+            };
+        };
         /**
          *
          * @param {object} opts
@@ -899,7 +931,8 @@ define([
 
         return {
             preInit: selectTree.preInit,
-            init: selectTree.init
+            init: selectTree.init,
+            setValue: selectTree.setValue
             //initHtml: selectTree.initHtml
         };
     });

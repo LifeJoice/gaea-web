@@ -101,26 +101,28 @@ define([
                          * 这个只是纯粹UI的初始化，例如：button，或者数据已经存在的情况。
                          */
                         var gaeaUI = require("gaeajs-ui-commons");
-                        gaeaUI.initGaeaUI("#" + options.id, options.editable);
-                        /**
-                         * fill data
-                         * 必须在initGaeaUI后，甚至一切后，因为，得等数据集初始化完、KO binding后生成某些DOM、然后第三方插件初始化了（例如select2），再去改数据，这样KO、第三方插件才不会出错。
-                         * 例如select2，得初始化后，改数据还得调用trigger change，然后，未初始化前trigger change是没用的，也就改不了数据了。
-                         */
-                        if (gaeaValid.isNotNull(options.data)) {
+                        // 必须先初始化完Gaea UI 组件（包括组件的数据，例如下拉框的数据），再填充数据（例如：下拉框选中哪一个）
+                        $.when(gaeaUI.initGaeaUI("#" + options.id, options.editable)).done(function () {
+                            /**
+                             * fill data
+                             * 必须在initGaeaUI后，甚至一切后，因为，得等数据集初始化完、KO binding后生成某些DOM、然后第三方插件初始化了（例如select2），再去改数据，这样KO、第三方插件才不会出错。
+                             * 例如select2，得初始化后，改数据还得调用trigger change，然后，未初始化前trigger change是没用的，也就改不了数据了。
+                             */
+                            if (gaeaValid.isNotNull(options.data)) {
 
-                            gaeaUI.fillData({
-                                //id: options.id,
-                                target: "#" + options.id,
-                                data: options.data
-                            });
+                                gaeaUI.fillData({
+                                    //id: options.id,
+                                    target: "#" + options.id,
+                                    data: options.data
+                                });
 
-                            //gaeaData.fieldData.init(options.id, options.data);
-                            // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
-                            gaeaUI.initGaeaUIAfterData({
-                                containerId: options.id
-                            });
-                        }
+                                //gaeaData.fieldData.init(options.id, options.data);
+                                // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
+                                gaeaUI.initGaeaUIAfterData({
+                                    containerId: options.id
+                                });
+                            }
+                        });
                     });
 
                     // 整个方法loadContent的完成. 其实就是defferedFunctions里面的数据集加载、gaeaUI初始化等完成后，最后data binding完成，就是整个loadContent完成了

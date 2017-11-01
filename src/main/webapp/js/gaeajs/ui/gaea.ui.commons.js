@@ -55,36 +55,51 @@ define([
              */
             initGaeaUI: function (ctSelector, editable) {
                 var dfd = $.Deferred();// JQuery同步对象
-                // 先处理内容是否可编辑
-                if (gaeaValid.isNotNull(editable)) {
-                    gaeaCommons.utils.setEditable(ctSelector, editable);
-                }
                 // 没有相关的组件，也是需要resolve的
                 if (gaeaValid.isNull(ctSelector)) {
                     dfd.resolve();
+                    return dfd.promise();
                 }
-                // 初始化按钮(在html中通过data-gaea-ui-button配置的)
-                _private.initGaeaButton(ctSelector);
-                // 初始化select. 其实select非组件，不需要初始化。这个主要初始化一些绑定在上面的通用gaea event。
-                _private.initSelect(ctSelector);
-                // 初始化select2插件
-                _private.initSelect2(ctSelector);
-                // 初始化tabs插件
-                _private.initGaeaTabs(ctSelector);
-                // 初始化crud grid
-                _private.crudGrid.init({
-                    target: ctSelector
+                /**
+                 * 同步调用数组。数组中的每个函数，都是并行调用。并且从声明这个数组开始就会触发方法调用。
+                 * 声明这个数组的目的，是为了控制，后面的data-bind处理，要等这几个方法全部执行完。
+                 */
+                var defferedFunctions = [
+                    // 初始化按钮(在html中通过data-gaea-ui-button配置的)
+                    _private.initGaeaButton(ctSelector),
+                    // 初始化select. 其实select非组件，不需要初始化。这个主要初始化一些绑定在上面的通用gaea event。
+                    _private.initSelect(ctSelector),
+                    // 初始化select2插件
+                    _private.initSelect2(ctSelector),
+                    // 初始化tabs插件
+                    _private.initGaeaTabs(ctSelector),
+                    // 初始化crud grid
+                    _private.crudGrid.init({
+                        target: ctSelector
+                    }),
+                    // 初始化select tree
+                    _private.selectTree.init({
+                        target: ctSelector
+                    }),
+                    // 初始化radio。系统默认的太丑了，而且还有样式问题
+                    _private.radio.init(ctSelector),
+                    // 初始化输入框。其实主要是带有日期等输入框，需要特殊的初始化
+                    _private.initInput(ctSelector),
+                    // 初始化multi-select组件
+                    gaeaMultiSelect.init(ctSelector)
+                ];
+                // 当所有组件（并发）初始化完，再执行其他操作
+                $.when.apply($, defferedFunctions).done(function () {
+                    // 处理内容是否可编辑
+                    // 放在其他组件初始化后面，这样可以应用到其他组件上。但也不严谨，因为某些组件有异步操作，这个后面有问题再改了。
+                    if (gaeaValid.isNotNull(editable)) {
+                        gaeaCommons.utils.setEditable(ctSelector, editable);
+                    }
+                    dfd.resolve();
                 });
-                // 初始化select tree
-                _private.selectTree.init({
-                    target: ctSelector
-                });
-                // 初始化radio。系统默认的太丑了，而且还有样式问题
-                _private.radio.init(ctSelector);
-                // 初始化输入框。其实主要是带有日期等输入框，需要特殊的初始化
-                _private.initInput(ctSelector);
 
-                return gaeaMultiSelect.init(ctSelector);
+                return dfd.promise();
+                //return gaeaMultiSelect.init(ctSelector);
             },
             /**
              * UI控件在数据完成后的一些初始化。
@@ -586,6 +601,11 @@ define([
                 // 找有gaeaUI select tree定义的元素( <div data-gaea-ui-select-tree=*** ...> )
                 var selectTreeTmpl = _.template("[<%= ATTR_NAME %>]");
 
+                /**
+                 * 同步调用数组。数组中的每个函数，都是并行调用。并且从声明这个数组开始就会触发方法调用。
+                 * 声明这个数组的目的，是为了控制，后面的data-bind处理，要等这几个方法全部执行完。
+                 */
+                var defferedFunctions = [];
                 // 遍历所有select tree组件
                 $(opts.target).find(selectTreeTmpl({
                     ATTR_NAME: attrName
@@ -608,11 +628,13 @@ define([
                     var selectTreeOpts = {
                         target: this
                     };
-                    //require(["gaeajs-ui-selectTree"], function (gaeaSelectTree) {
-                    gaeaSelectTree.init(selectTreeOpts);
-                    //});
+                    // 把初始化方法推到同步数组，不直接初始化
+                    defferedFunctions.push(gaeaSelectTree.init(selectTreeOpts));
                 });
-                dfd.resolve();
+                // 遍历所有selectTree组件后并发初始化，一起完成后再resolve对象
+                $.when.apply($, defferedFunctions).done(function () {
+                    dfd.resolve();
+                });
                 return dfd.promise();
             }
         };
