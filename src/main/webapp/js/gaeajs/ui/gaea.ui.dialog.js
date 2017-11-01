@@ -1103,6 +1103,9 @@ define([
                         selectedRow: gaeaContext.getValue("selectedRow", opts.gridId),
                         selectedRows: gaeaContext.getValue("selectedRows", opts.gridId)
                     };
+                    // 获取链式操作，前面节点的数据。可能服务端功能需要（一般都需要）。
+                    var viewChainData = gaeaView.getViewData($("#gaeaViewId").val());
+                    requestData["viewChain"] = JSON.stringify(viewChainData); // 必须json化。因为数据是笼统的，没有严格的对象mapping
                     // 数据加载要求同步
                     gaeaAjax.ajax({
                         url: opts.loadDataUrl,
@@ -2316,7 +2319,7 @@ define([
             // 克隆一下，否则由于指针的关系会不确定。
             var newOpts = _.defaults(_.clone(opts), _options);
             // 设定width。这个本来默认写在js里，但感觉不好。那样CSS控制不了。所以用.gaea-ui-dialog的宽度作为默认。
-            newOpts.width = gaeaValid.isNotNull($dialog.width) ? $dialog.width : _options.width;
+            newOpts.width = gaeaValid.isNotNull($dialog.width()) ? $dialog.width() : _options.width;
             // cache options
             $dialog.data("gaea-options", newOpts);
             // 初始化Dialog
