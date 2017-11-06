@@ -102,7 +102,8 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
             if (!(validatorNode instanceof Element)) {
                 continue;
             }
-            if (XmlSchemaDefinition.BUTTON_ACTION_VALIDATOR_NAME.equals(validatorNode.getNodeName())) {
+            if (XmlSchemaDefinition.BUTTON_ACTION_VALIDATOR_NAME.equals(validatorNode.getNodeName()) ||
+                    XmlSchemaDefinition.BUTTON_CONFIRM_VALIDATOR_NAME.equals(validatorNode.getNodeName())) {
                 // 解析< button >
                 Map<String, String> paramMap = parseValidator(validatorNode);
                 validatorList.add(paramMap);
@@ -112,12 +113,8 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
     }
 
     private Map<String, String> parseValidator(Node node) throws InvalidDataException {
-
-//        SchemaValidator validator = new SchemaValidator();
         Map<String, String> paramMap = GaeaXmlUtils.getAttributes(node);
         paramMap.put("type", node.getNodeName());
-//        validator.setType(node.getNodeName());
-//        validator.setValidateParamMap(paramMap);
         return paramMap;
     }
 

@@ -106,11 +106,17 @@ define([
             }
         };
 
+        // 这个是不被继承的一些选项。因为继承会把用户的一些选择（例如故意留空）给覆盖掉
+        var _default = {
+            width: 940                         // 第二优先级默认宽度，这个要代码控制；第一优先级，以dialog的div容器的初始宽度(.gaea-ui-dialog的宽度)为默认宽度
+        };
+
+        // 这个是会被继承的默认options
         var _options = {
             id: null,
             title: null,
             renderTo: null,
-            width: 940,                         // 第二优先级默认宽度；第一优先级，以dialog的div容器的初始宽度(.gaea-ui-dialog的宽度)为默认宽度
+            //width: 940,                         // 第二优先级默认宽度；第一优先级，以dialog的div容器的初始宽度(.gaea-ui-dialog的宽度)为默认宽度
             height: document.body.scrollHeight * 0.85,                        // 默认高度, 页面高度的85%. 设了高度后，jquery.ui.dialog会去调整内页的高度。
             maxHeight: 550, // 最大高度。这个关系自动生产高度的弹出框的最大高度。
             // 默认弹出位置
@@ -932,56 +938,58 @@ define([
                 GAEA_EVENTS.registerListener(GAEA_EVENTS.DEFINE.UI.DIALOG.CRUD_OPEN, options.triggerOpenJqSelector, function (event, data) {
                     // validate
                     // 如果有绑定校验器，需要校验通过才能继续。
-                    if (gaeaValid.isNotNull(buttonOpts.validators) && !$refButton.gaeaValidate("valid")) {
-                        return;
-                    }
-
-                    var gridId = data.gridId;
-                    var editData;
-
-                    if (options.initComponentData) {
+                    //if (gaeaValid.isNotNull(buttonOpts.validators) && !$refButton.gaeaValidate("valid")) {
+                    //    return;
+                    //}
+                    $.when($refButton.gaeaValidate("valid")).done(function () {
 
                         var gridId = data.gridId;
-                        if (gaeaValid.isNull(gridId)) {
-                            gaeaNotify.error("grid id为空，无法执行编辑操作。");
+                        var editData;
+
+                        if (options.initComponentData) {
+
+                            var gridId = data.gridId;
+                            if (gaeaValid.isNull(gridId)) {
+                                gaeaNotify.error("grid id为空，无法执行编辑操作。");
+                            }
+
+                            // 加载数据
+                            editData = crudDialog.getData({
+                                id: options.id,
+                                gridId: gridId,
+                                loadDataUrl: options.loadDataUrl
+                            });
+                            options["editData"] = editData; // 一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的）
+                            options.data = editData;
                         }
 
-                        // 加载数据
-                        editData = crudDialog.getData({
-                            id: options.id,
-                            gridId: gridId,
-                            loadDataUrl: options.loadDataUrl
-                        });
-                        options["editData"] = editData; // 一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的）
-                        options.data = editData;
-                    }
-
-                    /**
-                     * 加载HTML内容，初始化里面的数据集、复选框组件、按钮等，包括按钮相关的进一步打开弹出框等
-                     */
-                    $.when(gaeaContent.loadContent(options)).done(function () {
-                        // init
-                        _private.createDialog(options);
-
-                        // 如果是update操作，在表单中嵌入id的值
-                        // crud dialog都带上selectedRow数据
                         /**
-                         * @type {DialogGaeaOptions}
+                         * 加载HTML内容，初始化里面的数据集、复选框组件、按钮等，包括按钮相关的进一步打开弹出框等
                          */
-                        var dialogDataOpts = $dialog.data("gaeaOptions");
-                        if (gaeaValid.isNull(dialogDataOpts.extraSubmitData)) {
-                            dialogDataOpts.extraSubmitData = {};
-                        }
-                        // get selected row id
-                        var selectedRowId = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", gridId));
-                        var selectedRow = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']", gridId));
-                        // set to submit extra data, for update
-                        dialogDataOpts.extraSubmitData.id = selectedRowId;
-                        dialogDataOpts.extraSubmitData.selectedRow = selectedRow;
-                        //}
+                        $.when(gaeaContent.loadContent(options)).done(function () {
+                            // init
+                            _private.createDialog(options);
 
-                        //dialog.createAndOpen(options);
-                        dialog.open(options);
+                            // 如果是update操作，在表单中嵌入id的值
+                            // crud dialog都带上selectedRow数据
+                            /**
+                             * @type {DialogGaeaOptions}
+                             */
+                            var dialogDataOpts = $dialog.data("gaeaOptions");
+                            if (gaeaValid.isNull(dialogDataOpts.extraSubmitData)) {
+                                dialogDataOpts.extraSubmitData = {};
+                            }
+                            // get selected row id
+                            var selectedRowId = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']['id']", gridId));
+                            var selectedRow = gaeaContext.getValue(gaeaString.builder.simpleBuild("$pageContext['selectedRow']['%s']", gridId));
+                            // set to submit extra data, for update
+                            dialogDataOpts.extraSubmitData.id = selectedRowId;
+                            dialogDataOpts.extraSubmitData.selectedRow = selectedRow;
+                            //}
+
+                            //dialog.createAndOpen(options);
+                            dialog.open(options);
+                        });
                     });
                 });
             },
@@ -1240,9 +1248,10 @@ define([
              * @param {object} options
              * @param {object} [options.id]         弹出框id。为空就用系统默认的。建议为空，整个系统公用一个即可。
              * @param {string} [options.type]       如果为空，默认为感叹号图标。 value = message|forbidden
-             * @param {function} callback
+             * @param {function} [callback]
              */
             confirm: function (options, callback) {
+                var dfd = $.Deferred();// JQuery同步对象. confirm操作很多时候需要阻塞操作。
                 var dialogId = gaeaValid.isNull(options.id) ? GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID : options.id;
                 var confirmButtons = {
                     "确认": function () {
@@ -1250,9 +1259,13 @@ define([
                             callback();
                         }
                         $dialog.gaeaDialog("close");
+                        // 点击按钮，完成阻塞
+                        dfd.resolve();
                     },
                     "取消": function () {
                         $dialog.gaeaDialog("close");
+                        // 点击按钮，完成阻塞
+                        dfd.reject();
                     }
                 };
                 // 初始化，无论是否创建过都可以初始化
@@ -1261,6 +1274,8 @@ define([
                 var $dialog = $("#" + dialogId);
                 // 打开
                 $dialog.gaeaDialog("open");
+                // 返回同步对象
+                return dfd.promise();
             },
             /**
              * 创建图标（和相关的容器div）。并以jQuery对象返回。
@@ -2318,8 +2333,11 @@ define([
             var $dialog = $("#" + opts.id);
             // 克隆一下，否则由于指针的关系会不确定。
             var newOpts = _.defaults(_.clone(opts), _options);
+            // 优先级：用户设定 -> .gaea-dialog的css宽度 -> _default.width
             // 设定width。这个本来默认写在js里，但感觉不好。那样CSS控制不了。所以用.gaea-ui-dialog的宽度作为默认。
-            newOpts.width = gaeaValid.isNotNull($dialog.width()) ? $dialog.width() : _options.width;
+            if (gaeaValid.isNull(newOpts.width)) {
+                newOpts.width = gaeaValid.isNotNull($dialog.width()) ? $dialog.width() : _default.width;
+            }
             // cache options
             $dialog.data("gaea-options", newOpts);
             // 初始化Dialog

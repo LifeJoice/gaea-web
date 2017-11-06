@@ -92,40 +92,70 @@ define([
             },
             /**
              * 即刻执行目标对象的校验。
+             *
+             * @param $inTarget
              * @param opts
+             * @returns {boolean}   全部校验成功（true）还是失败（false）
              */
             valid: function ($inTarget, opts) {
-                var result = false;
+                var dfd = $.Deferred();// JQuery同步对象
+                //var validateResult = true; // 默认校验通过
                 $inTarget.each(function () {
                     var $target = $(this);
                     var gaeaOpts = $target.data("gaeaOptions");
                     if (gaeaValid.isNull(gaeaOpts.validators)) {
+                        dfd.resolve();
                         return;
                     }
                     var validators = gaeaOpts.validators;
                     // 这个是后面表达式计算需要的一个上下文变量，不能删除！
-                    var $pageContext = gaeaContext.getContext();
+                    //var $pageContext = gaeaContext.getContext();
                     if (_.isArray(validators)) {
                         /**
                          * 遍历所有校验器，如果第一个校验器校验通过，就执行第二个，第三个……如此类推。
                          * 如果第一个失败，就中止执行。
                          */
-                        $.each(validators, function (i, validator) {
-                            var origValidateEl = validator["check-expression"];
-                            var convertedValidateEl = gaeaContext.formatName(origValidateEl);
-                            try {
-                                var validateResult = eval(convertedValidateEl);
-                                result = validateResult;
-                                // 校验不通过
-                                if (!validateResult) {
-                                    gaeaNotify.warn(validator["data-msg"]);
-                                    // 中断检查，不再继续其他校验器
-                                    return false;
-                                }
-                            } catch (err) {
-                                gaeaNotify.error("校验失败！请联系系统管理员！" + err);
-                            }
+                        $.when(gaeaValidate.loopValidator(validators, 0)).done(function () {
+                            // 下一个递归完成，才完结当前这个递归
+                            dfd.resolve();
+                        }).fail(function () {
+                            dfd.reject();
                         });
+                        //$.each(validators, function (i, validator) {
+                        //
+                        //    if(gaeaString.equalsIgnoreCase("action-validator",validator.type)) {
+                        //        validateResult = gaeaValidate.genericValidate(validator);
+                        //    }else if(gaeaString.equalsIgnoreCase("confirm-validator",validator.type)) {
+                        //        //validateResult = gaeaValidate.confirmValidate(validator);
+                        //        $.when(gaeaValidate.confirmValidate(validator)).done(function () {
+                        //            validateResult = true;
+                        //        }).fail(function () {
+                        //            validateResult = false;
+                        //        });
+                        //    }
+                        //    // 中断检查（循环），不再继续其他校验器
+                        //        if(!validateResult){
+                        //            return false;
+                        //        }
+                        //
+                        //
+                        //
+                        //
+                        //    //var origValidateEl = validator["check-expression"];
+                        //    //var convertedValidateEl = gaeaContext.formatName(origValidateEl);
+                        //    //try {
+                        //    //    var validateResult = eval(convertedValidateEl);
+                        //    //    result = validateResult;
+                        //    //    // 校验不通过
+                        //    //    if (!validateResult) {
+                        //    //        gaeaNotify.warn(validator["data-msg"]);
+                        //    //        // 中断检查，不再继续其他校验器
+                        //    //        return false;
+                        //    //    }
+                        //    //} catch (err) {
+                        //    //    gaeaNotify.error("校验失败！请联系系统管理员！" + err);
+                        //    //}
+                        //});
                     }
 
                     /**
@@ -134,7 +164,101 @@ define([
                      */
                     //$target.validate();
                 });
-                return result;
+                //return validateResult;
+                return dfd.promise();
+            },
+            /**
+             *
+             * @param validators
+             * @param index
+             * @returns {boolean}   如果校验不成功，返回false。其他没返回。
+             */
+            loopValidator: function (validators, index) {
+                var dfd = $.Deferred();// JQuery同步对象
+                if (index >= validators.length) {
+                    return;
+                }
+                var validator = validators[index];
+                if (gaeaString.equalsIgnoreCase("action-validator", validator.type)) {
+                    $.when(gaeaValidate.genericValidate(validator)).done(function () {
+                        // 当一个校验完结，递归，继续校验下一个validator
+                        index++; // 下标移动，检查下一个validator
+                        $.when(gaeaValidate.loopValidator(validators, index)).done(function () {
+                            // 下一个递归完成，才完结当前这个递归
+                            dfd.resolve();
+                        }).fail(function () {
+                            dfd.reject();
+                        });
+                    }).fail(function () {
+                        dfd.reject();
+                    });
+                } else if (gaeaString.equalsIgnoreCase("confirm-validator", validator.type)) {
+                    //validateResult = gaeaValidate.confirmValidate(validator);
+                    $.when(gaeaValidate.confirmValidate(validator)).done(function () {
+                        // 递归，继续校验下一个validator
+                        index++; // 下标移动，检查下一个validator
+                        $.when(gaeaValidate.loopValidator(validators, index)).done(function () {
+                            // 下一个递归完成，才完结当前这个递归
+                            dfd.resolve();
+                        }).fail(function () {
+                            dfd.reject();
+                        });
+                    }).fail(function () {
+                        // 校验不通过，返回false
+                        //return false;
+                        dfd.reject();
+                    });
+                }
+                return dfd.promise();
+            },
+            /**
+             * 确认弹出框的校验
+             * @param opts
+             */
+            confirmValidate: function (validator) {
+                var dfd = $.Deferred();// JQuery同步对象
+                gaeaValid.isNull({check: validator["data-msg"], exception: "系统通用校验validator的data-msg不允许为空！无法校验！"});
+                var validateMsg = gaeaContext.getValue(validator["data-msg"]);
+                var gaeaDialog = require("gaeajs-ui-dialog");
+                // 同步操作，一个validator验证通过了，再resolve，再下一个
+                $.when(gaeaDialog.commonDialog.confirm({
+                    title: "操作确认",
+                    content: validateMsg
+                })).done(function () {
+                    dfd.resolve();
+                }).fail(function () {
+                    dfd.reject();
+                });
+                return dfd.promise();
+            },
+            /**
+             * 普通的校验. 基于服务端配置的表达式校验。
+             * @param validator
+             */
+            genericValidate: function (validator) {
+                var dfd = $.Deferred();// JQuery同步对象
+                var result = false;
+                // 这个是后面表达式计算需要的一个上下文变量，不能删除！
+                var $pageContext = gaeaContext.getContext();
+                var origValidateEl = validator["check-expression"];
+                var convertedValidateEl = gaeaContext.formatName(origValidateEl);
+                try {
+                    var validateResult = eval(convertedValidateEl);
+                    result = validateResult;
+                    // 校验不通过
+                    if (!validateResult) {
+                        gaeaNotify.warn(validator["data-msg"]);
+                        // 中断检查，不再继续其他校验器
+                        //return false;
+                        dfd.reject();
+                    } else {
+                        dfd.resolve();
+                    }
+                } catch (err) {
+                    gaeaNotify.error("校验失败！请联系系统管理员！" + err);
+                }
+                return dfd.promise();
+                //return result;
             }
         };
         /**
@@ -160,6 +284,7 @@ define([
              * 即刻校验
              */
             if (gaeaString.equalsIgnoreCase("valid", opts) || gaeaValid.isNotNull(opts.valid)) {
+                // 返回同步对象
                 return gaeaValidate.valid($this, null);
             }
         };

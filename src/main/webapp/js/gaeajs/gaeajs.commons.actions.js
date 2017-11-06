@@ -42,17 +42,20 @@ define([
             /**
              * 【1】通用校验框架
              * 当按钮含有action/actions/onClick才校验。之所以要有这个，是因为弹出框等也有校验，这里如果不限制一下，弹出框类的会校验两次。
+             * TODO 这个是有bug的。校验的同时，因为异步，其实已经绕过（校验）了。
              */
             if ((gaeaValid.isNotNull(buttonDef.action) || gaeaValid.isNotNull(buttonDef.actions) || _.isFunction(buttonDef.onClick)) &&
                 gaeaValid.isNotNull(buttonDef.validators)) {
                 $button.click(function (event) {
                     // validate
                     // 如果有绑定校验器，需要校验通过才能继续。
-                    if (!$button.gaeaValidate("valid")) {
+                    //if (!$button.gaeaValidate("valid")) {
+                    $.when($button.gaeaValidate("valid")).fail(function () {
+
                         // （验证不通过）立刻中止在本元素上绑定的所有同名事件的触发！
                         event.stopImmediatePropagation();
                         return;
-                    }
+                    });
                 });
             }
 

@@ -53,6 +53,7 @@ define([
          * @property {string} submitType                    ajax|...
          * @property {string} submitUrl                     点确定提交的url
          * @property {string} msg                           提交后的提示信息的base部分
+         * @property {array} validators                     按钮绑定的相关校验器。
          */
 
         /**
@@ -620,40 +621,42 @@ define([
                         GAEA_EVENTS.registerListener("click", "#" + opts.id, function (event, ui) {
                             // validate
                             // 如果有绑定校验器，需要校验通过才能继续。
-                            if (gaeaValid.isNotNull(gaeaOptions.validators) && !$button.gaeaValidate("valid")) {
-                                return;
-                            }
-                            //if (gaeaValid.isNull(submitUrl)) {
-                            //    throw "按钮对应的请求地址为空(可能是缺少配置)。";
+                            //if (gaeaValid.isNotNull(gaeaOptions.validators) && !$button.gaeaValidate("valid")) {
+                            //    return;
                             //}
-                            //var row = gaeaGrid.getSelected();
-                            var selectedRows = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
-                            // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
-                            var newRow = gaeaUtils.data.flattenData({
-                                selectedRows: selectedRows
-                            });
-                            // 提交
-                            gaeaAjax.post({
-                                url: submitUrl,
-                                data: newRow,
-                                success: function (data) {
-                                    var respObj = {};
-                                    if (gaeaValid.isNotNull(data.responseText)) {
-                                        respObj = JSON.parse(data.responseText);
-                                    }
-                                    // 处理请求返回结果, 包括成功和失败
-                                    gaeaUtils.processResponse(respObj, {
-                                        success: {
-                                            baseMsg: "操作成功！"
+
+                            $.when($button.gaeaValidate("valid")).done(function () {
+
+                                // 校验通过再执行
+
+                                var selectedRows = gaeaContext.getValue(GAEA_UI_DEFINE.UI.GAEA_CONTEXT.CACHE_KEY.SELECTED_ROWS, GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID);
+                                // 把数据处理一下。否则以Spring MVC接受jQuery的请求格式，对不上会抛异常。特别是数组、对象类的（带了[id]）。
+                                var newRow = gaeaUtils.data.flattenData({
+                                    selectedRows: selectedRows
+                                });
+                                // 提交
+                                gaeaAjax.post({
+                                    url: submitUrl,
+                                    data: newRow,
+                                    success: function (data) {
+                                        var respObj = {};
+                                        if (gaeaValid.isNotNull(data.responseText)) {
+                                            respObj = JSON.parse(data.responseText);
                                         }
-                                    });
-                                    // 刷新grid数据
-                                    $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                                },
-                                fail: function (data) {
-                                    // 处理请求返回结果, 包括成功和失败
-                                    gaeaUtils.processResponse(JSON.parse(data.responseText));
-                                }
+                                        // 处理请求返回结果, 包括成功和失败
+                                        gaeaUtils.processResponse(respObj, {
+                                            success: {
+                                                baseMsg: "操作成功！"
+                                            }
+                                        });
+                                        // 刷新grid数据
+                                        $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                                    },
+                                    fail: function (data) {
+                                        // 处理请求返回结果, 包括成功和失败
+                                        gaeaUtils.processResponse(JSON.parse(data.responseText));
+                                    }
+                                });
                             });
                         });
                     }

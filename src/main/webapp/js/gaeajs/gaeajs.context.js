@@ -74,7 +74,8 @@ define([
                     // 按照gaea框架标准格式化表达式
                     key = _private.gaeaEL.formatName(key);
                     try {
-                        value = eval(key);
+                        //value = eval(key);
+                        value = _private.gaeaEL.parseExpString(key, $pageContext);
                         if (gaeaValid.isNull(value)) {
                             value = "";
                         }
@@ -140,7 +141,8 @@ define([
                 if (gaeaValid.isNull(str)) {
                     return false;
                 }
-                if (_s.startsWith(str, "$pageContext")) {
+                //if (_s.startsWith(str, "$pageContext")) {
+                if (_s.include(str, "$pageContext")) {
                     return true;
                 }
                 return false;
@@ -182,6 +184,39 @@ define([
                     return name;
                 },
                 /**
+                 * 负责把一个含有gaea的表达式的string，转换为一个标准string。
+                 * gaea表达式中含有$pageContext变量，把这些变量转换为实际的值。getValue只能获取$pageContext开始的，而这个方法能获取$pageContext在字符串任意位置的。
+                 * <p>
+                 * 例如：
+                 *      你好啊，$pageContext['selectedRow']['gaea-grid-ct']['className'] 的第 $pageContext['selectedRow']['gaea-grid-ct']['termYear']届同学
+                 *      -------->>>> 你好啊，一年二班 的第 2015届同学
+                 * </p>
+                 * @param origString
+                 */
+                parseExpString: function (origString, $pageContext) {
+                    //var origString = "你好啊，$pageContext['selectedRow']['gaea-grid-ct']['className'] 的第 $pageContext['selectedRow']['gaea-grid-ct']['termYear']届同学";
+                    //var $pageContext = $(".gaea-sys-content-context").data();
+
+                    var gaeaExpPattern = /\$pageContext(?:\[[\w\-_.']*\])*/g;
+                    var checkResult; // exp pattern执行检查后返回的对象
+                    var i = 0;
+                    var matchExpArr = []; // 所有匹配的关键字的数组
+
+                    while ((checkResult = gaeaExpPattern.exec(origString)) != null) {
+                        //console.log(checkResult);
+                        matchExpArr.push(checkResult[0]);
+//console.log("replaced: \n"+exp.replace(result[0],eval(result[0])));
+//                        i++;
+//                        if(i>5){break;};
+                    }
+                    // 再根据匹配后的关键字，一个个替换
+                    for (var j = 0; j < matchExpArr.length; j++) {
+                        origString = origString.replace(matchExpArr[j], eval(matchExpArr[j]));
+                    }
+                    //console.log("after replace: "+origString);
+                    return origString;
+                },
+                /**
                  * 转换表达式的特殊定义符({gaea#***})等。
                  * @param origExp
                  */
@@ -201,27 +236,31 @@ define([
         var tools = {
             gaeaEL: {
                 debugUndefined: function (elStr) {
-                    var partEL = "";
-                    // 这个供表达式直读值, 不能看没引用就删掉
-                    // 获取缓存context。不知道为什么不能直接访问到CONTEXT变量
-                    var $pageContext = $(".gaea-sys-content-context").data();
-                    /**
-                     * 参考：
-                     "$pageContext['selectedRow']['gaea-grid-ct']['name']".split(/(\[[\'\w\']*\])/);
-                     result ==> ["$pageContext", "['selectedRow']", "['gaea-grid-ct']", "['name']", ""]
-                     */
-                    $.each(elStr.split(/(\[\'[\w]*\'\])/g), function (i, iValue) {
-                        if (gaeaValid.isNull(iValue)) {
-                            return;
-                        }
-                        partEL += iValue;
-                        if (i > 0) {
-                            if (gaeaValid.isNull(eval(partEL))) {
-                                console.warn("尝试执行 %s 获取上下文的值，但 %s 部分为空！", elStr, partEL);
-                                return false;
+                    try {
+                        var partEL = "";
+                        // 这个供表达式直读值, 不能看没引用就删掉
+                        // 获取缓存context。不知道为什么不能直接访问到CONTEXT变量
+                        var $pageContext = $(".gaea-sys-content-context").data();
+                        /**
+                         * 参考：
+                         "$pageContext['selectedRow']['gaea-grid-ct']['name']".split(/(\[[\'\w\']*\])/);
+                         result ==> ["$pageContext", "['selectedRow']", "['gaea-grid-ct']", "['name']", ""]
+                         */
+                        $.each(elStr.split(/(\[\'[\w]*\'\])/g), function (i, iValue) {
+                            if (gaeaValid.isNull(iValue)) {
+                                return;
                             }
-                        }
-                    });
+                            partEL += iValue;
+                            if (i > 0) {
+                                if (gaeaValid.isNull(eval(partEL))) {
+                                    console.warn("尝试执行 %s 获取上下文的值，但 %s 部分为空！", elStr, partEL);
+                                    return false;
+                                }
+                            }
+                        });
+                    } catch (err) {
+                        console.warn("debug失败。输入string：%s", elStr);
+                    }
                 }
             }
         };

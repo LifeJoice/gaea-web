@@ -39,7 +39,8 @@ public class XmlSchemaDefinition {
     public static String ACTION_BUTTON_GROUP_NAME = "button-group";
     public static String BUTTON_ACTION_NAME = "button-action"; // "button"的子元素。
     public static String BUTTON_VALIDATORS_NAME = "validators"; // 校验规则的容器元素
-    public static String BUTTON_ACTION_VALIDATOR_NAME = "action-validator";
+    public static String BUTTON_ACTION_VALIDATOR_NAME = "action-validator"; // 不同操作校验
+    public static String BUTTON_CONFIRM_VALIDATOR_NAME = "confirm-validator"; // 确认操作校验器
     /**
      * ********************************************************************************************************************************************************
      * JavaScript/Css

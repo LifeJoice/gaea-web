@@ -58,33 +58,36 @@ define([
                         // validate
                         // 如果有绑定校验器，需要校验通过才能继续。
                         var buttonOpts = $refButton.data("gaeaOptions");
-                        if (gaeaValid.isNotNull(buttonOpts.validators) && !$refButton.gaeaValidate("valid")) {
-                            return;
-                        }
-
-                        _private.viewChainData.setChainNodeData(opts);
-                        // 点击的时候，先缓存父对象（短暂）
-                        // 这个得用parentId，因为opts.id是linkViewId，由于在服务端两者分开定义（对于链条第二个开始的）, opts.id和最终加载view的id有可能不一样
-                        gaeaViewChain.setParent({
-                            id: opts.parentId
-                        });
-
-                        // 构造加载下一个view时，服务端需要的额外数据
-                        var reqData = {
-                            selectedRow: gaeaContext.getValue("$pageContext['selectedRow']['gaea-grid-ct']"),
-                            viewChain: gaeaContext.getValue("viewChain")
-                        };
-                        /**
-                         * 点击按钮的时候，加载内容页。加载完成后，把view组件加入操作链，提供返回功能。
-                         */
-                        $contentCt.load(opts.contentUrl, gaeaCommonUtils.data.flattenData(reqData), function () {
+                        //if (gaeaValid.isNotNull(buttonOpts.validators) && !$refButton.gaeaValidate("valid")) {
+                        //    return;
+                        //}
+                        $.when($refButton.gaeaValidate("valid")).done(function () {
 
 
-                            // TODO 未完成。待view返回功能一起完成。
-                            //gaeaToolbar.add();
+                            _private.viewChainData.setChainNodeData(opts);
+                            // 点击的时候，先缓存父对象（短暂）
+                            // 这个得用parentId，因为opts.id是linkViewId，由于在服务端两者分开定义（对于链条第二个开始的）, opts.id和最终加载view的id有可能不一样
+                            gaeaViewChain.setParent({
+                                id: opts.parentId
+                            });
 
-                            // 清除缓存
-                            _private.cleanCache(opts);
+                            // 构造加载下一个view时，服务端需要的额外数据
+                            var reqData = {
+                                selectedRow: gaeaContext.getValue("$pageContext['selectedRow']['gaea-grid-ct']"),
+                                viewChain: gaeaContext.getValue("viewChain")
+                            };
+                            /**
+                             * 点击按钮的时候，加载内容页。加载完成后，把view组件加入操作链，提供返回功能。
+                             */
+                            $contentCt.load(opts.contentUrl, gaeaCommonUtils.data.flattenData(reqData), function () {
+
+
+                                // TODO 未完成。待view返回功能一起完成。
+                                //gaeaToolbar.add();
+
+                                // 清除缓存
+                                _private.cleanCache(opts);
+                            });
                         });
 
                     });
