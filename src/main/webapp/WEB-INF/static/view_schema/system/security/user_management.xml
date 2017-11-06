@@ -40,7 +40,7 @@
                 <validators>
                     <action-validator data-msg="未选择任意记录，无法执行操作。"
                                       check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
-                    <confirm-validator data-msg="确认删除选择的记录？"/>
+                    <confirm-validator data-msg="确定要执行删除操作？"/>
                 </validators>
             </button>
         </actions>
