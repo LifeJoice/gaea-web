@@ -128,7 +128,11 @@ define([
                         /**
                          * 普通按钮
                          */
-                            // [1] 生成按钮的基础html。例如：<a>新增</a>
+                        var refObj;
+                        if (gaeaValid.isNotNull(thisButton.linkViewId)) {
+                            // 在view定义对象中，找id关联的定义
+                            refObj = _.clone(gaeaUI.utils.findComponent(inViews, thisButton.linkViewId));
+                        }
                         thisButton.text = thisButton.htmlValue;     // 按钮的名称，即htmlValue属性。
                         // create button container
                         var $buttonCt = $("<span></span>");
@@ -139,7 +143,9 @@ define([
                             jqContainer: $buttonCt,
                             htmlId: thisButton.htmlId,
                             text: thisButton.text,
-                            size: thisButton.size
+                            size: thisButton.size,
+                            action: thisButton.action,
+                            refObject: refObj
                         });
                         // cache options
                         $("#" + this.htmlId).data("gaeaOptions", thisButton);
@@ -155,10 +161,10 @@ define([
                      * “审批”按钮对应的是工作流的审批弹出框，则根据返回的json数据(views.dialogs[x].componentName:wf-dialog)，
                      * 找到关于工作流弹出框的描述信息，然后构造。
                      */
-                    var refObj;
+                    //var refObj;
                     if (gaeaValid.isNotNull(thisButton.linkViewId)) {
                         // 在view定义对象中，找id关联的定义
-                        refObj = _.clone(gaeaUI.utils.findComponent(inViews, thisButton.linkViewId));
+                        //refObj = _.clone(gaeaUI.utils.findComponent(inViews, thisButton.linkViewId));
                         if (gaeaValid.isNull(refObj)) {
                             console.warn("根据linkViewId找不到对应的组件！linkViewId: %s", thisButton.linkViewId);
                             return;
@@ -856,10 +862,10 @@ define([
                  * 如果有上传组件的dialog，则初始化上传组件。
                  */
                 else if (gaeaString.equalsIgnoreCase("uploader-dialog", refObj.componentName)) {
-                    gaeaUploader.init({
-                        dialog: refObj,
-                        button: buttonDef,
-                        submitUrl: refObj.submitUrl
+                    // 不要直接初始化组件。通过gaeaButton初始化（前提需要初始化好html）
+                    var gaeaButton = require("gaeajs-ui-button");
+                    gaeaButton.initGaeaButton({
+                        id: buttonDef.id
                     });
                 }
                 /**

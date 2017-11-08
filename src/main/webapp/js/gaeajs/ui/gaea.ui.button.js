@@ -51,33 +51,50 @@ define([
             /**
              * 创建个按钮的html。简单的HTML拼凑而已。
              * @param {object} btnOptions
-             * @param {object} btnOptions.jqContainer       容器jq对象。可以为空。非空时，生成的按钮html append在这个容器最后。
-             * @param {object} btnOptions.htmlId            html id
-             * @param {object} btnOptions.text              按钮的文本
-             * @param {object} btnOptions.size              要生成大按钮，还是小按钮。默认medium. value: small |
+             * @param {string} btnOptions.jqContainer       容器jq对象。可以为空。非空时，生成的按钮html append在这个容器最后。
+             * @param {string} btnOptions.htmlId            html id
+             * @param {string} btnOptions.text              按钮的文本
+             * @param {string} btnOptions.size              要生成大按钮，还是小按钮。默认medium. value: small |
+             * @param {string} btnOptions.action            按钮的action
+             * @param {object} btnOptions.refObject         关联的对象定义（例如：要打开一个dialog，则关联对象dialog的定义等）
              */
             create: function (btnOptions) {
-                var buttonHtml = "";
+                var $html;
                 if (gaeaValid.isNotNull(btnOptions.size) && "small" == btnOptions.size) {
-                    html = "<a id='" + btnOptions.htmlId + "'" +
+                    $html = $("<a id='" + btnOptions.htmlId + "'" +
                         " class=\"small darkslategrey gaea-ui-button\">" +
                         "<span>" +
                         btnOptions.text +
                         "</span>" +
-                        "</a>";
+                        "</a>");
                 } else {
-                    html = "<a id='" + btnOptions.htmlId + "'" +
+                    $html = $("<a id='" + btnOptions.htmlId + "'" +
                         " class=\"medium darkslategrey gaea-ui-button\">" +
                         "<span>" +
                         btnOptions.text +
                         "</span>" +
-                        "</a>";
+                        "</a>");
                 }
                 // 放入容器
                 if (gaeaValid.isNotNull(btnOptions.jqContainer)) {
-                    btnOptions.jqContainer.append(html);
+                    btnOptions.jqContainer.append($html);
                 }
-                return html;
+                // 初始化关联对象的定义等
+                if (gaeaValid.isNotNull(btnOptions.refObject)) {
+                    var action;
+                    // 根据关联对象，确定按钮的action
+                    if (gaeaString.equalsIgnoreCase("uploader-dialog", btnOptions.refObject.componentName)) {
+                        action = "uploader_dialog";
+                    }
+                    $html.attr('data-gaea-ui-button', JSON.stringify({
+                        newId: btnOptions.refObject.id,
+                        action: action,
+                        submitUrl: btnOptions.refObject.submitUrl,
+                        multiple: btnOptions.refObject.multiple,
+                        keepFailed: btnOptions.refObject.keepFailed
+                    }));
+                }
+                return $html.html();
             },
             /**
              * 参考html配置：
@@ -93,7 +110,7 @@ define([
                     throw "缺少id配置，无法初始化gaea的按钮。";
                 }
                 var $button = $("#" + opts.id);
-                var strButtonDef = $button.data(GAEA_UI_DEFINE.UI.BUTTON.DEFINE);
+                var strButtonDef = $button.data(GAEA_UI_DEFINE.UI.BUTTON.DEFINE); // 这里可能获取的是对象（如果存储的时候是strict json的话）
                 // 获取最外层弹出框
                 var $rootDialog = gaeaDialog.utils.findRootDialog(opts.parentCtSelector);
                 //var $parentContainer = $(opts.parentCtSelector);

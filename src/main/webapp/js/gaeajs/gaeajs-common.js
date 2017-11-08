@@ -218,7 +218,7 @@ define([
             confirmValidate: function (validator) {
                 var dfd = $.Deferred();// JQuery同步对象
                 gaeaValid.isNull({check: validator["data-msg"], exception: "系统通用校验validator的data-msg不允许为空！无法校验！"});
-                var validateMsg = gaeaValid.isNotNull(gaeaContext.getValue(validator["data-msg"])) ? gaeaContext.getValue(validator["data-msg"]) : validator["data-msg"];
+                var validateMsg = gaeaValid.isNotNull(gaeaContext.parseElString(validator["data-msg"])) ? gaeaContext.parseElString(validator["data-msg"]) : validator["data-msg"];
                 var gaeaDialog = require("gaeajs-ui-dialog");
                 // 同步操作，一个validator验证通过了，再resolve，再下一个
                 $.when(gaeaDialog.commonDialog.confirm({

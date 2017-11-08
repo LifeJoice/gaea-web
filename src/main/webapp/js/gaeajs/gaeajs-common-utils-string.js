@@ -80,6 +80,10 @@ define([
             if (gaeaValid.isNull(jsonStr)) {
                 return result;
             }
+            // 进来都已经是对象了，不需要转换
+            if (_.isObject(jsonStr)) {
+                return jsonStr;
+            }
             // 如果进来的带有json的“{}”，去掉
             jsonStr = _s.trim(jsonStr);
             if (!_s.startsWith("{")) {

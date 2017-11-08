@@ -216,6 +216,9 @@ define([
                     opts["pageId"] = (new Date()).getTime().toString() + _.random(100, 999).toString(); // 最终会进cache gaeaOptions
                 }
 
+                // cache options
+                $dialog.data("gaea-options", _.clone(opts));
+
                 /**
                  * if contentUrl不为空 或 是data filter dialog的时候，才做加载内容工作
                  * else （像上传弹出框、工作流弹出框等）
@@ -652,6 +655,9 @@ define([
                 // 这对dialog中的组件找父dialog很必要。
                 $("#" + dialogOpts.id).attr("data-gaea-ui-dialog", "");
                 $("#" + dialogOpts.id).addClass("gaea-dialog");
+
+                // cache options
+                $dialog.data("gaea-options", _.clone(dialogOpts));
 
                 /**
                  * 创建了dialog html后，对里面的form也得做validate的初始化。否则jQuery.validate插件会报错：
@@ -1437,6 +1443,7 @@ define([
                     isDataUnbind: true
                 });
                 var formId = dialog.utils.getFormId(opts.id);
+                var $dialog = $("#" + opts.id);
                 var $dialogForm = $("#" + formId);
                 /**
                  * 必须首先关闭dialog。否则后面的操作会把整个dialog的DOM删除。jQuery dialog的事件就统统失效了。
@@ -1444,7 +1451,10 @@ define([
                 dialog.close("#" + opts.id);
                 // 取消数据绑定. 这里也会把dialog的DOM干掉！需要注意！
                 if (opts.isDataUnbind) {
+                    var dialogOpts = _.clone($dialog.data("gaeaOptions"));
                     gaeaData.unbind(opts.id);
+                    // TODO unbind会把gaeaOptions清空。这样下次打开crud dialog的时候就会缺少配置信息无法初始化。以后不需要KnockOutJS就可以把下面这个重写入gaeaOptions去掉
+                    $dialog.data("gaeaOptions", dialogOpts);
                 }
                 // 清空表单内容
                 // 彻底删除相关的HTML DOM
@@ -2332,14 +2342,15 @@ define([
         _private.createDialog = function (opts) {
             var $dialog = $("#" + opts.id);
             // 克隆一下，否则由于指针的关系会不确定。
-            var newOpts = _.defaults(_.clone(opts), _options);
+            //var newOpts = _.defaults(_.clone(opts), _options);
+            var newOpts = $dialog.data("gaeaOptions");
             // 优先级：用户设定 -> .gaea-dialog的css宽度 -> _default.width
             // 设定width。这个本来默认写在js里，但感觉不好。那样CSS控制不了。所以用.gaea-ui-dialog的宽度作为默认。
             if (gaeaValid.isNull(newOpts.width)) {
                 newOpts.width = gaeaValid.isNotNull($dialog.width()) ? $dialog.width() : _default.width;
             }
-            // cache options
-            $dialog.data("gaea-options", newOpts);
+            //// cache options
+            //$dialog.data("gaea-options", newOpts);
             // 初始化Dialog
             // openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
             if (gaeaValid.isNotNull(opts.openStyle) && !gaeaString.equalsIgnoreCase(opts.openStyle, "new")) {

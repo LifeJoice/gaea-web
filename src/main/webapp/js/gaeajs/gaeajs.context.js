@@ -74,8 +74,7 @@ define([
                     // 按照gaea框架标准格式化表达式
                     key = _private.gaeaEL.formatName(key);
                     try {
-                        //value = eval(key);
-                        value = _private.gaeaEL.parseExpString(key, $pageContext);
+                        value = eval(key);
                         if (gaeaValid.isNull(value)) {
                             value = "";
                         }
@@ -141,8 +140,7 @@ define([
                 if (gaeaValid.isNull(str)) {
                     return false;
                 }
-                //if (_s.startsWith(str, "$pageContext")) {
-                if (_s.include(str, "$pageContext")) {
+                if (_s.startsWith(str, "$pageContext")) {
                     return true;
                 }
                 return false;
@@ -153,6 +151,26 @@ define([
              */
             getContext: function () {
                 return $(".gaea-sys-content-context").data();
+            },
+            /**
+             * 把某个带有上下文变量的字符串（同时含有其他普通字符），把上下文变量替换成实际的值。
+             * 例如：
+             * "确定要执行编辑操作？$pageContext[selectedRow][gaea-grid-ct][className]"  --->  "确定要执行编辑操作？一年二班"
+             * @param elStr 某个带有（也可以不带有）上下文变量$pageContext的字符串
+             * @returns {*}
+             */
+            parseElString: function (elStr) {
+                if (gaeaValid.isNull(elStr)) {
+                    return;
+                }
+                if (!_s.include(elStr, "$pageContext")) {
+                    return elStr;
+                }
+                // 按照gaea框架标准格式化表达式
+                elStr = _private.gaeaEL.formatName(elStr);
+                //value = eval(key);
+                var result = _private.gaeaEL.parseExpString(elStr, gaeaContext.getContext());
+                return result;
             }
         };
 
