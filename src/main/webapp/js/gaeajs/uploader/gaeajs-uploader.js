@@ -81,6 +81,8 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                     // 是否缓存选中的
                     keepFailed: opts.keepFailed
                 }, _options);
+                // 放在dialog options里面，才能一起缓存
+                _.defaults(opts, uploaderOpts);
                 /* 初始化上传组件的dialog */
                 uploader._initDialog(dialogOptions);
                 // get dialog container
@@ -95,6 +97,8 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 // 注册点击处理
                 // 如果需要keepFailed，并且WebUploader的错误队列里面有文件，则添加回文件列表页面
                 _private.registerOpenUploader(buttonOptions, $dialog.data("gaeaOptions"), _uploader, opts.keepFailed);
+                // 注册关闭弹出框处理
+                _private.registerCloseUploader($dialog.data("gaeaOptions"), _uploader, opts.keepFailed);
 
                 //_uploader = new webuploader.Uploader({
                 //    // swf文件路径
@@ -175,7 +179,10 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                         text: "取消",
                         id: dialogOptions.id + "-cancel",
                         click: function () {
-                            _private.cleanUploaderList(dialogOptions.id); // 清空文件列表页面
+                            //_private.cleanUploaderList(dialogOptions.id); // 清空文件列表页面
+                            //var files = webUploader.getFiles();
+                            // 触发事件处理关闭逻辑，例如清空文件列表等。因为在这里还拿不到webUploader的对象，无法做一些清空文件列表等的操作
+                            $("#" + dialogOptions.id).trigger(gaeaEvents.DEFINE.UI.UPLOADER_DIALOG.CLOSE_DIALOG);
                             $(this).gaeaDialog("close");
                         }
                     }
@@ -366,6 +373,30 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                         $.each(failQueue, function (i, file) {
                             _private.html.addFile(file, $dialog.children(".uploader-list"), webUploader);
                         });
+                    }
+                });
+            },
+            /**
+             * 关闭弹出框的处理, 例如清空文件列表等。
+             * @param dialogOptions
+             * @param webUploader
+             * @param keepFailed
+             */
+            registerCloseUploader: function (dialogOptions, webUploader, keepFailed) {
+                // 注册关闭弹出框处理
+                gaeaEvents.registerListener(gaeaEvents.DEFINE.UI.UPLOADER_DIALOG.CLOSE_DIALOG, "#" + dialogOptions.id, function (event, ui) {
+                    // 清空文件列表页面(Html)
+                    _private.cleanUploaderList(dialogOptions.id);
+                    var files = webUploader.getFiles();
+                    // 如果不需要保留失败的，就彻底把它移除。
+                    // 否则WebUploader会留在队列里面，下次选不中
+                    if (!keepFailed) {
+                        // 清空WebUploader组件里面的文件（缓存）
+                        if (gaeaValid.isNotNull(files) && _.isArray(files)) {
+                            $.each(files, function (i, file) {
+                                webUploader.removeFile(file, true);
+                            });
+                        }
                     }
                 });
             },

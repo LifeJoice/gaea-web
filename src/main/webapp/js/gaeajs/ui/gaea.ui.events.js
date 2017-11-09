@@ -92,7 +92,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     CLOSE: "gaeaUI_event_dialog_close"                              // 对应jQuery dialog的close。主要是设定JQ的close会互相覆盖，干脆用自己的事件算了
                 },
                 UPLOADER_DIALOG: {
-                    UPLOAD: "gaeaUI_event_uploader_dialog_upload" // 即刻上传
+                    UPLOAD: "gaeaUI_event_uploader_dialog_upload", // 即刻上传
+                    CLOSE_DIALOG: "gaeaUI_event_uploader_dialog_close" // 关闭弹出框
                 },
                 GRID: {
                     REFRESH_DATA: "gaeaUI_event_grid_refresh_data", // 刷新数据区事件
