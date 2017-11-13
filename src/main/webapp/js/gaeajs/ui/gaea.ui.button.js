@@ -81,18 +81,19 @@ define([
                 }
                 // 初始化关联对象的定义等
                 if (gaeaValid.isNotNull(btnOptions.refObject)) {
-                    var action;
-                    // 根据关联对象，确定按钮的action
-                    if (gaeaString.equalsIgnoreCase("uploader-dialog", btnOptions.refObject.componentName)) {
-                        action = "uploader_dialog";
-                    }
-                    $html.attr('data-gaea-ui-button', JSON.stringify({
+                    var refObjectCfg = {
                         newId: btnOptions.refObject.id,
-                        action: action,
+                        //action: action,
                         submitUrl: btnOptions.refObject.submitUrl,
                         multiple: btnOptions.refObject.multiple,
                         keepFailed: btnOptions.refObject.keepFailed
-                    }));
+                    };
+                    // 根据关联对象，确定按钮的action
+                    if (gaeaString.equalsIgnoreCase("uploader-dialog", btnOptions.refObject.componentName)) {
+                        refObjectCfg.action = "uploader_dialog";
+                        refObjectCfg.multiple = btnOptions.refObject.multiple;
+                    }
+                    $html.attr('data-gaea-ui-button', JSON.stringify(refObjectCfg));
                 }
                 return $html.html();
             },
@@ -233,15 +234,15 @@ define([
                 gaeaValid.isNull({check: opts.newId, exception: "如果需要配置打开上传文件弹出框，newId不允许为空！"});
                 // 找当前按钮所在弹框的最外层dialog（避免是嵌套式的dialog）
                 var $thisButton = $("#" + opts.id);
-                var $rootDialog = $("#" + opts.id).parents("[data-gaea-ui-dialog]").filter(":last");
-                var $myForm = $("#" + opts.id).parents("form").filter(":first");
-                var pageId = "";
+                //var $rootDialog = $("#" + opts.id).parents("[data-gaea-ui-dialog]").filter(":last");
+                //var $myForm = $("#" + opts.id).parents("form").filter(":first");
+                //var pageId = "";
                 var postData = {};
                 // 带上pageId
-                if (gaeaValid.isNotNull($rootDialog)) {
-                    var dialogGaeaOpts = $rootDialog.data("gaeaOptions");
-                    postData.pageId = dialogGaeaOpts["pageId"];
-                }
+                //if (gaeaValid.isNotNull($rootDialog)) {
+                //    var dialogGaeaOpts = $rootDialog.data("gaeaOptions");
+                //    postData.pageId = dialogGaeaOpts["pageId"];
+                //}
 
                 // 初始化按钮上的事件, 例如什么onComplete等
                 GAEA_EVENTS.initGaeaEvent(opts);
@@ -265,7 +266,7 @@ define([
                     submitUrl: opts.submitUrl,
                     multiple: opts.multiple,
                     keepFailed: opts.keepFailed,
-                    data: gaeaCommonUtils.data.flattenData(postData),
+                    data: postData,
                     /* 获取数据的回调。在点击上传的时候。 */
                     getUploadDataFunc: function () {
                         var $myForm = $("#" + opts.id).parents("form").filter(":first");

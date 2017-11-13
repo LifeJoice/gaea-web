@@ -71,13 +71,17 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 // 构造上传组件的配置项
                 var uploaderOpts = _.defaults({
                     // 文件选择页面的div
-                    pick: "#" + filePickerId,
+                    pick: {
+                        id: "#" + filePickerId,
+                        // 是否多选
+                        multiple: opts.multiple
+                    },
                     // 文件上传提交的url位置
                     server: opts.submitUrl,
                     // 一并上传的form data
                     formData: opts.data,
                     // 是否多选
-                    multiple: opts.multiple,
+                    //multiple: opts.multiple,
                     // 是否缓存选中的
                     keepFailed: opts.keepFailed
                 }, _options);
@@ -250,8 +254,9 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                     var failQueue = webUploader.getFiles("error"); // 截止到目前为止，上传失败的
                     // 上传前，获取一次最新的、需要额外提交的数据
                     if (_.isFunction(getUploadDataFunc)) {
-                        var latestPostData = getUploadDataFunc();
-                        _.extend(webUploader.option("formData"), latestPostData);
+                        var latestPostData = getUploadDataFunc(); // 例如：获取当前dialog所在form的数据
+                        //_.extend(webUploader.option("formData"), latestPostData);
+                        _.extend(webUploader.option("formData"), _private.getPostData(latestPostData, dialogOptions)); // getPostData，额外的数据，例如：pageId
                     }
                     // 如果有上次上传失败的，就重试
                     if (failQueue.length > 0) {
@@ -421,6 +426,27 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
              */
             cleanUploaderList: function (dialogId) {
                 $("#" + dialogId).find(".uploader-list").html("");
+            },
+            /**
+             * 获取webUploader组件要一并提交的form data。
+             * @param data
+             * @param dialogOptions
+             * @returns {*}
+             */
+            getPostData: function (data, dialogOptions) {
+                if (gaeaValid.isNull(data)) {
+                    data = {};
+                }
+                var $dialog = $("#" + dialogOptions.id);
+                var $rootDialog = $dialog.filter("[data-gaea-ui-dialog]").length > 0 ? $dialog : $dialog.parents("[data-gaea-ui-dialog]").filter(":last"); // 找根的dialog，可能是自己，也可能包了另外一层
+
+                // 带上pageId
+                if (gaeaValid.isNotNull($rootDialog)) {
+                    var dialogGaeaOpts = $rootDialog.data("gaeaOptions");
+                    data.pageId = dialogGaeaOpts["pageId"];
+                }
+
+                return data;
             },
             html: {
                 /**

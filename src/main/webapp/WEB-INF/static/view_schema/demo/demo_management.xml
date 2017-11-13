@@ -151,7 +151,7 @@
                      content-url="/gaea/demo/class-crud-form" load-data-url="/gaea/demo/get-class"
                      submit-url="/gaea/demo/add-class"/>
         <uploader-dialog id="uploaderDialog" html-id="uploaderDialog" content-url=""
-                         submit-url="/gaea/demo/upload-to-somewhere"/>
+                         submit-url="/gaea/demo/upload-to-somewhere" multiple="true"/>
         <!-- 导入Excel -->
         <uploader-dialog id="importExcelDialog" html-id="importExcelDialog" content-url=""
                          submit-url="/gaea/demo/excel-import"/>

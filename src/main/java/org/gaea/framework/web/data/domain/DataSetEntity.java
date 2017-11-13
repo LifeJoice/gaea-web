@@ -38,7 +38,7 @@ public class DataSetEntity implements Serializable {
     private String primaryTable;
     @Column(name = "DATA_SQL", length = 4000)
     private String sql;
-    @Column(name = "DS_DATA", length = 2000)
+    @Column(name = "DS_DATA", length = 3000)
     private String dsData;
     @Column(name = "CACHE_TYPE", length = 20, nullable = false)
     private String cacheType = GaeaDataSet.CACHE_TYPE_NONE; // 默认不缓存

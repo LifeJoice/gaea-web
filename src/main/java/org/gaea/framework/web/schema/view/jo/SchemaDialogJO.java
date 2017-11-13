@@ -26,6 +26,7 @@ public class SchemaDialogJO implements SchemaViewsComponent, Serializable {
     private String idField;         // id的html name。在update dialog有用。
     private List<SchemaButton> buttons = new ArrayList<SchemaButton>();
     private Boolean editable = true; // 是否可编辑。默认true
+    private Boolean multiple = false; // 文件上传组件专用。是否支持多选。
 
     public String getId() {
         return id;
@@ -146,5 +147,13 @@ public class SchemaDialogJO implements SchemaViewsComponent, Serializable {
 
     public void setEditable(Boolean editable) {
         this.editable = editable;
+    }
+
+    public Boolean getMultiple() {
+        return multiple;
+    }
+
+    public void setMultiple(Boolean multiple) {
+        this.multiple = multiple;
     }
 }
