@@ -2343,7 +2343,7 @@ define([
             var $dialog = $("#" + opts.id);
             // 克隆一下，否则由于指针的关系会不确定。
             //var newOpts = _.defaults(_.clone(opts), _options);
-            var newOpts = $dialog.data("gaeaOptions");
+            var newOpts = gaeaValid.isNotNull($dialog.data("gaeaOptions")) ? $dialog.data("gaeaOptions") : _.defaults(_.clone(opts), _options);
             // 优先级：用户设定 -> .gaea-dialog的css宽度 -> _default.width
             // 设定width。这个本来默认写在js里，但感觉不好。那样CSS控制不了。所以用.gaea-ui-dialog的宽度作为默认。
             if (gaeaValid.isNull(newOpts.width)) {
