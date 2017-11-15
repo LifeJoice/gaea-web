@@ -12,9 +12,9 @@
  * @typedef {object} BaiduWebUploader
  */
 define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-dialog"
-        , 'gaeajs-common-utils-validate', 'gaeajs-common', "gaeajs-ui-notify", "gaeajs-ui-events", "gaeajs-common-utils"],
+        , 'gaeajs-common-utils-validate', 'gaeajs-common', "gaeajs-ui-notify", "gaeajs-ui-events", "gaeajs-common-utils", "gaeajs-ui-chain"],
     function ($, _, baiduUploader, _s, gaeaDialog,
-              gaeaValid, gaeaCommon, gaeaNotify, gaeaEvents, gaeaUtils) {
+              gaeaValid, gaeaCommon, gaeaNotify, gaeaEvents, gaeaUtils, gaeaChain) {
         // default options
         var _options = {
             // swf文件路径
@@ -65,9 +65,15 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                     exception: "dialog id为空，无法初始化gaea uploader组件！Button id: " + opts.button.id
                 });
                 var _uploader;
+                var gaeaDialog = require("gaeajs-ui-dialog");
                 var dialogOptions = opts.dialog;
                 var buttonOptions = opts.button;
                 var filePickerId = dialogOptions.id + "-filePicker";
+                // 获取按钮所在弹出框（因为文件上传弹出框是独立的，加入不了前面的弹出框链的话获取不到pageId）
+                var $parentDialog = gaeaDialog.utils.findRootDialog("#" + buttonOptions.id);
+                if ($parentDialog.length > 0) {
+                    dialogOptions.parentId = $parentDialog.attr("id");
+                }
                 // 构造上传组件的配置项
                 var uploaderOpts = _.defaults({
                     // 文件选择页面的div
@@ -437,11 +443,15 @@ define(["jquery", "underscore", 'webuploader', 'underscore-string', "gaeajs-ui-d
                 if (gaeaValid.isNull(data)) {
                     data = {};
                 }
-                var $dialog = $("#" + dialogOptions.id);
-                var $rootDialog = $dialog.filter("[data-gaea-ui-dialog]").length > 0 ? $dialog : $dialog.parents("[data-gaea-ui-dialog]").filter(":last"); // 找根的dialog，可能是自己，也可能包了另外一层
+                //var $dialog = $("#" + dialogOptions.id);
+                // 从操作链获取根dialog id（因为文件上传dialog是独立的另一个弹出框）
+                var rootDialogId = gaeaChain.getRootId(dialogOptions.id);
+                //var $rootDialog = $dialog.filter("[data-gaea-ui-dialog]").length > 0 ? $dialog : $dialog.parents("[data-gaea-ui-dialog]").filter(":last"); // 找根的dialog，可能是自己，也可能包了另外一层
+                var $rootDialog;
 
                 // 带上pageId
-                if (gaeaValid.isNotNull($rootDialog)) {
+                if (gaeaValid.isNotNull(rootDialogId)) {
+                    $rootDialog = $("#" + rootDialogId);
                     var dialogGaeaOpts = $rootDialog.data("gaeaOptions");
                     data.pageId = dialogGaeaOpts["pageId"];
                 }
