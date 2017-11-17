@@ -2350,7 +2350,10 @@ define([
                 newOpts.width = gaeaValid.isNotNull($dialog.width()) ? $dialog.width() : _default.width;
             }
             //// cache options
-            //$dialog.data("gaea-options", newOpts);
+            // TODO 这个cache的流程不太清楚。有从createDialog cahce的，有从init cache的……这样很乱。要整理一下。
+            if (gaeaValid.isNull($dialog.data("gaea-options"))) {
+                $dialog.data("gaea-options", newOpts);
+            }
             // 初始化Dialog
             // openStyle != inOne的, 才需要初始化. inOne的, 其实就只是一个div, 不需要调用jQuery dialog组件.
             if (gaeaValid.isNotNull(opts.openStyle) && !gaeaString.equalsIgnoreCase(opts.openStyle, "new")) {

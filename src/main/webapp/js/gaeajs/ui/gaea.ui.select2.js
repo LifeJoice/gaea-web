@@ -41,6 +41,7 @@ define([
              * @param {string} opts.htmlName
              * @param {string} opts.fieldId             input的data-field-id. 服务端查询需要。
              * @param {string} opts.dataSetId           数据集id
+             * @param {string} opts.multiple            如果可以多选，value=multiple. 否则为空。
              * @param {object} [opts.condition]         condition的配置。例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
              */
             createAndInit: function (opts) {
@@ -123,6 +124,7 @@ define([
              * @param {string} opts.htmlName
              * @param {string} opts.fieldId             input的data-field-id. 服务端查询需要。
              * @param {string} opts.dataSetId           数据集id
+             * @param {string} opts.multiple            如果可以多选，value=multiple. 否则为空。
              * @param {object} [opts.condition]         condition的配置。例如：{id:'byId',values:[{ type:'pageContext',value:'id' }]}
              */
             preInitHtmlAndData: function (opts) {
@@ -168,14 +170,20 @@ define([
              * @param {string} opts.jqSelector                  container selector. 这个细化到某个grid的某个.gaea-query-input-div
              * @param {string} opts.htmlId
              * @param {string} opts.htmlName
+             * @param {string} opts.multiple                    如果可以多选，value=multiple. 否则为空。
              * @param {string} opts.fieldId                     input的data-field-id. 服务端查询需要。
              */
             initHtmlCt: function (opts) {
-                var selectTemplate = _.template('<select id="<%=ID%>" name="<%=NAME%>" data-field-id="<%= FIELD_ID %>"></select>');
+                var selectTemplate = _.template('<select id="<%=ID%>" name="<%=NAME%>" data-field-id="<%= FIELD_ID %>" <%= MULTIPLE_CFG %> ></select>');
+                var multipleCfg = "";
+                if (gaeaValid.isNotNull(opts.multiple)) {
+                    multipleCfg = 'multiple="multiple"';
+                }
                 var $select = $(selectTemplate({
                     ID: opts.htmlId,
                     NAME: opts.htmlName,
-                    FIELD_ID: opts.fieldId
+                    FIELD_ID: opts.fieldId,
+                    MULTIPLE_CFG: multipleCfg
                 }));
                 $(opts.jqSelector).append($select);
             },

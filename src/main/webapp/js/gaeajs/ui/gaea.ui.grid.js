@@ -10,8 +10,9 @@
  * @property {boolean} GaeaColumn.editable              是否可编辑
  * @property {int} GaeaColumn.width                     宽度
  * @property {string} GaeaColumn.dataSetId              数据集id
- * @property {object} GaeaColumn.default                默认项（值等）
- * @property {string} GaeaColumn.default.value
+ * @property {GaeaColumnComponent} GaeaColumn.component
+ //* @property {object} GaeaColumn.default                默认项（值等）
+ //* @property {string} GaeaColumn.default.value
  * @property {string} GaeaColumn.dataType               数据类型。string|date|datetime|img|...
  * @property {string} GaeaColumn.imgSrcPrefix           图片列，自动为<img>标签的src加上的前缀
  * @property {string} GaeaColumn.imgSrcSuffix           图片列，自动为<img>标签的src加上的后缀
@@ -32,6 +33,14 @@
  * @property {string} GaeaColumnValidatorHtml.required          对应input required
  * @property {string} GaeaColumnValidatorHtml.data-msg          对应input data-msg
  * @property {string} GaeaColumnValidatorHtml.xxx               其他jQuery.validate和HTML5支持的属性
+ */
+/**
+ * 对应列的组件。例如：列是可编辑的，里面的是下拉选择框……这样的。
+ * @type {object} GaeaColumnComponent
+ * @property {string} GaeaColumnComponent.type              组件的类型。决定了初始化的组件。value=select2|...
+ * @property {string} GaeaColumnComponent.multiple          是否多选。下拉框专属属性。
+ * @property {object} GaeaColumnComponent.default           默认项（值等）
+ * @property {string} GaeaColumnComponent.default.value
  */
 define([
         "jquery", "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-common-utils-datetime',
@@ -1413,7 +1422,9 @@ define([
                                 // --------->>>> 下面是init方法需要配置项
                                 // 这个是创建了<select>元素后，元素的选择器
                                 selectJqSelector: "#" + gaeaString.format.getValidName(opts.inputId),
-                                default: opts.column.default,
+                                default: opts.column.component.default,
+                                multiple: opts.column.component.multiple,
+                                //component: opts.column.component,
                                 value: value
                             });
                         });
