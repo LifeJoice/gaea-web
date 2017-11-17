@@ -236,16 +236,28 @@ define([
                     }
                 }
                 // 组装按钮
-                $gridCt.find("#query-actions").children("div:first").append(gaeaButton.create({
+                //$gridCt.find("#query-actions").children("div:first").append(gaeaButton.create({
+                //    "htmlId": "headqueryOK",
+                //    "text": "确定",
+                //    "size": "small"
+                //}));
+                gaeaButton.create({
                     "htmlId": "headqueryOK",
                     "text": "确定",
-                    "size": "small"
-                }));
-                $gridCt.find("#query-actions").children("div:first").append(gaeaButton.create({
+                    "size": "small",
+                    jqContainer: $gridCt.find("#query-actions").children("div:first")
+                });
+                //$gridCt.find("#query-actions").children("div:first").append(gaeaButton.create({
+                //    "htmlId": "query-reset",
+                //    "text": "重置",
+                //    "size": "small"
+                //}));
+                gaeaButton.create({
                     "htmlId": "query-reset",
                     "text": "重置",
-                    "size": "small"
-                }));
+                    "size": "small",
+                    jqContainer: $gridCt.find("#query-actions").children("div:first")
+                });
 
                 /**
                  * 初始化一个gaea小插件：保证查询区的按钮自动居中（随滚动条左右滑动的时候）

@@ -352,22 +352,22 @@ define([
                 $("#" + this.htmlId).data("gaeaOptions", opts);
             },
             button: {
-                _create: function (btnOptions) {
-                    //var html = "<span><a id='" + btnOptions.htmlId + "'" +
-                    //    " class=\"medium darkslategrey button\"" +
-                    //    "><span>" +
-                    //    btnOptions.text +
-                    //    "</span>" +
-                    //    "</a></span>";
-                    var html = '<span>' +
-                        gaeaButton.create({
-                            "htmlId": btnOptions.htmlId,
-                            "text": btnOptions.text,
-                            "size": btnOptions.size
-                        }) +
-                        '</span>';
-                    return html;
-                },
+                //_create: function (btnOptions) {
+                //    //var html = "<span><a id='" + btnOptions.htmlId + "'" +
+                //    //    " class=\"medium darkslategrey button\"" +
+                //    //    "><span>" +
+                //    //    btnOptions.text +
+                //    //    "</span>" +
+                //    //    "</a></span>";
+                //    var html = '<span>' +
+                //        gaeaButton.create({
+                //            "htmlId": btnOptions.htmlId,
+                //            "text": btnOptions.text,
+                //            "size": btnOptions.size
+                //        }) +
+                //        '</span>';
+                //    return html;
+                //},
                 /**
                  * 创建按钮组。
                  * TODO BUG. 这个按钮组，应该在之前重构的时候，导致不支持弹出框类的。需要修复。
