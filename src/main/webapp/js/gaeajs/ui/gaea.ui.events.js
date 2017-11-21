@@ -276,14 +276,16 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
         /**
          * gaea定义的各种event（onComplete等）的处理
          * @param {object} opts
-         * @param {object} opts.id          当前元素的id。例如：是一个按钮。
+         * @param {object} opts.target              绑定事件的对象
+         * @param {object} opts.id          作废！！！当前元素的id。例如：是一个按钮。
          * @param {object} opts.onComplete
          */
         events.initGaeaEvent = function (opts) {
             if (gaeaValid.isNull(opts)) {
                 return;
             }
-            var $target = $("#" + opts.id);
+            //var $target = $("#" + opts.id);
+            var $target = $(opts.target);
             if (gaeaValid.isNotNull(opts.onComplete)) {
                 opts.gaeaEventName = "onComplete"; // 这个必须和html元素上的data-gaea-ui-xx的事件名对上。否则opts里面没有对应的属性值。
                 _private.bindOnComplete(opts);
@@ -298,11 +300,12 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * 根据onComplete对象定义，绑定一个gaeaEvent_onComplete事件，在触发的时候，进一步触发对应target的event。
              * @param {object} opts
              * @param {object} opts.id
+             * @param {object} opts.target              绑定事件的对象
              * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。
              * @param {GaeaUiEvent} opts.onComplete
              */
             bindOnComplete: function (opts) {
-                events.registerListener(events.DEFINE.CALLBACK.ON_COMPLETE, "#" + opts.id, function (event, data) {
+                events.registerListener(events.DEFINE.CALLBACK.ON_COMPLETE, opts.target, function (event, data) {
                     // 通用处理
                     _private.doGaeaEvent(opts);
 
@@ -325,11 +328,12 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * 绑定gaea event通用处理onChange的处理。
              * 例如针对：data-gaea-ui-select="onChange: { trigger: {target:'#tab2-title' , event:'reload_data' }}"
              * @param {object} opts
+             * @param {object} opts.target              绑定事件的对象
              * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。
              */
             bindOnChange: function (opts) {
                 var $target = $("#" + opts.id);
-                events.registerListener("change", "#" + opts.id, function (event, data) {
+                events.registerListener("change", opts.target, function (event, data) {
                     // 通用处理
                     _private.doGaeaEvent(opts);
                 });

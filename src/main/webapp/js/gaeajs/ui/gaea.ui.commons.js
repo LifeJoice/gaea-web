@@ -263,7 +263,7 @@ define([
                     }
 
                     // 初始化按钮上的事件, 例如什么onComplete等
-                    gaeaEvents.initGaeaEvent(opts);
+                    gaeaEvents.initGaeaEvent(_.extend(_.clone(opts), {target: "#" + id})); // 这里的target是单个组件的、给initGaeaEvent绑定事件的
 
                     // 请求gaea select2模块进行初始化
                     //gaeaSelect2.init({

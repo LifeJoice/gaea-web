@@ -102,7 +102,7 @@ define([
                     '<span class="selected"></span>' +
                     '<span class="tree-input">' +
                         // 真正的form值
-                    '<select class="<%=CLASS%>" multiple="multiple" name="<%=NAME %>" data-field-id="<%=FIELD_ID %>">' +
+                    '<select id="<%=SELECT_ID%>" class="<%=CLASS%>" multiple="multiple" name="<%=NAME %>" data-field-id="<%=FIELD_ID %>">' +
                         //'<option value="<%=VALUE %>" selected="selected"><%= TEXT%></option>' +
                     '</select>' +
                         // 只用于获取焦点的输入框
@@ -117,6 +117,7 @@ define([
                 var htmlTmpl = _.template(selectTreeHtmlTmpl);
                 $selectTreeCt.html(htmlTmpl({
                     ID: ("input_" + _s.replaceAll(opts.htmlId, "\\.", "")), // id可能有特殊字符(.之类的)
+                    SELECT_ID: (_s.replaceAll(opts.htmlId, "\\.", "")), // id可能有特殊字符(.之类的)
                     NAME: opts.htmlName,
                     FIELD_ID: opts.fieldId,
                     CLASS: GAEA_UI_DEFINE.UI.QUERY.INPUT_FIELD_CLASS
@@ -155,6 +156,8 @@ define([
                 selectTree.initHtml(opts);
                 //}
 
+                // 初始化按钮上的事件, 例如什么onComplete等
+                gaeaEvents.initGaeaEvent(_.extend(_.clone(opts), {target: "#" + opts.htmlId})); // 这里的target是select tree的<select>、给initGaeaEvent绑定事件的
 
                 //var gaeaOptions = $selectTreeCt.data("gaeaOptions");
                 // 查询区的单元格（head-query-column）加上select-tree class，把overflow设为visible
@@ -743,6 +746,24 @@ define([
             //        $(this).parent().remove();
             //    });
             //}
+            /**
+             * 绑定select-tree的删除一个选中项(.item-close)的事件处理。
+             * @param {jqObject} $chooseItem       选中项对象
+             * @param {jqObject} $selectElement    select-tree的下拉框（隐藏）对象
+             */
+            bindRemoveSelected: function ($chooseItem, $selectElement) {
+                $chooseItem.children(".item-close").click(function () {
+                    var value = $chooseItem.find("input:first").val();
+                    // 删除<select>中对应的项
+                    if (gaeaValid.isNotNull(value)) {
+                        $selectElement.find("option[value='" + value + "']").remove();
+                    }
+                    // 删除select-tree自己的已选列表项
+                    $chooseItem.remove();
+                    // 触发select的change事件
+                    $selectElement.trigger("change");
+                });
+            }
         };
 
         /**
@@ -849,10 +870,11 @@ define([
             // 选中项容器
             var $chooseItem = $('<span class="choose-item"></span>');
             $chooseItem.append('<span class="item-text">' + text + '<input type="hidden" value="' + value + '"></span><span class="fa fa-times item-close"></span>');
-            // 删除选中项事件
-            $chooseItem.children(".item-close").click(function () {
-                $(this).parent().remove();
-            });
+            // 绑定删除选中项事件
+            //$chooseItem.children(".item-close").click(function () {
+            //    $(this).parent().remove();
+            //});
+            _private.events.bindRemoveSelected($chooseItem, $selectElement);
             // 单选先清空
             if (_.isBoolean(gaeaOptions.multiple) && !gaeaOptions.multiple) {
                 // 清空显示的已选中
@@ -868,6 +890,8 @@ define([
                 VALUE: value,
                 TEXT: text
             }));
+            // 触发改变事件
+            $selectElement.trigger("change");
         };
         /**
          * 判断一个li是否有子项。

@@ -245,6 +245,7 @@ define([
                 //}
 
                 // 初始化按钮上的事件, 例如什么onComplete等
+                opts.target = "#" + opts.id; // 这个initGaeaEvent需要
                 GAEA_EVENTS.initGaeaEvent(opts);
 
                 // 初始化uploader的onComplete事件（如果有的话）

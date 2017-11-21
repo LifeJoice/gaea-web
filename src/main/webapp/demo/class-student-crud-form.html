@@ -27,7 +27,8 @@
             <div class="field-block">
                 <span class="fieldname">年级</span>
             <span class="fieldvalue">
-                <select id="currentYear" name="classEntity.currentYear" data-gaea-data="dataset:'DEMO_PRIMARY_GRADE'">
+                <select id="currentYear" name="classEntity.currentYear" data-gaea-data="dataset:'DEMO_PRIMARY_GRADE'"
+                        data-gaea-ui-select="onChange: { trigger: {target:'#tab2-title' , event:'reload_data' }}">
                 </select>
             </span>
             </div>
@@ -55,6 +56,15 @@
                 <!--<span data-gaea-ui-name="createTimecreateTime"-->
                 <!--data-gaea-ui-input="dataset:'DEMO_CLASS_ROLE',default:{ value:'2' }"-->
                 <!--multiple="multiple" required></span>-->
+            </span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="field-block">
+                <span class="fieldname">下拉树组件</span>
+            <span class="fieldvalue">
+                <div id="productCategoryCt" data-gaea-ui-select-tree="dataSetId:'DS_DEMO_PRODUCT_CATEGORY'"
+                     data-gaea-ui-name="productCategory"></div>
             </span>
             </div>
         </div>
