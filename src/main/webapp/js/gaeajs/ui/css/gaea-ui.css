@@ -117,7 +117,7 @@
     height: 100%;
     background: #000;
     /* 必须浮在JQuery Dialog上面 */
-    z-index: 102;
+    z-index: 103;
     top: 0;
     left: 0;
     opacity: 0.7;
