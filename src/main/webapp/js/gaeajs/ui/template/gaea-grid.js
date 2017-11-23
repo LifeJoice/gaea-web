@@ -1,3 +1,4 @@
+//@ sourceURL=gaea-grid.js
 /**
  * 重构，基于RequireJS的模块化。包括整个前端的架构都基于RequireJS模块化。
  * 2016-2-17 11:09:22

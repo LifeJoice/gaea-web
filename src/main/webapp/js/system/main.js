@@ -1,3 +1,4 @@
+//@ sourceURL=main.js
 /**
  * Dependency: JQuery
  * 2015年10月25日14:36:44
@@ -5,9 +6,9 @@
  */
 require([
     'jquery', "underscore", 'underscore-string', 'gaeajs-common-utils-ajax', 'gaeajs-common-utils-validate', 'gaeajs-ui-notify', "gaeajs-common-utils-string",
-    "gaea-system-url"
+    "gaea-system-url", "gaeajs-common"
 ], function ($, _, _s, gaeaAjax, gaeaValid, gaeaNotify, gaeaString,
-             URL) {
+             URL, gaeaCommon) {
     // 初始化消息提示组件
     gaeaNotify.init();
     /**
@@ -100,6 +101,8 @@ require([
             // 刷新全局事件对象（锚）
             $("#gaea-event-ct").remove();
             $(".main-right").append('<span id="gaea-event-ct" style="display: none;">Gaea事件的绑定对象(不显示)</span>');
+            // 打开遮罩层
+            gaeaCommon.loading.on();
             // 加载功能内容
             var requestData = {};
             $(".gaea-sys-content").load($(this).data("href"), requestData, function (responseText, textStatus, XMLHttpRequest) {
@@ -107,6 +110,8 @@ require([
                 if (gaeaString.equalsIgnoreCase("404", XMLHttpRequest.status)) {
                     $(".gaea-sys-content").load("/system/404.html");
                 }
+                // 关闭遮罩层
+                gaeaCommon.loading.off();
             });
         }
     });
