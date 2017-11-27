@@ -1424,6 +1424,10 @@ define([
                      * 初始化 数据集下拉框/输入框/...
                      */
                     if (gaeaValid.isNotNull(opts.column.dataSetId)) {
+                        if (gaeaValid.isNull(opts.column.component)) {
+                            // 初始化，非空就好了
+                            opts.column.component = {};
+                        }
                         require(["gaeajs-ui-select2"], function (gaeaSelect2) {
                             gaeaSelect2.createAndInit({
                                 jqSelector: $cellCt,
