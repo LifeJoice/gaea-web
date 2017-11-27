@@ -13,4 +13,7 @@ import java.util.List;
 public interface SystemRolesRepository extends CrudRepository<Role,String> {
     @Query(value = "select r from Role r where r.users in (?1)")
     List<Role> findByUser(List<User> users);
+
+    @Query(value = "select r from Role r where r.code = ?1")
+    List<Role> findByCode(String code);
 }

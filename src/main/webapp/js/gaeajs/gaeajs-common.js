@@ -216,20 +216,16 @@ define([
              * @param opts
              */
             confirmValidate: function (validator) {
-                var dfd = $.Deferred();// JQuery同步对象
+                //var dfd = $.Deferred();// JQuery同步对象
                 gaeaValid.isNull({check: validator["data-msg"], exception: "系统通用校验validator的data-msg不允许为空！无法校验！"});
                 var validateMsg = gaeaValid.isNotNull(gaeaContext.parseElString(validator["data-msg"])) ? gaeaContext.parseElString(validator["data-msg"]) : validator["data-msg"];
                 var gaeaDialog = require("gaeajs-ui-dialog");
                 // 同步操作，一个validator验证通过了，再resolve，再下一个
-                $.when(gaeaDialog.commonDialog.confirm({
+                return gaeaDialog.commonDialog.confirm({
                     title: "操作确认",
                     content: validateMsg
-                })).done(function () {
-                    dfd.resolve();
-                }).fail(function () {
-                    dfd.reject();
                 });
-                return dfd.promise();
+                //return dfd.promise();
             },
             /**
              * 普通的校验. 基于服务端配置的表达式校验。

@@ -42,10 +42,11 @@
                                       check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
                 </validators>
             </button>
-            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected">
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/security/role/delete" msg="删除角色">
                 <validators>
                     <action-validator data-msg="未选择任意记录，无法执行操作。"
                                       check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                    <confirm-validator data-msg="确定要执行删除操作？"/>
                 </validators>
             </button>
         </actions>
@@ -65,7 +66,8 @@
         <!--crud-dialog，是特别针对增删改的dialog。会涉及数据集的加载，编辑数据填充等许多特有功能。-->
         <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
         <crud-dialog id="createDialog" html-id="createDialog" content-url="/gaea/security/role/showCreateUpdateForm" submit-url="/gaea/security/role/add" />
-        <crud-dialog id="editDialog" html-id="editDialog" id-field="id" content-url="/gaea/security/role/showCreateUpdateForm" submit-url="/gaea/security/role/add" />
+        <crud-dialog id="editDialog" html-id="editDialog" id-field="id"
+                     content-url="/gaea/security/role/showCreateUpdateForm" submit-url="/gaea/security/role/update"/>
         <crud-dialog id="editRoleUsersDialog" html-id="editRoleUsersDialog" id-field="id" content-url="/gaea/security/role/showRoleUsers" submit-url="/gaea/security/role/saveRoleUsers" />
         <crud-dialog id="editRoleAuthsDialog" html-id="editRoleAuthsDialog" id-field="id" content-url="/gaea/security/role/showRoleAuths" submit-url="/gaea/security/role/saveRoleAuths" />
         <!--如果一个grid没有primary-key=true的字段，是无法和工作流结合的-->

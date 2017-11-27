@@ -2,11 +2,13 @@ package org.gaea.security.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.security.domain.Authority;
 import org.gaea.security.domain.Role;
 import org.gaea.security.domain.User;
 import org.gaea.security.repository.SystemRolesRepository;
 import org.gaea.security.service.SystemRolesService;
+import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,16 @@ public class SystemRolesServiceImpl implements SystemRolesService {
     private SystemRolesRepository systemRolesRepository;
 
     @Override
-    public void save(Role role) {
+    public void save(Role role) throws ValidationFailedException {
+        if (StringUtils.isEmpty(role.getName()) || StringUtils.isEmpty(role.getCode())) {
+            throw new ValidationFailedException("角色名/角色编码不允许为空！");
+        }
+        List<Role> roleList = systemRolesRepository.findByCode(role.getCode());
+        if (roleList.size() > 0) {
+            throw new ValidationFailedException("角色编码已经存在！");
+        }
+        // 新增
+        role.setId(null);
         systemRolesRepository.save(role);
     }
 
@@ -78,5 +89,28 @@ public class SystemRolesServiceImpl implements SystemRolesService {
             }
         }
         systemRolesRepository.save(role);
+    }
+
+    @Override
+    public void update(Role inRole) throws ValidationFailedException {
+        if (StringUtils.isEmpty(inRole.getName()) || StringUtils.isEmpty(inRole.getCode())) {
+            throw new ValidationFailedException("角色名/角色编码不允许为空！");
+        }
+        if (inRole.getId() == null) {
+            throw new ValidationFailedException("没有获得角色id，也许是未选择角色记录。");
+        }
+        Role role = systemRolesRepository.findOne(inRole.getId());
+        BeanUtils.copyProperties(inRole, role, "users", "authorities", "dsAuthorities");
+        systemRolesRepository.save(role);
+    }
+
+    @Override
+    @Transactional
+    public void delete(List<Role> roleList) throws ValidationFailedException {
+        // id不为空，是更新操作
+        if (CollectionUtils.isEmpty(roleList)) {
+            throw new ValidationFailedException("选择角色为空，无法执行删除操作！");
+        }
+        systemRolesRepository.delete(roleList);
     }
 }

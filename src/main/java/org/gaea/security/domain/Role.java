@@ -25,11 +25,11 @@ public class Role implements Serializable, DsAuthRole {
     private String code;                    // 代表性的全英文编码
     @Column(name = "description")
     private String description;
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    @JoinColumn(name = "parent_id")
-    private Role parent;
-    @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    private List<Role> subRoles;
+    //    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+//    @JoinColumn(name = "parent_id")
+//    private Role parent;
+//    @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//    private List<Role> subRoles;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "GAEA_SYS_USERS_ROLES", joinColumns = {
@@ -88,22 +88,6 @@ public class Role implements Serializable, DsAuthRole {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Role getParent() {
-        return parent;
-    }
-
-    public void setParent(Role parent) {
-        this.parent = parent;
-    }
-
-    public List<Role> getSubRoles() {
-        return subRoles;
-    }
-
-    public void setSubRoles(List<Role> subRoles) {
-        this.subRoles = subRoles;
     }
 
     public List<User> getUsers() {

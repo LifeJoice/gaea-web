@@ -71,6 +71,13 @@
                                       check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
                 </validators>
             </button>
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/security/resource/delete" msg="删除资源">
+                <validators>
+                    <action-validator data-msg="未选择任意记录，无法执行操作。"
+                                      check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                    <confirm-validator data-msg="确定要执行删除操作？"/>
+                </validators>
+            </button>
             <!--<button id="btnDel" name="btnDel" html-value="删除" interface-action="deleteSelected" />--><!-- 老的方式，不要了。重构采用action。 -->
             <!--<button id="btnImport" name="btnImport" html-value="测试导入" />-->
             <!--<button id="btnUpload" name="btnUpload" html-value="测试上传文件" link-view-id="uploaderDialog" />-->
@@ -109,7 +116,7 @@
         <!--ds-primary-table : 和grid删除操作（和诸如此类）的操作的1对1的主表。因为一个grid对应dataset，dataset可能是多表关联查询。但如果grid有删除功能，包括primary column，就需要对应到一张表。 -->
         <!--page-size : 定义每页显示多少条。这个放在SCHEMA定义吧。不要放在页面了。-->
         <grid id="resource-grid" title="资源管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
-              dataset-id="DS_RESOURCE_MANAGEMENT" ds-primary-table="GAEA_SYS_RESOURCES" page-size="20">
+              dataset-id="DS_RESOURCE_MANAGEMENT" ds-primary-table="GAEA_SYS_RESOURCES" page-size="26">
         <!--<views:grid title="Iverson测试表格" dataset-id="" actions-id="">-->
             <!-- 列头可以分组。可以无限分组。 -->
             <!-- <column-group> --><!-- 老的设计，不要了 -->

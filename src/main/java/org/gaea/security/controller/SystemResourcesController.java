@@ -79,6 +79,12 @@ public class SystemResourcesController {
         return result;
     }
 
+    @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void delete(@RequestBean("selectedRows") List<Resource> roleList) throws ValidationFailedException {
+        systemResourcesService.delete(roleList);
+    }
+
     @RequestMapping(value = "/test", produces = "plain/text; charset=UTF-8")
     public void testImportExcel() {
         String xlsFilePath = "/WEB-INF/static/view_schema/demo/test_3月份法本考勤.xlsx";// TODO 改为在配置文件里配置。

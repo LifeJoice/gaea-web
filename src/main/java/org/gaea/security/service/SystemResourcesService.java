@@ -18,4 +18,6 @@ public interface SystemResourcesService {
     void update(Resource newResource) throws ValidationFailedException;
 
     String loadEditData(String id) throws ProcessFailedException, IOException;
+
+    void delete(List<Resource> resourceList) throws ValidationFailedException;
 }

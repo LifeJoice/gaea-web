@@ -1216,20 +1216,22 @@ define([
                 if (gaeaValid.isNull(dialogId)) {
                     dialogId = GAEA_UI_DEFINE.UI.DIALOG.COMMON_CONFIG_DIALOG_ID; // 共用
                 }
-                // 检查是否存在div，没有先创建(HTML)
-                if ($("#" + dialogId).length < 1) {
-                    // not exist, create.
-                    dialog.utils.createDialogDiv({
-                        id: dialogId,
-                        content: options.content
-                    });
-                } else {
-                    $("#" + dialogId).html(_.template(GAEA_UI_DEFINE.TEMPLATE.DIV.WITH_NAME)({
-                        ID: options.id,
-                        NAME: options.id,
-                        CONTENT: options.content
-                    }));
+                // 检查是否存在div，有就删除（每次都全新。否则有些组件（confirm-validator）的deferred对象会有残留）
+                if ($("#" + dialogId).length > 0) {
+                    $("#" + dialogId).remove();
                 }
+                // not exist, create.
+                dialog.utils.createDialogDiv({
+                    id: dialogId,
+                    content: options.content
+                });
+                //} else {
+                //    $("#" + dialogId).html(_.template(GAEA_UI_DEFINE.TEMPLATE.DIV.WITH_NAME)({
+                //        ID: options.id,
+                //        NAME: options.id,
+                //        CONTENT: options.content
+                //    }));
+                //}
                 var $dialog = $("#" + dialogId);
                 $dialog.addClass("gaea-common-dialog");
                 // 初始化标签，插入到弹出框内容的最前面

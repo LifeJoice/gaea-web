@@ -1,5 +1,6 @@
 package org.gaea.security.controller;
 
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.security.domain.Authority;
 import org.gaea.security.domain.Role;
@@ -52,9 +53,14 @@ public class SystemRolesController {
 
     @RequestMapping(value = "/add", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public String save(Role role) {
+    public void save(Role role) throws ValidationFailedException {
         systemRolesService.save(role);
-        return "";
+    }
+
+    @RequestMapping(value = "/update", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void update(Role role) throws ValidationFailedException {
+        systemRolesService.update(role);
     }
 
     @RequestMapping(value = "/saveRoleUsers", produces = "plain/text; charset=UTF-8")
@@ -69,5 +75,11 @@ public class SystemRolesController {
     public String saveRoleAuthorities(Role role, @RequestBean List<String> authIds) {
         systemRolesService.saveRoleAuthorities(role, authIds);
         return "";
+    }
+
+    @RequestMapping(value = "/delete", produces = "plain/text; charset=UTF-8")
+    @ResponseBody
+    public void delete(@RequestBean("selectedRows") List<Role> roleList) throws ValidationFailedException {
+        systemRolesService.delete(roleList);
     }
 }

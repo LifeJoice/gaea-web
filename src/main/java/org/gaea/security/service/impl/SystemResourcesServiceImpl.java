@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
@@ -61,6 +62,12 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
 
     @Override
     public void save(Resource inResource) throws ValidationFailedException {
+        if (inResource == null || StringUtils.isEmpty(inResource.getId())) {
+            throw new ValidationFailedException("页面传来的资源对象为空，无法保存！");
+        }
+        if (StringUtils.isEmpty(inResource.getName())) {
+            throw new ValidationFailedException("资源名称不允许为空！");
+        }
         inResource.setId(""); // 避免页面端有缓存，新增都应该是空的id
         resourcesRepository.save(inResource);
 
@@ -84,5 +91,14 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
             throw new ProcessFailedException("找不到对应的资源，无法编辑！");
         }
         return GaeaJacksonUtils.parse(resource, "authorities");
+    }
+
+    @Override
+    public void delete(List<Resource> resourceList) throws ValidationFailedException {
+        // id不为空，是更新操作
+        if (CollectionUtils.isEmpty(resourceList)) {
+            throw new ValidationFailedException("选择资源为空，无法执行删除操作！");
+        }
+        resourcesRepository.delete(resourceList);
     }
 }
