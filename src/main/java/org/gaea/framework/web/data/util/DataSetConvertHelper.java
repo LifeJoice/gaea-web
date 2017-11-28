@@ -13,6 +13,7 @@ import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.util.BeanUtils;
+import org.gaea.util.GaeaStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -77,7 +78,7 @@ public class DataSetConvertHelper {
                 Object newValue = rowDataMap.get(key);
                 // 如果需要DataSet转换
                 if (isDsTranslate) {
-                    newValue = getValueFromDS(newValue, column.getDataSetId());
+                    newValue = getValueFromDS(newValue, column);
                 }
                 // 空值的处理
                 // 默认把空改为''. 如果你非要看null，你也可以在null-to定义
@@ -222,24 +223,34 @@ public class DataSetConvertHelper {
      * 如果数据集里，有value=1，text=一级菜单，则把对象作为值返回。
      *
      * @param origValue     原始值。这个一般为string。
-     * @param dataSetId 数据集id。通过获取数据集的数据，返回匹配value的项。
+     * @param columnDef 数据集id。通过获取数据集的数据，返回匹配value的项。
      * @return
      */
-    private static Object getValueFromDS(Object origValue, String dataSetId) {
+    private static Object getValueFromDS(Object origValue, SchemaColumn columnDef) {
+        String dataSetId = columnDef.getDataSetId();
         Object newValue = origValue;
         if (origValue != null) {
             if (StringUtils.isNotEmpty(dataSetId)) {
                 GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSetId);
                 if (gaeaDataSet != null) {
                     List<DataItem> dsDatas = gaeaDataSet.getStaticResults();
-                    if (dsDatas != null) {
-                        // 遍历数据集
-                        for (DataItem dataItem : dsDatas) {
-                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(origValue))) {
-                                newValue = dataItem;
-                            }
-                        }
+                    Map<String, String> mapping = null;
+                    if (CollectionUtils.isNotEmpty(dsDatas)) {
+                        mapping = GaeaDataUtils.toMap(dsDatas, true);
                     }
+                    /**
+                     * 如果multiValueSeparator有定义，则对origValue进行拆分，再转换值；
+                     * 否则就直接转换值。
+                     */
+                    newValue = GaeaStringUtils.convertText(String.valueOf(origValue), columnDef.getMultiValueSeparator(), mapping);
+//                    if (dsDatas != null) {
+//                        // 遍历数据集
+//                        for (DataItem dataItem : dsDatas) {
+//                            if (dataItem.getValue() != null && dataItem.getValue().equalsIgnoreCase(String.valueOf(origValue))) {
+//                                newValue = dataItem;
+//                            }
+//                        }
+//                    }
                 }
             }
         }

@@ -189,6 +189,9 @@
             </column>
             <column id="classNo" name="classNo" label="班级" db-column-name="CLASS_NO"
                     visible="true" sortable="false" html-width="240" data-type="string"/>
+            <column id="honours" name="honours" label="班级荣誉" db-column-name="CLASS_HONOURS"
+                    visible="true" sortable="false" html-width="120" data-type="string" dataset-id="DEMO_CLASS_HONOURS"
+                    multi-value-separator=","/>
             <column id="createBy" name="createBy" label="创建人" db-column-name="CREATE_BY"
                     visible="true" sortable="false" html-width="120" data-type="string"/>
             <column id="createTime" name="createTime" label="创建时间" db-column-name="CREATE_TIME"

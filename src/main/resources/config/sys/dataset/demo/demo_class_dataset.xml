@@ -48,6 +48,16 @@
             <data-element value="4" text="英语代表"/>
         </data>
     </dataset>
+    <!-- ********************************************** 班级荣誉 ********************************************** -->
+    <dataset id="DEMO_CLASS_HONOURS" cache-type="static">
+        <data>
+            <data-element value="" text=""/>
+            <data-element value="1" text="五讲四美"/>
+            <data-element value="2" text="优秀班级"/>
+            <data-element value="3" text="亮晶晶班级"/>
+            <data-element value="4" text="红领巾班级"/>
+        </data>
+    </dataset>
     <!-- ********************************************** 性别 ********************************************** -->
     <dataset id="DEMO_STUDENT_SEX" cache-type="static">
         <data>

@@ -3,8 +3,9 @@ package org.gaea.demo.entity;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Created by iverson on 2017/1/16.
@@ -30,6 +31,8 @@ public class DemoStudentEntity {
     private Date birthday; // 出生日期
     @Column(name = "ADDRESS")
     private String address; // 地址
+    @Column(name = "CLASS_ROLES")
+    private String classRoles; // 班角色
     @Column(name = "CREATE_BY")
     private String createBy;
     @Column(name = "CREATE_TIME")
@@ -37,6 +40,10 @@ public class DemoStudentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CLASS_ID")
     private DemoClassEntity myClass;
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DemoStudentPhotoEntity> photos;
+    @Transient
+    private List<String> imgType;
 
     public String getId() {
         return id;
@@ -94,6 +101,14 @@ public class DemoStudentEntity {
         this.address = address;
     }
 
+    public String getClassRoles() {
+        return classRoles;
+    }
+
+    public void setClassRoles(String classRoles) {
+        this.classRoles = classRoles;
+    }
+
     public String getCreateBy() {
         return createBy;
     }
@@ -116,5 +131,13 @@ public class DemoStudentEntity {
 
     public void setMyClass(DemoClassEntity myClass) {
         this.myClass = myClass;
+    }
+
+    public List<String> getImgType() {
+        return imgType;
+    }
+
+    public void setImgType(List<String> imgType) {
+        this.imgType = imgType;
     }
 }

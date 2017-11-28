@@ -183,25 +183,26 @@ public class DemosController {
         DemoClassEntity classEntity = demoClassRepository.findOne(classObj.getId());
         DemoClassDTO demoClassDTO = new DemoClassDTO();
         BeanUtils.copyProperties(classEntity, demoClassDTO, "students", "classRoles");
-        if (StringUtils.isNotEmpty(classEntity.getClassRoles())) {
-            demoClassDTO.setClassRolesList(Arrays.asList(classEntity.getClassRoles().split(",")));
-        }
+//        if (StringUtils.isNotEmpty(classEntity.getClassRoles())) {
+//            demoClassDTO.setClassRolesList(Arrays.asList(classEntity.getClassRoles().split(",")));
+//        }
         return demoClassDTO;
     }
 
     @RequestMapping(value = "/add-class", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public void saveClass(@RequestBean DemoClassEntity classEntity, HttpServletRequest request, @RequestBean("classRolesList") List<String> classRolesList, @RequestBean("students") List<DemoStudentEntity> studentList) {
-        classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
+//        classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
 //        demoClassService.save(classEntity, GaeaWebSecuritySystem.getUserName(request));
     }
 
     @RequestMapping(value = "/add-class-student", produces = "plain/text; charset=UTF-8")
     @ResponseBody
-    public void addClassStudent(@RequestBean DemoClassEntity classEntity, String pageId, @RequestBean("classRolesList") List<String> classRolesList, @RequestBean("students") List<DemoStudentEntity> studentList) {
+    public void addClassStudent(@RequestBean DemoClassEntity classEntity, String pageId, @RequestBean("classRoles") List<String> classRolesList, @RequestBean("students") List<DemoStudentEntity> studentList) {
         System.out.println("------------>>>> save class students.");
         // 未完成
 //        classEntity.setClassRoles(StringUtils.join(classRolesList, ","));
+//        demoClassService.addClassStudent();
     }
 
     @RequestMapping(value = "/test", produces = "plain/text; charset=UTF-8")

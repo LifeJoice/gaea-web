@@ -40,6 +40,8 @@ public class SchemaColumn {
     private String imgThumbnailSuffix; // 缩略图后缀。图片列，自动为<img>标签的src加上的后缀作为缩略图。
     /* 空的替换符. 即对于结果为null的，要替换成什么显示。 */
     private String nullTo = null;
+    /* 如果这个列是多个值混合的，定义一个分隔符，会按分隔符去分割后，再匹配数据集。 */
+    private String multiValueSeparator;
 
     // 构造方法
 
@@ -216,5 +218,13 @@ public class SchemaColumn {
 
     public void setNullTo(String nullTo) {
         this.nullTo = nullTo;
+    }
+
+    public String getMultiValueSeparator() {
+        return multiValueSeparator;
+    }
+
+    public void setMultiValueSeparator(String multiValueSeparator) {
+        this.multiValueSeparator = multiValueSeparator;
     }
 }

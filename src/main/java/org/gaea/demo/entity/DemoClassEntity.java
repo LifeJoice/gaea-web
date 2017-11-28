@@ -28,8 +28,8 @@ public class DemoClassEntity {
     @Column(name = "CLASS_NO")
     private String classNo; // 几班
     // 和classRoleList对应的数据库字段。这个纯粹是为了测试写入获取、转换List存在。设计上不应该这样。
-    @Column(name = "CLASS_ROLES")
-    private String classRoles; // 班里角色，班长……
+    @Column(name = "CLASS_HONOURS")
+    private String classHonours; // 班级荣誉
     @Column(name = "CREATE_BY")
     private String createBy;
     @Column(name = "CREATE_TIME")
@@ -101,11 +101,11 @@ public class DemoClassEntity {
         this.students = students;
     }
 
-    public String getClassRoles() {
-        return classRoles;
+    public String getClassHonours() {
+        return classHonours;
     }
 
-    public void setClassRoles(String classRoles) {
-        this.classRoles = classRoles;
+    public void setClassHonours(String classHonours) {
+        this.classHonours = classHonours;
     }
 }
