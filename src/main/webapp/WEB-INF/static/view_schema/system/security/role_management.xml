@@ -77,7 +77,7 @@
         <!--ds-primary-table : 和grid删除操作（和诸如此类）的操作的1对1的主表。因为一个grid对应dataset，dataset可能是多表关联查询。但如果grid有删除功能，包括primary column，就需要对应到一张表。 -->
         <!--page-size : 定义每页显示多少条。这个放在SCHEMA定义吧。不要放在页面了。-->
         <grid id="role-grid" title="角色管理" with-workflow="true" render-to="urgrid" display-undefined-column="true"
-              dataset-id="DS_ROLE_MANAGEMENT" ds-primary-table="GAEA_SYS_ROLES" page-size="20">
+              dataset-id="DS_ROLE_MANAGEMENT" ds-primary-table="GAEA_SYS_ROLES" page-size="27">
             <column id="id" name="id" label="ID" db-column-name="ID"
                     visible="false" sortable="true" html-width="30" primary-key="true" data-type="String" />
             <column id="name" name="name" label="角色名称" db-column-name="name"
@@ -89,7 +89,7 @@
             <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->
                     <!--visible="true" sortable="false" html-width="240" data-type="String" />-->
             <column id="description" name="description" label="角色说明" db-column-name="DESCRIPTION"
-                    visible="true" sortable="false" html-width="300" data-type="String"/>
+                    visible="true" sortable="false" html-width="400" data-type="String"/>
         </grid>
     </views>
 </ur-schema>
