@@ -2,6 +2,8 @@ package iverson.test;
 
 //import iverson.test.demo.Role;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -26,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Users implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GenericGenerator(name = "gaeaDateTimeLongIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeLongIDGenerator")
     @Column(name = "id")
     private Long id;
     @Column(name = "name")

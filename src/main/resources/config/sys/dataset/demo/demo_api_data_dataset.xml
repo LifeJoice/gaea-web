@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- create 2017年11月29日16:21:03 -->
+<!--text,value是所有数据集默认必备的字段！尽量小写！部分结果集可以通过前端配置text,value字段而不需要在定义中显示说明。-->
+<dataset-definition>
+
+    <dataset id="DEMO_API_DATA_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="1" data-from="">
+        <api-data-source request-type="get">
+            <request>
+                <url><![CDATA[
+                    http://pms.ma-test.com/api/coupon/schemas
+                    ]]></url>
+                <!--<params>-->
+                <!--<param name="limit" value="26" />-->
+                <!--</params>-->
+                <!--<page param-name="limit" />-->
+                <paging start-num="0" param-name="start" pagingBy="start" size-param-name="limit">
+                    <!--<param name="limit" value="26" />-->
+                </paging>
+            </request>
+            <response>
+                <data-extract>
+                    <response-data param-name="data"/>
+                    <!--<totalElements param-name="total" />-->
+                    <paging total-elements-param-name="total"/>
+                </data-extract>
+            </response>
+        </api-data-source>
+    </dataset>
+</dataset-definition>

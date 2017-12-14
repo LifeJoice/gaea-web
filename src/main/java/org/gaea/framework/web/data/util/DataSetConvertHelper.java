@@ -236,7 +236,7 @@ public class DataSetConvertHelper {
                     List<DataItem> dsDatas = gaeaDataSet.getStaticResults();
                     Map<String, String> mapping = null;
                     if (CollectionUtils.isNotEmpty(dsDatas)) {
-                        mapping = GaeaDataUtils.toMap(dsDatas, true);
+                        mapping = GaeaWebDataUtils.toMap(dsDatas, true);
                     }
                     /**
                      * 如果multiValueSeparator有定义，则对origValue进行拆分，再转换值；

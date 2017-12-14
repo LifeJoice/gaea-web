@@ -3,6 +3,7 @@ package org.gaea.workflow.demo.dayoff.domain;
 import org.gaea.workflow.domain.WorkflowDomain;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -18,7 +19,7 @@ import java.util.Date;
 @Table(name = "DEMO_DAYOFF_FORM")
 public class DayoffForm extends WorkflowDomain<Long> {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GenericGenerator(name = "gaeaDateTimeLongIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeLongIDGenerator")
     private Long id;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "BEGIN_DATETIME")

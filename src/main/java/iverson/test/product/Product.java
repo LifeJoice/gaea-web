@@ -15,6 +15,8 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
@@ -29,7 +31,7 @@ import org.hibernate.validator.constraints.NotBlank;
 public class Product implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GenericGenerator(name = "gaeaDateTimeLongIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeLongIDGenerator")
     @Column(name = "product_id")
     private Long productId;
     @NotBlank(message = "产品名称不允许为空！")

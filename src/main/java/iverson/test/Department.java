@@ -1,5 +1,7 @@
 package iverson.test;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,7 +20,7 @@ import javax.persistence.Table;
 @Table(name = "Department")
 public class Department {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GenericGenerator(name = "gaeaDateTimeLongIDGenerator", strategy = "org.gaea.extend.hibernate.id.GaeaDateTimeLongIDGenerator")
     @Column(name="id")
     private Integer id;
     @Column(name = "name")

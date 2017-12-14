@@ -160,7 +160,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
     }
 
     /**
-     * 根据指定的xml schema，查询获取对应的数据集的数据，然后转换成json返回。
+     * 获取xml schema对应的数据，然后转换成json返回。
      *
      * @param gaeaXML
      * @param loginName       对应的数据集的数据权限过滤用  @return

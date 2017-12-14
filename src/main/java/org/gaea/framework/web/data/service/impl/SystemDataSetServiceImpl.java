@@ -23,6 +23,7 @@ import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.service.ApiDataSourceQueryService;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
     @Autowired
     private CommonViewQueryService commonViewQueryService;
     @Autowired
-    private GaeaSchemaCache gaeaSchemaCache;
+    private ApiDataSourceQueryService apiDataSourceQueryService;
 
     /**
      * 初始化整个数据集系统。<br/>
@@ -140,7 +141,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * 同步数据库的数据集。<br/>
      * 读取数据库的数据集，然后清空当前缓存的所有数据集。再缓存数据库的数据集。
      * <p>
-     *     {@code <columns-define>}不从数据库同步，只以XML文档为主。
+     * {@code <columns-define>}不从数据库同步，只以XML文档为主。
      * </p>
      */
     @Override
@@ -157,10 +158,11 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
                     ds.getDsConditionSetEntities();
                     ds.getDsAuthorities();
                     GaeaDataSet gaeaDataSet = GaeaDataSetUtils.convert(ds);
-                    // 不要覆盖columns，这个数据库没有存储的
+                    // 不要覆盖columns、apiDataSource，这个数据库没有存储的
                     GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(ds.getName());
                     if (cacheDataSet != null) {
                         gaeaDataSet.setColumns(cacheDataSet.getColumns());
+                        gaeaDataSet.setApiDataSource(cacheDataSet.getApiDataSource());
                     }
 
                     gaeaDataSetMap.put(gaeaDataSet.getId(), gaeaDataSet);
@@ -209,14 +211,21 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
         if (gaeaDataSet == null) {
             throw new ValidationFailedException("无法执行数据集的查询。缓存中获取不到对应的数据集。", "DataSet id: " + ds.getId() + "");
         }
-        if (StringUtils.isBlank(gaeaDataSet.getSql())) {
+        if (StringUtils.isBlank(gaeaDataSet.getSql()) && gaeaDataSet.getApiDataSource() == null) {
             return ds;
         }
         PageResult pageResultSet = null;
         try {
-            pageResultSet = commonViewQueryService.query(gaeaDataSet, conditionSetMap, new SchemaGridPage(1, pageSize), loginName);
+            if (gaeaDataSet.getApiDataSource() != null) {
+                // 基于接口查询
+                pageResultSet = apiDataSourceQueryService.query(gaeaDataSet, conditionSetMap, new SchemaGridPage(1, pageSize), loginName);
+            } else {
+                // 数据库查询
+                pageResultSet = commonViewQueryService.query(gaeaDataSet, conditionSetMap, new SchemaGridPage(1, pageSize), loginName);
+                logger.debug("【SQL】 " + gaeaDataSet.getSql());
+                logger.debug("Query results count : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
+            }
 
-            logger.debug("\n【SQL】 " + gaeaDataSet.getSql() + "\n Query results number : " + (pageResultSet.getContent() != null ? pageResultSet.getContent().size() : "null"));
             ds.setSqlResult((List<Map<String, Object>>) pageResultSet.getContent());
             ds.setTotalElements(pageResultSet.getTotalElements());
         } catch (InvalidDataException e) {

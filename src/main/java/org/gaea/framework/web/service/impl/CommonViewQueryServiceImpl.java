@@ -30,6 +30,7 @@ import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.service.SchemaDataService;
 import org.gaea.framework.web.schema.utils.GaeaSchemaUtils;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
+import org.gaea.framework.web.service.ApiDataSourceQueryService;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.security.jo.UserJO;
 import org.gaea.util.BeanUtils;
@@ -63,7 +64,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     @Autowired
     private SystemDataSetAuthorityService systemDataSetAuthorityService;
     @Autowired
-    private SystemDataSetService systemDataSetService;
+    private ApiDataSourceQueryService apiDataSourceQueryService;
 
     @Override
     public PageResult query(GaeaXmlSchema gaeaXml, List<QueryCondition> filters,
@@ -106,19 +107,27 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                 Integer pageSize = StringUtils.isNumeric(grid.getPageSize()) ? Integer.parseInt(grid.getPageSize()) : SchemaGrid.DEFAULT_PAGE_SIZE;
                 page.setSize(pageSize);
             }
-            // 数据集权限校验
-            ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
-            // 如果权限校验，没有条件。可能是具有所有数据权限。创建一个空列表给后面用。
-            if (authorityConditionSet == null) {
-                authorityConditionSet = new ConditionSet();
-                authorityConditionSet.setConditions(new ArrayList<Condition>());
+
+            /* 数据查询有两种：查数据库，或者从Restful接口获取 */
+            if (gaeaDataSet.getApiDataSource() != null) {
+                // 基于Restful接口查询
+                pageResult = apiDataSourceQueryService.query(gaeaDataSet, null, page, loginName);
+            } else {
+                // 数据集权限校验
+                ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
+                // 如果权限校验，没有条件。可能是具有所有数据权限。创建一个空列表给后面用。
+                if (authorityConditionSet == null) {
+                    authorityConditionSet = new ConditionSet();
+                    authorityConditionSet.setConditions(new ArrayList<Condition>());
+                }
+                // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
+                // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
+                authorityConditionSet.getConditions().addAll(convertToConditions(filters));
+                // 构建默认的SQL中表达式要用的上下文对象
+                GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
+                // 数据库查询
+                pageResult = gaeaSqlProcessor.query(sql, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
             }
-            // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
-            // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
-            authorityConditionSet.getConditions().addAll(convertToConditions(filters));
-            // 构建默认的SQL中表达式要用的上下文对象
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
-            pageResult = gaeaSqlProcessor.query(sql, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
 
             List<Map<String, Object>> dataList = pageResult.getContent();
             // 基于XML SCHEMA的结果集格式转换
@@ -183,8 +192,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     /**
      * 这个是结合权限过滤的查询。
      *
-     * @param gaeaDataSet          数据集的定义。主要用sql，primaryTable等。
-    //     * @param conditions  条件 重构删掉了，从没用过 by Iverson 2017-7-11
+     * @param gaeaDataSet 数据集的定义。主要用sql，primaryTable等。
+     *                    //     * @param conditions  条件 重构删掉了，从没用过 by Iverson 2017-7-11
      * @param page
      * @param loginName   登录账户名。主要用于数据权限过滤。   @return
      * @throws ValidationFailedException

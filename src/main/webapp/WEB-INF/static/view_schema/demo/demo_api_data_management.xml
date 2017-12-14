@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SCHEMA id必须全局唯一。会进入系统的cache。-->
+<ur-schema id="SCHEMA_DEMO_API_DATA_MANAGEMENT">
+    <!--<ur-schema xmlns:views="http://www.ur.com.cn/schema/views">-->
+    <data>
+        <dataset id="DEMO_API_DATA_MANAGEMENT" primary-table="GAEA_SYS_RESOURCES"></dataset>
+    </data>
+    <views id="demoMgrView" title="演示功能-API读取数据">
+
+        <actions id="myActions">
+            <button id="btnNewClass" name="btnNewClass" html-value="新增班级" link-view-id="classCrudDialog" action="add"/>
+            <button id="btnEditClass" name="btnEditClass" html-value="编辑班级" link-view-id="classEditDialog"
+                    action="update"/>
+            <button id="btnViewClass" name="btnViewClass" html-value="查看班级" link-view-id="classViewDialog"/>
+        </actions>
+
+        <wf-dialog id="wfDialog" html-id="wfDialog" title="流程审批" html-width="500" html-height="500"
+                   submit-url="/admin/wf-demo/new-dayoff/complete.do">
+            <button id="btnApproved" name="btnApproved" html-value="批准" type="approve"/>
+            <button id="btnNotApproved" name="btnNotApproved" html-value="不批准" type="notApprove"/>
+            <button id="btnCancel" name="btnCancel" html-value="取消" type="cancel"/>
+        </wf-dialog>
+        <crud-dialog id="classStuNewDialog" html-id="classStuNewDialog" content-url="/gaea/demo/class-student-crud-form"
+                     submit-url="/gaea/demo/add-class-student"/>
+        <crud-dialog id="classCrudDialog" html-id="classCrudDialog" content-url="/gaea/demo/class-crud-form"
+                     submit-url="/gaea/demo/add-class"/>
+        <crud-dialog id="classViewDialog" html-id="classViewDialog" id-field="id"
+                     content-url="/gaea/demo/class-crud-form" load-data-url="/gaea/demo/get-class" editable="false"/>
+
+        <grid id="demo-api-list-grid" title="演示API读取数据列表" with-workflow="true" render-to="urgrid"
+              display-undefined-column="true"
+              dataset-id="DS_RESOURCE_MANAGEMENT" ds-primary-table="GAEA_SYS_RESOURCES" page-size="27">
+            <column id="id" name="id" label="ID" db-column-name="ID"
+                    visible="false" sortable="true" html-width="30" primary-key="true" data-type="string"/>
+            <column id="schemaName" name="schemaName" label="佣金名称" db-column-name="schemaName"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="schemaType" name="schemaType" label="类型" db-column-name="schemaType"
+                    visible="true" sortable="false" html-width="120" data-type="string"/>
+            <column id="scopePlatformRemark" name="scopePlatformRemark" label="备注" db-column-name="scopePlatformRemark"
+                    visible="true" sortable="false" html-width="120" data-type="string">
+            </column>
+            <column id="startTime" name="startTime" label="佣金周期开始时间" db-column-name="startTime"
+                    visible="true" sortable="true" html-width="180" data-type="date"
+                    datetime-format="yyyy-MM-dd HH:mm"/>
+            <column id="endTime" name="endTime" label="佣金周期结束时间" db-column-name="endTime"
+                    visible="true" sortable="true" html-width="180" data-type="date"
+                    datetime-format="yyyy-MM-dd HH:mm"/>
+            <!--<column id="classNo" name="classNo" label="班级" db-column-name="CLASS_NO"-->
+            <!--visible="true" sortable="false" html-width="240" data-type="string"/>-->
+            <!--<column id="honours" name="honours" label="班级荣誉" db-column-name="CLASS_HONOURS"-->
+            <!--visible="true" sortable="false" html-width="120" data-type="string" dataset-id="DEMO_CLASS_HONOURS"-->
+            <!--multi-value-separator=","/>-->
+            <!--<column id="createBy" name="createBy" label="创建人" db-column-name="CREATE_BY"-->
+            <!--visible="true" sortable="false" html-width="120" data-type="string"/>-->
+            <!--<column id="createTime" name="createTime" label="创建时间" db-column-name="CREATE_TIME"-->
+            <!--visible="true" sortable="true" html-width="180" data-type="date"-->
+            <!--datetime-format="yyyy-MM-dd HH:mm"/>-->
+        </grid>
+    </views>
+</ur-schema>

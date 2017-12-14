@@ -14,8 +14,8 @@ import java.util.Map;
  * 数据工具。
  * Created by iverson on 2017年11月28日09:48:29
  */
-public class GaeaDataUtils {
-    private static final Logger logger = LoggerFactory.getLogger(GaeaDataUtils.class);
+public class GaeaWebDataUtils {
+    private static final Logger logger = LoggerFactory.getLogger(GaeaWebDataUtils.class);
 
     /**
      * 把DataItem对象列表转换为map。其中key为dataItem.value，value为dataItem.text。
