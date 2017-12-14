@@ -415,7 +415,7 @@ define([
                     var $radioFilter = $filterResult.filter("[type='radio']");
                     // gaea img的选择器
                     var $gaeaImgFilter = $(opts.target).find("[data-" + GAEA_UI_DEFINE.UI.IMG_DEFINE + "]").filter(jqIgnoreCaseFilter(opts.name));
-                    // gaea img的选择器
+                    // gaea selectTree的选择器
                     var $selectTreeFilter = $(opts.target).find("[data-" + GAEA_UI_DEFINE.UI.SELECT_TREE_DEFINE + "]").filter(jqIgnoreCaseFilter(opts.name));
                     // 设定值
                     if ($radioFilter.length > 0) {
