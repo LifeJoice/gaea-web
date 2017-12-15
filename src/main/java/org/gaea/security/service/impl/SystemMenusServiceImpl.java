@@ -1,5 +1,6 @@
 package org.gaea.security.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
@@ -68,7 +69,7 @@ public class SystemMenusServiceImpl implements SystemMenusService {
                         MenuDTO parentMenu = menuDTOMap.get(lv2MenuName);
                         if (parentMenu == null) {
                             parentMenu = new MenuDTO();
-                            BeanUtils.copyProperties(menu.getParent(), parentMenu);
+                            BeanUtils.copyProperties(menu.getParent(), parentMenu, "subMenus");
                             menuDTOMap.put(lv2MenuName, parentMenu);
                         }
                         MenuDTO menuDTO = new MenuDTO();
@@ -107,5 +108,18 @@ public class SystemMenusServiceImpl implements SystemMenusService {
 
         return result;
 
+    }
+
+    @Override
+    @Transactional
+    public void delete(List<Menu> menuList) throws ValidationFailedException {
+        // id不为空，是更新操作
+        if (CollectionUtils.isEmpty(menuList)) {
+            throw new ValidationFailedException("选择菜单为空，无法执行删除操作！");
+        }
+        for (Menu menu : menuList) {
+            Menu menuEntity = systemMenusRepository.findOne(menu.getId());
+            systemMenusRepository.delete(menuEntity);
+        }
     }
 }

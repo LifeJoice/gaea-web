@@ -1623,9 +1623,9 @@ define([
                                 },
                                 fail: function (data) {
                                     //gaeaNotify.error("保存失败！");
-                                    var responseObj = JSON.parse(data.responseText);
+                                    //var responseObj = JSON.parse(data.responseText);
                                     // 处理请求返回结果, 包括成功和失败
-                                    gaeaUtils.processResponse(responseObj, {
+                                    gaeaUtils.processResponse(data, {
                                         fail: {
                                             baseMsg: "处理失败！"
                                         },

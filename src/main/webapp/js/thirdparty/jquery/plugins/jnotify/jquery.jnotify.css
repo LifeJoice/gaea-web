@@ -39,7 +39,10 @@
     display: block;
     float: left;
     /* 限制了宽度才会换行 */
-    width: 70%;
+    width: 79%;
+    /* 高度控制。滚动。 */
+    max-height: 300px;
+    overflow: auto;
     /*padding-left: 5px;*/
     /*font-size: 14px;*/
 }

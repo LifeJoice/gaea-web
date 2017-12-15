@@ -3,6 +3,7 @@ package org.gaea.security.domain;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by iverson on 2016/1/30.
@@ -18,7 +19,7 @@ public class Menu {
     private String id;
     @Column(name = "NAME", nullable = false)
     private String name;
-    @OneToOne(cascade=CascadeType.REMOVE)
+    @OneToOne
     @JoinColumn(name="RESOURCE_ID")
     private Resource resource;
     @Column(name = "LEVEL_NUM")
@@ -30,6 +31,8 @@ public class Menu {
     private Menu parent;
     public static final int LEVEL_2 = 2;
     public static final int LEVEL_3 = 3;
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<Menu> subMenus;
 
     public String getId() {
         return id;

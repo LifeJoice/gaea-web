@@ -21,4 +21,6 @@ public interface SystemMenusService {
     List<MenuDTO> findAll(Set<String> loginName);
 
     Map<String, Object> loadEditData(String id) throws ProcessFailedException, IOException;
+
+    void delete(List<Menu> menuList) throws ValidationFailedException;
 }

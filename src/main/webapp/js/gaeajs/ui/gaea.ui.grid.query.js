@@ -104,7 +104,7 @@ define([
                         //var result = JSON.parse(data.responseText);
                         //gaeaNotify.error("查询失败！\n" + result.message);
                         // 处理请求返回结果, 包括成功和失败
-                        gaeaUtils.processResponse(JSON.parse(data.responseText));
+                        gaeaUtils.processResponse(data);
                     }
                 });
             },

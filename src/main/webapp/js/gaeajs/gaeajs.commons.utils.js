@@ -605,6 +605,12 @@ define([
          * @param {object} opts.default.baseMsg
          */
         utils.processResponse = function (responseObj, opts) {
+            // 返回对象转换
+            //var respObj = {};
+            if (gaeaValid.isNotNull(responseObj) && gaeaValid.isNotNull(responseObj.responseText)) {
+                responseObj = JSON.parse(responseObj.responseText);
+            }
+            // 处理返回消息
             if (_.isObject(responseObj)) {
                 var baseMsg = "";
                 if (gaeaValid.isNotNullMultiple(opts, ["fail", "baseMsg"])) {
@@ -616,6 +622,9 @@ define([
                 } else if (gaeaString.equalsIgnoreCase(responseObj.status, "500")) {
                     // 非普通的异常
                     gaeaNotify.error(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
+                } else if (gaeaString.equalsIgnoreCase(responseObj.status, "270")) {
+                    // 正常返回，有信息需要显示，并且不自动消失。
+                    gaeaNotify.message(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message), true);
                 } else if (gaeaString.equalsIgnoreCase(responseObj.status, "200")) {
                     // 成功
                     gaeaNotify.success(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));

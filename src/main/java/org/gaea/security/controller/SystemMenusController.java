@@ -4,6 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.common.GaeaHttpStatus;
+import org.gaea.framework.web.common.ResponseJsonMessage;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.security.domain.Menu;
 import org.gaea.security.dto.MenuDTO;
@@ -21,10 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 系统的菜单管理控制器。负责寻找用户所能操作的菜单等。
@@ -70,6 +69,12 @@ public class SystemMenusController {
         menu.setStatus(1);
         systemMenusService.update(menu);
         return "";
+    }
+
+    @RequestMapping(value = "/delete")
+    @ResponseBody
+    public void delete(@RequestBean("selectedRows") List<Menu> menuList) throws ValidationFailedException {
+        systemMenusService.delete(menuList);
     }
 
     // 加载编辑数据

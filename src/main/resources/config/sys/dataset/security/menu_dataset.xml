@@ -16,4 +16,12 @@
             </condition-set>
         </where>
     </dataset>
+    <!-- ********************************************** 菜单级别 ********************************************** -->
+    <!-- 当前不支持3级菜单，但又预留了3级菜单。所以先把第二级当第一级用。 -->
+    <dataset id="DS_MENU_LEVELS" cache-type="static">
+        <data>
+            <data-element value="2" text="一级菜单"/>
+            <data-element value="3" text="二级菜单"/>
+        </data>
+    </dataset>
 </dataset-definition>

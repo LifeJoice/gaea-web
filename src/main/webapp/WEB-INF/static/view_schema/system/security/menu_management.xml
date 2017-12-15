@@ -29,10 +29,11 @@
                 </validators>
             </button>
             <!--<button id="btnEditAuthRes" name="btnEditAuthRes" html-value="编辑权限资源" link-view-id="editAuthResDialog" action="update" />-->
-            <button id="btnDel" name="btnDel" html-value="删除" action="deleteSelected">
+            <button id="btnDel" name="btnDel" html-value="删除" submit-url="/gaea/security/menu/delete" msg="删除菜单">
                 <validators>
                     <action-validator data-msg="未选择任意记录，无法执行操作。"
                                       check-expression="!gaeaValid.isNull($pageContext[selectedRows]) {gaea#and} gaeaValid.isNotNullArray($pageContext[selectedRows][gaea-grid-ct])"/>
+                    <confirm-validator data-msg="确定要执行删除操作？"/>
                 </validators>
             </button>
         </actions>
@@ -69,7 +70,9 @@
             <column id="name" name="name" label="名称" db-column-name="name"
                     visible="true" sortable="false" html-width="120" data-type="String" />
             <column id="level" name="level" label="层级" db-column-name="LEVEL_NUM"
-                    visible="true" sortable="false" html-width="120" data-type="String" dataset-id="DS_MENU_LEVELS"/>
+                    visible="true" sortable="false" html-width="120" data-type="String" dataset-id="DS_MENU_LEVELS">
+                <query-condition is-multiple="true" component="select"/>
+            </column>
             <column id="parentMenuName" name="parentMenuName" label="父级菜单名" db-column-name="parentMenuName"
                     visible="true" sortable="false" html-width="300" data-type="String" />
             <!--<column id="resource" name="resource" label="资源(URL)" db-column-name="RESOURCE"-->

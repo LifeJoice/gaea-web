@@ -32,10 +32,16 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
                     'z-index': '9999'
                 });
         },
-        message: function (msg) {
+        /**
+         * 消息样式。
+         * @param {string} msg       消息体
+         * @param {boolean} [permanent] 消息框是否自动消失
+         */
+        message: function (msg, permanent) {
             gaeaNotify.show({
                 msg: msg,
-                msgType: msgDefaultType.DEFAULT
+                msgType: msgDefaultType.DEFAULT,
+                permanent: permanent
             });
         },
         success: function (msg) {
@@ -75,8 +81,11 @@ define(["jquery", "underscore", 'jquery-notify', 'gaeajs-common-utils-string'], 
             opts.text = opts.msg;
             // 转换gaeaNotify和jNotify的类型
             if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.DEFAULT, opts.msgType)) {
+                _.defaults(opts, {
+                    permanent: false
+                });
                 opts.type = "message";
-                opts.permanent = false;
+                //opts.permanent = false;
                 $notify.jnotifyAddMessage(opts);
             } else if (gaeaStringUtils.equalsIgnoreCase(msgDefaultType.SUCCESS, opts.msgType) ||
                 gaeaStringUtils.equalsIgnoreCase(msgDefaultType.FAIL, opts.msgType)) {
