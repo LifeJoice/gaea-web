@@ -102,19 +102,21 @@ define([
             /**
              * 设置某个链节点的值
              *
-             * @param nodeId
-             * @param key
-             * @param value
+             * @param nodeId    例如：adView
+             * @param key       例如：data
+             * @param value     例如：{ selectedRow: {xxx} }
              */
             setNodeValue: function (nodeId, key, value) {
                 if (gaeaValid.isNull(nodeId) || gaeaValid.isNull(key)) {
                     return;
                 }
-                var node = _private.pickEndWith(nodeId);
+                var node = _private.pickEndWith(nodeId); // 返回的可能是：{'adPageView->adView': {xxx} }
                 if (gaeaValid.isNull(node)) {
                     throw "找不到gaea操作链对应的节点。id：" + nodeId;
                 }
-                node[nodeId][key] = value;
+                // 因为返回的可能是“adPageView->adView”，所以不能用node[nodeId]去取值，得用_.values()
+                node = _.values(node)[0];
+                node[key] = value;
             },
             /**
              * 这个一个临时的缓存。任何一个想加入chain的组件/操作都可以重写这个值。
