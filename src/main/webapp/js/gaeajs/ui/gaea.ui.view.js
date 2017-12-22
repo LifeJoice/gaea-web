@@ -110,7 +110,9 @@ define([
                 if (_.isArray(nodes)) {
                     var viewData = [];
                     $.each(nodes, function (i, val) {
-                        viewData.push(val.data);
+                        if (gaeaValid.isNotNull(val.data)) {
+                            viewData.push(val.data);
+                        }
                     });
                     return viewData;
                 }

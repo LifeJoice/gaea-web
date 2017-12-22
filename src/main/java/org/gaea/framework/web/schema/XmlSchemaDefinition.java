@@ -36,7 +36,9 @@ public class XmlSchemaDefinition {
      * ********************************************************************************************************************************************************
      */
     public static String ACTION_BUTTON_NAME = "button";
+    /* 由于按钮组的定义，在XML中体现为button-group元素，但反映到json的属性名是: buttons */
     public static String ACTION_BUTTON_GROUP_NAME = "button-group";
+    public static String ACTION_BUTTONS_NAME = "buttons"; // 这个是对应SchemaButtonGroup.buttons。这个属性最后会被转为json。
     public static String BUTTON_ACTION_NAME = "button-action"; // "button"的子元素。
     public static String BUTTON_VALIDATORS_NAME = "validators"; // 校验规则的容器元素
     public static String BUTTON_ACTION_VALIDATOR_NAME = "action-validator"; // 不同操作校验

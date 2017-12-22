@@ -56,6 +56,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
     @PostConstruct
     public void systemInit() {
         try {
+            logger.info(" 开始初始化Gaea框架的XML Schema。读取配置system.schema.init_path配置项中的Schema到缓存中。");
             init();
         } catch (Exception e) {
             logger.error("Gaea xml schema初始化失败！" + e.getMessage(), e);
@@ -94,6 +95,10 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
                             logger.error("Gaea xml schema初始化失败！" + e.getMessage(), e);
                         }
                         if (gaeaXmlSchema != null) {
+                            // 暂时只检查某个扫描路径下有没有重复。无法检查全局，因为parseXml会把解析的放入缓存，这时候在这里检查已经没用了。
+                            if (allGaeaXmlSchemaMap.get(gaeaXmlSchema.getId()) != null) {
+                                throw new SysInitException("系统发现重复id的XML Schema。这会导致某一个Xml Schema文件不可用。Schema Id: " + gaeaXmlSchema.getId() + " resource file: " + r.getFilename());
+                            }
                             allGaeaXmlSchemaMap.put(gaeaXmlSchema.getId(), gaeaXmlSchema);
                         }
                     }
@@ -201,7 +206,7 @@ public class GaeaXmlSchemaServiceImpl implements GaeaXmlSchemaService {
      *
      * @param schemaId
      * @param queryConditionDTO
-     * @param loginName 对应的数据集的数据权限过滤用
+     * @param loginName         对应的数据集的数据权限过滤用
      * @return
      * @throws SysInitException
      * @throws ValidationFailedException

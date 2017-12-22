@@ -3,6 +3,7 @@ package org.gaea.framework.web.schema.domain.view;
 import org.gaea.framework.web.schema.domain.SchemaViewsComponent;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -155,6 +156,9 @@ public class SchemaButton implements SchemaViewsComponent, Serializable {
     }
 
     public List getActions() {
+        if (actions == null) {
+            actions = new ArrayList();
+        }
         return actions;
     }
 

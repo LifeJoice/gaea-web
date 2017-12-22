@@ -1,11 +1,16 @@
 package org.gaea.framework.web.schema.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.domain.GaeaColumn;
 import org.gaea.data.dataset.domain.GaeaDataSet;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.Action;
+import org.gaea.framework.web.schema.SchemaActionDefinition;
+import org.gaea.framework.web.schema.XmlSchemaDefinition;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
@@ -19,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +34,9 @@ import java.util.Map;
  * Created by Iverson on 2015/8/18.
  */
 public class GaeaSchemaUtils {
-    private final Logger logger = LoggerFactory.getLogger(GaeaSchemaUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(GaeaSchemaUtils.class);
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static String getDbColumnName(SchemaGrid grid, String modelFieldId) {
         if (StringUtils.isBlank(modelFieldId)) {
@@ -145,12 +153,16 @@ public class GaeaSchemaUtils {
      * <p>
      * 找到第一个就返回！
      * </p>
+     * <p>
+     *     由于SchemaViews.Actions是List<Object>, 所以在XML转换的时候,虽然某个button可能是ExcelExportButtonAction类型的, 但从json转为Actions的时候就变成Map了.<br/>
+     *     这个时候,就需要人工判断method属性,再用对应的类去做强制转换.
+     * </p>
      *
      * @param xmlSchema
      * @param method
      * @return 找不到返回null
      */
-    public static SchemaButton getButton(GaeaXmlSchema xmlSchema, String buttonId, String method) {
+    public static SchemaButton getButton(GaeaXmlSchema xmlSchema, String buttonId, String method) throws ValidationFailedException {
         if (xmlSchema == null || StringUtils.isEmpty(buttonId) || StringUtils.isEmpty(method)) {
             return null;
         }
@@ -159,22 +171,49 @@ public class GaeaSchemaUtils {
             throw new IllegalArgumentException("Xml schema的view或者view下的action为空！");
         }
         List buttons = xmlSchema.getSchemaViews().getActions().getButtons();
+        button = getButton(buttons, buttonId, method);
+        return button;
+    }
+
+    private static SchemaButton getButton(List buttons, String buttonId, String method) throws ValidationFailedException {
+        SchemaButton button = null;
         for (Object o : buttons) {
-            if (o instanceof SchemaButton) {
-                SchemaButton b = (SchemaButton) o;
+            if (o == null) {
+                continue;
+            }
+            if (!(o instanceof Map)) {
+                throw new ValidationFailedException("要提取按钮，要求xmlSchema.getSchemaViews().getActions()的值为Map！");
+            }
+            Map buttonMap = (Map) o;
+            Object subButtonsObj = buttonMap.get(XmlSchemaDefinition.ACTION_BUTTONS_NAME);
+            List subButtonList = subButtonsObj == null || !(subButtonsObj instanceof List) ? // 有子按钮并且是List？
+                    null : (List) subButtonsObj;
+            // 如果有按钮组，递归
+            if (subButtonList != null) {
+                button = getButton(subButtonList, buttonId, method);
+            } else {
                 // 如果button id相同，且里面的action method相同
-                if (b != null && buttonId.equalsIgnoreCase(b.getId()) && isTheButton(method, b)) {
-                    button = b;
-                }
-            } else if (o instanceof SchemaButtonGroup) {
-                SchemaButtonGroup buttonGroup = (SchemaButtonGroup) o;
-                List<SchemaButton> buttonList = buttonGroup.getButtons();
-                for (SchemaButton b : buttonList) {
-                    // 如果button id相同，且里面的action method相同
-                    if (b != null && buttonId.equalsIgnoreCase(b.getId()) && isTheButton(method, b)) {
-                        button = b;
-                        break;
+                if (buttonId.equalsIgnoreCase(String.valueOf(buttonMap.get("id"))) && SchemaActionDefinition.METHOD_EXCEL_EXPORT_BY_TEMPLATE.equalsIgnoreCase(method)) {
+                    try {
+                        String schemaButtonJson = objectMapper.writeValueAsString(buttonMap);
+                        button = objectMapper.readValue(schemaButtonJson, SchemaButton.class);
+                        if (buttonMap.get("actions") != null && CollectionUtils.isNotEmpty((List) buttonMap.get("actions"))) {
+                            // 先清空actions（因为前面ObjectMapper转的时候把数据当map放进去了）
+                            button.setActions(new ArrayList());
+                            // 遍历actions，转换为Action类型并放入
+                            List buttonActions = (List) buttonMap.get("actions");
+                            for (Object btnActionObj : buttonActions) {
+                                String btnActionJson = objectMapper.writeValueAsString(btnActionObj);
+                                ExcelExportButtonAction action = objectMapper.readValue(btnActionJson, ExcelExportButtonAction.class);
+                                button.getActions().add(action);
+                            }
+                        }
+                    } catch (JsonProcessingException e) {
+                        logger.error("objectMapper转换SchemaButton失败！", e);
+                    } catch (IOException e) {
+                        logger.error("objectMapper转换SchemaButton失败！", e);
                     }
+                    break;
                 }
             }
         }

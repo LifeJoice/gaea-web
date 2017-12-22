@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--SCHEMA id必须全局唯一。会进入系统的cache。-->
-<ur-schema id="GAEA_SCHEMA_DEMO_MANAGEMENT">
+<ur-schema id="SCHEMA_DEMO_PRODUCT_MANAGEMENT">
     <data>
         <dataset id="DS_DEMO_PRODUCT_MANAGEMENT" primary-table="PRODUCT_INFO"></dataset>
     </data>

@@ -35,7 +35,7 @@ public class ExcelExportButtonAction implements Action<File> {
     private final Logger logger = LoggerFactory.getLogger(ExcelExportButtonAction.class);
 
     private String method;
-    @JsonIgnore
+
     private Map<String, ActionParam> actionParamMap; // Map< param.name , param obj >
     @JsonIgnore
     private String name;
@@ -70,7 +70,10 @@ public class ExcelExportButtonAction implements Action<File> {
         ActionParam<String> dataSetParam = actionParamMap.get("dataSetId");
         ActionParam<String> excelTemplateParam = actionParamMap.get("excelTemplateId");
         ActionParam<String> withDataParam = actionParamMap.get("withData");
-        if (StringUtils.isEmpty(dataSetParam.getValue())) {
+        // 默认没有配置withData就是true
+        boolean withData = withDataParam == null || BooleanUtils.toBooleanObject(withDataParam.getValue()) == null ? true : BooleanUtils.toBooleanObject(withDataParam.getValue());
+        // 如果要withData, 但又没有dataSet，失败
+        if (StringUtils.isEmpty(dataSetParam.getValue()) && withData) {
             throw new ValidationFailedException("无法获取button action的dataSetId。无法导出操作！");
         }
         try {
@@ -84,7 +87,7 @@ public class ExcelExportButtonAction implements Action<File> {
              * 就查询data
              * 其实就是，除非withData=false，否则都会查询data
              */
-            if (withDataParam == null || BooleanUtils.toBooleanObject(withDataParam.getValue()) == null || BooleanUtils.toBooleanObject(withDataParam.getValue())) {
+            if (withData) {
                 GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
                 data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), excelTemplateParam.getValue(), defaultDsContext); // 默认导出1000条
                 if (data == null) {

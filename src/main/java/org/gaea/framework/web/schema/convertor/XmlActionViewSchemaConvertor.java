@@ -73,6 +73,7 @@ public class XmlActionViewSchemaConvertor implements SchemaConvertor<SchemaActio
             if (!(viewNode instanceof Element)) {
                 continue;
             }
+            // TODO 这里有问题。为什么不管三七二十一都转为ExcelExportButtonAction类型？？
             if (XmlSchemaDefinition.BUTTON_ACTION_NAME.equals(viewNode.getNodeName())) {
                 if (CollectionUtils.isEmpty(button.getActions())) {
                     button.setActions(new ArrayList<ExcelExportButtonAction>());
