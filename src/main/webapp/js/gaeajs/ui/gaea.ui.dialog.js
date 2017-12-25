@@ -949,6 +949,7 @@ define([
                     //}
                     $.when($refButton.gaeaValidate("valid")).done(function () {
 
+                        var dialogOptions = $dialog.data("gaeaOptions");
                         var gridId = data.gridId;
                         var editData;
 
@@ -965,8 +966,8 @@ define([
                                 gridId: gridId,
                                 loadDataUrl: options.loadDataUrl
                             });
-                            options["editData"] = editData; // 一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的）
-                            options.data = editData;
+                            dialogOptions["editData"] = editData; // 一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的）
+                            dialogOptions.data = editData;
                         }
 
                         /**
