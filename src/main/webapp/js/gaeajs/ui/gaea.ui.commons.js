@@ -67,8 +67,9 @@ define([
                 var defferedFunctions = [
                     // 初始化按钮(在html中通过data-gaea-ui-button配置的)
                     _private.initGaeaButton(ctSelector),
+                    // TODO 这个应该在这里。但现在和gaeaData的冲突。因为select依赖KO。这个后面重构的时候解决掉。
                     // 初始化select. 其实select非组件，不需要初始化。这个主要初始化一些绑定在上面的通用gaea event。
-                    _private.initSelect(ctSelector),
+                    //_private.initSelect(ctSelector),
                     // 初始化select2插件
                     _private.initSelect2(ctSelector),
                     // 初始化tabs插件
@@ -246,15 +247,18 @@ define([
                 }
                 // data-gaea-ui-select
                 var attrName = "data-" + GAEA_UI_DEFINE.UI.SELECT.DEFINE;
+                var dpSelectAttrName = "data-" + GAEA_UI_DEFINE.UI.SELECT.DP_SELECT_DEFINE;
                 // 找gaeaUI按钮的jq选择器条件( <select data-gaea-ui-select2=*** ...> )
-                var gaeaSelectTemplate = _.template("select[<%= ATTR_NAME %>]");
+                var gaeaSelectTemplate = _.template("select[<%= ATTR_NAME %>], select[<%=DP_SELECT_ATTR%>]");
                 // 查找所有按钮，遍历并初始化
                 $(ctSelector).find(gaeaSelectTemplate({
-                    ATTR_NAME: attrName
+                    ATTR_NAME: attrName,
+                    DP_SELECT_ATTR: dpSelectAttrName
                 })).each(function (i, eachSelectObj) {
                     var $select = $(eachSelectObj);
                     var id = $select.attr("id");
-                    var configStr = $select.data(GAEA_UI_DEFINE.UI.SELECT.DEFINE); // = data-gaea-ui-select
+                    var configStr = $select.is("[data-" + GAEA_UI_DEFINE.UI.SELECT.DEFINE + "]") ?
+                        $select.data(GAEA_UI_DEFINE.UI.SELECT.DEFINE) : $select.data(GAEA_UI_DEFINE.UI.SELECT.DP_SELECT_DEFINE); // = data-gaea-ui-select / data-gaea-ui-dp-select
                     var opts = gaeaString.parseJSON(configStr);
                     opts.id = id;
                     // 检查是否有重复元素！
@@ -824,5 +828,7 @@ define([
         /**
          * 返回接口定义。
          */
-        return gaeaCommons;
+        return _.defaults(gaeaCommons, {
+            initSelect: _private.initSelect
+        });
     });

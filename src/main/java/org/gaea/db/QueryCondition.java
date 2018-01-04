@@ -1,5 +1,8 @@
 package org.gaea.db;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * <p><b>复制于Hibernate的SimpleExpression。没错，借鉴，借鉴。。。</b></p>
  * 查询条件的封装实体类。场景：
@@ -33,6 +36,8 @@ public class QueryCondition {
     public static final String COND_OP_NONE = "none";
     public static final String COND_OP_AND = "and";
     public static final String COND_OP_OR = "or";
+    /* 如果propValue是一个El表格式，这里可以放它需要用到的上下文属性值。 */
+    private Map valueElContextMap = null;
 
     public QueryCondition() {
     }
@@ -108,7 +113,17 @@ public class QueryCondition {
         return this;
     }
 
-    /* 这个是Hibernate的SimpleExpression带过来的方法。可以分析一下要不要用起来。 */
+    public Map getValueElContextMap() {
+        if (valueElContextMap == null) {
+            valueElContextMap = new HashMap();
+        }
+        return valueElContextMap;
+    }
+
+    public void setValueElContextMap(Map valueElContextMap) {
+        this.valueElContextMap = valueElContextMap;
+    }
+/* 这个是Hibernate的SimpleExpression带过来的方法。可以分析一下要不要用起来。 */
 //    public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery) throws HibernateException {
 //        final String[] columns = criteriaQuery.findColumns( propertyName, criteria );
 //        final Type type = criteriaQuery.getTypeUsingProjection( criteria, propertyName );

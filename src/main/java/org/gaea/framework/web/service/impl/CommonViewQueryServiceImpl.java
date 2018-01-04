@@ -372,18 +372,23 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                 }
                 conditionSet = dataSet.getWhere().getConditionSets().get(queryConditionDTO.getId());
                 if (conditionSet != null && conditionSet.getConditions() != null) {
-                    for (int i = 0; i < conditionSet.getConditions().size(); i++) {
-                        // AI.TODO 这里不能用顺序来确定键值对应。因为对于is null之类的，是没有值的。需要增加一个标识符来做对应关系。
-                        // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
-                        Condition schemaCondition = conditionSet.getConditions().get(i);
-                        QueryValue valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
-                        QueryCondition cond = new QueryCondition();
-                        cond.setPropName(schemaCondition.getPropName());// 查询字段为XML SCHEMA中的定义
-                        cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
-                        cond.setPropValue(valueDTO.getValue());// value为页面传过来的值
-                        cond.setOp(schemaCondition.getOp());
-                        newConditions.add(cond);
-                    }
+//                    for (int i = 0; i < conditionSet.getConditions().size(); i++) {
+//                        // AI.TODO 这里不能用顺序来确定键值对应。因为对于is null之类的，是没有值的。需要增加一个标识符来做对应关系。
+//                        // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
+//                        Condition schemaCondition = conditionSet.getConditions().get(i);
+//                        QueryValue valueDTO = queryConditionDTO.getValues().get(i);// 假设顺序一致
+//                        QueryCondition cond = new QueryCondition();
+//                        cond.setPropName(schemaCondition.getPropName());// 查询字段为XML SCHEMA中的定义
+//                        cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
+//                        if(StringUtils.isEmpty(schemaCondition.getPropValue())) {
+//                            cond.setPropValue(valueDTO.getValue());// value为页面传过来的值
+//                        }else{
+//                            cond.setPropValue(schemaCondition.getPropValue());
+//                            cond.getValueElContextMap().put("gaea_value", valueDTO.getValue());
+//                        }
+//                        cond.setOp(schemaCondition.getOp());
+//                        newConditions.add(cond);
+//                    }
                 } else {
                     logger.debug("根据查询请求的ConditionSet id获取不到系统对应的ConditionSet。请求ConditionSet id:{} 系统数据集:{} 所含ConditionSet list size:{}",
                             queryConditionDTO.getId(), dataSet.getId(), dataSet.getWhere().getConditionSets().size());

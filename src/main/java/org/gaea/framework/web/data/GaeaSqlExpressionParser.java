@@ -7,7 +7,10 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * 负责对数据集的SQL里面的表达式进行处理。
@@ -33,28 +36,45 @@ public class GaeaSqlExpressionParser {
      * 内置的表达式可调用的上下文对象: GaeaDefaultDsContext
      * </p>
      *
-     * @param sql
+     * @param origExpression
      * @param defaultDsContext
      * @return
      */
-    public String parse(String sql, GaeaDefaultDsContext defaultDsContext) {
-        String newSql = sql;
+    public String parse(String origExpression, GaeaDefaultDsContext defaultDsContext) {
+        return parse(origExpression, defaultDsContext, null);
+    }
+
+    /**
+     * 把某个表达式，根据传入的上下文的值，替换掉占位符，再返回。
+     *
+     * @param origExpression   表达式原句
+     * @param defaultDsContext
+     * @param contextMap
+     * @return
+     */
+    public String parse(String origExpression, GaeaDefaultDsContext defaultDsContext, Map contextMap) {
+        String newSql = origExpression;
         if (defaultDsContext == null) {
             defaultDsContext = new GaeaDefaultDsContext();
         }
-        logger.trace("准备对sql里的表达式进行处理。处理前：\n{}", sql);
+        logger.trace("准备对sql里的表达式进行处理。处理前：\n{}", origExpression);
         Expression expression =
-                parser.parseExpression(sql, parserContext);
-//        EvaluationContext context = new StandardEvaluationContext();
+                parser.parseExpression(origExpression, parserContext);
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        if (defaultDsContext != null) {
+            context.setRootObject(defaultDsContext);
+        }
+        if (contextMap != null) {
+            context.setVariables(contextMap);
+        }
 //        GaeaDefaultDsContext dsContext = new GaeaDefaultDsContext("Iverson");
 //        context.setVariable("gaeaDsContext",dsContext);
-        if (defaultDsContext != null) {
-            newSql = expression.getValue(defaultDsContext).toString();
-        } else {
-            newSql = expression.getValue().toString();
-        }
-        logger.trace("准备对sql里的表达式进行处理。处理后：\n{}", newSql);
-//        System.out.println(expression.getValue(dsContext));
+//        if (defaultDsContext != null) {
+//            newSql = expression.getValue(defaultDsContext).toString();
+//        } else {
+        newSql = expression.getValue(context).toString();
+//        }
+        logger.trace("准备对sql里的表达式进行处理。处理前：{} 处理后：\n{}", origExpression, newSql);
         return newSql;
     }
 

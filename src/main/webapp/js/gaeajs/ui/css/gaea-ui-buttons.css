@@ -8,7 +8,7 @@
 /* ALL ------>> 所有的按钮class都必须加上"a."，否则会受macula样式影响。*/
 .gaea-ui-page a.button,
 a.gaea-ui-button,
-.gaea-button-group .title {
+.gaea-button-group-ct .title {
     cursor: pointer;
     display: inline-block;
     line-height: 1;
@@ -212,7 +212,7 @@ a.small.gaea-ui-button {
 
 /*深蓝灰色效果*/
 .gaea-ui-page a.darkslategrey.button,
-.gaea-button-group .title,
+.gaea-button-group-ct .title,
 .gaea-button-group .detail,
 a.darkslategrey.gaea-ui-button {
     background-color: #5D6D7D;
@@ -238,16 +238,24 @@ a.darkslategrey.gaea-ui-button:hover {
 }
 
 /**
- *  ****************************************************
- *                        按钮组
- *  ****************************************************
+ *  ********************************************************************************************************************************************************
+ *                                                                  按钮组
+ *  ********************************************************************************************************************************************************
  */
+
+.gaea-button-group-ct {
+    position: relative;
+    display: inline-block;
+    height: 30px;
+}
+
 /*整个按钮组区域*/
 .gaea-button-group {
     position: absolute;
     font-size: 13px;
     color: white; /* 按钮字体颜色 */
     z-index: 1; /* 因为对于列表页，toolbar在grid上面，所以按钮组的列表应该盖住grid。但如果在其他页面toolbar就不一定这样了。*/
+    width: 100%;
 }
 
 /*按钮组里面的按钮.初始是隐藏的.*/
@@ -275,7 +283,7 @@ a.darkslategrey.gaea-ui-button:hover {
 }
 
 /*移动到按钮组的时候,展开按钮.*/
-.gaea-button-group:hover > .detail ul li {
+.gaea-button-group-ct:hover .detail ul li {
     height: 30px;
     line-height: 30px;
 }

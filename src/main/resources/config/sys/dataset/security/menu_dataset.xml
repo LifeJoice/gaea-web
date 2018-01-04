@@ -24,4 +24,36 @@
             <data-element value="3" text="二级菜单"/>
         </data>
     </dataset>
+    <!-- ********************************************** 当前所选级别的上一级菜单 ********************************************** -->
+    <dataset id="DS_PARENT_MENUS" primary-table="GAEA_SYS_MENUS" authority-type="0">
+        <data-sql>
+            <![CDATA[
+            SELECT ID,NAME FROM GAEA_SYS_MENUS
+            ]]>
+        </data-sql>
+        <!--定义查询出来的结果集的字段名转换-->
+        <columns-define>
+            <column name="value" db-column-name="ID" data-type="String"/>
+            <column name="text" db-column-name="NAME" data-type="String"/>
+        </columns-define>
+        <where>
+            <condition-set id="parentMenus">
+                <and propName="level_num" op="eq" propValue="#{#gaea_value-1}"></and>
+            </condition-set>
+        </where>
+    </dataset>
+    <!-- ********************************************** 未关联的资源. 过滤掉已经被关联过的。 ********************************************** -->
+    <dataset id="DS_MENU_RESOURCE" cache-type="auto" authority-type="0">
+        <data-sql>
+            <![CDATA[
+            SELECT resources.* FROM GAEA_SYS_RESOURCES resources left join gaea_sys_menus menu on resources.id=menu.resource_id
+where menu.id is null
+            ]]>
+        </data-sql>
+        <!--定义查询出来的结果集的字段名转换-->
+        <columns-define>
+            <column name="value" db-column-name="ID" data-type="String"/>
+            <column name="text" db-column-name="NAME" data-type="String"/>
+        </columns-define>
+    </dataset>
 </dataset-definition>

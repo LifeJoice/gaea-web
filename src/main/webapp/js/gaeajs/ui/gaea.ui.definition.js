@@ -95,15 +95,18 @@ define(function () {
         BUTTON_GROUP: {
             TEMPLATE: {
                 // 整个按钮组的框架的HTML,除了按钮
-                HTML: '<span id="<%= GROUP_ID %>" class="gaea-button-group">' +
+                HTML: '<span class="gaea-button-group-ct">' +
+                '<span id="<%= GROUP_ID %>" class="gaea-button-group">' +
+                '<div id="<%= BUTTONS_PANEL_ID %>" class="detail"></div></span>' +
                 '<div class="title"><%= GROUP_TEXT %><i class="fa fa-chevron-down"></i></div>' +
-                '<div id="<%= BUTTONS_PANEL_ID %>" class="detail"></div></span>',
+                '</span>',
                 // 按钮组的按钮的HTML
                 SUB_BUTTON_HTML: '<li id="<%= ID %>" data-url="<%= URL %>"><%=TEXT %></li>'
             }
         },
         SELECT: {
-            DEFINE: "gaea-ui-select"
+            DEFINE: "gaea-ui-select",
+            DP_SELECT_DEFINE: "gaea-ui-dp-select"
         },
         SELECT2: {
             DEFINE: "gaea-ui-select2"

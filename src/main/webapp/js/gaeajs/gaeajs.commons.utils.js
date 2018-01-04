@@ -597,14 +597,18 @@ define([
          * </p>
          * @param {object} responseObj          ajax请求后的错误返回json对象。
          * @param {object} [opts]
-         * @param {object} opts.fail            失败的相关处理配置
-         * @param {object} opts.fail.baseMsg    错误的基本信息。叠在服务端返回错误的前面。
-         * @param {object} opts.success         成功的相关处理配置
-         * @param {object} opts.success.baseMsg 成功的基本信息。叠在服务端返回成功的前面。
-         * @param {object} opts.default         如果responseObj为空，就用这个
+         * @param {object} opts.fail                失败的相关处理配置
+         * @param {object} opts.fail.baseMsg        错误的基本信息。叠在服务端返回错误的前面。
+         * @param {object} opts.success             成功的相关处理配置
+         * @param {object} opts.success.baseMsg     成功的基本信息。叠在服务端返回成功的前面。
+         * @param {object} opts.default             如果responseObj为空，就用这个
          * @param {object} opts.default.baseMsg
+         * @param {boolean} opts.onlyFail=false     默认只处理失败的
          */
         utils.processResponse = function (responseObj, opts) {
+            _.defaults(opts, {
+                onlyFail: false
+            });
             // 返回对象转换
             //var respObj = {};
             if (gaeaValid.isNotNull(responseObj) && gaeaValid.isNotNull(responseObj.responseText)) {
@@ -623,11 +627,15 @@ define([
                     // 非普通的异常
                     gaeaNotify.error(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
                 } else if (gaeaString.equalsIgnoreCase(responseObj.status, "270")) {
-                    // 正常返回，有信息需要显示，并且不自动消失。
-                    gaeaNotify.message(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message), true);
+                    if (!opts.onlyFail) {
+                        // 正常返回，有信息需要显示，并且不自动消失。
+                        gaeaNotify.message(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message), true);
+                    }
                 } else if (gaeaString.equalsIgnoreCase(responseObj.status, "200")) {
-                    // 成功
-                    gaeaNotify.success(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
+                    if (!opts.onlyFail) {
+                        // 成功
+                        gaeaNotify.success(gaeaString.builder.simpleBuild("%s %s", baseMsg, responseObj.message));
+                    }
                 } else {
                     /**
                      * 不可识别的状态码, 或者返回的对象不完整（没有状态码）等

@@ -26,10 +26,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Types;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Iverson on 2015/9/23.
@@ -421,6 +418,7 @@ public class GaeaSqlProcessor {
             throw new ValidationFailedException("查询失败！conditionSet的值和queryCondition的值的个数不匹配。可能XML配置和页面值配置不匹配导致。请检查。");
         }
         for (int i = 0; i < conditionSet.getConditions().size(); i++) {
+            QueryCondition cond = new QueryCondition();
             // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
             Condition schemaCondition = conditionSet.getConditions().get(i);
             // 以Condition的value为基础
@@ -429,11 +427,17 @@ public class GaeaSqlProcessor {
                 // 【重要】假设顺序一致
                 QueryValue valueDTO = queryConditionDTO.getValues().get(i);
                 value = valueDTO.getValue();
+                if (StringUtils.isEmpty(schemaCondition.getPropValue())) {
+                    cond.setPropValue(valueDTO.getValue());// value为页面传过来的值
+                } else {
+                    cond.setPropValue(schemaCondition.getPropValue());
+                    cond.getValueElContextMap().put("gaea_value", valueDTO.getValue());
+                }
             }
-            QueryCondition cond = new QueryCondition();
+//            QueryCondition cond = new QueryCondition();
             BeanUtils.copyProperties(schemaCondition, cond);
             cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
-            cond.setPropValue(value);// value为页面传过来的值 or 写死在condition中的值
+//            cond.setPropValue(value);// value为页面传过来的值 or 写死在condition中的值
             newConditions.add(cond);
         }
         return newConditions;
@@ -499,8 +503,16 @@ public class GaeaSqlProcessor {
         /**
          * 检查值是否有SPEL表达式。如果有，则先转换为正常静态值
          */
+//        Map contextMap = new HashMap();
+//        contextMap.put("gaea_value", cond.getPropValue());
+//        value = "#{#gaea_value-1}";
         if (gaeaSqlExpressionParser.hasExpression(value)) {
-            value = gaeaSqlExpressionParser.parse(value, defaultDsContext);
+//            value = gaeaSqlExpressionParser.parse(value, defaultDsContext);
+            try {
+                value = gaeaSqlExpressionParser.parse(value, defaultDsContext, cond.getValueElContextMap());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         /**
          * 对特殊关系操作符的处理。

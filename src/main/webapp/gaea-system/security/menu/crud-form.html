@@ -11,19 +11,28 @@
             </span>
         </div>
         <div class="field-block">
-            <span class="fieldname">菜单级别</span>
+            <span class="fieldname">当前菜单级别</span>
             <span class="fieldvalue">
-                <select id="menu.level" name="menu.level" data-gaea-data="dataset:'DS_MENU_LEVELS'"></select>
+                <select id="menuLevel" name="menu.level" data-gaea-data="dataset:'DS_MENU_LEVELS'"
+                        data-gaea-ui-select="onChange: { trigger: {target:'#menuParentId' , event:'reload_data' }}"></select>
             </span>
         </div>
         <!--<div class="field-block"><span class="fieldname">顺序号</span><span class="fieldvalue"><input id="orderSeq" name="orderSeq" value=""></span></div>-->
     </div>
     <div class="row">
-        <div class="field-block"><span class="fieldname">资源</span><span class="fieldvalue"><select id="menu.resource.id" name="menu.resource.id" data-gaea-data="dataset:'DS_RESOURCE_MANAGEMENT'"></select></span></div>
+        <div class="field-block">
+            <span class="fieldname">对应资源</span>
+            <span class="fieldvalue">
+                <select id="menuResourceId" name="menu.resource.id"
+                        data-gaea-data="dataset:'DS_MENU_RESOURCE'"></select>
+            </span>
+        </div>
         <div class="field-block">
             <span class="fieldname">父级菜单</span>
             <span class="fieldvalue">
-                <select id="menu.parent.id" name="menu.parent.id" data-gaea-data="dataset:'DS_MENU'"></select>
+                <select id="menuParentId" name="menu.parent.id"
+                        data-gaea-ui-dp-select="registerEvents:[{name:'reload_data' }]"
+                        data-gaea-data="dataset:'DS_PARENT_MENUS', condition:{id:'parentMenus'}"></select>
             </span>
         </div>
     </div>

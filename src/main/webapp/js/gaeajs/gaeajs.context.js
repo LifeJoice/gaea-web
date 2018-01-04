@@ -58,6 +58,7 @@ define([
                 }
             },
             /**
+             * TODO 重构一下。应该支持非表达式的。就直接返回就可以了。
              * 获取当前上下文的某个值。
              * @param {string} key          某个key。一般表示某一类的缓存，例如：selectRows
              * @param {string} [id]         组件id。例如两个grid的selectRows，就必须通过两个id区分。
