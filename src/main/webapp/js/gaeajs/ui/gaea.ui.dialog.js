@@ -600,6 +600,12 @@ define([
              * @param {string} options.refInputId           和submitAction有关，如果是回写的话，这个关联input id就会有所用。
              * @param {boolean} options.editable            dialog的内容是否可编辑
              */
+            initAndBindTrigger: function (dialogOpts) {
+                // 初始化和绑定得分开。因为绑定的事件触发后，需要再次初始化。放一起会循环调用。
+                crudDialog.init(dialogOpts);
+                crudDialog.bindOpenEvent(dialogOpts);
+            },
+            // 这个是只初始化的。
             init: function (dialogOpts) {
 
                 _.defaults(dialogOpts, _options);
@@ -740,7 +746,8 @@ define([
                     //    //crudDialog.initAddDialog(dialogOpts);
                     //    crudDialog.bindOpenEvent(dialogOpts);
                 }
-                crudDialog.bindOpenEvent(dialogOpts);
+                // 这个不能放在这里！因为bindOpenEvent里面还要调用init，会导致循环调用。
+                //crudDialog.bindOpenEvent(dialogOpts);
             },
             /**
              * 初始化新增弹出框。
@@ -949,6 +956,7 @@ define([
                     //}
                     $.when($refButton.gaeaValidate("valid")).done(function () {
 
+                        crudDialog.init(options);
                         var dialogOptions = $dialog.data("gaeaOptions");
                         var gridId = data.gridId;
                         var editData;
@@ -966,8 +974,8 @@ define([
                                 gridId: gridId,
                                 loadDataUrl: options.loadDataUrl
                             });
-                            dialogOptions["editData"] = editData; // 一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的）
-                            dialogOptions.data = editData;
+                            dialogOptions["editData"] = editData; // 这个一般是tab等延迟加载用（一般表示crud dialog的编辑数据。把编辑数据缓存在dialog的data中（像多tab dialog的>2的tab会有用的））
+                            options.data = editData; // 这个是当前初始化数据用
                         }
 
                         /**
@@ -2422,7 +2430,7 @@ define([
         //return dialog;
         return {
             init: dialog.init,
-            initCrudDialog: crudDialog.init,
+            initCrudDialog: crudDialog.initAndBindTrigger,
             findDialog: dialog.findDialog,
             //create: _private.createDialog, 已过时！
             open: dialog.open,
