@@ -377,6 +377,7 @@ define([
                  * @param {string} containerId          整个按钮组的容器id
                  */
                 createButtonGroup: function (opts) {
+                    var gaeaButton = require("gaeajs-ui-button");
                     var buttonGroupDef = opts.buttonDef;
                     var $container = $("#" + opts.containerId);
                     var buttonPanelId = buttonGroupDef.id + "-buttons-panel";
@@ -433,6 +434,15 @@ define([
                             $button.data("gaeaOptions").linkViewObj = refObj;
                             // dialog id
                             refObj.id = refObj.htmlId;
+                            // init gaea-ui-button attr
+                            gaeaButton.init({
+                                id: button.id,
+                                //htmlId: button.htmlId,
+                                //text: button.text,
+                                //size: button.size,
+                                //action: button.action,
+                                refObject: refObj
+                            });
 
                             // 初始化相关组件
                             _private.initRefComponent(button, opts.views, refObj);

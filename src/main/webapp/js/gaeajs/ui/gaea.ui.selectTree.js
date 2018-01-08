@@ -116,8 +116,8 @@ define([
                 //'</div>';
                 var htmlTmpl = _.template(selectTreeHtmlTmpl);
                 $selectTreeCt.html(htmlTmpl({
-                    ID: ("input_" + _s.replaceAll(opts.htmlId, "\\.", "")), // id可能有特殊字符(.之类的)
-                    SELECT_ID: (_s.replaceAll(opts.htmlId, "\\.", "")), // id可能有特殊字符(.之类的)
+                    ID: ("input_" + opts.htmlId), // id可能有特殊字符(.之类的)
+                    SELECT_ID: (opts.htmlId), // id可能有特殊字符(.之类的)
                     NAME: opts.htmlName,
                     FIELD_ID: opts.fieldId,
                     CLASS: GAEA_UI_DEFINE.UI.QUERY.INPUT_FIELD_CLASS
@@ -145,6 +145,9 @@ define([
                     var name = $selectTreeCt.data("gaea-ui-name");
                     opts.htmlId = gaeaValid.isNull(opts.htmlId) ? name : opts.htmlId;
                     opts.htmlName = gaeaValid.isNull(opts.htmlName) ? name : opts.htmlName;
+                    // id可能有特殊字符(.之类的)
+                    opts.htmlId = _s.replaceAll(opts.htmlId, "\\.", "");
+                    opts.id = opts.htmlId; // 这个对gaea其他组件来说，可以用于获取值
                 }
 
                 // options

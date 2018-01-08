@@ -55,10 +55,13 @@ define([
              * @param {string} btnOptions.htmlId            html id
              * @param {string} btnOptions.text              按钮的文本
              * @param {string} btnOptions.size              要生成大按钮，还是小按钮。默认medium. value: small |
-             * @param {string} btnOptions.action            按钮的action
+             //* @param {string} btnOptions.action            按钮的action
              * @param {object} btnOptions.refObject         关联的对象定义（例如：要打开一个dialog，则关联对象dialog的定义等）
              */
             create: function (btnOptions) {
+                if (gaeaValid.isNull(btnOptions.id) && gaeaValid.isNotNull(btnOptions.htmlId)) {
+                    btnOptions.id = btnOptions.htmlId;
+                }
                 var $html;
                 if (gaeaValid.isNotNull(btnOptions.size) && "small" == btnOptions.size) {
                     $html = $("<a id='" + btnOptions.htmlId + "'" +
@@ -80,6 +83,30 @@ define([
                     btnOptions.jqContainer.append($html);
                 }
                 // 初始化关联对象的定义等
+                button.init(btnOptions);
+                //if (gaeaValid.isNotNull(btnOptions.refObject)) {
+                //    var refObjectCfg = {
+                //        newId: btnOptions.refObject.id,
+                //        //action: action,
+                //        submitUrl: btnOptions.refObject.submitUrl,
+                //        multiple: btnOptions.refObject.multiple,
+                //        keepFailed: btnOptions.refObject.keepFailed
+                //    };
+                //    // 根据关联对象，确定按钮的action
+                //    if (gaeaString.equalsIgnoreCase("uploader-dialog", btnOptions.refObject.componentName)) {
+                //        refObjectCfg.action = "uploader_dialog";
+                //        refObjectCfg.multiple = btnOptions.refObject.multiple;
+                //    }
+                //    $html.attr('data-gaea-ui-button', JSON.stringify(refObjectCfg));
+                //}
+                return $html.html();
+            },
+            init: function (btnOptions) {
+                if (gaeaValid.isNull(btnOptions.id)) {
+                    throw "id为空，无法初始化按钮！";
+                }
+                var $Button = $("#" + btnOptions.id);
+                // 初始化关联对象的定义等
                 if (gaeaValid.isNotNull(btnOptions.refObject)) {
                     var refObjectCfg = {
                         newId: btnOptions.refObject.id,
@@ -93,9 +120,8 @@ define([
                         refObjectCfg.action = "uploader_dialog";
                         refObjectCfg.multiple = btnOptions.refObject.multiple;
                     }
-                    $html.attr('data-gaea-ui-button', JSON.stringify(refObjectCfg));
+                    $Button.attr('data-gaea-ui-button', JSON.stringify(refObjectCfg));
                 }
-                return $html.html();
             },
             /**
              * 参考html配置：
