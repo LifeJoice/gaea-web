@@ -23,6 +23,7 @@ public class SchemaDialog implements SchemaViewsComponent, Serializable {
     private String loadDataUrl;       // dialog中内容的数据来源的URL。
     private String componentName; // 就是XML的元素名，例如：crud-dialog|wf-dialog|...
     private String idField;         // id的html name。在update dialog有用。
+    /* dialog对应的按钮 */
     private List<SchemaButton> buttons = new ArrayList<SchemaButton>();
     private Boolean editable = true; // 是否可编辑。默认true
     private Boolean multiple = false; // 文件上传组件专用。是否支持多选。

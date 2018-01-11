@@ -32,7 +32,8 @@ define(function () {
                 NEW_DIALOG: "new_dialog",
                 // 打开 data_filter_dialog
                 DATA_FILTER_DIALOG: "data_filter_dialog",
-                UPLOADER_DIALOG: "uploader_dialog" // 文件上传弹出框
+                UPLOADER_DIALOG: "uploader_dialog", // 文件上传弹出框
+                WITHOUT_VALIDATE: "without-validate" // dialog中的按钮点击，不需要触发validate
             },
             SUBMIT_ACTION: {
                 WRITEBACK_IN_ONE: "writeback_in_one",

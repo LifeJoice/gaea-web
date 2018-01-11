@@ -421,6 +421,7 @@ public class GaeaSqlProcessor {
             QueryCondition cond = new QueryCondition();
             // 【重要】这里一个假设：页面value的顺序和XML SCHEMA condition的顺序是一致的。因为暂时不想把查询字段暴露到页面去。
             Condition schemaCondition = conditionSet.getConditions().get(i);
+            BeanUtils.copyProperties(schemaCondition, cond);
             // 以Condition的value为基础
             String value = schemaCondition.getPropValue();
             if (queryConditionDTO != null) {
@@ -435,7 +436,7 @@ public class GaeaSqlProcessor {
                 }
             }
 //            QueryCondition cond = new QueryCondition();
-            BeanUtils.copyProperties(schemaCondition, cond);
+//            BeanUtils.copyProperties(schemaCondition, cond);
             cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
 //            cond.setPropValue(value);// value为页面传过来的值 or 写死在condition中的值
             newConditions.add(cond);
