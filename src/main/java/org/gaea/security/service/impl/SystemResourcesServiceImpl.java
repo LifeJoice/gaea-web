@@ -62,7 +62,7 @@ public class SystemResourcesServiceImpl implements SystemResourcesService {
 
     @Override
     public void save(Resource inResource) throws ValidationFailedException {
-        if (inResource == null || StringUtils.isEmpty(inResource.getId())) {
+        if (inResource == null) {
             throw new ValidationFailedException("页面传来的资源对象为空，无法保存！");
         }
         if (StringUtils.isEmpty(inResource.getName())) {
