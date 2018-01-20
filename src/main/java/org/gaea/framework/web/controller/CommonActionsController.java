@@ -22,6 +22,7 @@ import org.gaea.framework.web.schema.view.service.ActionsService;
 import org.gaea.framework.web.service.ExcelService;
 import org.gaea.poi.ExcelReader;
 import org.gaea.poi.domain.Field;
+import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +103,7 @@ public class CommonActionsController {
      * @throws ValidationFailedException
      */
     @RequestMapping(value = "/doSimpleAction")
-    public void doSimpleAction(String schemaId, String buttonId, String actionName, @RequestBean("filters") List<QueryCondition> queryConditionList,
+    public void doSimpleAction(String schemaId, String buttonId, String actionName, @RequestBean(value = "filters", dataType = RequestBeanDataType.JSON) List<QueryCondition> queryConditionList,
                                HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, InvalidDataException {
         if (StringUtils.isEmpty(schemaId)) {
             throw new ValidationFailedException("获取不到Schema id。无法进行导出操作。");

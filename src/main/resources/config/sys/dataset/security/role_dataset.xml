@@ -45,8 +45,9 @@
     ON rauth.Role_Id = r.id]]>
         </data-sql>
         <where>
-            <condition-set id="selectable" append-sql=" r.id is null :ROLE_ID_NOT_EQ">
-                <or propName="r.id" op="ne" placeholder="ROLE_ID_NOT_EQ"></or>
+            <condition-set id="selectable"
+                           append-sql=" auth.id not in (SELECT distinct auth.id FROM gaea_sys_authorities auth LEFT JOIN gaea_sys_roles_authorities rauth ON auth.id = rauth.authority_id LEFT JOIN gaea_sys_roles r ON rauth.Role_Id = r.id WHERE :ROLE_ID_NOT_EQ)">
+                <none propName="r.id" op="eq" placeholder="ROLE_ID_NOT_EQ"></none>
             </condition-set>
             <condition-set id="selected">
                 <and propName="r.id" op="eq"></and>

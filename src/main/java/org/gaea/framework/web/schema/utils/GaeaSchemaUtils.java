@@ -191,6 +191,10 @@ public class GaeaSchemaUtils {
             // 如果有按钮组，递归
             if (subButtonList != null) {
                 button = getButton(subButtonList, buttonId, method);
+                // 如果找到就立马返回。
+                if (button != null) {
+                    return button;
+                }
             } else {
                 // 如果button id相同，且里面的action method相同
                 if (buttonId.equalsIgnoreCase(String.valueOf(buttonMap.get("id"))) && SchemaActionDefinition.METHOD_EXCEL_EXPORT_BY_TEMPLATE.equalsIgnoreCase(method)) {

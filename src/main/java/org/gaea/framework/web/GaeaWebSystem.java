@@ -1,6 +1,7 @@
 package org.gaea.framework.web;
 
 import org.gaea.exception.SysInitException;
+import org.gaea.util.SpringContextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -19,31 +20,31 @@ import java.util.Map;
  * Created by iverson on 2016/11/10.
  */
 @Component
-public class GaeaWebSystem implements ApplicationContextAware {
+public class GaeaWebSystem extends SpringContextUtils {
     private final Logger logger = LoggerFactory.getLogger(GaeaWebSystem.class);
 
-    private static ApplicationContext applicationContext;
-
-    @Override
-    public void setApplicationContext(ApplicationContext ac) throws BeansException {
-        logger.debug("注入通用容器（供静态获取的）context name:{} context id:{} has parent:{}", ac.getApplicationName(), ac.getId(), (ac.getParent() == null));
-        applicationContext = ac;
-    }
-
-    public static <T> T getBean(Class<T> aClass) throws SysInitException {
-        if (applicationContext == null) {
-            throw new SysInitException("系统初始化ApplicationContext失败。ApplicationContext=null。无法通过静态方法获取bean。");
-        }
-        return applicationContext.getBean(aClass);
-    }
-
-    public static <T> Map<String, T> getBeansOfType(Class<T> aClass) throws SysInitException {
-        if (applicationContext == null) {
-            throw new SysInitException("系统初始化ApplicationContext失败。ApplicationContext=null。无法通过静态方法获取bean。");
-        }
-        return applicationContext.getBeansOfType(aClass);
-    }
-
+    //    private static ApplicationContext applicationContext;
+//
+//    @Override
+//    public void setApplicationContext(ApplicationContext ac) throws BeansException {
+//        logger.debug("注入通用容器（供静态获取的）context name:{} context id:{} has parent:{}", ac.getApplicationName(), ac.getId(), (ac.getParent() == null));
+//        applicationContext = ac;
+//    }
+//
+//    public static <T> T getBean(Class<T> aClass) throws SysInitException {
+//        if (applicationContext == null) {
+//            throw new SysInitException("系统初始化ApplicationContext失败。ApplicationContext=null。无法通过静态方法获取bean。");
+//        }
+//        return applicationContext.getBean(aClass);
+//    }
+//
+//    public static <T> Map<String, T> getBeansOfType(Class<T> aClass) throws SysInitException {
+//        if (applicationContext == null) {
+//            throw new SysInitException("系统初始化ApplicationContext失败。ApplicationContext=null。无法通过静态方法获取bean。");
+//        }
+//        return applicationContext.getBeansOfType(aClass);
+//    }
+//
     public static HttpServletRequest getRequest() throws SysInitException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         if (request == null) {
