@@ -325,6 +325,7 @@ define([
              * @param {object} opts.data                要填充的数据
              */
             fillData: function (opts) {
+                var gaeaEvents = require("gaeajs-ui-events");
                 if (gaeaValid.isNull(opts) || gaeaValid.isNull(opts.target)) {
                     throw "缺少要填充数据的目标容器target定义！";
                 }
@@ -429,10 +430,15 @@ define([
                     } else if ($selectTreeFilter.length > 0) {
                         // 填充select-tree组件的值
                         var gaeaSelectTree = require("gaeajs-ui-selectTree");
-                        gaeaSelectTree.setValue($selectTreeFilter.first(), opts.data);
+                        // 写入值，并触发“fill_data_complete”事件。
+                        gaeaSelectTree.setValue($selectTreeFilter.first(), opts.data, gaeaEvents.DEFINE.UI.FILL_DATA_COMPLETE);
                     } else {
-                        // 普通输入框，直接用val方法设置
-                        $filterResult.val(opts.data);
+                        if ($filterResult.length > 0) {
+                            // 普通输入框，直接用val方法设置
+                            $filterResult.val(opts.data);
+                            // 写入值，并触发“fill_data_complete”事件。
+                            $filterResult.trigger(gaeaEvents.DEFINE.UI.FILL_DATA_COMPLETE);
+                        }
                     }
                 }
             },

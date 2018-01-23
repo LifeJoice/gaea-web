@@ -142,7 +142,7 @@
         <!--crud-dialog，是特别针对增删改的dialog。会涉及数据集的加载，编辑数据填充等许多特有功能。-->
         <!--id-field : 定义id字段的名称，即修改页面的id，提交到后台是什么名称，Controller才能用对应的变量去接。例如：id-field='userId',则controller有一个String userId就可以获得id，然后就可以去update数据库记录。-->
         <crud-dialog id="classStuNewDialog" html-id="classStuNewDialog" content-url="/gaea/demo/class-student-crud-form"
-                     submit-url="/gaea/demo/add-class-student"/>
+                     submit-url="/gaea/demo/add-class-student" load-data-url="/gaea/demo/class-student/load-data"/>
         <crud-dialog id="classCrudDialog" html-id="classCrudDialog" content-url="/gaea/demo/class-crud-form"
                      submit-url="/gaea/demo/add-class"/>
         <crud-dialog id="classViewDialog" html-id="classViewDialog" id-field="id"

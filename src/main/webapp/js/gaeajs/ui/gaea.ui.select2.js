@@ -8,12 +8,12 @@
 define([
         "jquery", "underscore", 'underscore-string',
         'gaeajs-common-utils-validate', "gaeajs-common-utils-string", 'gaeajs-ui-definition', "gaeajs-ui-notify",
-        "gaeajs-data", "gaeajs-common-utils",
+        "gaeajs-data", "gaeajs-common-utils", "gaeajs-ui-events",
         "jquery-select2"
     ],
     function ($, _, _s,
               gaeaValid, gaeaString, GAEA_UI_DEFINE, gaeaNotify,
-              gaeaData, gaeaCommonUtils) {
+              gaeaData, gaeaCommonUtils, gaeaEvents) {
 
         // 默认的opts参数值的统一定义
         var defaultOpts = {
@@ -114,6 +114,8 @@ define([
                 }
 
                 $select2.select2(select2Opts);
+                // 绑定load data完成后的事件触发
+                events.bindOnFillDataComplete($select2);
             },
             /**
              * 这个是init前的准备，包括生成html和查询数据集（如果有）并构造数据。
@@ -226,6 +228,21 @@ define([
                 ) {
                     $select2.prepend('<option></option>');
                 }
+            }
+        };
+
+        var events = {
+            /**
+             * 绑定"fill_data_complete"事件.
+             * 对于select2组件而言，“fill_data_complete”事件等同于“change”事件。所以同步触发。
+             * @param $select2
+             */
+            bindOnFillDataComplete: function ($select2) {
+
+                // 对于select2组件而言，“fill_data_complete”事件等同于“change”事件。所以同步触发。
+                $select2.on(gaeaEvents.DEFINE.UI.FILL_DATA_COMPLETE, function () {
+                    $select2.trigger("change");
+                });
             }
         };
 

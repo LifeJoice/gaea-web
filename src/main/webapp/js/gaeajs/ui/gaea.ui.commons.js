@@ -112,7 +112,7 @@ define([
              */
             initGaeaUIAfterData: function (opts) {
                 // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
-                $("#" + opts.containerId).find("select").trigger("change");
+                //$("#" + opts.containerId).find("select").trigger("change");
             },
             /**
              * 负责所有数据的填充，包括Gaea框架的UI组件的数据填充。
@@ -633,12 +633,21 @@ define([
                         target: this
                     };
                     // 把初始化方法推到同步数组，不直接初始化
-                    defferedFunctions.push(gaeaSelectTree.init(selectTreeOpts));
+                    defferedFunctions.push(function () {
+                        return gaeaSelectTree.init(selectTreeOpts);
+                    });
                 });
-                // 遍历所有selectTree组件后并发初始化，一起完成后再resolve对象
-                $.when.apply($, defferedFunctions).done(function () {
+
+                // 对同个页面多个数据集并发ajax请求，加载数据
+                // 利用functionsExecutor进行并发的方法调用
+                $.when(gaeaUtils.defer.functionsExecutor(defferedFunctions)).done(function () {
+                    var resolveContext = this;
                     dfd.resolve();
                 });
+                //// 遍历所有selectTree组件后并发初始化，一起完成后再resolve对象
+                //$.when.apply($, defferedFunctions).done(function () {
+                //    dfd.resolve();
+                //});
                 return dfd.promise();
             }
         };

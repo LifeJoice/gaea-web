@@ -185,8 +185,9 @@ define([
              * 给select tree组件设定值
              * @param {jqObject} $selectTree
              * @param {array} valArray          不是数组也行。自动转为数组。
+             * @param {string} [completeTriggerEvent]     完成的时候触发的事件名。如果没有，默认触发change
              */
-            setValue: function ($selectTree, valArray) {
+            setValue: function ($selectTree, valArray, completeTriggerEvent) {
                 if (gaeaValid.isNull($selectTree)) {
                     return;
                 }
@@ -195,7 +196,8 @@ define([
                 }
                 $.each(valArray, function (i, val) {
                     var valObj = _private.getByValue($selectTree, val);
-                    _private.addSelect($selectTree, valObj.text, val);
+                    // 添加选中项
+                    _private.addSelect($selectTree, valObj.text, val, completeTriggerEvent);
                 });
             }
         };
@@ -865,8 +867,9 @@ define([
          * @param $selectTree
          * @param text
          * @param value
+         * @param {string} [completeTriggerEvent]     完成的时候触发的事件名。如果没有，默认触发change
          */
-        _private.addSelect = function ($selectTree, text, value) {
+        _private.addSelect = function ($selectTree, text, value, completeTriggerEvent) {
             var $selected = $selectTree.find(".selected");
             var gaeaOptions = $selectTree.data("gaeaOptions");
             var $selectElement = $selectTree.find(".tree-input select");
@@ -894,7 +897,11 @@ define([
                 TEXT: text
             }));
             // 触发改变事件
-            $selectElement.trigger("change");
+            if (gaeaValid.isNotNull(completeTriggerEvent)) {
+                $selectElement.trigger(completeTriggerEvent);
+            } else {
+                $selectElement.trigger("change");
+            }
         };
         /**
          * 判断一个li是否有子项。

@@ -118,9 +118,9 @@ define([
 
                                 //gaeaData.fieldData.init(options.id, options.data);
                                 // 填充完数据后, 某些组件得触发事件才生效（例如select2需要触发change...）
-                                gaeaUI.initGaeaUIAfterData({
-                                    containerId: options.id
-                                });
+                                //gaeaUI.initGaeaUIAfterData({
+                                //    containerId: options.id
+                                //});
                             }
                         });
                     });

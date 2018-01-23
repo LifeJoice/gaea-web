@@ -63,7 +63,8 @@
             <div class="field-block">
                 <span class="fieldname">下拉树组件</span>
             <span class="fieldvalue">
-                <div id="productCategoryCt" data-gaea-ui-select-tree="dataSetId:'DS_DEMO_PRODUCT_CATEGORY'"
+                <div id="productCategoryCt"
+                     data-gaea-ui-select-tree="dataSetId:'DS_DEMO_PRODUCT_CATEGORY', onFillDataComplete: { trigger: {target:'#tab2-title' , event:'reload_data' }}"
                      data-gaea-ui-name="productCategory"></div>
             </span>
             </div>

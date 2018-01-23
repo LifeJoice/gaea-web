@@ -115,7 +115,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     SELECT: "gaeaUI_event_multiselect_select" // 点选中了某项
                 },
                 INIT_COMPLETE: "gaeaUI_event_init_complete", // 针对UI任意组件。初始化完成后（包括UI、数据等等一切）触发。
-                RELOAD_DATA: "reload_data"
+                RELOAD_DATA: "reload_data",
+                FILL_DATA_COMPLETE: "fill_data_complete" // 这个是系统帮助填充数据完成。例如对于select，数据改变都是change，但有了这个就区分成两种了。
             },
             /**
              * action操作。
@@ -298,6 +299,11 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 opts.gaeaEventName = "onChange"; // 这个必须和html元素上的data-gaea-ui-xx的事件名对上。否则opts里面没有对应的属性值。
                 _private.bindOnChange(opts);
             }
+            // "fill_data_complete"事件可以叠加其他事件。
+            if (gaeaValid.isNotNull(opts["onFillDataComplete"])) {
+                opts.gaeaEventName = "onFillDataComplete"; // 这个必须和html元素上的data-gaea-ui-xx的事件名对上。否则opts里面没有对应的属性值。
+                _private.bindOnFillDataComplete(opts);
+            }
 
             // 注册事件。这个一般是gaea框架特定业务事件。
             if (gaeaValid.isNotNull(opts["registerEvents"])) {
@@ -340,11 +346,30 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * 例如针对：data-gaea-ui-select="onChange: { trigger: {target:'#tab2-title' , event:'reload_data' }}"
              * @param {object} opts
              * @param {object} opts.target              绑定事件的对象
-             * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。
+             * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。不要把这个和js的事件名搞混了。
              */
             bindOnChange: function (opts) {
                 var $target = $("#" + opts.id);
                 events.registerListener("change", opts.target, function (event, data) {
+                    //opts.data = $target.val();
+                    // opts.data可能为空。反过来赋值。
+                    opts.data = _.defaults({
+                        value: $target.val()
+                    }, opts.data);
+                    // 通用处理
+                    _private.doGaeaEvent(opts);
+                });
+            },
+            /**
+             * 绑定gaea event通用处理onFillDataComplete的处理。
+             * 针对：data-gaea-ui-select="onFillDataComplete: { trigger: {target:'#tab2-title' , event:'reload_data' }}"
+             * @param {object} opts
+             * @param {object} opts.target              绑定事件的对象
+             * @param {object} opts.gaeaEventName       gaea自定义的一些用于html的（事件）属性名。
+             */
+            bindOnFillDataComplete: function (opts) {
+                var $target = $("#" + opts.id);
+                events.registerListener(events.DEFINE.UI.FILL_DATA_COMPLETE, opts.target, function (event, data) {
                     //opts.data = $target.val();
                     // opts.data可能为空。反过来赋值。
                     opts.data = _.defaults({

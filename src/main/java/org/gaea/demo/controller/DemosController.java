@@ -136,6 +136,17 @@ public class DemosController {
     }
 
     // 文件上传完后的数据刷新
+    @RequestMapping(value = "/class-student/load-data")
+    @ResponseBody
+    public String classStudentLoadData() throws IOException {
+        Map result = new HashMap();
+        result.put("productCategory", "下装");
+        result.put("classRoles", "4");
+        result.put("classEntity.currentYear", "5");
+        return GaeaJacksonUtils.parse(result);
+    }
+
+    // 文件上传完后的数据刷新
     @RequestMapping(value = "/class-student-crud-form/tab2/load-data", produces = "plain/text; charset=UTF-8")
     @ResponseBody
     public String addClassStudentFormTab2LoadData() throws IOException {

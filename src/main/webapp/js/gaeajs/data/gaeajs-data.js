@@ -1313,6 +1313,8 @@ define([
          *              gaeaData ajax返回的data放在这个属性中
          */
         gaeaData.getData = function (options) {
+            var dfd = $.Deferred();// JQuery同步对象
+
             var result = null;
             var isAsync = false;
             // default -> /sys/query/byCondition
@@ -1324,7 +1326,7 @@ define([
                 isAsync = options.isAsync;
             }
             // 数据加载要求同步
-            return gaeaAjax.ajax({
+            gaeaAjax.ajax({
                 url: url,
                 async: isAsync,
                 data: options.submitData,
@@ -1347,6 +1349,8 @@ define([
                     }
 
                     jqXHR.gaeaData = result;
+                    // 告诉同步对象，已完成
+                    dfd.resolve();
                 },
                 fail: function (data) {
                     gaeaUtils.processResponse(data, {
@@ -1355,9 +1359,12 @@ define([
                         },
                         onlyFail: true // 只显示错误的。成功的不显示。
                     });
+                    // 告诉同步对象，失败
+                    dfd.reject();
                 }
             });
             //return result;
+            return dfd.promise();
         };
         /**
          * 和绑定相关的通用操作
