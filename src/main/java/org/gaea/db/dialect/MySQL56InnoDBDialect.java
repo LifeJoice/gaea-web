@@ -1,6 +1,7 @@
 package org.gaea.db.dialect;
 
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.db.QueryCondition;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.db.service.GaeaDataBaseCommonService;
 import org.gaea.exception.InvalidDataException;
@@ -43,5 +44,10 @@ public class MySQL56InnoDBDialect implements GaeaDataBaseCommonService{
             .ORDER_BY("id asc limit :PAGE_SIZE")
         .toString();
         return newSql;
+    }
+
+    @Override
+    public String parseDateTimeCondition(QueryCondition condition) {
+        return null;
     }
 }

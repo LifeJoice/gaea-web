@@ -1,5 +1,6 @@
 package org.gaea.db;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.gaea.config.SystemProperties;
 import org.gaea.db.dialect.MySQL56InnoDBDialect;
 import org.gaea.db.dialect.Oracle10gDialect;
@@ -51,5 +52,23 @@ public class GaeaDataBase {
             return sqlServer2008Dialect.getPageSql(sql, primaryTable, startPos, pageSize);
         }
         return null;
+    }
+
+    /**
+     * 日期类的字段的查询语句拼凑。
+     *
+     * @param condition
+     * @return
+     */
+    public String parseDateTimeCondition(QueryCondition condition) {
+        String dataBaseName = SystemProperties.get(WebCommonDefinition.PROP_KEY_SYSTEM_DATABASE);
+        if (DATABASE_NAME_ORACLE.equalsIgnoreCase(dataBaseName)) {
+            return oracle10gDialect.parseDateTimeCondition(condition);
+        } else if (DATABASE_NAME_MYSQL.equalsIgnoreCase(dataBaseName)) {
+            throw new NotImplementedException("未实现！");
+        } else if (DATABASE_NAME_SQL_SERVER.equalsIgnoreCase(dataBaseName)) {
+            throw new NotImplementedException("未实现！");
+        }
+        return "";
     }
 }

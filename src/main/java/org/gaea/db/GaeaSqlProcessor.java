@@ -79,6 +79,7 @@ public class GaeaSqlProcessor {
     /**
      * 根据SQL，把conditions主动组装条件加到SQL上，然后查询出结果。
      * <p>这个是没分页的<p/>
+     *
      * @param sql
      * @param conditionSet      可以为空。
      * @param queryConditionDTO 可以为空。查询条件对象，包含若干where ... and ... and ...
@@ -385,18 +386,24 @@ public class GaeaSqlProcessor {
      */
     private String parseCondition(QueryCondition cond) throws ValidationFailedException {
         StringBuilder result = new StringBuilder();
-        /**
-         * if 关系符是 is null / is not null这类查询
-         *      则不需要">=<"之类的
-         *      直接用操作符。例如：
-         *      username is not null
-         * else
-         *      username = :USER_NAME
-         */
-        if (QueryCondition.FIELD_OP_NULL.equalsIgnoreCase(cond.getOp()) || QueryCondition.FIELD_OP_NOT_NULL.equalsIgnoreCase(cond.getOp())) {
-            result.append(MessageFormat.format("{0} {1}", cond.getPropName().toUpperCase(), parseFieldOp(cond)));
+        if (SchemaColumn.DATA_TYPE_DATE.equalsIgnoreCase(cond.getDataType()) ||
+                SchemaColumn.DATA_TYPE_DATETIME.equalsIgnoreCase(cond.getDataType())) {
+            // 日期类的条件转换
+            result.append(gaeaDataBase.parseDateTimeCondition(cond));
         } else {
-            result.append(MessageFormat.format("{0} {1} :{2}", cond.getPropName().toUpperCase(), parseFieldOp(cond), cond.getPropName().toUpperCase()));
+            /**
+             * if 关系符是 is null / is not null这类查询
+             *      则不需要">=<"之类的
+             *      直接用操作符。例如：
+             *      username is not null
+             * else
+             *      username = :USER_NAME
+             */
+            if (QueryCondition.FIELD_OP_NULL.equalsIgnoreCase(cond.getOp()) || QueryCondition.FIELD_OP_NOT_NULL.equalsIgnoreCase(cond.getOp())) {
+                result.append(MessageFormat.format("{0} {1}", cond.getPropName().toUpperCase(), parseFieldOp(cond)));
+            } else {
+                result.append(MessageFormat.format("{0} {1} :{2}", cond.getPropName().toUpperCase(), parseFieldOp(cond), cond.getPropName().toUpperCase()));
+            }
         }
         return result.toString();
     }
@@ -437,7 +444,9 @@ public class GaeaSqlProcessor {
             }
 //            QueryCondition cond = new QueryCondition();
 //            BeanUtils.copyProperties(schemaCondition, cond);
-            cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
+            if (StringUtils.isEmpty(cond.getDataType())) {
+                cond.setDataType(SchemaColumn.DATA_TYPE_STRING);// 暂时默认
+            }
 //            cond.setPropValue(value);// value为页面传过来的值 or 写死在condition中的值
             newConditions.add(cond);
         }
@@ -579,6 +588,11 @@ public class GaeaSqlProcessor {
                 SELECT("count(*)")
                 .FROM("(" + sql + ") results")
                 .toString();
+        // debug
+        if (logger.isDebugEnabled()) {
+            logger.debug("Count SQL:" + countSQL);
+            logger.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
+        }
         // 查询记录数
         int total = namedParameterJdbcTemplate.queryForObject(countSQL, params, Integer.class);
 
@@ -602,10 +616,6 @@ public class GaeaSqlProcessor {
             content = namedParameterJdbcTemplate.queryForList(sql, params);
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Count SQL:" + countSQL);
-            logger.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
-        }
         pageResult.setContent(content);
         pageResult.setTotalElements(total);
         pageResult.setPage(page.getPage());

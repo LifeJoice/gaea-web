@@ -1,5 +1,6 @@
 package org.gaea.db.dialect;
 
+import org.gaea.db.QueryCondition;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.db.service.GaeaDataBaseCommonService;
 import org.slf4j.Logger;
@@ -33,5 +34,10 @@ public class SQLServer2008Dialect implements GaeaDataBaseCommonService{
             WHERE("row_num_ >:START_ROWNUM");
         }}.toString();
         return pageSql;
+    }
+
+    @Override
+    public String parseDateTimeCondition(QueryCondition condition) {
+        return null;
     }
 }
