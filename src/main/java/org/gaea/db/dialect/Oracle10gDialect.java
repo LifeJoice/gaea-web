@@ -70,7 +70,14 @@ public class Oracle10gDialect implements GaeaDataBaseCommonService {
 
     /**
      * 转换日期类的条件的SQL。因为日期类的，不能简单的用 xxx>xxx这样。像Oracle还需要结合to_date函数。
-     *
+     * <ul>
+     *     <li>
+     *         对于传入的op = eq，即条件为“等于某天”，则转换的条件为：>= 某天 00:00 and <= 某天 23:59
+     *     </li>
+     *     <li>
+     *         如果传入的op关系符，是大于、小于之类的，则认为可能是区间查询的一部分，只会生成一个条件。> 某天 00:00
+     *     </li>
+     * </ul>
      * @param condition
      * @return
      */
@@ -95,7 +102,17 @@ public class Oracle10gDialect implements GaeaDataBaseCommonService {
             // 拼凑SQL
             String dateMoreThan = MessageFormat.format("{0} >= to_date({1},{2})", condition.getPropName().toUpperCase(), "'" + beginDT + "'", "'yyyy-mm-dd hh24:mi:ss'");
             String dateLessThan = MessageFormat.format("{0} <= to_date({1},{2})", condition.getPropName().toUpperCase(), "'" + endDT + "'", "'yyyy-mm-dd hh24:mi:ss'");
-            whereCase = dateMoreThan + " AND " + dateLessThan;
+
+            if (QueryCondition.FIELD_OP_GE.equalsIgnoreCase(condition.getOp()) || QueryCondition.FIELD_OP_GT.equalsIgnoreCase(condition.getOp())) {
+                // 大于 | 大于等于
+                whereCase = dateMoreThan;
+            } else if (QueryCondition.FIELD_OP_LT.equalsIgnoreCase(condition.getOp()) || QueryCondition.FIELD_OP_LE.equalsIgnoreCase(condition.getOp())) {
+                // 小于 | 小于等于
+                whereCase = dateLessThan;
+            } else if (QueryCondition.FIELD_OP_EQ.equalsIgnoreCase(condition.getOp())) {
+                // 等于
+                whereCase = dateMoreThan + " AND " + dateLessThan;
+            }
         } catch (ParseException e) {
             logger.error("转换Oracle的日期类的查询条件失败！condition value: " + condition.getPropValue(), e);
         }

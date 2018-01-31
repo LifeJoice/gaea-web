@@ -13,6 +13,11 @@ define([
     function ($, _, _s, gaeaValid, gaeaString,
               gaeaEvents, gaeaUtils, SYS_URL, gaeaAjax, gaeaNotify,
               GAEA_UI_DEFINE, gaeaInput, gaeaPlugins, gaeaUI) {
+
+        var TEMPLATE = {
+            DT_END_INPUT_NAME: "<%= INPUT_ID %>_2" // 日期类的第二个日期输入框id模板
+        };
+
         /**
          * @type {object} QueryCondition
          * @property {string} QueryCondition.propName       属性名
@@ -223,21 +228,22 @@ define([
                      * 例如：
                      * 日期类的字段，需要初始化日期控件。
                      */
-                    if (gaeaValid.isNotNull(column.dataType)) {
-                        if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
-                            // 初始化日期控件
-                            gaeaPlugins.datePicker.init({
-                                target: "#" + inputId
-                            });
-                        } else if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_TIME)) {
-                            // TODO
-                        } else if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME)) {
-                            // 初始化日期时间控件
-                            gaeaPlugins.datetimePicker.init({
-                                target: "#" + inputId
-                            });
-                        }
-                    }
+                    query.view.initDateTimePicker(column.dataType, inputId);
+                    //if (gaeaValid.isNotNull(column.dataType)) {
+                    //    if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
+                    //        // 初始化日期控件
+                    //        gaeaPlugins.datePicker.init({
+                    //            target: "#" + inputId
+                    //        });
+                    //    } else if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_TIME)) {
+                    //        // TODO
+                    //    } else if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME)) {
+                    //        // 初始化日期时间控件
+                    //        gaeaPlugins.datetimePicker.init({
+                    //            target: "#" + inputId
+                    //        });
+                    //    }
+                    //}
 
                     // 初始化各种插件
                     if (gaeaValid.isNotNull(column.queryCondition)) {
@@ -253,6 +259,30 @@ define([
                             // 初始化各种组件（其中就包括select tree）
                             gaeaUI.initGaeaUI("#" + opts.id + " #" + columnHtmId);
                         }
+                    }
+                }
+            },
+            /**
+             * 处理快捷查询区的日期类的组件。
+             * @param dataType
+             * @param inputId
+             */
+            initDateTimePicker: function (dataType, inputId) {
+                //var $grid = $("#" + opts.id);
+                //var gridOptions = $grid.data().options;
+                if (gaeaValid.isNotNull(dataType)) {
+                    if (gaeaString.equalsIgnoreCase(dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
+                        // 初始化日期控件
+                        gaeaPlugins.datePicker.init({
+                            target: "#" + inputId
+                        });
+                    } else if (gaeaString.equalsIgnoreCase(dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_TIME)) {
+                        // TODO
+                    } else if (gaeaString.equalsIgnoreCase(dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME)) {
+                        // 初始化日期时间控件
+                        gaeaPlugins.datetimePicker.init({
+                            target: "#" + inputId
+                        });
                     }
                 }
             }
@@ -392,6 +422,8 @@ define([
                 //});
                 // 【3】 点击列头，展示查询区。但忽略“选择全部”按钮区。
                 query.event.bindShowSimpleQuery(opts);
+                // 重置操作
+                query.event.bindResetQuery(opts);
                 // 设定查询区的比较符按钮点击操作，和相关的触发事件。
                 query.event.setQueryCompareButtonTrigger(opts);
                 //_query.view.event.setQueryCompareButtonTrigger(opts);
@@ -453,6 +485,33 @@ define([
                 });
             },
             /**
+             * 切换日期查询，按天查询，还是按区间查询。
+             * 绑定日期类的查询框，前面的“+”的功能。
+             * @param opts
+             */
+            bindDateTimePeriodSwitch: function (opts) {
+                var inputId = opts.inputId;
+                var fieldId = opts.fieldId;
+                var $target = $(opts.target);
+                var $queryCondBtn = $target.children(".gaea-query-one-button").children("i");
+                $queryCondBtn.click(function () {
+                    var $this = $(this);
+                    // 查询区高度加倍
+                    $target.toggleClass("row-2x");
+                    if ($this.is(".fa-plus")) {
+                        // 展开
+                        $this.removeClass("fa-plus").addClass("fa-minus");
+                        // 初始化两个日期输入框
+                        query.actions.dt.beginEndDateTimeInit(opts);
+                    } else {
+                        // 缩起
+                        $this.removeClass("fa-minus").addClass("fa-plus");
+                        // 初始化一个日期输入框
+                        query.actions.dt.oneDateTimeInit(opts);
+                    }
+                });
+            },
+            /**
              * 注册快捷查询区的比较操作符按钮的监听。
              * 监听在整个头部快捷查询区。因为考虑，一旦改变，应该所有的查询条件和值都得遍历、汇总，而不只是当前点击这一个。
              * @param {object} opts
@@ -479,6 +538,34 @@ define([
                         query.view.hide(opts);
                     });
                 }
+            },
+            /**
+             * 重置查询
+             * @param {object} opts
+             * @param {string} opts.id                      grid容器id
+             */
+            bindResetQuery: function (opts) {
+                var $gridCt = $("#" + opts.id);
+
+                gaeaEvents.registerListener("click", $gridCt.find("#query-reset"), function (event, data) {
+                    var gridOptions = $gridCt.data("options");
+                    var allData = gridOptions.data;
+                    // 清空查询条件
+                    query.view.resetUI(opts);
+                    // 收起查询区
+                    query.view.hide(opts);
+                    // 触发刷新
+                    if ($gridCt.parent().is("[data-gaea-ui-crud-grid]")) {
+                        // 如果是可编辑表格
+                        $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, {
+                            data: allData,
+                            isNewData: false
+                        });
+                    } else {
+                        // 普通表格，重新加载即可
+                        $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.RELOAD);
+                    }
+                });
             }
         };
 
@@ -498,7 +585,7 @@ define([
                     // 绑定快捷查询区“确定”按钮的操作
                     crudQuery.event.bindSubmitQuery(opts);
                     // 重置操作
-                    crudQuery.event.bindResetQuery(opts);
+                    query.event.bindResetQuery(opts);
                     // 点击列头，展示查询区。但忽略“选择全部”按钮区。
                     query.event.bindShowSimpleQuery(opts);
                     // 设定查询区的比较符按钮点击操作，和相关的触发事件。
@@ -530,28 +617,112 @@ define([
                         //    queryConditions: queryConditions
                         //});
                     });
+                }
+            }
+        };
+
+        /**
+         * 查询的相关按钮，还有按钮的相关逻辑，等等的处理。
+         */
+        query.actions = {
+            // 日期类的
+            dt: {
+                /**
+                 * 初始化快捷查询区的某个日期区域
+                 * @param {object} opts
+                 * @param {jqSelector} opts.target      这个一般对应.head-query-column块。
+                 */
+                init: function (opts) {
+                    // 先创建单个日期框的查询
+                    query.actions.dt.oneDateTimeInit(opts);
+                    // 绑定前面的加号点击时的切换
+                    query.event.bindDateTimePeriodSwitch(opts);
                 },
                 /**
-                 * 重置查询
-                 * @param {object} opts
-                 * @param {string} opts.id                      grid容器id
+                 * 单个日期组件的生成。是整个查询区的。不只是日期那个按钮。
+                 * @param opts
                  */
-                bindResetQuery: function (opts) {
-                    var $gridCt = $("#" + opts.id);
-
-                    gaeaEvents.registerListener("click", $gridCt.find("#query-reset"), function (event, data) {
-                        var gridOptions = $gridCt.data("options");
-                        var allData = gridOptions.data;
-                        // 清空查询条件
-                        query.view.resetUI(opts);
-                        // 收起查询区
-                        query.view.hide(opts);
-                        // 触发刷新
-                        $gridCt.trigger(gaeaEvents.DEFINE.UI.GRID.REFRESH_DATA, {
-                            data: allData,
-                            isNewData: false
-                        });
+                oneDateTimeInit: function (opts) {
+                    var inputId = opts.inputId;
+                    var inputId2 = _.template(TEMPLATE.DT_END_INPUT_NAME)({
+                        INPUT_ID: inputId
                     });
+                    var fieldId = opts.fieldId;
+                    var $target = $(opts.target);
+                    var $gaeaInput = $target.children(".gaea-query-input-ct");
+                    //var $gaeaInput = $(opts.jqSelector);
+                    var DATE_TIME_FIELD =
+                        '<span class="query-date-time gaea-query-field">' +
+                        '<span class="gaea-query-buttons"><i data-gaea-data="value:\'eq\'"></i></span>' + // 这个是给query组件获取查询条件用的。不需要显示。
+                        '<input id="<%= INPUT_ID %>" data-field-id="<%= FIELD_ID %>">' +
+                        '</span>';
+                    if (gaeaValid.isNull($gaeaInput)) {
+                        return;
+                    }
+                    // 检查，已经创建需要销毁
+                    if ($("#" + inputId).length > 0) {
+                        gaeaPlugins.datePicker.destroy("#" + inputId);
+                    }
+                    if ($("#" + inputId2).length > 0) {
+                        gaeaPlugins.datePicker.destroy("#" + inputId2);
+                    }
+                    /**
+                     * 初始化查询的按钮（大于、等于、小于等），和对应的input框
+                     */
+                    var queryFieldTemplate = _.template(DATE_TIME_FIELD);
+                    $gaeaInput.html(queryFieldTemplate({
+                        INPUT_ID: inputId,
+                        FIELD_ID: fieldId
+                    }));
+                    // 初始化日期组件
+                    query.view.initDateTimePicker(opts.dataType, inputId);
+                },
+                /**
+                 * 初始化日期区间查询的日期查询区。是整个查询区的。不只是日期那个按钮。
+                 * @param {object} opts
+                 * @param {string} opts.jqSelector               容器选择器1
+                 * @param {string} opts.containerId 容器div id
+                 * @param {string} opts.inputId 组件中输入框的id
+                 * @param {string} opts.fieldId input的data-field-id
+                 * @param {string} opts.dataType                 服务端传来的数据类型。例如：dateTime
+                 */
+                beginEndDateTimeInit: function (opts) {
+                    var inputId = opts.inputId;
+                    var inputId2 = _.template(TEMPLATE.DT_END_INPUT_NAME)({
+                        INPUT_ID: inputId
+                    });
+                    var fieldId = opts.fieldId;
+                    var $target = $(opts.target);
+                    var $gaeaInput = $target.children(".gaea-query-input-ct");
+                    var DATE_TIME_FIELD =
+                        '<span class="query-date-time begin gaea-query-field">' +
+                        '<span class="gaea-query-buttons"><i data-gaea-data="value:\'ge\'"></i></span>' + // 这个是给query组件获取查询条件用的。不需要显示。
+                        '<input id="<%= INPUT_ID %>" data-field-id="<%= FIELD_ID %>">' +
+                        '</span>' +
+                        '<span class="query-date-time end gaea-query-field">' +
+                        '<span class="gaea-query-buttons"><i data-gaea-data="value:\'le\'"></i></span>' + // 这个是给query组件获取查询条件用的。不需要显示。
+                        '<input id="<%= INPUT_ID_2 %>" data-field-id="<%= FIELD_ID %>">' +
+                        '</span>';
+                    if (gaeaValid.isNull($gaeaInput)) {
+                        return;
+                    }
+                    // 检查，已经创建需要销毁
+                    if ($("#" + inputId).length > 0) {
+                        gaeaPlugins.datePicker.destroy("#" + inputId);
+                    }
+
+                    /**
+                     * 初始化查询的按钮（大于、等于、小于等），和对应的input框
+                     */
+                    var queryFieldTemplate = _.template(DATE_TIME_FIELD);
+                    $gaeaInput.html(queryFieldTemplate({
+                        INPUT_ID: inputId,
+                        INPUT_ID_2: inputId2,
+                        FIELD_ID: fieldId
+                    }));
+                    // input框的日期组件初始化
+                    query.view.initDateTimePicker(opts.dataType, inputId);
+                    query.view.initDateTimePicker(opts.dataType, inputId2);
                 }
             }
         };
@@ -641,6 +812,7 @@ define([
             view: {
                 init: query.view.init
                 //resetUI:query.view.resetUI
-            }
+            },
+            dateTimeFieldInit: query.actions.dt.init
         };
     });

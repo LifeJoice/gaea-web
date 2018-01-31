@@ -5,7 +5,7 @@
  */
 
 /* 单个查询的按钮区。下拉的那个。 */
-.gaea-query-buttons {
+.gaea-query-buttons, .gaea-query-one-button {
     width: 25px;
     height: 25px;
     overflow: hidden;
@@ -13,6 +13,11 @@
     position: relative;
     /* 这个得覆盖下面那个命令区，否则会被遮挡 */
     z-index: 1;
+}
+
+/* 日期类的，区间查询会有两个比较符。但不需要显示出来。 */
+.query-date-time .gaea-query-buttons {
+    display: none;
 }
 
 .gaea-query-buttons:hover {
@@ -23,6 +28,12 @@
     border: 1px solid;
 }
 
+/* 只有一个按钮的比较操作区 */
+.gaea-query-one-button {
+    text-align: center;
+    cursor: pointer;
+}
+
 /* 里面的按钮 */
 .gaea-query-buttons i {
     float: left;
@@ -30,10 +41,47 @@
 }
 
 /* 单个查询的输入框区 */
-.gaea-query-input-div {
+.gaea-query-input-ct {
     /*float: none;*/
     /* width: 120px; */
     position: relative;
     height: 25px;
     margin-left: 25px;
+}
+
+/* 如果是日期类的，会有span进行多个条件的区分 */
+.gaea-query-input-ct span {
+    padding-bottom: 5px;
+    position: relative;
+}
+
+/* （日期类的）行高加倍 */
+.row-2x {
+    height: 70px;
+}
+
+/** ****************************************************
+ *                  查询区的日期类按钮
+ *  ****************************************************/
+
+/* 按钮后的“起”和“止”的处理 */
+.mars-tb-head-query .query-date-time.begin:after,
+.mars-tb-head-query .query-date-time.end:after {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    display: block;
+    top: 0;
+    right: 0;
+    font-size: 12px;
+    line-height: 26px;
+    color: gray;
+}
+
+.mars-tb-head-query .query-date-time.begin:after {
+    content: '起';
+}
+
+.mars-tb-head-query .query-date-time.end:after {
+    content: '止';
 }

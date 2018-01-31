@@ -105,7 +105,7 @@ define([
          */
         var TEMPLATE = {
             QUERY: {
-                DIV_FIELD: '<div id="<%= ID %>" class="gaea-query-field <%= CLASS %>">' +
+                DIV_FIELD: '<div id="<%= ID %>" class="<%= CLASS %>">' +
                 '</div>' // 查询字段块（包括下拉按钮）
             },
             GRID: {
@@ -155,6 +155,10 @@ define([
                     var inputId = "mars-hq-" + field.id;
                     // 拼凑各个字段的查询输入框
                     if (gaeaValid.isNotNull(column.hidden) && !column.hidden) {
+                        // 非日期类的，一般一个div是一个查询条件
+                        if (!gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
+                            defaultClass += " gaea-query-field"; // gaea-query-field决定了提取查询条件的单元容器
+                        }
 
                         /**
                          * 添加快捷查询区的列（容器）
@@ -180,10 +184,19 @@ define([
                             '<i class="gaea-icon" style="font-size: 12px;" data-gaea-data="value:\'na\'" >N/A</i>' + // style是临时的
                             '<i class="gaea-icon" style="font-size: 12px;" data-gaea-data="value:\'nna\'" >nNA</i>' + // style是临时的
                             '</div>' +
-                            '<div class="gaea-query-input-div"></div>' // 查询字段块（包括下拉按钮）
+                            '<div class="gaea-query-input-ct"></div>' // 查询字段块（包括下拉按钮）
                         );
+                        // 日期类的，不需要比较操作
+                        if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
+                            oneQuerySubCtTemplate = _.template(
+                                '<div class="gaea-query-one-button">' +
+                                '<i class="fa fa-plus"/>' +
+                                '</div>' +
+                                '<div class="gaea-query-input-ct"></div>' // 查询字段块（包括下拉按钮）
+                            );
+                        }
                         $oneQueryCt.append(oneQuerySubCtTemplate());
-                        var oneQueryInputCtSelector = "#" + opts.id + " #" + columnHtmId + " .gaea-query-input-div";
+                        var oneQueryInputCtSelector = "#" + opts.id + " #" + columnHtmId + " .gaea-query-input-ct";
                         //var $oneQueryInputCt = $oneQueryCt.children(".gaea-query-input-div");
 
                         if (gaeaValid.isNotNull(column.queryCondition)) {
@@ -210,6 +223,16 @@ define([
                                 gaeaSelectTree.preInit(selectTreeOpts);
                                 //});
                             }
+                        } else if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE) ||
+                                // 日期类的，可以切换区间查询or单个查询
+                            gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATETIME) ||
+                            gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_TIME)) {
+                            gridQuery.dateTimeFieldInit({
+                                target: $oneQueryCt,
+                                inputId: inputId,
+                                fieldId: field.id,
+                                dataType: column.dataType
+                            });
                         } else {
                             /**
                              * 初始化gaeaInput输入框（带按钮）

@@ -57,6 +57,17 @@ define([
                 //    defaultTime: '08:30',
                 //    step: 10
                 //});
+            },
+            /**
+             * 销毁日期控件。
+             * @param target
+             */
+            destroy: function (target) {
+                if (gaeaValid.isNull(target)) {
+                    throw "target为空，无法销毁dateTimePicker！";
+                }
+                var $datePicker = $(target);
+                $datePicker.datetimepicker("destroy");
             }
         };
         /**

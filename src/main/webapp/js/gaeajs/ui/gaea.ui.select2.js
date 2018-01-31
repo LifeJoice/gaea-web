@@ -36,7 +36,7 @@ define([
              * @param {string} opts.value                   当前的值
              * @param {object} opts.default                 默认的配置项，包括默认值等
              * preInitHtmlAndData 所需 ------------------------------------------------------------------------------------>>>>
-             * @param {string} opts.selectJqSelector        (jqSelector) container selector. 这个细化到某个grid的某个.gaea-query-input-div
+             * @param {string} opts.selectJqSelector        (jqSelector) container selector. 这个细化到某个grid的某个.gaea-query-input-ct
              * @param {string} opts.htmlId
              * @param {string} opts.htmlName
              * @param {string} opts.fieldId             input的data-field-id. 服务端查询需要。
@@ -121,7 +121,7 @@ define([
              * 这个是init前的准备，包括生成html和查询数据集（如果有）并构造数据。
              * 但不包含调用select2组件初始化。所以，本方法处理完后，可能只有一个普通的下拉框！
              * @param {object} opts
-             * @param {string} opts.jqSelector          container selector. 这个细化到某个grid的某个.gaea-query-input-div
+             * @param {string} opts.jqSelector          container selector. 这个细化到某个grid的某个.gaea-query-input-ct
              * @param {string} opts.htmlId
              * @param {string} opts.htmlName
              * @param {string} opts.fieldId             input的data-field-id. 服务端查询需要。
@@ -147,7 +147,7 @@ define([
                     dataSetId: opts.dataSetId,
                     condition: opts.condition,
                     success: function (data) {
-                        // 找到某个.gaea-query-input-div的select
+                        // 找到某个.gaea-query-input-ct的select
                         var $select = $(opts.jqSelector).children("#" + gaeaString.format.getValidName(opts.htmlId));
                         if (_.isArray(data)) {
                             $.each(data, function (i, iValue) {
@@ -169,7 +169,7 @@ define([
             /**
              *
              * @param {object} opts
-             * @param {string} opts.jqSelector                  container selector. 这个细化到某个grid的某个.gaea-query-input-div
+             * @param {string} opts.jqSelector                  container selector. 这个细化到某个grid的某个.gaea-query-input-ct
              * @param {string} opts.htmlId
              * @param {string} opts.htmlName
              * @param {string} opts.multiple                    如果可以多选，value=multiple. 否则为空。
