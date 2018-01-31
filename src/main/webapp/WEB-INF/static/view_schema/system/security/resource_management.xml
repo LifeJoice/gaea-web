@@ -135,7 +135,7 @@
             <column id="orderSeq" name="orderSeq" label="顺序号" db-column-name="ORDER_SEQ"
                     visible="true" sortable="false" html-width="120" data-type="String" />
             <column id="resourceUrl" name="resourceUrl" label="资源(URL)" db-column-name="RESOURCE_URL"
-                    visible="true" sortable="false" html-width="300" data-type="String"/>
+                    visible="true" sortable="false" html-width="450" data-type="String"/>
             <column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"
                     visible="true" sortable="false" html-width="300" data-type="String"/>
         </grid>
