@@ -37,15 +37,18 @@ public class GaeaFilterInvocationSecurityMetadataSource implements FilterInvocat
      * key: /login
      * value:
      */
-    private static ConcurrentHashMap<String, Collection<ConfigAttribute>> resourceMap = null;
+    private static ConcurrentHashMap<String, Collection<ConfigAttribute>> resourceMap = null; // AI.TODO 这个以后移到系统的缓存系统去
 
     public GaeaFilterInvocationSecurityMetadataSource() {
-//        loadResourceDefine();
+//        reloadResourceDefine();
     }
 
     /**
-     * 根据URL，找到相关的权限配置。
-     *
+     * 所有请求，都会进入这个方法（包括url、js等等）。
+     * 然后会截取url，根据URL，找到相关的权限配置（Gaea_sys_authority_resource）。
+     * <p>
+     *     如果返回为空，找不到请求url对应的权限配置，则不会进入权限校验（GaeaAccessDecisionManager）。即可以操作。
+     * </p>
      * @param object 是一个URL，被用户请求的url
      * @return
      * @throws IllegalArgumentException
@@ -54,7 +57,7 @@ public class GaeaFilterInvocationSecurityMetadataSource implements FilterInvocat
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
         try {
             if (resourceMap == null || resourceMap.isEmpty()) {
-                loadResourceDefine();
+                reloadResourceDefine();
             }
             FilterInvocation filterInvocation = (FilterInvocation) object;
             // object 是一个URL，被用户请求的url。
@@ -81,7 +84,9 @@ public class GaeaFilterInvocationSecurityMetadataSource implements FilterInvocat
         } catch (Exception e) {
             logger.error("根据URL，找到相关的权限配置失败！" + e.getMessage(), e);
         }
-
+        /**
+         * 这里返回为空，找不到请求url对应的权限配置，则不会进入权限校验（GaeaAccessDecisionManager）
+         */
         return null;
     }
 
@@ -96,11 +101,11 @@ public class GaeaFilterInvocationSecurityMetadataSource implements FilterInvocat
     }
 
     /**
-     * 初始化资源和对应的权限列表。
+     * 初始化资源和对应的权限列表。并缓存在一个内部的map中。
      *
      * @throws ValidationFailedException
      */
-    private void loadResourceDefine() throws ValidationFailedException {
+    public void reloadResourceDefine() throws ValidationFailedException {
 //        ApplicationContext context = new ClassPathXmlApplicationContext(
 //                "classpath:applicationContext.xml");
 //

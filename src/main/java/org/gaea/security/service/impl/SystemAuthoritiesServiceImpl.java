@@ -6,6 +6,7 @@ import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.security.domain.Authority;
 import org.gaea.security.domain.Resource;
+import org.gaea.security.extend.GaeaFilterInvocationSecurityMetadataSource;
 import org.gaea.security.repository.SystemAuthoritiesRepository;
 import org.gaea.security.service.SystemAuthoritiesService;
 import org.gaea.util.BeanUtils;
@@ -28,6 +29,8 @@ public class SystemAuthoritiesServiceImpl implements SystemAuthoritiesService {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
     private SystemAuthoritiesRepository authoritiesRepository;
+    @Autowired
+    private GaeaFilterInvocationSecurityMetadataSource gaeaFilterInvocationSecurityMetadataSource;
 
     /**
      * 查找权限表的所有的code。不带条件。
@@ -40,7 +43,6 @@ public class SystemAuthoritiesServiceImpl implements SystemAuthoritiesService {
 //        List<String> codeList = namedParameterJdbcTemplate.queryForList(sql, new MapSqlParameterSource(), String.class);
 //        return codeList;
 //    }
-
     @Override
     public List<Authority> findAllWithResource() {
         List<Authority> authorityList = authoritiesRepository.findAllWithResource();
@@ -71,17 +73,24 @@ public class SystemAuthoritiesServiceImpl implements SystemAuthoritiesService {
             throw new IllegalArgumentException("用户权限authority对象的id为空！无法执行更新操作！");
         }
         authority = authoritiesRepository.findOne(authority.getId());
+        List<Resource> resources = authority.getResources();
+        // 先清空所有关联资源
+        resources.clear();
+        // 再加入当前设定的资源
         if (CollectionUtils.isNotEmpty(resourceIds)) {
-            List<Resource> resources = authority.getResources();
-            resources.clear();
             for (String id : resourceIds) {
                 if (StringUtils.isNotEmpty(id)) {
                     Resource resource = new Resource(id);
                     resources.add(resource);
                 }
             }
-            update(authority);
         }
+        update(authority);
+        // 刷新Spring security缓存的权限资源关系
+        if (gaeaFilterInvocationSecurityMetadataSource == null) {
+            throw new ValidationFailedException("获取不到系统的权限控制框架对象，无法刷新缓存的资源权限缓存！");
+        }
+        gaeaFilterInvocationSecurityMetadataSource.reloadResourceDefine();
     }
 
     @Override
