@@ -1,5 +1,6 @@
 package org.gaea.framework.web.utils;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,8 @@ public class GaeaWebUtils {
         response.setContentType("application/vnd.ms-excel");
         // 这个可能有助于服务器和客户端直接分块传输
         response.setHeader("Content-Length", String.valueOf(file.length()));
+        // 下载Excel文件的文件名
+        response.setHeader("Content-Disposition", "attachment; filename=export_" + new DateTime().toString("yyyy-MM-dd_HH:mm:ss") + ".xls");
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
         try {
