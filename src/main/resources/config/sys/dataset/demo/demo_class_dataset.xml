@@ -7,7 +7,7 @@
     -->
     <dataset id="DEMO_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="1">
         <data-sql>
-            <![CDATA[SELECT c.* FROM demo_class c]]>
+            <![CDATA[SELECT c.* FROM demo_class c #{#where} order by id]]>
         </data-sql>
         <where>
             <condition-set id="byId">

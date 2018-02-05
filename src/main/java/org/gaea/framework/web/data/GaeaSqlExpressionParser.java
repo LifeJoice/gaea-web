@@ -99,4 +99,14 @@ public class GaeaSqlExpressionParser {
         }
         return false;
     }
+
+    public boolean hasExpression(String str, String key) {
+        if (StringUtils.isEmpty(str)) {
+            return false;
+        }
+        if (StringUtils.contains(str, parserContext.getExpressionPrefix()) && StringUtils.contains(str, parserContext.getExpressionSuffix())) {
+            return true;
+        }
+        return false;
+    }
 }

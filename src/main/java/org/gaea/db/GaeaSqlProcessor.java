@@ -209,7 +209,11 @@ public class GaeaSqlProcessor {
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
          */
-        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext);
+        Map contextMap = new HashMap();
+        if (gaeaSqlExpressionParser.hasExpression(sql, "where")) {
+            contextMap.put("where", "where id='1702141833eDtGJ'");
+        }
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, contextMap);
         // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
