@@ -118,6 +118,12 @@
     box-sizing: border-box; /* 宽度应该是总体宽度。包括padding和border。否则像input和select的宽度就会不一样。 */
 }
 
+/* form的字段是图片的 */
+.gaea-form .fieldvalue.img-cell img {
+    width: 100%;
+    height: 100%;
+}
+
 .gaea-form textarea {
     height: 60px;
 }
