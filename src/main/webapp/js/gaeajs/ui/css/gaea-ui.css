@@ -73,7 +73,8 @@
  *  ****************************************************
  */
 .ui-tabs .gaea-form input:not([type=radio]):not([type=checkbox]), .ui-tabs .gaea-form select, .ui-tabs .gaea-form label.error {
-    width: 165px; /* input和错误提示label的宽度一致.宽度应该是总体的宽度. */
+    /*width: 165px; !* input和错误提示label的宽度一致.宽度应该是总体的宽度. *!*/
+    min-width: 165px;
 }
 
 /* ******************************************************************** validate组件的样式 ******************************************************************** */
