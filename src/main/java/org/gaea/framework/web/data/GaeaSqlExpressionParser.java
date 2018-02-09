@@ -1,5 +1,6 @@
 package org.gaea.framework.web.data;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +97,29 @@ public class GaeaSqlExpressionParser {
         }
         if (StringUtils.contains(str, parserContext.getExpressionPrefix()) && StringUtils.contains(str, parserContext.getExpressionSuffix())) {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断字符里面，有没有某个特定key的存在。
+     *
+     * @param str
+     * @param key
+     * @return
+     */
+    public boolean hasExpression(String str, String key) {
+        if (StringUtils.isEmpty(str)) {
+            return false;
+        }
+        String[] spelContentArr = StringUtils.substringsBetween(str, parserContext.getExpressionPrefix(), parserContext.getExpressionSuffix());
+        if (ArrayUtils.isEmpty(spelContentArr)) {
+            return false;
+        }
+        for (String spelContent : spelContentArr) {
+            if (StringUtils.containsIgnoreCase(spelContent, key)) {
+                return true;
+            }
         }
         return false;
     }

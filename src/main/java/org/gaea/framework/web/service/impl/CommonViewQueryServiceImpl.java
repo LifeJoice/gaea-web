@@ -126,7 +126,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                 // 构建默认的SQL中表达式要用的上下文对象
                 GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
                 // 数据库查询
-                pageResult = gaeaSqlProcessor.query(sql, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
+                pageResult = gaeaSqlProcessor.query(gaeaDataSet, gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
             }
 
             List<Map<String, Object>> dataList = pageResult.getContent();
@@ -190,6 +190,8 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
     }
 
     /**
+     * 好像没用。注释掉 by Iverson 2018-2-7 11:11:13
+     *
      * 这个是结合权限过滤的查询。
      *
      * @param gaeaDataSet 数据集的定义。主要用sql，primaryTable等。
@@ -200,27 +202,27 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
      * @throws InvalidDataException
      * @throws SystemConfigException
      */
-    @Override
-    public PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException {
-        if (gaeaDataSet != null) {
-            UserJO loginUser = GaeaWebSecuritySystem.getLoginUser();
-//            if (authConditions == null) {
-//                authConditions = new ArrayList<QueryCondition>();
-//            }
-            // 数据集权限校验
-            ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
-            // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
-//            if (authorityConditionSet != null && CollectionUtils.isNotEmpty(authorityConditionSet.getConditions())) {
-//                // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
-//                List<Condition> originConditions = CollectionUtils.isEmpty(authConditions) ? new ArrayList<Condition>() : convertToConditions(authConditions);
-//                authorityConditionSet.getConditions().addAll(originConditions);
-//            }
-            // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
-            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
-            return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
-        }
-        return null;
-    }
+//    @Override
+//    public PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException {
+//        if (gaeaDataSet != null) {
+//            UserJO loginUser = GaeaWebSecuritySystem.getLoginUser();
+////            if (authConditions == null) {
+////                authConditions = new ArrayList<QueryCondition>();
+////            }
+//            // 数据集权限校验
+//            ConditionSet authorityConditionSet = getAuthorityConditions(gaeaDataSet, loginName);
+//            // 把数据权限条件和页面的filter结合。并且权限条件是在filter前面
+////            if (authorityConditionSet != null && CollectionUtils.isNotEmpty(authorityConditionSet.getConditions())) {
+////                // 把查询条件（可能是页面传来的、或者数据集配置的），放在权限过滤条件后面
+////                List<Condition> originConditions = CollectionUtils.isEmpty(authConditions) ? new ArrayList<Condition>() : convertToConditions(authConditions);
+////                authorityConditionSet.getConditions().addAll(originConditions);
+////            }
+//            // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
+//            GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
+//            return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), authorityConditionSet, page, defaultDsContext, null);
+//        }
+//        return null;
+//    }
 
     @Override
     public PageResult query(GaeaDataSet gaeaDataSet, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException {
@@ -245,7 +247,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
 
             // 构建默认的SQL中表达式要用的上下文对象, 这个是权限校验的值对象
             GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
-            return gaeaSqlProcessor.query(gaeaDataSet.getSql(), gaeaDataSet.getPrimaryTable(), newSortConditionSetMap, page, defaultDsContext);
+            return gaeaSqlProcessor.query(gaeaDataSet, gaeaDataSet.getPrimaryTable(), newSortConditionSetMap, page, defaultDsContext);
         }
         return null;
     }

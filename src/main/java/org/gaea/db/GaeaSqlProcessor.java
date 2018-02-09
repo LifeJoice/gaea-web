@@ -3,13 +3,13 @@ package org.gaea.db;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.gaea.data.dataset.domain.Condition;
-import org.gaea.data.dataset.domain.ConditionSet;
+import org.gaea.data.dataset.domain.*;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.domain.QueryValue;
 import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ValidationFailedException;
+import org.gaea.framework.common.GaeaSpelKeywordDefinition;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.data.GaeaSqlExpressionParser;
 import org.gaea.framework.web.schema.domain.PageResult;
@@ -124,7 +124,7 @@ public class GaeaSqlProcessor {
      * AI.TODO 这个，重构一下，整合两个值对象会比较合理
      * </p>
      *
-     * @param sql
+     * @param gaeaDataSet
      * @param primaryTable
      * @param conditionSet      条件。
      * @param page
@@ -134,10 +134,13 @@ public class GaeaSqlProcessor {
      * @throws ValidationFailedException
      * @throws InvalidDataException
      */
-    public PageResult query(String sql, String primaryTable, ConditionSet conditionSet, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, InvalidDataException {
+    public PageResult query(GaeaDataSet gaeaDataSet, String primaryTable, ConditionSet conditionSet, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, InvalidDataException {
         MapSqlParameterSource params = null;
+        String sql = gaeaDataSet.getSql();
+        StringBuilder whereCause = new StringBuilder();
         /* 拼凑【WHERE】条件语句 */
-        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
+//        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
+        whereCause.append(parseConditionSet(conditionSet, queryConditionDTO));
         /**
          * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
          * else 按条件对象，拼凑条件参数值
@@ -148,15 +151,16 @@ public class GaeaSqlProcessor {
         } else {
             params = genWhereParams(getConditions(conditionSet, queryConditionDTO), defaultDsContext);
         }
-        if (StringUtils.isNotEmpty(whereCause)) {
-            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause).toString();
-        }
+        sql = toSql(sql, whereCause.toString(), gaeaDataSet.getOrderBy(), gaeaDataSet.getGroupBy());
+//        if (StringUtils.isNotEmpty(whereCause)) {
+//            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause).toString();
+//        }
         /* 转换SQL里面的表达式 */
         /**
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
          */
-        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext);
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause));
         // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
@@ -165,18 +169,19 @@ public class GaeaSqlProcessor {
     /**
      * 支持多个ConditionSet作为查询条件的查询功能。
      *
-     * @param sql
-     * @param primaryTable
+     * @param gaeaDataSet
+     * @param gaeaDataSet
+     *@param primaryTable
      * @param conditionSetMap  key：条件集 value：条件集的值。这个需要有序的map。查询条件组成sql的顺序，会按照map中的顺序来。
      * @param page
-     * @param defaultDsContext
-     * @return
+     * @param defaultDsContext     @return
      * @throws ValidationFailedException
      * @throws InvalidDataException
      */
-    public PageResult query(String sql, String primaryTable, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext) throws ValidationFailedException, InvalidDataException {
+    public PageResult query(GaeaDataSet gaeaDataSet, String primaryTable, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, GaeaDefaultDsContext defaultDsContext) throws ValidationFailedException, InvalidDataException {
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder whereCause = new StringBuilder();
+        String sql = gaeaDataSet.getSql();
         /**
          * 构造where
          */
@@ -201,15 +206,16 @@ public class GaeaSqlProcessor {
         /**
          * 最终SQL
          */
-        if (StringUtils.isNotEmpty(whereCause)) {
-            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause.toString()).toString();
-        }
+        sql = toSql(sql, whereCause.toString(), gaeaDataSet.getOrderBy(), gaeaDataSet.getGroupBy());
+//        if (StringUtils.isNotEmpty(whereCause)) {
+//            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause.toString()).toString();
+//        }
         /* 转换SQL里面的表达式 */
         /**
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
          */
-        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext);
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause));
         // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
@@ -621,5 +627,47 @@ public class GaeaSqlProcessor {
         pageResult.setPage(page.getPage());
         pageResult.setSize(page.getSize());
         return pageResult;
+    }
+
+    /**
+     * 获取最终的SQL。看是否需要拼order by，group by等。
+     * 还有看有没有#where表达式，有就
+     *
+     * @param sql
+     * @param whereCause
+     * @param orderBy
+     * @param groupBy
+     * @return
+     */
+    private String toSql(String sql, String whereCause, OrderBy orderBy, GroupBy groupBy) {
+        SQL sqlCriteria = new SQL();
+        sqlCriteria.SELECT("*").FROM(sql, "subQuery");
+        // 如果有where 且 必须没有#{#where} SPEL表达式，则把sql再包一层子查询
+        // 如果有SPEL where表达式，会导致有两个where条件
+        if (StringUtils.isNotEmpty(whereCause) && !gaeaSqlExpressionParser.hasExpression(sql, GaeaSpelKeywordDefinition.SQL_WHERE)) {
+            sqlCriteria.WHERE(whereCause.toString());
+        }
+        if (orderBy != null && StringUtils.isNotEmpty(orderBy.getValue())) {
+            sqlCriteria.ORDER_BY(orderBy.getValue());
+        }
+        if (groupBy != null && StringUtils.isNotEmpty(groupBy.getValue())) {
+            sqlCriteria.GROUP_BY(groupBy.getValue());
+        }
+        return sqlCriteria.toString();
+    }
+
+    /**
+     * 获取查询需要的一些额外的属性，作为SPEL表达式所需的参数。
+     *
+     * @param whereCause
+     * @return
+     */
+    private Map getExtraContext(StringBuilder whereCause) {
+        Map contextMap = new HashMap();
+        if (StringUtils.isNotEmpty(whereCause)) {
+            whereCause.insert(0, " WHERE ");
+        }
+        contextMap.put(GaeaSpelKeywordDefinition.SQL_WHERE, whereCause);
+        return contextMap;
     }
 }

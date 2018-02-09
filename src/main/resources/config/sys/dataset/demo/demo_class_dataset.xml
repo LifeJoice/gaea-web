@@ -7,13 +7,15 @@
     -->
     <dataset id="DEMO_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="1">
         <data-sql>
-            <![CDATA[SELECT c.* FROM demo_class c]]>
+            <![CDATA[SELECT c.* FROM demo_class c #{#where} order by id]]>
         </data-sql>
         <where>
             <condition-set id="byId">
                 <and propName="id" op="eq"></and>
             </condition-set>
         </where>
+        <!--<order-by value="id" />-->
+        <!--<group-by value="" />-->
     </dataset>
     <!-- ********************************************** 学生 ********************************************** -->
     <dataset id="DEMO_STUDENT_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="0">

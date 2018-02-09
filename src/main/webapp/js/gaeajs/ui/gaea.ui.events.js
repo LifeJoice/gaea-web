@@ -222,6 +222,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * @param {string} jqSelector               jq选择器。用于识别焦点是否离开了它，就触发关闭。
              * @param {function} [closeFunction]        关闭的方法。例如有自定义的动画等。可以为空，则直接display=none.
              * @param {object} opts                     暂时没用。
+             * @param {object} opts.inContainer         进入某个容器后，就关闭
              */
             registerAutoClose: function (jqSelector, closeFunction, opts) {
                 gaeaValid.isNull({

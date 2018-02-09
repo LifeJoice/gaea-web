@@ -188,7 +188,9 @@
                 <query-condition is-multiple="true" component="select"/>
             </column>
             <column id="classNo" name="classNo" label="班级" db-column-name="CLASS_NO"
-                    visible="true" sortable="false" html-width="240" data-type="string"/>
+                    visible="true" sortable="false" html-width="240" data-type="string">
+                <query-condition visible="false"/>
+            </column>
             <column id="honours" name="honours" label="班级荣誉" db-column-name="CLASS_HONOURS"
                     visible="true" sortable="false" html-width="120" data-type="string" dataset-id="DEMO_CLASS_HONOURS"
                     multi-value-separator=","/>

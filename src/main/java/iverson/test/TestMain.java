@@ -1,5 +1,6 @@
 package iverson.test;
 
+import org.gaea.db.ibatis.jdbc.SQL;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.data.GaeaSqlParserContext;
 import org.gaea.security.domain.User;
@@ -40,6 +41,12 @@ public class TestMain {
                 parser.parseExpression("#{#gaea_value-1} and #{name}", parserContext);
         String parseResult = expression.getValue(context).toString();
         System.out.println("Spring EL解析结果：" + parseResult);
+
+        SQL sq = new SQL().SELECT("*").FROM("Test").WHERE("name='iverson'").ORDER_BY("id,name").GROUP_BY("price,age");
+        System.out.println("SQL:\n" + sq.toString());
+
+        StringBuilder sb = new StringBuilder("aaa");
+        System.out.println(sb.insert(0, "This is "));
     }
 
     enum TestEnum {

@@ -4,6 +4,11 @@
  * by Iverson 2016-8-25 16:48:10
  */
 
+.gaea-query-field {
+    /* 先随便给个高度。这样把里面的内容隐藏的时候，不会整个区域坍塌了。 */
+    height: 25px;
+}
+
 /* 单个查询的按钮区。下拉的那个。 */
 .gaea-query-buttons, .gaea-query-one-button {
     width: 25px;

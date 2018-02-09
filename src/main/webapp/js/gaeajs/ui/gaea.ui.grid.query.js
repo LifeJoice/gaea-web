@@ -371,7 +371,7 @@ define([
              * @returns gaeaInput里面的input的值
              */
             getValue: function ($oneQueryCt) {
-                var result = null;
+                var result = {};
                 //var $oneQueryCt = $("#" + containerId);// gaeaInput的容器。包含按钮组、输入框等
                 if (gaeaValid.isNotNull($oneQueryCt)) {
                     // 找到gaeaInput的输入框,获取其中的值

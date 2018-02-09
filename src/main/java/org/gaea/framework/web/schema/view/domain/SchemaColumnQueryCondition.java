@@ -11,6 +11,8 @@ public class SchemaColumnQueryCondition implements Serializable {
     private String component; // select|select-tree
     // 是否可以多选。默认单选。
     private boolean isMultiple = false;
+    /* 查询条件是否可见 */
+    private boolean visible = true;
 
     public String getComponent() {
         return component;
@@ -26,5 +28,13 @@ public class SchemaColumnQueryCondition implements Serializable {
 
     public void setMultiple(boolean multiple) {
         isMultiple = multiple;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

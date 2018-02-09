@@ -1,5 +1,6 @@
 body {
-    font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;
+    /*font-family: "Helvetica Neue", "Hiragino Sans GB", "Microsoft Yahei", Helvetica, Arial, sans-serif;*/
+    font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', 'SimSun', 'Segoe UI', 'Lucida Grande', Verdana, Arial, Helvetica, sans-serif !important;
     margin: 0; /* 不知道为何在Chrome会有个边距。默认都去掉。 */
 }
 
@@ -100,25 +101,27 @@ body, html {
 /*二级菜单*/
 .menu.lv2 {
     color: white;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: lighter;
     margin-left: 10px;
-    margin-top: 10px;
+    /*margin-top: 10px;*/
     letter-spacing: 1px; /* 字间距 */
+    padding: 4px;
 }
 
 /*三级菜单*/
 .menu.lv3 {
     /*margin-left: 50px;*/
-    padding-left: 20px;
-    height: 35px;
-    line-height: 35px; /* 字体垂直居中 */
+    padding-left: 40px;
+    height: 28px;
+    line-height: 28px; /* 字体垂直居中 */
     /*padding-top: 10px;*/
     letter-spacing: 0.5px; /* 字间距 */
     font-size: 16px;
     opacity: 0;
     transform: translateX(50px);
     transition: all 0s;
+    font-weight: lighter;
     /*-webkit-transition: all 0.4s;*/
     /*-moz-transition: all 0.4s;*/
     /*-ms-transition: all 0.4s;*/

@@ -158,11 +158,13 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
                     ds.getDsConditionSetEntities();
                     ds.getDsAuthorities();
                     GaeaDataSet gaeaDataSet = GaeaDataSetUtils.convert(ds);
-                    // 不要覆盖columns、apiDataSource，这个数据库没有存储的
+                    // 不要覆盖columns、apiDataSource、orderBy、groupBy，这个数据库没有存储的
                     GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(ds.getName());
                     if (cacheDataSet != null) {
                         gaeaDataSet.setColumns(cacheDataSet.getColumns());
                         gaeaDataSet.setApiDataSource(cacheDataSet.getApiDataSource());
+                        gaeaDataSet.setOrderBy(cacheDataSet.getOrderBy());
+                        gaeaDataSet.setGroupBy(cacheDataSet.getGroupBy());
                     }
 
                     gaeaDataSetMap.put(gaeaDataSet.getId(), gaeaDataSet);
