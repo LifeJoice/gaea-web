@@ -96,7 +96,12 @@ public class SystemDataSetAuthorityServiceImpl implements SystemDataSetAuthority
                         hasRole = true;
                         // debug一下权限校验的过滤条件
 //                        if(CollectionUtils.isNotEmpty(queryConditionList)) {
-                        if (conditionSet != null && CollectionUtils.isNotEmpty(conditionSet.getConditions())) {
+                        /**
+                         * 要么得配置conditionSet的condition，要么就得有appendSQL，直接附上。
+                         */
+                        if (conditionSet != null &&
+                                (CollectionUtils.isNotEmpty(conditionSet.getConditions()) || StringUtils.isNotEmpty(conditionSet.getAppendSql()))
+                                ) {
                             try {
                                 logger.trace("用户的数据权限过滤条件\n{}", objectMapper.writeValueAsString(queryConditionList));
                             } catch (JsonProcessingException e) {

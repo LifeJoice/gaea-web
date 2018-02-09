@@ -27,7 +27,7 @@ public interface CommonViewQueryService {
 
 //    List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, DataSetCommonQueryConditionDTO queryConditionDTO, String excelTemplateId) throws ValidationFailedException, SysLogicalException, SysInitException;
 
-    PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException;
+//    PageResult query(GaeaDataSet gaeaDataSet, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException;
 
     PageResult query(GaeaDataSet gaeaDataSet, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap, SchemaGridPage page, String loginName) throws ValidationFailedException, InvalidDataException, SystemConfigException, SysInitException;
 

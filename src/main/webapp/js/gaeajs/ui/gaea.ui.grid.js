@@ -174,7 +174,7 @@ define([
                         // 添加两个子容器（条件按钮区，和输入区）
                         var oneQuerySubCtTemplate = _.template(
                             '<div class="gaea-query-buttons">' +
-                            '<i class="iconfont icon-eq gaea-icon" data-gaea-data="value:\'eq\'"/>' +
+                            '<i class="iconfont icon-eq gaea-icon" data-gaea-data="value:\'lk\'"/>' +
                             '<i class="iconfont icon-gt gaea-icon" data-gaea-data="value:\'gt\'" />' +
                             '<i class="iconfont icon-ge gaea-icon" data-gaea-data="value:\'ge\'" />' +
                             '<i class="iconfont icon-lt gaea-icon" data-gaea-data="value:\'lt\'" />' +
@@ -200,6 +200,11 @@ define([
                         //var $oneQueryInputCt = $oneQueryCt.children(".gaea-query-input-div");
 
                         if (gaeaValid.isNotNull(column.queryCondition)) {
+                            // 如果query-condition定义列的查询条件不可见，隐藏
+                            if (_.isBoolean(column.queryCondition.visible) && !column.queryCondition.visible) {
+                                $oneQueryCt.children("div").css("display", "none");
+                            }
+                            /* 组件初始化 */
                             if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT, column.queryCondition.component)) {
                                 var gaeaSelect2 = require("gaeajs-ui-select2");
                                 gaeaSelect2.preInitHtmlAndData({

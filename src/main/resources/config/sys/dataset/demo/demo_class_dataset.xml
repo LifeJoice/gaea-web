@@ -14,6 +14,8 @@
                 <and propName="id" op="eq"></and>
             </condition-set>
         </where>
+        <!--<order-by value="id" />-->
+        <!--<group-by value="" />-->
     </dataset>
     <!-- ********************************************** 学生 ********************************************** -->
     <dataset id="DEMO_STUDENT_MANAGEMENT" primary-table="DEMO_RESOURCES" authority-type="0">
