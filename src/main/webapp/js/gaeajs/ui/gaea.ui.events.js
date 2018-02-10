@@ -26,6 +26,14 @@
  * @property {string} name    事件名称
  */
 
+/**
+ * 某个对象/元素对应的自动关闭的定义。
+ * @typedef {object} GaeaEventAutoClose
+ * @property {function} closeFunction           关闭的方法。
+ * @property {object} opts                      对应的配置项
+ * @property {string|jqSelector} opts.inContainer         进入某个容器后，就关闭
+ */
+
 define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-utils-string", "gaeajs-ui-notify", "gaeajs-common-utils-ajax", "gaeajs-common-utils"],
     function ($, _, gaeaValid, gaeaString, gaeaNotify, gaeaAjax, gaeaUtils) {
 
@@ -44,6 +52,9 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
             // jqSelector.最近一个操作组件的jqSelector。
             lastOne: "",
             // 已注册的自动关闭的列表。key: jqSelector value: closeFunction
+            /**
+             * @type {GaeaEventAutoClose[]}
+             */
             autoCloseList: {}
         };
         /**
@@ -221,8 +232,8 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
              * 相反，通过维护一个最新点击的组件jqSelector，当鼠标离开该容器的时候，就自动关闭。
              * @param {string} jqSelector               jq选择器。用于识别焦点是否离开了它，就触发关闭。
              * @param {function} [closeFunction]        关闭的方法。例如有自定义的动画等。可以为空，则直接display=none.
-             * @param {object} opts                     暂时没用。
-             * @param {object} opts.inContainer         进入某个容器后，就关闭
+             * @param {object} opts
+             * @param {string|jqSelector} opts.inContainer         进入某个容器后，就关闭
              */
             registerAutoClose: function (jqSelector, closeFunction, opts) {
                 gaeaValid.isNull({
@@ -242,12 +253,22 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                         }
                         // 依赖setMe()寻找最后点击的对象，并关闭
                         var iJqSelector = events.cache.lastOne;
-                        var container = $(iJqSelector);
-                        var closeFunc = events.cache.autoCloseList[iJqSelector];
+                        var $container = $(iJqSelector);
+                        var closeFunc = events.cache.autoCloseList[iJqSelector].closeFunction;
+                        /* 是否已经离开了目标容器 */
+                        var isOutTargetArea = _private.registerAutoClose.isOutTargetContainer(iJqSelector, e);
+                        /* 如果有配置，是否进入指定区域。没有设置就是true，区域为全局。 */
+                        var isInTriggerCloseArea = true;
+                        // 如果有配置进入某容器才触发关闭，则判断是否进入了容器
+                        if (gaeaValid.isNotNullMultiple(events.cache.autoCloseList[iJqSelector].opts, ["inContainer"])) {
+                            isInTriggerCloseArea = _private.registerAutoClose.isInContainer(events.cache.autoCloseList[iJqSelector].opts.inContainer, e);
+                        }
 
-                        if (!container.is(e.target) // if the target of the click isn't the container...
-                            && container.has(e.target).length === 0) // ... nor a descendant of the container
-                        {
+                        /* 如果点击已经离开了目标容器, 且进入指定（如果有）会触发关闭的区域 */
+                        if (isOutTargetArea && isInTriggerCloseArea) {
+                            //if (!container.is(e.target) // if the target of the click isn't the container...
+                            //    && container.has(e.target).length === 0) // ... nor a descendant of the container
+                            //{
                             /**
                              * if 有定义关闭方法（可能有特定的效果之类的）
                              *      执行特定关闭方法
@@ -257,7 +278,7 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                             if (_.isFunction(closeFunc)) {
                                 closeFunc(e);
                             } else {
-                                container.hide();
+                                $container.hide();
                             }
                         }
                     });
@@ -265,7 +286,11 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     events.cache.isRegisterAutoClose = true;
                 }
                 // 缓存，同名即覆盖
-                events.cache.autoCloseList[jqSelector] = closeFunction;
+                events.cache.autoCloseList[jqSelector] = $.extend(events.cache.autoCloseList[jqSelector], {
+                    closeFunction: closeFunction,
+                    opts: opts
+                });
+                //events.cache.autoCloseList[jqSelector] = closeFunction;
             },
             /**
              * 设定（缓存）最后点击的是什么东东，这样自动关闭才好去做。而不是把所有注册过的都关一遍。
@@ -415,6 +440,51 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                     throw "通过:" + opts.gaeaEventName + "属性定义，要触发的target不存在！options: " + JSON.stringify(gaeaEventDef);
                 }
                 $target.trigger(gaeaEventDef.trigger.event, opts.data);
+            },
+            /**
+             * registerAutoClose的辅助方法
+             */
+            registerAutoClose: {
+                /**
+                 * 当前的点击是否进入某个指定容器。
+                 * @param {string|jqSelector} inContainer      指定容器的jq选择器
+                 */
+                isInContainer: function (inContainer, e) {
+                    if (gaeaValid.isNull(inContainer) || gaeaValid.isNull(e)) {
+                        throw "未配置目标容器或缺少事件对象，registerAutoClose无法判断是否要自动关闭特定的组件。";
+                    }
+                    var $inContainer = $(inContainer);
+                    if ($inContainer <= 0) {
+                        throw "jQuery selector找不到目标容器, selector: " + inContainer + "，registerAutoClose无法判断是否要自动关闭特定的组件。";
+                    }
+                    // 如果指定容器，是当前点击对象，或包含当前点击对象，表示进入
+                    if ($inContainer.is(e.target) || $inContainer.has(e.target).length > 0) {
+                        return true;
+                    }
+                    return false;
+                },
+                /**
+                 * 判断点击事件（e）是否在容器（targetContainer）外。
+                 * @param targetContainer
+                 * @param e
+                 * @returns {boolean} 在容器外，返回true
+                 */
+                isOutTargetContainer: function (targetContainer, e) {
+                    if (gaeaValid.isNull(targetContainer) || gaeaValid.isNull(e)) {
+                        throw "未配置目标容器或缺少事件对象，registerAutoClose无法判断是否要自动关闭特定的组件。";
+                    }
+                    var $target = $(targetContainer);
+                    if ($target <= 0) {
+                        throw "jQuery selector找不到目标容器, selector: " + targetContainer + "，registerAutoClose无法判断是否要自动关闭特定的组件。";
+                    }
+                    // 如果当前点击，不是等于容器，或是在容器外
+                    if (!$target.is(e.target) // if the target of the click isn't the container...
+                        && $target.has(e.target).length === 0  // ... nor a descendant of the container
+                    ) {
+                        return true;
+                    }
+                    return false;
+                }
             }
         };
 

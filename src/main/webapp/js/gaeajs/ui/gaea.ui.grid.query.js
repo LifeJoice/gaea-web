@@ -459,7 +459,9 @@ define([
                     }
                 });
                 // 注册点击外部自动关闭。
-                gaeaEvents.autoClose.registerAutoClose(".gaea-grid-header", closeFunction);
+                gaeaEvents.autoClose.registerAutoClose(".gaea-grid-header", closeFunction, {
+                    inContainer: ".gaea-grid-body" // 点击表格的内容区才会触发关闭。不能全局，因为查询区的日期等组件在body尾部。
+                });
             },
             /**
              * 初始化触发快捷查询区的比较按钮的功能。
