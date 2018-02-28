@@ -13,6 +13,7 @@ import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.*;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.config.SystemProperties;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.data.domain.DataSetEntity;
 import org.gaea.framework.web.data.domain.DsConditionSetEntity;
 import org.gaea.framework.web.data.repository.SystemDataSetRepository;
@@ -23,6 +24,7 @@ import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.framework.web.service.ApiDataSourceQueryService;
 import org.gaea.framework.web.service.CommonViewQueryService;
 import org.gaea.util.BeanUtils;
@@ -250,7 +252,9 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * @throws SysInitException
      */
     @Override
-    public List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException {
+    public List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException {
+
+        GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getLoginUser().getLoginName(), String.valueOf(GaeaWebSecuritySystem.getLoginUser().getId()));
 
         // 获取数据集定义。可能从数据库读，也可能从缓存获取。
         GaeaDataSet dataSetDef = SystemDataSetFactory.getDataSet(resultConfig.getDsId());
@@ -275,7 +279,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
 //                }
 //            }
             // 默认需要对结果的每个字段做数据集转换
-            results = commonViewQueryService.queryByConditions(schemaId, resultConfig.getDsId(), null, queryConditionDTO, isDsTranslate);
+            results = commonViewQueryService.queryByConditions(schemaId, resultConfig.getDsId(), defaultDsContext, queryConditionDTO, isDsTranslate);
         }
         return results;
     }

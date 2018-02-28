@@ -364,6 +364,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
             return null;
         }
         try {
+            GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(dataSet.getId());
             List<QueryCondition> newConditions = new ArrayList<QueryCondition>();// 按通用查询组装标准查询对象
             ConditionSet conditionSet = null;// SCHEMA定义的条件集合
 
@@ -396,7 +397,7 @@ public class CommonViewQueryServiceImpl implements CommonViewQueryService {
                             queryConditionDTO.getId(), dataSet.getId(), dataSet.getWhere().getConditionSets().size());
                 }
             }
-            List<Map<String, Object>> result = gaeaSqlProcessor.query(dataSet.getSql(), conditionSet, defaultDsContext, queryConditionDTO);
+            List<Map<String, Object>> result = gaeaSqlProcessor.query(gaeaDataSet, conditionSet, defaultDsContext, queryConditionDTO);
             dataSet.setSqlResult(result);
             return dataSet.getSqlResult();
         } catch (ValidationFailedException e) {

@@ -29,7 +29,7 @@ public interface SystemDataSetService {
 
     DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws InvalidDataException, SystemConfigException, ValidationFailedException;
 
-    List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException;
+    List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException;
 
     /**
      * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>
