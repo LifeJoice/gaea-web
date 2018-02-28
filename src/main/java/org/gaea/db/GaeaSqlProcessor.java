@@ -288,6 +288,8 @@ public class GaeaSqlProcessor {
             sqlOp = " IS NULL ";
         } else if (QueryCondition.FIELD_OP_NOT_NULL.equalsIgnoreCase(op)) {
             sqlOp = " IS NOT NULL ";
+        } else if (QueryCondition.FIELD_OP_IN.equalsIgnoreCase(op)) {
+            sqlOp = " IN ";
         } else {
             throw new ValidationFailedException(MessageFormat.format("配置的sql操作符无法解析！op={0}", op));
         }
@@ -402,11 +404,18 @@ public class GaeaSqlProcessor {
              *      则不需要">=<"之类的
              *      直接用操作符。例如：
              *      username is not null
+             * else if propValues不为空
+             *      采用 in ('A','B')
              * else
              *      username = :USER_NAME
              */
             if (QueryCondition.FIELD_OP_NULL.equalsIgnoreCase(cond.getOp()) || QueryCondition.FIELD_OP_NOT_NULL.equalsIgnoreCase(cond.getOp())) {
                 result.append(MessageFormat.format("{0} {1}", cond.getPropName().toUpperCase(), parseFieldOp(cond)));
+            } else if (QueryCondition.FIELD_OP_IN.equalsIgnoreCase(cond.getOp())) {
+                if (CollectionUtils.isEmpty(cond.getPropValues())) {
+                    throw new ValidationFailedException("未获取到条件的值，无法执行IN查询。 condition: " + cond.toString());
+                }
+                result.append(MessageFormat.format("{0} {1} (:{2})", cond.getPropName().toUpperCase(), parseFieldOp(cond), cond.getPropName().toUpperCase()));
             } else {
                 result.append(MessageFormat.format("{0} {1} :{2}", cond.getPropName().toUpperCase(), parseFieldOp(cond), cond.getPropName().toUpperCase()));
             }
@@ -500,7 +509,7 @@ public class GaeaSqlProcessor {
     }
 
     /**
-     * 转换值。主要是增加like操作符。是以**开始，还是以**结束。就是“%”加在前面还是后面。
+     * 转换值。主要是增加like操作符。是以'某内容'开始，还是以'某内容'结束。就是“%”加在前面还是后面。
      * <p>
      * 针对带表达式的处理（例如：权限校验里面的）<br/>
      * 1. 默认可用的值对象，就是GaeaDefaultDsContext。（无关DataSetCommonQueryConditionDTO）
@@ -513,6 +522,10 @@ public class GaeaSqlProcessor {
     private Object parseParamValue(QueryCondition cond, GaeaDefaultDsContext defaultDsContext) throws ParseException {
         String value = cond.getPropValue();
         if (StringUtils.isEmpty(value)) {
+            // 如果是多值，即IN查询，直接返回值
+            if (CollectionUtils.isNotEmpty(cond.getPropValues())) {
+                return cond.getPropValues();
+            }
             // 返回null是为了方便调用方法判断
             return null;
         }

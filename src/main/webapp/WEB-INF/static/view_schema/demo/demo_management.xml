@@ -184,8 +184,8 @@
             <column id="termYear" name="termYear" label="第几届" db-column-name="TERM_YEAR"
                     visible="true" sortable="false" html-width="120" data-type="string"/>
             <column id="currentYear" name="currentYear" label="年级" db-column-name="CURRENT_YEAR"
-                    visible="true" sortable="false" html-width="120" data-type="string" dataset-id="DEMO_PRIMARY_GRADE">
-                <query-condition is-multiple="true" component="select"/>
+                    visible="true" sortable="false" html-width="150" data-type="string" dataset-id="DEMO_PRIMARY_GRADE">
+                <query-condition multiple="true" component="select"/>
             </column>
             <column id="classNo" name="classNo" label="班级" db-column-name="CLASS_NO"
                     visible="true" sortable="false" html-width="240" data-type="string">

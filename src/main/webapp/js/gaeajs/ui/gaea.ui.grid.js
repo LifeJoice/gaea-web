@@ -186,14 +186,24 @@ define([
                             '</div>' +
                             '<div class="gaea-query-input-ct"></div>' // 查询字段块（包括下拉按钮）
                         );
-                        // 日期类的，不需要比较操作
                         if (gaeaString.equalsIgnoreCase(column.dataType, GAEA_UI_DEFINE.UI.DATA.DATA_TYPE_DATE)) {
+                            // 日期类的，不需要比较操作
                             oneQuerySubCtTemplate = _.template(
                                 '<div class="gaea-query-one-button">' +
                                 '<i class="fa fa-plus"/>' +
                                 '</div>' +
                                 '<div class="gaea-query-input-ct"></div>' // 查询字段块（包括下拉按钮）
                             );
+                        } else if (gaeaValid.isNotNull(column.queryCondition) && gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT, column.queryCondition.component) && column.queryCondition.multiple) {
+                            // 如果是下拉多选，查询语法为in
+                            oneQuerySubCtTemplate = _.template(
+                                '<div class="gaea-query-buttons">' +
+                                '<i class="iconfont icon-eq gaea-icon" data-gaea-data="value:\'in\'"/>' +
+                                '</div>' +
+                                '<div class="gaea-query-input-ct"></div>' // 查询字段块（包括下拉按钮）
+                            );
+                            // 给父元素加一个inQuery的class, 控制特殊样式
+                            $oneQueryCt.addClass("in-query");
                         }
                         $oneQueryCt.append(oneQuerySubCtTemplate());
                         var oneQueryInputCtSelector = "#" + opts.id + " #" + columnHtmId + " .gaea-query-input-ct";
@@ -212,7 +222,8 @@ define([
                                     htmlId: inputId,
                                     htmlName: inputId,
                                     dataSetId: column.dataSetId,
-                                    fieldId: field.id
+                                    fieldId: field.id,
+                                    multiple: column.queryCondition.multiple
                                 });
                             } else if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.SELECT_TREE, column.queryCondition.component)) {
                                 var selectTreeOpts = {

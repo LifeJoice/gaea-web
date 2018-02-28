@@ -60,6 +60,16 @@
     position: relative;
 }
 
+/* 如果是in查询，不需要显示操作符下拉框 */
+.gaea-query-field.in-query .gaea-query-buttons {
+    display: none;
+}
+
+/* 如果是in查询，不需要左边距 */
+.gaea-query-field.in-query .gaea-query-input-ct {
+    margin-left: auto;
+}
+
 /* （日期类的）行高加倍 */
 .row-2x {
     height: 70px;

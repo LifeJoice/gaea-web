@@ -1,6 +1,7 @@
 package org.gaea.db;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,6 +13,7 @@ import java.util.Map;
 public class QueryCondition {
     private String propName;
     private String propValue;
+    private List propValues; // 如果是in的查询，就是多值。
     private boolean ignoreCase;
     private String op;                // 操作符。例如：> , = , like 等
     /*  单字段条件的比较操作符：eq ne lt gt le ge.这个在处理时会被转义.  */
@@ -26,6 +28,7 @@ public class QueryCondition {
     public static final String FIELD_OP_RLK = "rlk";
     public static final String FIELD_OP_NULL = "na";
     public static final String FIELD_OP_NOT_NULL = "nna";
+    public static final String FIELD_OP_IN = "in";
     /**
      * 数据类型。这个和XML SCHEMA的data-type一样。
      * 辅助字段。当查询都是字符串的时候可以无视。但如果是日期之类的，需要有dataType协助转换。
@@ -162,8 +165,14 @@ public class QueryCondition {
 
     @Override
     public String toString() {
-        return "'" + condOp + "'" + propName + getOp() + propValue;
+        return "'" + condOp + "'" + propName + getOp() + "propValue : " + propValue + " propValues : " + propValues;
     }
 
+    public List getPropValues() {
+        return propValues;
+    }
 
+    public void setPropValues(List propValues) {
+        this.propValues = propValues;
+    }
 }

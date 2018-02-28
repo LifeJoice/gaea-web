@@ -177,6 +177,8 @@ define([
                         // 收起查询区
                         query.view.hide(opts);
                         var queryConditions = query.parser.getQueryConditions(opts);
+                        var gaeaUtils = require("gaeajs-common-utils");
+                        var test = gaeaUtils.data.flattenData(queryConditions);
                         //var queryConditions = gridQuery.parser.getQueryConditions(opts);
                         query.doQuery({
                             id: opts.id,
@@ -345,7 +347,7 @@ define([
                         //queryConditions[fieldValueKey] = inputValue.value; // 值
                         queryCondition.propName = fieldNameValue; // 字段
                         queryCondition.op = inputValue.op; // 比较符
-                        queryCondition.propValue = inputValue.value; // 值
+                        queryCondition.propValues = inputValue.value; // 值
                         queryConditions.push(queryCondition);
                         //i += 1;
                     }
