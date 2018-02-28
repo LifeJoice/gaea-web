@@ -9,6 +9,7 @@ import org.gaea.db.GaeaSqlProcessor;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.*;
 import org.gaea.framework.web.bind.annotation.RequestBean;
+import org.gaea.framework.web.data.GaeaDefaultDsContext;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
@@ -101,8 +102,10 @@ public class CommonViewQueryController {
     @RequestMapping(value = "/byCondition", method = RequestMethod.POST)
     @ResponseBody
     public List<Map<String, Object>> queryByConditions(String schemaId, String conditions, Boolean isDsTranslate,
-                                                       String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException {
+                                                       String dsId, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException {
         DataSetCommonQueryConditionDTO queryConditionDTO = null;
+        GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getLoginUser().getLoginName(), String.valueOf(GaeaWebSecuritySystem.getLoginUser().getId()));
+
         if (StringUtils.isNotEmpty(conditions)) {
             try {
                 queryConditionDTO = mapper.readValue(conditions, DataSetCommonQueryConditionDTO.class);
@@ -120,7 +123,7 @@ public class CommonViewQueryController {
             isDsTranslate = true;
         }
         try {
-            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, null, queryConditionDTO, isDsTranslate);
+            List<Map<String, Object>> result = commonViewQueryService.queryByConditions(schemaId, dsId, defaultDsContext, queryConditionDTO, isDsTranslate);
             return result;
         } catch (SysLogicalException e) {
             logger.debug(e.getMessage(), e);

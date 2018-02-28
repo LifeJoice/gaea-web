@@ -45,7 +45,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public List<Map<String, Object>> queryByConditions(String schemaId, String datasetId, String excelTemplateId, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException {
         // 默认需要对结果的每个字段做数据集转换
-        List<Map<String, Object>> newDataList = commonViewQueryService.queryByConditions(schemaId, datasetId, null, queryConditionDTO, true);
+        List<Map<String, Object>> newDataList = commonViewQueryService.queryByConditions(schemaId, datasetId, defaultDsContext, queryConditionDTO, true);
         // 对查询数据作处理，例如，把数据库字段名改一改等，再返回
         return schemaDataService.transformViewData(newDataList, excelTemplateId);
     }

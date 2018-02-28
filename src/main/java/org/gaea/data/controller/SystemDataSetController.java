@@ -9,6 +9,7 @@ import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SysLogicalException;
+import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.bind.annotation.RequestBeanDataType;
@@ -62,7 +63,7 @@ public class SystemDataSetController {
     @RequestMapping("/get")
     @ResponseBody
     public List<Map<String, Object>> getDsData(GaeaDsResultConfig resultConfig, String schemaId, @RequestBean(value = "conditions", dataType = RequestBeanDataType.JSON) DataSetCommonQueryConditionDTO queryConditionDTO,
-                                               HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException {
+                                               HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException {
         if (resultConfig == null || StringUtils.isEmpty(resultConfig.getDsId())) {
             logger.debug("无法获取到请求的<结果集配置/dsId>，返回空。");
             return null;

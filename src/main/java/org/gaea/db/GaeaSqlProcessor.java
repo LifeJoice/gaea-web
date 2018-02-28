@@ -80,16 +80,18 @@ public class GaeaSqlProcessor {
      * 根据SQL，把conditions主动组装条件加到SQL上，然后查询出结果。
      * <p>这个是没分页的<p/>
      *
-     * @param sql
+     * @param gaeaDataSet
      * @param conditionSet      可以为空。
      * @param queryConditionDTO 可以为空。查询条件对象，包含若干where ... and ... and ...
      * @return
      */
-    public List<Map<String, Object>> query(String sql, ConditionSet conditionSet, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+    public List<Map<String, Object>> query(GaeaDataSet gaeaDataSet, ConditionSet conditionSet, GaeaDefaultDsContext defaultDsContext, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, InvalidDataException {
         MapSqlParameterSource params = null;
+        String sql = gaeaDataSet.getSql();
+        StringBuilder whereCause = new StringBuilder();
         /* 拼凑【WHERE】条件语句 */
-        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
-//        String whereCause = genWhereString(conditions);
+//        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
+        whereCause.append(parseConditionSet(conditionSet, queryConditionDTO));
         /**
          * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
          * else 按条件对象，拼凑条件参数值
@@ -102,15 +104,29 @@ public class GaeaSqlProcessor {
         }
 //        params = CollectionUtils.isEmpty(conditionSet.getConditions()) ? new MapSqlParameterSource() : genWhereParams(getConditions(conditionSet, queryConditionDTO));
 //        params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions);
-        if (StringUtils.isNotEmpty(whereCause)) {
-            sql = sql + " WHERE " + whereCause;
-        }
-        logger.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
 
-        List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
-        // 查询数据
-        content = namedParameterJdbcTemplate.queryForList(sql, params);
-        return content;
+        sql = toSql(sql, whereCause.toString(), gaeaDataSet.getOrderBy(), gaeaDataSet.getGroupBy());
+//        if (StringUtils.isNotEmpty(whereCause)) {
+//            sql = new SQL().SELECT("*").FROM(sql, "subQuery").WHERE(whereCause).toString();
+//        }
+        /* 转换SQL里面的表达式 */
+        /**
+         * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
+         * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
+         */
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause));
+        // 查询
+        PageResult pageResult = query(sql, params, gaeaDataSet.getPrimaryTable(), null);
+
+//        if (StringUtils.isNotEmpty(whereCause)) {
+//            sql = sql + " WHERE " + whereCause;
+//        }
+//        logger.debug(MessageFormat.format("\nquery SQL:\n{0}\nparams:\n{1}", sql, params.getValues()));
+//
+//        List<Map<String, Object>> content = new ArrayList<Map<String, Object>>();
+//        // 查询数据
+//        content = namedParameterJdbcTemplate.queryForList(sql, params);
+        return pageResult.getContent();
     }
 
     /**
@@ -595,7 +611,7 @@ public class GaeaSqlProcessor {
      * @param sql
      * @param params
      * @param primaryTable
-     * @param page
+     * @param page            可以为空。为空表示查询不设数量限制。
      * @return
      * @throws InvalidDataException
      */
@@ -631,14 +647,15 @@ public class GaeaSqlProcessor {
                 // 查询数据
                 content = namedParameterJdbcTemplate.queryForList(limitedSQL, params);
             }
+            // 回写分页相关信息
+            pageResult.setPage(page.getPage());
+            pageResult.setSize(page.getSize());
         } else {
             content = namedParameterJdbcTemplate.queryForList(sql, params);
         }
 
         pageResult.setContent(content);
         pageResult.setTotalElements(total);
-        pageResult.setPage(page.getPage());
-        pageResult.setSize(page.getSize());
         return pageResult;
     }
 
@@ -653,20 +670,24 @@ public class GaeaSqlProcessor {
      * @return
      */
     private String toSql(String sql, String whereCause, OrderBy orderBy, GroupBy groupBy) {
-        SQL sqlCriteria = new SQL();
-        sqlCriteria.SELECT("*").FROM(sql, "subQuery");
+        StringBuilder sqlBuilder = new StringBuilder(sql);
+//        SQL sqlCriteria = new SQL();
+//        sqlCriteria.SELECT("*").FROM(sql, "subQuery");
         // 如果有where 且 必须没有#{#where} SPEL表达式，则把sql再包一层子查询
         // 如果有SPEL where表达式，会导致有两个where条件
         if (StringUtils.isNotEmpty(whereCause) && !gaeaSqlExpressionParser.hasExpression(sql, GaeaSpelKeywordDefinition.SQL_WHERE)) {
-            sqlCriteria.WHERE(whereCause.toString());
-        }
-        if (orderBy != null && StringUtils.isNotEmpty(orderBy.getValue())) {
-            sqlCriteria.ORDER_BY(orderBy.getValue());
+//            sqlCriteria.WHERE(whereCause.toString());
+            sqlBuilder.append(" WHERE ").append(whereCause);
         }
         if (groupBy != null && StringUtils.isNotEmpty(groupBy.getValue())) {
-            sqlCriteria.GROUP_BY(groupBy.getValue());
+//            sqlCriteria.GROUP_BY(groupBy.getValue());
+            sqlBuilder.append(" GROUP BY ").append(groupBy.getValue());
         }
-        return sqlCriteria.toString();
+        if (orderBy != null && StringUtils.isNotEmpty(orderBy.getValue())) {
+//            sqlCriteria.ORDER_BY(orderBy.getValue());
+            sqlBuilder.append(" ORDER BY ").append(orderBy.getValue());
+        }
+        return sqlBuilder.toString();
     }
 
     /**
