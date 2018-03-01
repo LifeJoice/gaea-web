@@ -177,8 +177,6 @@ define([
                         // 收起查询区
                         query.view.hide(opts);
                         var queryConditions = query.parser.getQueryConditions(opts);
-                        var gaeaUtils = require("gaeajs-common-utils");
-                        var test = gaeaUtils.data.flattenData(queryConditions);
                         //var queryConditions = gridQuery.parser.getQueryConditions(opts);
                         query.doQuery({
                             id: opts.id,

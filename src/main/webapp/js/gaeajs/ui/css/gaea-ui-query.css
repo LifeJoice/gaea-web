@@ -55,9 +55,20 @@
 }
 
 /* 如果是日期类的，会有span进行多个条件的区分 */
-.gaea-query-input-ct span {
+.gaea-query-input-ct > span {
     padding-bottom: 5px;
     position: relative;
+}
+
+/* 如果是in查询，里面的select是多选，为了避免遮挡，高度为自适应。 */
+.gaea-query-input-ct.in-query {
+    height: auto;
+    min-height: 25px;
+}
+
+/* 高度自增。因为多选会越选越多，不增长会遮住 */
+.gaea-query-field.in-query {
+    height: auto;
 }
 
 /* 如果是in查询，不需要显示操作符下拉框 */

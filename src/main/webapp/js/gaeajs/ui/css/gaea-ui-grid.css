@@ -69,11 +69,11 @@ AI.TODO 后面可以把所有grid的列头都利用这种方式自适应。之�
     float: left;
     height: 100%;
     background-color: #2D3E50;
-    border-style: solid;
-    border-collapse: collapse;
-    /* 列头上、下留下白色边框 */
-    border-width: 1px 0 2px 0;
-    border-color: white;
+    border-style: none;
+    /*border-collapse: collapse;*/
+    /*!* 列头上、下留下白色边框 *!*/
+    /*border-width: 1px 0 2px 0;*/
+    /*border-color: white;*/
     /*文字水平居中*/
     text-align: center;
     /*文字垂直居中。line-height和div高度一致即可。*/
@@ -229,7 +229,8 @@ AI.TODO 后面可以把所有grid的列头都利用这种方式自适应。之�
     overflow: visible;
 }
 
-.head-query-column span {
+/* 历史久远已经不记得了。这个应该是为了控制快捷查询区的input居中。 */
+.gaea-query-input-ct > span {
     display: block;
     margin: 0 auto; /* 水平居中 */
     width: 90%;

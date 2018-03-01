@@ -200,7 +200,7 @@ define([
                                 '<div class="gaea-query-buttons">' +
                                 '<i class="iconfont icon-eq gaea-icon" data-gaea-data="value:\'in\'"/>' +
                                 '</div>' +
-                                '<div class="gaea-query-input-ct"></div>' // 查询字段块（包括下拉按钮）
+                                '<div class="gaea-query-input-ct in-query"></div>' // 查询字段块（包括下拉按钮） / .in-query确保高度自动、避免遮挡
                             );
                             // 给父元素加一个inQuery的class, 控制特殊样式
                             $oneQueryCt.addClass("in-query");

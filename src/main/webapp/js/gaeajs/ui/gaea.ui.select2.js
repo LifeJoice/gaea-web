@@ -72,7 +72,9 @@ define([
                     throw "初始化select2，不允许对象的选择器selector为空！";
                 }
                 var $select2 = $(opts.jqSelector);
-                var select2Opts = {}; // 这个是传递给jQuery select2组件的初始化选项
+                var select2Opts = {
+                    width: "style" // 这个会决定构建select2时怎么处理宽度。感觉是以父容器的宽度为准。
+                }; // 这个是传递给jQuery select2组件的初始化选项
 
                 var gaeaDefStr = $select2.data("gaea-ui-select2");
                 // 把元素的gaea-data配置转成对象，并和默认配置合并。
@@ -178,7 +180,7 @@ define([
             initHtmlCt: function (opts) {
                 var selectTemplate = _.template('<select id="<%=ID%>" name="<%=NAME%>" data-field-id="<%= FIELD_ID %>" <%= MULTIPLE_CFG %> ></select>');
                 var multipleCfg = "";
-                if (gaeaValid.isNotNull(opts.multiple)) {
+                if (gaeaValid.isNotNull(opts.multiple) && opts.multiple) {
                     multipleCfg = 'multiple="multiple"';
                 }
                 var $select = $(selectTemplate({
