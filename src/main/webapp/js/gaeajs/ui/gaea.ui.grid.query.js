@@ -345,7 +345,11 @@ define([
                         //queryConditions[fieldValueKey] = inputValue.value; // 值
                         queryCondition.propName = fieldNameValue; // 字段
                         queryCondition.op = inputValue.op; // 比较符
-                        queryCondition.propValues = inputValue.value; // 值
+                        queryCondition.propValue = inputValue.value; // 值
+                        // 如果是in查询，值另外设定
+                        if (gaeaString.equalsIgnoreCase(inputVal.op, "in")) {
+                            queryCondition.propValues = inputValue.value; // 值
+                        }
                         queryConditions.push(queryCondition);
                         //i += 1;
                     }

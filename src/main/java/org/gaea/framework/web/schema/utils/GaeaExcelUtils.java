@@ -11,6 +11,7 @@ import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
 import org.gaea.poi.domain.Field;
+import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -35,22 +36,23 @@ public class GaeaExcelUtils {
      * @param schemaId
      * @return Map < column.name，Field对象 >
      */
-    public static Map<String, Field> getFields(String schemaId) throws SysInitException {
+    public static LinkedCaseInsensitiveMap<Field> getFields(String schemaId) throws SysInitException {
         if (StringUtils.isEmpty(schemaId)) {
             return null;
         }
         GaeaXmlSchema gaeaXmlSchema = SystemCacheFactory.getGaeaSchema(schemaId);
-        Map<String, Field> fieldsMap = null;
+        LinkedCaseInsensitiveMap<Field> fieldsMap = null;
         if (gaeaXmlSchema != null && gaeaXmlSchema.getSchemaViews() != null) {
-            fieldsMap = new HashMap<String, Field>();
+            fieldsMap = new LinkedCaseInsensitiveMap<Field>();
             SchemaGrid grid = gaeaXmlSchema.getSchemaViews().getGrid();
             if (grid != null && grid.getColumns() != null) {
                 for (SchemaColumn col : grid.getColumns()) {
                     Field field = new Field();
-                    field.setName(col.getName());
+                    BeanUtils.copyProperties(col, field);
+//                    field.setName(col.getName());
                     field.setTitle(col.getLabel());
-                    field.setDataType(col.getDataType());
-                    field.setDatetimeFormat(col.getDatetimeFormat());
+//                    field.setDataType(col.getDataType());
+//                    field.setDatetimeFormat(col.getDatetimeFormat());
                     fieldsMap.put(col.getName(), field);
                 }
             }

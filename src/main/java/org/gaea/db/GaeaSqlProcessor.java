@@ -670,24 +670,25 @@ public class GaeaSqlProcessor {
      * @return
      */
     private String toSql(String sql, String whereCause, OrderBy orderBy, GroupBy groupBy) {
-        StringBuilder sqlBuilder = new StringBuilder(sql);
-//        SQL sqlCriteria = new SQL();
-//        sqlCriteria.SELECT("*").FROM(sql, "subQuery");
+//        StringBuilder sqlBuilder = new StringBuilder(sql);
+        SQL sqlCriteria = new SQL();
+        sqlCriteria.SELECT("*").FROM(sql, "subQuery");
         // 如果有where 且 必须没有#{#where} SPEL表达式，则把sql再包一层子查询
         // 如果有SPEL where表达式，会导致有两个where条件
         if (StringUtils.isNotEmpty(whereCause) && !gaeaSqlExpressionParser.hasExpression(sql, GaeaSpelKeywordDefinition.SQL_WHERE)) {
-//            sqlCriteria.WHERE(whereCause.toString());
-            sqlBuilder.append(" WHERE ").append(whereCause);
+            sqlCriteria.WHERE(whereCause);
+//            sqlBuilder.append(" WHERE ").append(whereCause);
         }
         if (groupBy != null && StringUtils.isNotEmpty(groupBy.getValue())) {
-//            sqlCriteria.GROUP_BY(groupBy.getValue());
-            sqlBuilder.append(" GROUP BY ").append(groupBy.getValue());
+            sqlCriteria.GROUP_BY(groupBy.getValue());
+//            sqlBuilder.append(" GROUP BY ").append(groupBy.getValue());
         }
         if (orderBy != null && StringUtils.isNotEmpty(orderBy.getValue())) {
-//            sqlCriteria.ORDER_BY(orderBy.getValue());
-            sqlBuilder.append(" ORDER BY ").append(orderBy.getValue());
+            sqlCriteria.ORDER_BY(orderBy.getValue());
+//            sqlBuilder.append(" ORDER BY ").append(orderBy.getValue());
         }
-        return sqlBuilder.toString();
+        return sqlCriteria.toString();
+//        return sqlBuilder.toString();
     }
 
     /**
