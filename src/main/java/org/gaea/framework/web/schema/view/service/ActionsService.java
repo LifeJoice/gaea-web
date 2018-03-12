@@ -1,11 +1,13 @@
 package org.gaea.framework.web.schema.view.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.db.QueryCondition;
 import org.gaea.exception.InvalidDataException;
 import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.SchemaActionDefinition;
+import org.gaea.framework.web.schema.view.action.ActionParam;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.framework.web.schema.view.action.ExcelExportSimpleButtonAction;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.List;
 
 /**
  * 负责各种Action的处理。
@@ -35,9 +38,11 @@ public class ActionsService {
      * @param action
      * @param response 利用流回写文件
      * @param request  获取用户登录信息
+     * @param queryConditions    页面快捷查询区的条件。用于过滤数据。
+     * @param schemaId
      * @throws ValidationFailedException
      */
-    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request) throws ValidationFailedException, ProcessFailedException {
+    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request, List<QueryCondition> queryConditions, String schemaId) throws ValidationFailedException, ProcessFailedException {
         if (action == null) {
             logger.warn("传入参数是一个空action。无法执行！");
             return;
@@ -48,37 +53,12 @@ public class ActionsService {
              * 转换成ExcepExportButtonAction，就可以获得返回的File。通用Action执行方法，没有明确返回的类型。
              */
             String loginName = GaeaWebSecuritySystem.getUserName(request);
-            File file = ((ExcelExportButtonAction) action).doAction(loginName);
+            // 默认写死了excel操作
+            ExcelExportButtonAction excelExportAction = (ExcelExportButtonAction) action;
+            // 执行action逻辑
+            File file = excelExportAction.doAction(loginName, schemaId, queryConditions);
+            // 回写文件
             GaeaWebUtils.writeFileToResponse(file, response);
-//            response.reset();
-//            response.setCharacterEncoding("utf-8");
-//            response.setContentType("application/vnd.ms-excel");
-//            // 这个可能有助于服务器和客户端直接分块传输
-//            response.setHeader("Content-Length", String.valueOf(file.length()));
-//            BufferedInputStream bis = null;
-//            BufferedOutputStream bos = null;
-//            try {
-//                bis = new BufferedInputStream(new FileInputStream(file));
-//                bos = new BufferedOutputStream(response.getOutputStream());
-//
-//
-//                byte[] buff = new byte[4096];
-//                int bytesRead;
-//                while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
-//                    bos.write(buff, 0, bytesRead);
-//                }
-//            } catch (FileNotFoundException e) {
-//                logger.debug("读取缓存excel文件失败！");
-//            } catch (IOException e) {
-//                logger.debug("获取输出流失败！");
-//            } finally {
-//                try {
-//                    bis.close();
-//                    bos.close();
-//                } catch (IOException e) {
-//                    logger.error("输入输出流关闭失败！", e);
-//                }
-//            }
         } else {
             logger.debug("不可识别的button action方法：{}", action.getMethod());
         }

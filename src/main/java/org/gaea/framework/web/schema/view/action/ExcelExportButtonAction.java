@@ -3,6 +3,7 @@ package org.gaea.framework.web.schema.view.action;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gaea.db.QueryCondition;
 import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.WebCommonDefinition;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,16 +62,23 @@ public class ExcelExportButtonAction implements Action<File> {
 
     @Override
     public Map<String, ActionParam> getActionParamMap() {
+        if (actionParamMap == null) {
+            actionParamMap = new HashMap<String, ActionParam>();
+        }
         return actionParamMap;
     }
 
     @Override
     public File doAction(String loginName) throws ValidationFailedException, ProcessFailedException {
+        return doAction(loginName, null, null);
+    }
+
+    public File doAction(String loginName, String schemaId, List<QueryCondition> queryConditionList) throws ValidationFailedException, ProcessFailedException {
         File file = null;
         Map<String, ActionParam> actionParamMap = getActionParamMap();
-        ActionParam<String> dataSetParam = actionParamMap.get("dataSetId");
-        ActionParam<String> excelTemplateParam = actionParamMap.get("excelTemplateId");
-        ActionParam<String> withDataParam = actionParamMap.get("withData");
+        ActionParam<String> dataSetParam = actionParamMap.get("dataSetId"); // 数据集id
+        ActionParam<String> excelTemplateParam = actionParamMap.get("excelTemplateId"); // excel模板id
+        ActionParam<String> withDataParam = actionParamMap.get("withData"); // 是否导出数据
         // 默认没有配置withData就是true
         boolean withData = withDataParam == null || BooleanUtils.toBooleanObject(withDataParam.getValue()) == null ? true : BooleanUtils.toBooleanObject(withDataParam.getValue());
         // 如果要withData, 但又没有dataSet，失败
@@ -89,7 +98,7 @@ public class ExcelExportButtonAction implements Action<File> {
              */
             if (withData) {
                 GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(loginUser.getLoginName(), String.valueOf(loginUser.getId()));
-                data = excelService.queryByConditions(null, dataSetParam.getValue().toString(), excelTemplateParam.getValue(), defaultDsContext); // 默认导出1000条
+                data = excelService.queryByConditions(schemaId, queryConditionList, null, null, dataSetParam.getValue().toString(), excelTemplateParam.getValue(), defaultDsContext); // 默认导出1000条
                 if (data == null) {
                     throw new ProcessFailedException("数据为空，无法执行导出操作。");
                 }
@@ -102,6 +111,8 @@ public class ExcelExportButtonAction implements Action<File> {
             logger.error("系统初始化异常！", e);
         } catch (SystemConfigException e) {
             logger.error(e.getMessage(), e);
+        } catch (InvalidDataException e) {
+            throw new ValidationFailedException("根据模板导出Excel失败！" + e.getMessage());
         }
         return file;
     }

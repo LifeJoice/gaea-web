@@ -143,7 +143,7 @@ public class GaeaSqlProcessor {
      * @param gaeaDataSet
      * @param primaryTable
      * @param conditionSet      条件。
-     * @param page
+     * @param page              可以为空。为空表示查询不设数量限制。
      * @param defaultDsContext  主要用权限过滤，和SQL中的表达式（如果有）的解析。
      * @param queryConditionDTO 可以为空。查询的条件的值。这个一般页面发起的查询有。一般的可以放入到ConditionSet。有点重复了。
      * @return

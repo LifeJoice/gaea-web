@@ -602,6 +602,11 @@ define([
                 data.method = buttonAction.method; // 赋予"method"属性和值. Action必须!
                 // 生成url. 默认：SYS_URL.ACTION.DO_ACTION
                 var submitUrl = gaeaValid.isNull(opts.submitUrl) ? SYS_URL.ACTION.DO_ACTION : opts.submitUrl;
+                // 获取当前已生效的查询条件
+                var gaeaGrid = require("gaeajs-ui-grid");
+                var queryConditions = gaeaGrid.query.getQueryConditions({
+                    id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
+                });
                 /**
                  * 如果是获取文件的action，例如导出，不能用ajax。必须用submit才行。
                  */
@@ -611,6 +616,7 @@ define([
                         '<input type="hidden" name="method" value="<%= METHOD %>">' +
                         '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
                         '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
+                        '<input type="hidden" name="filters" value="">' +
                         '</form>';
                     var formHtmlTemplate = _.template(submitFormHtml);
                     var $form = $(formHtmlTemplate({
@@ -619,6 +625,8 @@ define([
                         SCHEMA_ID: data.schemaId,
                         BUTTON_ID: button.id
                     }));
+                    // 通过jQuery注入值，给json双引号等转义
+                    $form.children("[name='filters']").val(JSON.stringify(queryConditions));
                     // create form
                     // 必须append到body中，否则报错：Form submission canceled because the form is not connected
                     // 原因：According to the HTML standards, if the form is not associated browsing context(document), form submission will be aborted.
