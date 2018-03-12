@@ -42,7 +42,7 @@
   LEFT JOIN gaea_sys_roles_authorities rauth
     ON auth.id = rauth.authority_id
   LEFT JOIN gaea_sys_roles r
-    ON rauth.Role_Id = r.id]]>
+    ON rauth.Role_Id = r.id #{#where} ]]>
         </data-sql>
         <where>
             <condition-set id="selectable"
