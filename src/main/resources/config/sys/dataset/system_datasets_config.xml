@@ -14,7 +14,9 @@
     <!-- ++++++++++++++++++++++++++++++++++++  权限资源关系复选框  ++++++++++++++++++++++++++++++++++++ -->
     <dataset id="DS_AUTH_RESOURCE" table="GAEA_SYS_AUTHORITIES_RESOURCES" cache-type="auto" expire-time="1ms|s|min|d">
         <data-sql>
-            <![CDATA[SELECT res.id value, res.name text FROM gaea_sys_resources res LEFT JOIN gaea_sys_authorities_resources auRes ON res.id=auRes.RESOURCE_ID LEFT JOIN gaea_sys_authorities auth ON auRes.AUTHORITY_ID=auth.id]]>
+            <![CDATA[SELECT res.id value, res.name text FROM gaea_sys_resources res LEFT JOIN gaea_sys_authorities_resources auRes ON res.id=auRes.RESOURCE_ID LEFT JOIN gaea_sys_authorities auth ON auRes.AUTHORITY_ID=auth.id
+            #{#where}
+            ]]>
         </data-sql>
         <where>
             <condition-set id="selectable" append-sql=" auth.id IS NULL :AUTH_ID_NOT_EQ">

@@ -20,7 +20,9 @@
   LEFT JOIN gaea_sys_users_roles usrRoles
     ON u.id = usrRoles.User_Id
   LEFT JOIN gaea_sys_roles r
-    ON usrRoles.Role_Id=r.id]]>
+    ON usrRoles.Role_Id=r.id
+    #{#where}
+    ]]>
         </data-sql>
         <where>
             <condition-set id="selectable"
