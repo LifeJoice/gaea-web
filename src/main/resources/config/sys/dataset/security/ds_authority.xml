@@ -36,6 +36,7 @@
             on dsAuth.id = dsauthrole.ds_authority_id
                 left join gaea_sys_dataset ds
             on ds.id = dsAuth.Dataset_Id
+            #{#where}
     ]]>
         </data-sql>
         <!--定义查询出来的结果集的字段名转换-->
@@ -64,7 +65,7 @@
     <dataset id="DS_AUTH_ROLES_SELECTABLE" cache-type="auto" authority-type="0">
         <data-sql>
             <![CDATA[
-            select r.* from gaea_sys_roles r
+            select r.* from gaea_sys_roles r #{#where}
     ]]>
         </data-sql>
         <!--定义查询出来的结果集的字段名转换-->
