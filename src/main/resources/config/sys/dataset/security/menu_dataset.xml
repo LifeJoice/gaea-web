@@ -29,6 +29,7 @@
         <data-sql>
             <![CDATA[
             SELECT ID,NAME FROM GAEA_SYS_MENUS
+            #{#where}
             ]]>
         </data-sql>
         <!--定义查询出来的结果集的字段名转换-->

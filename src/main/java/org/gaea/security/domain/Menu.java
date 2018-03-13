@@ -26,7 +26,7 @@ public class Menu {
     private Integer level;          // 菜单树中的级别
     @Column(name = "STATUS")
     private Integer status;         // -1 删除 0 禁用 1 可用
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PARENT_ID")
     private Menu parent;
     public static final int LEVEL_2 = 2;
@@ -80,5 +80,13 @@ public class Menu {
 
     public void setParent(Menu parent) {
         this.parent = parent;
+    }
+
+    public List<Menu> getSubMenus() {
+        return subMenus;
+    }
+
+    public void setSubMenus(List<Menu> subMenus) {
+        this.subMenus = subMenus;
     }
 }
