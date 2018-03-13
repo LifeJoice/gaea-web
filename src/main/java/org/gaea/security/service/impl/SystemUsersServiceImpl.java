@@ -259,6 +259,7 @@ public class SystemUsersServiceImpl implements SystemUsersService {
         return realKey.toUpperCase();
     }
 
+    @Override
     public String getUserRoleCacheKey(String loginName) throws SystemConfigException {
         String roleRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_ROLES);
         if (StringUtils.isEmpty(roleRootKey)) {

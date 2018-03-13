@@ -26,6 +26,8 @@ public interface SystemUsersService {
 
     String[] getCacheUserRoles(String loginName) throws ValidationFailedException, SystemConfigException;
 
+    String getUserRoleCacheKey(String loginName) throws SystemConfigException;
+
     boolean isLogin(String loginName) throws SystemConfigException, ValidationFailedException;
 
     void delete(List<User> userList) throws ValidationFailedException;
