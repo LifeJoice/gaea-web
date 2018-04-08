@@ -1786,9 +1786,9 @@
 					if (top < 0) {
 						top = 0;
 					}
-					if (left + datetimepicker[0].offsetWidth > $(window).width()) {
-						left = $(window).width() - datetimepicker[0].offsetWidth;
-					}
+					//if (left + datetimepicker[0].offsetWidth > $(window).width()) {
+					//	left = $(window).width() - datetimepicker[0].offsetWidth;
+					//}
 				}
 				datetimepicker.css({
 					left: left,
