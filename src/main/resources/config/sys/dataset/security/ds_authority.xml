@@ -84,7 +84,7 @@
                         on dsAuth.id = dsauthrole.ds_authority_id
                       left join gaea_sys_dataset ds
                         on ds.id = dsAuth.Dataset_Id
-                     WHERE :DS_EQ_COND :DS_AUTH_EQ_COND )">
+                     WHERE #{#DS_EQ_COND} #{#DS_AUTH_EQ_COND} )">
                 <none propName="ds.name" op="eq" placeholder="DS_EQ_COND"></none>
                 <and propName="dsAuth.name" op="eq" placeholder="DS_AUTH_EQ_COND"></and>
             </condition-set>

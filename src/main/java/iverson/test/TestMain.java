@@ -28,25 +28,24 @@ public class TestMain {
         String gaea$value = "hello";
         String $gaea_value = "hello";
         System.out.println(gaea$value + "  、  " + $gaea_value);
-        // -------------------------------------------------------------- Test Enum --------------------------------------------------------------
+        // -------------------------------------------------------------- Test SPEL --------------------------------------------------------------
         ExpressionParser parser = new SpelExpressionParser();
         ParserContext parserContext = new GaeaSqlParserContext();
         User user = new User();
         user.setName("IVerson");
         Map contextMap = new HashMap();
         contextMap.put("gaea_value", 2);
+//        contextMap.put("abc", "");
         StandardEvaluationContext context = new StandardEvaluationContext(user);
         context.setVariables(contextMap);
         Expression expression =
-                parser.parseExpression("#{#gaea_value-1} and #{name}", parserContext);
+                parser.parseExpression("#{#gaea_value-1} and #{name} and #{'hi,'.concat(#abc==null?'man': #abc)}", parserContext);
         String parseResult = expression.getValue(context).toString();
         System.out.println("Spring EL解析结果：" + parseResult);
 
+        // -------------------------------------------------------------- Test SQL --------------------------------------------------------------
         SQL sq = new SQL().SELECT("*").FROM("Test").WHERE("name='iverson'").ORDER_BY("id,name").GROUP_BY("price,age");
         System.out.println("SQL:\n" + sq.toString());
-
-        StringBuilder sb = new StringBuilder("aaa");
-        System.out.println(sb.insert(0, "This is "));
     }
 
     enum TestEnum {

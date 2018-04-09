@@ -6,7 +6,7 @@
 
     <groupId>org.gaea</groupId>
     <artifactId>gaea-web</artifactId>
-    <version>0.5.3.5-SNAPSHOT</version>
+    <version>0.5.3.6.3-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>

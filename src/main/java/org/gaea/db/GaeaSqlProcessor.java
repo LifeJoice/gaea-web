@@ -59,12 +59,14 @@ public class GaeaSqlProcessor {
 //        MySQL56InnoDBDialect dialect = new MySQL56InnoDBDialect();
         MapSqlParameterSource params = null;
         /* 拼凑【WHERE】条件语句 */
-        String whereCause = genWhereString(conditions);
+        String whereCause = genWhereString(conditions, "", sql);
         params = conditions == null ? new MapSqlParameterSource() : genWhereParams(conditions, defaultDsContext);
         if (StringUtils.isNotEmpty(whereCause)) {
             sql = sql + " WHERE " + whereCause;
         }
         /* 转换SQL里面的表达式 */
+        // 转换自定义占位符
+//        sql = parsePlaceHolder(sql, conditions);
         /**
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
@@ -91,7 +93,7 @@ public class GaeaSqlProcessor {
         StringBuilder whereCause = new StringBuilder();
         /* 拼凑【WHERE】条件语句 */
 //        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
-        whereCause.append(parseConditionSet(conditionSet, queryConditionDTO));
+        whereCause.append(parseConditionSet(sql, conditionSet, queryConditionDTO));
         /**
          * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
          * else 按条件对象，拼凑条件参数值
@@ -114,7 +116,13 @@ public class GaeaSqlProcessor {
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
          */
-        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause));
+
+        // 先把where里面的占位符转换
+        whereCause = new StringBuilder(gaeaSqlExpressionParser.parse(whereCause.toString(), defaultDsContext, getExtraContext(whereCause, conditionSet, queryConditionDTO)));
+        // 再把where作为占位符上下文，给整句sql使用（转换sql里面的#where）
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause, conditionSet, queryConditionDTO));
+        // 转换自定义占位符
+//        sql = parsePlaceHolder(sql, conditionSet, queryConditionDTO);
         // 查询
         PageResult pageResult = query(sql, params, gaeaDataSet.getPrimaryTable(), null);
 
@@ -156,7 +164,7 @@ public class GaeaSqlProcessor {
         StringBuilder whereCause = new StringBuilder();
         /* 拼凑【WHERE】条件语句 */
 //        String whereCause = parseConditionSet(conditionSet, queryConditionDTO);
-        whereCause.append(parseConditionSet(conditionSet, queryConditionDTO));
+        whereCause.append(parseConditionSet(sql, conditionSet, queryConditionDTO));
         /**
          * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
          * else 按条件对象，拼凑条件参数值
@@ -176,7 +184,10 @@ public class GaeaSqlProcessor {
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
          */
-        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause));
+        // 先把where里面的占位符转换
+        whereCause = new StringBuilder(gaeaSqlExpressionParser.parse(whereCause.toString(), defaultDsContext, getExtraContext(whereCause, conditionSet, queryConditionDTO)));
+        // 再把where作为占位符上下文，给整句sql使用（转换sql里面的#where）
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause, conditionSet, queryConditionDTO));
         // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
@@ -205,7 +216,7 @@ public class GaeaSqlProcessor {
             for (ConditionSet conditionSet : conditionSetMap.keySet()) {
                 DataSetCommonQueryConditionDTO queryConditionDTO = conditionSetMap.get(conditionSet);
                 /* 拼凑【WHERE】条件语句 */
-                whereCause.append(parseConditionSet(conditionSet, queryConditionDTO));
+                whereCause.append(parseConditionSet(sql, conditionSet, queryConditionDTO));
                 /**
                  * 如果没有条件对象，则创建一个空的MapSqlParameterSource.
                  * else 按条件对象，拼凑条件参数值
@@ -231,29 +242,52 @@ public class GaeaSqlProcessor {
          * 如果defaultDsContext不为空，则对sql进行表达式转换。例如：
          * SQL里面可能有一些需要替换为当前登录名的、角色的等，用的是SPEL表达式，需要动态替换。
          */
-        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, getExtraContext(whereCause));
+        Map extraContextMap = new HashMap();
+        // 转换自定义占位符
+        for (ConditionSet conditionSet : conditionSetMap.keySet()) {
+            DataSetCommonQueryConditionDTO queryConditionDTO = conditionSetMap.get(conditionSet);
+            extraContextMap.putAll(getExtraContext(whereCause, conditionSet, queryConditionDTO));
+        }
+        sql = gaeaSqlExpressionParser.parse(sql, defaultDsContext, extraContextMap);
+//        // 转换自定义占位符
+//        for (ConditionSet conditionSet : conditionSetMap.keySet()) {
+//            DataSetCommonQueryConditionDTO queryConditionDTO = conditionSetMap.get(conditionSet);
+//            sql = parsePlaceHolder(sql, conditionSet, queryConditionDTO);
+//        }
         // 查询
         PageResult pageResult = query(sql, params, primaryTable, page);
         return pageResult;
     }
 
     /**
-     * 根据查询条件，拼凑SQL的WHERE语句（不包含WHERE关键字）。
+     * 根据查询条件，拼凑SQL的WHERE语句（不包含WHERE关键字）。<br/>
+     * 如果占位符定义为空，或者在sql/whereSql里面都找不到占位符，就直接把条件当SQL。否则就放后面处理。
      *
      * @param conditions
+     * @param baseWhereSql    如果where本身已经有一句基础了。在此基础上构造。例如, 当前主要是：conditionSet的appendSql.
+     * @param sql             主SQL。用于检测里面有没有占位符。
      * @return
      */
-    private String genWhereString(List<QueryCondition> conditions) throws ValidationFailedException {
+    private String genWhereString(List<QueryCondition> conditions, String baseWhereSql, String sql) throws ValidationFailedException {
         if (conditions == null || conditions.isEmpty()) {
             return "";
         }
         StringBuilder whereSql = new StringBuilder("");
+        // 如果where本身已经有一句基础了。在此基础上构造。
+        if (StringUtils.isNotEmpty(baseWhereSql)) {
+            whereSql.append(baseWhereSql);
+        }
+
         for (QueryCondition cond : conditions) {
+            String placeholderName = cond.getPlaceholder(); // 占位符
+//            String fullPlaceholder = PLACEHOLDER_PREFIX + placeholderName; // 完整的占位符
             String columnName = cond.getPropName();
             // 查询条件，变量名或值为空就略过
             if (StringUtils.isEmpty(columnName)) {
                 continue;
             }
+            StringBuffer conditionSql = new StringBuffer();
+            // 快捷查询区的条件，默认都只能用and
             if (StringUtils.isNotEmpty(whereSql.toString())) {
                 whereSql.append(" AND ");
             }
@@ -264,12 +298,19 @@ public class GaeaSqlProcessor {
              * else
              *      username = :USER_NAME
              */
-            whereSql.append(parseCondition(cond));
+            conditionSql.append(parseCondition(cond));
 //            if (StringUtils.isNotEmpty(cond.getPropValue())) {
 //                whereSql.append(MessageFormat.format("{0} {1} :{2}", columnName.toUpperCase(), parseFieldOp(cond), columnName.toUpperCase()));
 //            } else {
 //                whereSql.append(MessageFormat.format("{0} {1}", columnName.toUpperCase(), parseFieldOp(cond)));
 //            }
+
+            // 如果占位符定义为空，或者在sql/whereSql里面都找不到占位符，就直接把条件当SQL。否则就放后面处理。
+            // 主SQL有占位符也不能粘贴条件语句，因为这样会重复
+            if (StringUtils.isEmpty(placeholderName) ||
+                    (!gaeaSqlExpressionParser.hasExpression(baseWhereSql, placeholderName) && !gaeaSqlExpressionParser.hasExpression(sql, placeholderName))) {
+                whereSql.append(conditionSql);
+            }
         }
         return whereSql.toString();
     }
@@ -317,7 +358,9 @@ public class GaeaSqlProcessor {
      * <p>
      * 包括Spring查询占位符的生成、各种关系符的转换（OR,AND)、LIKE的不同查询情况的处理、appendSQL的替换等。
      * </p>
-     * <p/>
+     * <p>
+     *     如果是有append-sql的情况
+     * </p>
      * <p>
      * param name支持'.'所以<br/><b>
      * R.CREATE_BY = :R.CREATE_BY
@@ -325,12 +368,14 @@ public class GaeaSqlProcessor {
      * 这样的命名是没有问题的.
      * </p>
      *
+     *
+     * @param sql               协助判断其中没有SPEL表达式，才会把条件转换成where
      * @param conditionSet
      * @param queryConditionDTO 可以为空
      * @return
      * @throws ValidationFailedException
      */
-    public String parseConditionSet(ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+    public String parseConditionSet(String sql, ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
         if (conditionSet == null) {
             return "";
         }
@@ -344,13 +389,13 @@ public class GaeaSqlProcessor {
          *      appendSQL需要的转换placeholder，然后替换placeholder的位置。
          */
         if (StringUtils.isEmpty(appendSql) && CollectionUtils.isNotEmpty(newConditions)) {
-            String whereCause = genWhereString(newConditions);
+            String whereCause = genWhereString(newConditions, appendSql, sql);
             whereSql.append(whereCause);
         } else {
             if (CollectionUtils.isNotEmpty(newConditions)) {
                 for (QueryCondition cond : newConditions) {
-                    String placeholderName = cond.getPlaceholder();
-                    String fullPlaceholder = PLACEHOLDER_PREFIX + placeholderName;
+                    String placeholderName = cond.getPlaceholder(); // 占位符
+//                    String fullPlaceholder = PLACEHOLDER_PREFIX + placeholderName; // 完整的占位符
                     String columnName = cond.getPropName();
                     // 查询条件，变量名或值为空就略过
                     if (StringUtils.isEmpty(columnName)) {
@@ -384,10 +429,11 @@ public class GaeaSqlProcessor {
                      *      （例如：<or field="auth.id" op="ne" placeholder="AUTH_ID_NOT_EQ">）
                      *      转换后的SQL替换掉placeholder的位置。
                      */
-                    if (StringUtils.isEmpty(placeholderName) || !StringUtils.contains(appendSql, fullPlaceholder)) {
+                    if (StringUtils.isEmpty(placeholderName) ||
+                            (!gaeaSqlExpressionParser.hasExpression(appendSql, placeholderName) && !gaeaSqlExpressionParser.hasExpression(sql, placeholderName))) {
                         appendSql += conditionSql;
-                    } else {
-                        appendSql = StringUtils.replace(appendSql, fullPlaceholder, conditionSql.toString());
+//                    } else {
+//                        appendSql = StringUtils.replace(appendSql, fullPlaceholder, conditionSql.toString());
                     }
                 }
                 whereSql.append(appendSql);
@@ -451,6 +497,9 @@ public class GaeaSqlProcessor {
      * @throws ValidationFailedException
      */
     public List<QueryCondition> getConditions(ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+        if (conditionSet == null) {
+            return new ArrayList<QueryCondition>();
+        }
         List<QueryCondition> newConditions = new ArrayList<QueryCondition>();// 按通用查询组装标准查询对象
         if (queryConditionDTO != null && conditionSet.getConditions().size() != queryConditionDTO.getValues().size()) {
             throw new ValidationFailedException("查询失败！conditionSet的值和queryCondition的值的个数不匹配。可能XML配置和页面值配置不匹配导致。请检查。");
@@ -691,18 +740,123 @@ public class GaeaSqlProcessor {
 //        return sqlBuilder.toString();
     }
 
+//    private String parsePlaceHolder(String sql, ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+//        List<QueryCondition> newConditions = getConditions(conditionSet, queryConditionDTO);// 按通用查询组装标准查询对象
+//        return parsePlaceHolder(sql, newConditions);
+//    }
+
+    /**
+     * 转换SQL里面的相关占位符。主要是把newConditions转换为属性值，去替换SQL里面的占位符。占位符使用spel表达式。
+     * @param sql
+     * @param newConditions
+     * @return
+     * @throws ValidationFailedException
+     */
+//    private String parsePlaceHolder(String sql, List<QueryCondition> newConditions) throws ValidationFailedException {
+//        if (CollectionUtils.isNotEmpty(newConditions)) {
+//            for (QueryCondition cond : newConditions) {
+//                    String placeholderName = cond.getPlaceholder();
+//                    String fullPlaceholder = PLACEHOLDER_PREFIX + placeholderName;
+////                String columnName = cond.getPropName();
+//                // 查询条件，变量名或值为空就略过
+////                if (StringUtils.isEmpty(columnName)) {
+////                    continue;
+////                }
+//                StringBuffer conditionSql = new StringBuffer();
+////                // 如果condOp为空，默认就当AND处理。正常应该是不会的。因为condOp是XML元素名。
+//                String op = parseCondOp(cond);
+//                conditionSql.append(op);
+//                /**
+//                 * 拼凑查询条件.
+//                 * if 关系符是 eq/neq( is null / is not null)这类查询, 直接用操作符。例如：
+//                 *      username is not null
+//                 * else
+//                 *      username = :USER_NAME
+//                 */
+//                conditionSql.append(parseCondition(cond));
+//                /**
+//                 * if 没有placeholder,或者placeholder找不到
+//                 *      直接加上条件SQL即可
+//                 * else
+//                 *      把条件SQL配置项
+//                 *      （例如：<or field="auth.id" op="ne" placeholder="AUTH_ID_NOT_EQ">）
+//                 *      转换后的SQL替换掉placeholder的位置。
+//                 */
+//                    if (StringUtils.isNotEmpty(placeholderName) && StringUtils.contains(sql, fullPlaceholder)) {
+////                appendSql += conditionSql;
+////                    } else {
+//                        sql = StringUtils.replace(sql, fullPlaceholder, conditionSql.toString());
+//                    }
+//            }
+////            whereSql.append(appendSql);
+//        }
+//        return sql;
+//    }
+
+    /**
+     * 把条件集转换为可以为SPEL调用的变量，放到contextMap中。这样SQL表达式就可以直接用了。
+     *
+     * @param newConditions
+     * @param contextMap
+     * @throws ValidationFailedException
+     */
+    private void setPlaceholderContext(List<QueryCondition> newConditions, Map contextMap) throws ValidationFailedException {
+
+        if (CollectionUtils.isNotEmpty(newConditions)) {
+            for (QueryCondition cond : newConditions) {
+                String placeholderName = cond.getPlaceholder();
+                if (StringUtils.isEmpty(placeholderName)) {
+                    continue;
+                }
+                if (StringUtils.containsAny(placeholderName, "#")) {
+                    throw new ValidationFailedException("查询语句中，place-holder不允许包含特殊字符'#'. ");
+                }
+                StringBuffer conditionSql = new StringBuffer();
+                // 如果condOp为空，默认就当AND处理。正常应该是不会的。因为condOp是XML元素名。
+                String op = parseCondOp(cond);
+                conditionSql.append(op);
+                /**
+                 * 拼凑查询条件.
+                 * if 关系符是 eq/neq( is null / is not null)这类查询, 直接用操作符。例如：
+                 *      username is not null
+                 * else
+                 *      username = :USER_NAME
+                 */
+                conditionSql.append(parseCondition(cond));
+                // 以placeholderName作为名，放到SPEL的上下文对象中去使用
+                contextMap.put(placeholderName, conditionSql.toString());
+            }
+        }
+    }
+
+    /**
+     * 获取额外的上下文数据。因为SQL中会有很多SPEL表达式引用，这些引用的动态变量，例如查询条件等，在这里被处理并放入上下文中供调用。
+     *
+     * @param whereCause
+     * @param conditionSet
+     * @param queryConditionDTO
+     * @return
+     * @throws ValidationFailedException
+     */
+    private Map getExtraContext(StringBuilder whereCause, ConditionSet conditionSet, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException {
+        List<QueryCondition> newConditions = getConditions(conditionSet, queryConditionDTO);// 按通用查询组装标准查询对象
+        return getExtraContext(whereCause, newConditions);
+    }
+
     /**
      * 获取查询需要的一些额外的属性，作为SPEL表达式所需的参数。
      *
      * @param whereCause
      * @return
      */
-    private Map getExtraContext(StringBuilder whereCause) {
+    private Map getExtraContext(StringBuilder whereCause, List<QueryCondition> newConditions) throws ValidationFailedException {
         Map contextMap = new HashMap();
         if (StringUtils.isNotEmpty(whereCause)) {
             whereCause.insert(0, " WHERE ");
         }
         contextMap.put(GaeaSpelKeywordDefinition.SQL_WHERE, whereCause);
+        // 把某些条件转换为上下文参数，可以供嵌入SQL不同位置（基于place-holder配置）
+        setPlaceholderContext(newConditions, contextMap);
         return contextMap;
     }
 }

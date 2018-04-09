@@ -19,7 +19,7 @@
             ]]>
         </data-sql>
         <where>
-            <condition-set id="selectable" append-sql=" auth.id IS NULL :AUTH_ID_NOT_EQ">
+            <condition-set id="selectable" append-sql=" auth.id IS NULL #{#AUTH_ID_NOT_EQ}">
                 <or propName="auth.id" op="ne" placeholder="AUTH_ID_NOT_EQ"></or>
             </condition-set>
             <condition-set id="selected">
