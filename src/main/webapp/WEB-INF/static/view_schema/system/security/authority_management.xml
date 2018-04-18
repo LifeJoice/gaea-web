@@ -83,6 +83,8 @@
                     <!--visible="true" sortable="false" html-width="240" data-type="String" />-->
             <column id="description" name="description" label="资源说明" db-column-name="DESCRIPTION"
                     visible="true" sortable="false" html-width="120" data-type="String" />
+            <column id="resourceUrl" name="resourceUrl" label="资源链接" db-column-name="resource_url"
+                    visible="true" sortable="false" html-width="500" data-type="String"/>
         </grid>
     </views>
 </ur-schema>

@@ -41,9 +41,16 @@ public class SystemMenusController {
         return "system/security/menu_management.xml";
     }
 
-    @RequestMapping(value = "/showCreateUpdateForm", produces = "plain/text; charset=UTF-8")
-    public String showCreateUpdateForm() {
+    // 新增页面
+    @RequestMapping(value = "/showCreateForm", produces = "plain/text; charset=UTF-8")
+    public String showCreateForm() {
         return "/gaea-system/security/menu/crud-form.html";
+    }
+
+    // 更新页面
+    @RequestMapping(value = "/showUpdateForm", produces = "plain/text; charset=UTF-8")
+    public String showUpdateForm() {
+        return "/gaea-system/security/menu/update-form.html";
     }
 
     /**

@@ -299,8 +299,9 @@ define([
                  * @param {string} opt.bindContainerId 当前元素所在的大的绑定容器(data-gaea-data-bind-area) id （因为ko binding不可能只绑定一个下拉框的数据，一般是一个表单）
                  * @param {string} [opt.bindAsObject]   bindAsObject暂时未启用和测试。预留。
                  * @param {object} data
+                 * @param {object} value                当前下拉框的值。就初始化完后设定的值。
                  */
-                setData: function (opt, data) {
+                setData: function (opt, data, value) {
                     if (gaeaValid.isNotNull(data)) {
                         opt.data = data;
                         gaeaData.select.resetData(opt);
@@ -311,6 +312,10 @@ define([
                         }
                     } else {
                         gaeaData.select.removeAllData(opt);
+                    }
+                    // 如果有默认值，就赋值
+                    if (gaeaValid.isNotNull(value)) {
+                        $("#" + opt.bindSelectId).val(value);
                     }
                 },
                 /**
@@ -324,8 +329,9 @@ define([
                      * 触发下拉框的数据刷新。
                      * @param target
                      * @param data  这个一般是event data
+                     * @param value 当前下拉框的值。就初始化完后设定的值。
                      */
-                    triggerReloadData: function (target, data) {
+                    triggerReloadData: function (target, data, value) {
                         if (gaeaValid.isNull(target)) {
                             throw "触发级联控件的数据刷新。输入参数id不允许为空！";
                         }
@@ -347,7 +353,7 @@ define([
                             },
                             isAsync: true,// 异步调用
                             success: function (data) {
-                                gaeaData.select.setData(opts, data);
+                                gaeaData.select.setData(opts, data, value);
                             }
                         });
                     }

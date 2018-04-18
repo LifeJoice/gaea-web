@@ -12,6 +12,7 @@ public class MenuDTO {
     private int level;
     private String url;
     private List<MenuDTO> subMenus = new ArrayList<MenuDTO>();
+    private String schemaId; // 对应的XML Schema Id。接口用于获取json渲染。
 
     public String getName() {
         return name;
@@ -43,5 +44,13 @@ public class MenuDTO {
 
     public void setSubMenus(List<MenuDTO> subMenus) {
         this.subMenus = subMenus;
+    }
+
+    public String getSchemaId() {
+        return schemaId;
+    }
+
+    public void setSchemaId(String schemaId) {
+        this.schemaId = schemaId;
     }
 }

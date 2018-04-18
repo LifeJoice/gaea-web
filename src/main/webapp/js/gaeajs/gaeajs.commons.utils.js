@@ -319,10 +319,11 @@ define([
              *     不支持grid。这个需要组件另外处理。
              * </p>
              * @param {object} opts
-             * @param {string} opts.id                  作废了！要填充入的容器（例如div）id
+             * @param {string} opts.id                      作废了！要填充入的容器（例如div）id
              * @param {string} opts.target                  要填充入的容器（例如div）id
-             * @param {string} [opts.name]              父级的前缀。是一串按父级名字拼凑而成的。
-             * @param {object} opts.data                要填充的数据
+             * @param {string} [opts.name]                  父级的前缀。是一串按父级名字拼凑而成的。
+             * @param {string} [opts.isTriggerEvent=true]   是否触发填充时的事件。例如：填充下拉框触发change。
+             * @param {object} opts.data                    要填充的数据
              */
             fillData: function (opts) {
                 var gaeaEvents = require("gaeajs-ui-events");
@@ -332,6 +333,10 @@ define([
                 if (gaeaValid.isNull(opts.name)) {
                     opts.name = "";
                 }
+                // 默认值
+                _.defaults(opts, {
+                    isTriggerEvent: true
+                });
                 var SEPERATOR = ".";
                 // 一个html dom元素的name比较、检索器
                 var jqIgnoreCaseFilter = function (argName) {
@@ -363,7 +368,11 @@ define([
                             var $this = $(this);
                             $.each(opts.data, function (i, value) {
                                 if (gaeaString.equalsIgnoreCase(value, $this.val())) {
-                                    $this.prop("checked", true).trigger("change");
+                                    $this.prop("checked", true);
+                                    // 如果需要触发，才触发
+                                    if (opts.isTriggerEvent) {
+                                        $this.trigger("change");
+                                    }
                                 }
                             });
                         });
@@ -420,7 +429,11 @@ define([
                     var $selectTreeFilter = $(opts.target).find("[data-" + GAEA_UI_DEFINE.UI.SELECT_TREE_DEFINE + "]").filter(jqIgnoreCaseFilter(opts.name));
                     // 设定值
                     if ($radioFilter.length > 0) {
-                        $radioFilter.filter("[value='" + opts.data + "']").prop("checked", true).trigger("change");
+                        $radioFilter.filter("[value='" + opts.data + "']").prop("checked", true);
+                        // 如果需要触发，才触发
+                        if (opts.isTriggerEvent) {
+                            $radioFilter.filter("[value='" + opts.data + "']").trigger("change");
+                        }
                     } else if ($gaeaImgFilter.length > 0) {
                         // 填充表单里面的图片字段
                         var optsStr = $gaeaImgFilter.data(GAEA_UI_DEFINE.UI.IMG_DEFINE); // = data-gaea-ui-img
@@ -436,6 +449,13 @@ define([
                         if ($filterResult.length > 0) {
                             // 普通输入框，直接用val方法设置
                             $filterResult.val(opts.data);
+                            // 下拉框
+                            // 如果需要触发，才触发
+                            if ($filterResult.is("select")) {
+                                if (opts.isTriggerEvent) {
+                                    $filterResult.change();
+                                }
+                            }
                             // 写入值，并触发“fill_data_complete”事件。
                             $filterResult.trigger(gaeaEvents.DEFINE.UI.FILL_DATA_COMPLETE);
                         }

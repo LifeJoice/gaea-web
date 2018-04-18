@@ -3,7 +3,9 @@
 <dataset-definition>
     <dataset id="DS_AUTHORITY_MANAGEMENT" primary-table="GAEA_SYS_AUTHORITIES" authority-type="0">
         <data-sql>
-            <![CDATA[SELECT * FROM GAEA_SYS_AUTHORITIES]]>
+            <![CDATA[
+            select au.*,r.resource_url from gaea_sys_authorities au left join gaea_sys_authorities_resources ar on au.id=ar.authority_id left join gaea_sys_resources r on ar.resource_id=r.id
+            ]]>
         </data-sql>
         <where>
             <condition-set id="byId">

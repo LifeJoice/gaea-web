@@ -33,6 +33,8 @@ public class Menu {
     public static final int LEVEL_3 = 3;
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Menu> subMenus;
+    @Column(name = "XML_SCHEMA_ID")
+    private String schemaId; // 对应的XML Schema Id。接口用于获取json渲染。
 
     public String getId() {
         return id;
@@ -88,5 +90,13 @@ public class Menu {
 
     public void setSubMenus(List<Menu> subMenus) {
         this.subMenus = subMenus;
+    }
+
+    public String getSchemaId() {
+        return schemaId;
+    }
+
+    public void setSchemaId(String schemaId) {
+        this.schemaId = schemaId;
     }
 }

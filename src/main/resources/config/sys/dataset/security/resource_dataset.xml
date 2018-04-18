@@ -15,6 +15,19 @@
         </columns-define>
     </dataset>
 
+    <!-- ********************************************** 全部资源 ********************************************** -->
+    <dataset id="DS_RESOURCE_ALL" cache-type="auto" authority-type="0">
+        <data-sql>
+            <![CDATA[
+            SELECT resources.* FROM GAEA_SYS_RESOURCES resources
+            ]]>
+        </data-sql>
+        <!--定义查询出来的结果集的字段名转换-->
+        <columns-define>
+            <column name="value" db-column-name="ID" data-type="String"/>
+            <column name="text" db-column-name="NAME" data-type="String"/>
+        </columns-define>
+    </dataset>
     <!-- ********************************************** 资源管理数据集 ********************************************** -->
     <!-- 这个是列表页用 -->
     <dataset id="DS_RESOURCE_MANAGEMENT_LIST" primary-table="GAEA_SYS_RESOURCES">

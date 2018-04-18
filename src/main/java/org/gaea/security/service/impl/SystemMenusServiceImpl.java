@@ -73,8 +73,9 @@ public class SystemMenusServiceImpl implements SystemMenusService {
                             menuDTOMap.put(lv2MenuName, parentMenu);
                         }
                         MenuDTO menuDTO = new MenuDTO();
-                        menuDTO.setName(menu.getName());
-                        menuDTO.setLevel(menu.getLevel());
+                        BeanUtils.copyProperties(menu, menuDTO, "subMenus");
+//                        menuDTO.setName(menu.getName());
+//                        menuDTO.setLevel(menu.getLevel());
                         menuDTO.setUrl(menu.getResource().getResourceUrl());
                         parentMenu.getSubMenus().add(menuDTO);
                     }
@@ -99,6 +100,7 @@ public class SystemMenusServiceImpl implements SystemMenusService {
         result.put("menu.id", menu.getId());
         result.put("menu.name", menu.getName());
         result.put("menu.level", menu.getLevel());
+        result.put("menu.schemaId", menu.getSchemaId());
         if (menu.getParent() != null) {
             result.put("menu.parent.id", menu.getParent().getId());
         }

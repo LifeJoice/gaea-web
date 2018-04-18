@@ -610,8 +610,20 @@ define(["jquery", "underscore", "gaeajs-common-utils-validate", "gaeajs-common-u
                 var gaeaData = require("gaeajs-data");
                 // 注册reload_data事件
                 events.registerListener(events.DEFINE.UI.RELOAD_DATA, target, function (event, data) {
+                    var gaeaDialog = require("gaeajs-ui-dialog");
+                    // 找到当前组件所在的弹出框，然后获取编辑的数据（如果是编辑功能）
+                    var $rootDialog = gaeaDialog.utils.findRootDialog($target);
+                    var value = "";
+                    if ($rootDialog.length > 0) {
+                        var dialogEditData = $rootDialog.data("gaeaOptions")["editData"]; // 编辑记录对应的前端缓存数据
+                        var targetName = $target.attr("name"); // 当前这个reload组件的name
+                        // 如果当前这个触发组件在编辑功能中有值，提取值。在级联触发后更新值。
+                        if (gaeaValid.isNotNull(dialogEditData) && gaeaValid.isNotNull(dialogEditData[targetName])) {
+                            value = dialogEditData[targetName];
+                        }
+                    }
                     // 触发select的数据刷新。因为select是依赖KO的，不能在这里直接刷新。
-                    gaeaData.select.dpSelect.triggerReloadData(target, data);
+                    gaeaData.select.dpSelect.triggerReloadData(target, data, value);
                 });
             }
         };
