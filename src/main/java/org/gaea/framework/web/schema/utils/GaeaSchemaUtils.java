@@ -154,8 +154,8 @@ public class GaeaSchemaUtils {
      * 找到第一个就返回！
      * </p>
      * <p>
-     *     由于SchemaViews.Actions是List<Object>, 所以在XML转换的时候,虽然某个button可能是ExcelExportButtonAction类型的, 但从json转为Actions的时候就变成Map了.<br/>
-     *     这个时候,就需要人工判断method属性,再用对应的类去做强制转换.
+     * 由于SchemaViews.Actions是List<Object>, 所以在XML转换的时候,虽然某个button可能是ExcelExportButtonAction类型的, 但从json转为Actions的时候就变成Map了.<br/>
+     * 这个时候,就需要人工判断method属性,再用对应的类去做强制转换.
      * </p>
      *
      * @param xmlSchema
@@ -325,8 +325,14 @@ public class GaeaSchemaUtils {
         if (CollectionUtils.isNotEmpty(actions.getButtons())) {
             for (Object objButton : actions.getButtons()) {
 
-                if (objButton instanceof SchemaButton) {
-                    SchemaButton button = (SchemaButton) objButton;
+                if (objButton instanceof SchemaButton || objButton instanceof Map) {
+                    SchemaButton button = null;
+                    // 如果从Redis中读出来，可能被转为map对象了
+                    if (objButton instanceof SchemaButton) {
+                        button = (SchemaButton) objButton;
+                    } else {
+                        button = objectMapper.convertValue((Map) objButton, SchemaButton.class);
+                    }
                     // 复制button
                     SchemaButtonJO buttonJO = convert(button);
                     // 添加button
