@@ -19,6 +19,7 @@ public class SchemaViews implements Serializable {
 //    private String htmlId;
     private String title;
     private String contentUrl;      // 准备加载内容到dialog的URL地址
+    private String schemaId;        // xml schema id。这个主要是接口用，如果有人需要不依赖gaea前端开发自己的UI的话。
     private String componentName; // 就是XML的元素名
     private SchemaGrid grid;
     private SchemaGridJO gridJO;
@@ -115,5 +116,13 @@ public class SchemaViews implements Serializable {
 
     public void setComponentName(String componentName) {
         this.componentName = componentName;
+    }
+
+    public String getSchemaId() {
+        return schemaId;
+    }
+
+    public void setSchemaId(String schemaId) {
+        this.schemaId = schemaId;
     }
 }

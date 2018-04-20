@@ -52,7 +52,8 @@
         <!--content-url="/gaea/data/dataset/showDsAuthForm" submit-url="/gaea/data/dataset/add-ds-authority"/>-->
 
         <!-- 这是新页面。表示内容区整个跳转到新的内容。 -->
-        <view id="dsAuthorityMgrView" title="数据集权限管理" content-url="/gaea/data/dataset/auth/management"/>
+        <view id="dsAuthorityMgrView" title="数据集权限管理" content-url="/gaea/data/dataset/auth/management"
+              schema-id="GAEA_SCHEMA_DS_AUTHORITY_MANAGEMENT"/>
 
 
         <!--列表定义-->
