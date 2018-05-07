@@ -452,6 +452,9 @@ define([
             //},
             /**
              * 主要是为了动画效果，初始化容器。
+             * <p>
+             *      <b>注意：嵌入式dialog才可用！</b>
+             * </p>
              * 预初始化dialog的HTML。主要是为了一些交互的效果，需要先有HTML容器的初始化。
              * @param opts
              */
@@ -1348,7 +1351,7 @@ define([
                 //var $dialogForm = $dialog.find("form:first");
                 //var formId = $dialogForm.attr("id");
 
-                if (gaeaValid.isNotNull(options.buttons)) {
+                if (_.isArray(options.buttons) && gaeaValid.isNotNull(options.buttons)) {
                     return dialog.button.getButtons(options);
                 } else {
                     // 没有定义按钮。默认就放“确认”和“取消”两个。
@@ -1571,10 +1574,13 @@ define([
                 },
                 /**
                  * 这个是不经过validator的submit.
-                 * @param options
+                 * @param {object} opts
+                 * @param {object} opts.id              dialog id
+                 * @param {object} opts.submitUrl       提交的路径
+                 * @param {object} opts.submitType      提交的方式。value= ajax|submit
                  */
-                submit: function (options) {
-                    var $dialog = $("#" + options.id);
+                submit: function (opts) {
+                    var $dialog = $("#" + opts.id);
                     var $dialogForm = $dialog.find("form:first");
                     var formId = $dialogForm.attr("id");
                     var requestData = $("#" + formId).serializeObject();
@@ -1593,36 +1599,50 @@ define([
                         requestData = _.extend(requestData, dialogOptions.extraSubmitData);
                     }
                     // 提交
-                    gaeaAjax.post({
-                        url: options.submitUrl,
-                        data: gaeaUtils.data.flattenData(requestData),
-                        success: function (data) {
-                            gaeaNotify.message("保存成功。");
-                            // 刷新grid数据
-                            $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
-                            // 取消数据绑定
-                            gaeaData.unbind(options.id);
-                            // 清空表单内容
-                            $dialogForm.html("");
-                            // 关闭弹出框
-                            dialog.close("#" + options.id);
-                        },
-                        fail: function (data) {
-                            //gaeaNotify.error("保存失败！");
-                            //var responseObj = JSON.parse(data.responseText);
-                            // 处理请求返回结果, 包括成功和失败
-                            gaeaUtils.processResponse(data, {
-                                fail: {
-                                    baseMsg: "处理失败！"
-                                },
-                                success: {
-                                    baseMsg: "操作已经成功！"
-                                }
-                            });
-                        }
-                    });
+
+                    /**
+                     * 如果是获取文件的action，例如导出，不能用ajax。必须用submit才行。
+                     */
+                    if (gaeaString.equalsIgnoreCase(opts.submitType, GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT)) {
+                        // 给form设定额外的值（非ajax提交得给form加入一些input）
+                        gaeaUtils.dom.setFormField({
+                            target: $dialogForm,
+                            params: dialogOptions.extraSubmitData
+                        });
+                        // 提交form
+                        $dialogForm.submit();
+                    } else {
+                        gaeaAjax.post({
+                            url: opts.submitUrl,
+                            data: gaeaUtils.data.flattenData(requestData),
+                            success: function (data) {
+                                gaeaNotify.message("保存成功。");
+                                // 刷新grid数据
+                                $("#" + GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID).trigger(GAEA_EVENTS.DEFINE.UI.GRID.RELOAD);
+                                // 取消数据绑定
+                                gaeaData.unbind(opts.id);
+                                // 清空表单内容
+                                $dialogForm.html("");
+                                // 关闭弹出框
+                                dialog.close("#" + opts.id);
+                            },
+                            fail: function (data) {
+                                //gaeaNotify.error("保存失败！");
+                                //var responseObj = JSON.parse(data.responseText);
+                                // 处理请求返回结果, 包括成功和失败
+                                gaeaUtils.processResponse(data, {
+                                    fail: {
+                                        baseMsg: "处理失败！"
+                                    },
+                                    success: {
+                                        baseMsg: "操作已经成功！"
+                                    }
+                                });
+                            }
+                        });
+                    }
                     //// 刷新数据，其实这里应该优化一下，不该不关三七二十一就刷新
-                    dialog.close("#" + options.id);
+                    dialog.close("#" + opts.id);
 
                 }
             },

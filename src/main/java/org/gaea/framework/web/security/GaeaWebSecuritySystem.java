@@ -2,6 +2,7 @@ package org.gaea.framework.web.security;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gaea.cache.GaeaCacheOperator;
+import org.gaea.exception.LoginFailedException;
 import org.gaea.exception.SysInitException;
 import org.gaea.exception.SystemConfigException;
 import org.gaea.exception.ValidationFailedException;
@@ -12,7 +13,10 @@ import org.gaea.security.jo.UserJO;
 import org.gaea.security.service.impl.SystemUsersServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
@@ -55,6 +59,9 @@ public class GaeaWebSecuritySystem {
      * @throws ValidationFailedException
      */
     public static UserJO getLoginUser() throws SysInitException, SystemConfigException, ValidationFailedException {
+        if (!hasLogin()) {
+            throw new LoginFailedException("未登录或登录已过期。");
+        }
         String userRootKey = SystemProperties.get(WebCommonDefinition.PROP_KEY_REDIS_USER_LOGIN);
         String loginName = getUserName();
         if (StringUtils.isEmpty(userRootKey)) {
@@ -74,6 +81,18 @@ public class GaeaWebSecuritySystem {
         String realKey = SystemUsersServiceImpl.getUserCacheKey(loginName);
         UserJO userJO = gaeaCacheOperator.get(realKey, UserJO.class);
         return userJO;
+    }
+
+    /**
+     * 判断当前状态是否已经登录
+     *
+     * @return
+     */
+    public static boolean hasLogin() {
+        if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
+            return false;
+        }
+        return true;
     }
 
     public static void logout(HttpServletRequest request, HttpServletResponse response, Authentication auth) {

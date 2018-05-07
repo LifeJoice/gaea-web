@@ -132,4 +132,13 @@
         </data-sql>
     </dataset>
     <!-- ++++++++++++++++++++++++++++++++++++  TEST END  ++++++++++++++++++++++++++++++++++++ -->
+
+    <!-- ********************************************** excel导出可选列 ********************************************** -->
+    <dataset id="DEMO_EXCEL_EXPORT_COLUMNS" primary-table="GAEA_SYS_MENUS" authority-type="0">
+        <processor bean-ref="excelExportColumnsDSP">
+            <param name="schemaId" value="GAEA_SCHEMA_DEMO_MANAGEMENT"/>
+            <!--<param name="excelTemplateId" value="EXCEL_EXPORT_DEMO" />-->
+        </processor>
+    </dataset>
+
 </dataset-definition>

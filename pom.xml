@@ -6,7 +6,7 @@
 
     <groupId>org.gaea</groupId>
     <artifactId>gaea-web</artifactId>
-    <version>0.5.3.7.0-SNAPSHOT</version>
+    <version>0.5.4.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
@@ -14,6 +14,7 @@
         <jdkLevel>1.6</jdkLevel>
         <jvmargs>-XX:MaxPermSize=384m -Xms512m -Xmx1024m</jvmargs>
         <gaea.poi.version>0.5.3.7-SNAPSHOT</gaea.poi.version>
+        <gaea.db.version>0.5.4.0-SNAPSHOT</gaea.db.version>
         <spring.version>4.3.7.RELEASE</spring.version>
         <spring.data.jpa.version>1.8.2.RELEASE</spring.data.jpa.version>
         <spring.security.version>4.0.2.RELEASE</spring.security.version>
@@ -37,7 +38,7 @@
         <dependency>
             <groupId>org.gaea</groupId>
             <artifactId>gaea-common-db</artifactId>
-            <version>0.5.3.0-SNAPSHOT</version>
+            <version>${gaea.db.version}</version>
         </dependency>
         <!--Gaea框架的POI包。负责导入导出。-->
         <dependency>

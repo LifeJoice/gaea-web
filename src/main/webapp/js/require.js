@@ -2175,6 +2175,7 @@ require.config({
         "gaeajs-ui-selectTree": '/js/gaeajs/ui/gaea.ui.selectTree',
         "gaeajs-ui-utils": '/js/gaeajs/ui/gaea.ui.utils',
         "gaeajs-ui-dependency": '/js/gaeajs/ui/gaea.ui.dependency',
+        "gaea.ui.excel-export": '/js/gaeajs/ui/gaea.ui.excel-export',
         /* Jquery-UI */
         "jquery-ui-core":'/js/thirdparty/jquery/ui/core',
         "jquery-ui-widget":'/js/thirdparty/jquery/ui/widget',

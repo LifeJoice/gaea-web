@@ -16,6 +16,7 @@ import org.gaea.config.SystemProperties;
 import org.gaea.util.ValidationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -69,6 +70,8 @@ public class GenericExceptionResolver extends AbstractHandlerExceptionResolver {
                 response.setStatus(GaeaException.DEFAULT_FAIL);// 自定义一般校验错误 600
                 GaeaException gaeaException = (GaeaException) ex;
                 debugMessage = gaeaException.getDebugMessage();
+            } else if (ex instanceof LoginFailedException || ex instanceof AuthenticationServiceException) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);// 自定义一般校验错误 401
             }
             /* 解决返回json乱码的问题 */
             response.setContentType("text/xml;charset=utf-8");

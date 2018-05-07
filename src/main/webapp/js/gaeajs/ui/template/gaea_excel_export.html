@@ -1,0 +1,26 @@
+<div id="gaeaExcelExport-ct" class="gaea-form gaea-ui-page" data-gaea-data-bind-area="true">
+    <div class="row">
+        <div class="field-block">
+            <span class="fieldname">导出字段</span>
+                <span class="fieldvalue">
+                    <div id="dsAuthRoleIds" class="gaea-multi-select"
+                         data-gaea-data="name: 'excelFields',
+                    selectable:{
+                        dataset:'DEMO_EXCEL_EXPORT_COLUMNS' },
+                    selected:{}">
+                    </div>
+                </span>
+        </div>
+    </div>
+</div>
+<script>
+    //@ sourceURL=gaea-excel-export-script.js
+    require(["jquery", "underscore", 'underscore-string',
+                'gaeajs-common-utils-validate', "gaeajs-common-utils-string", "gaea.ui.excel-export"],
+            function ($, _, _s,
+                      gaeaValid, gaeaString, gaeaExport) {
+                gaeaExport.init({
+                    id: "gaeaExcelExport-ct"
+                });
+            });
+</script>

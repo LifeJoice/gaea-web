@@ -1,12 +1,12 @@
 package org.gaea.framework.web.schema.view.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.collections.CollectionUtils;
 import org.gaea.config.SystemProperties;
 import org.gaea.db.QueryCondition;
 import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.WebCommonDefinition;
-import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
@@ -36,8 +36,10 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
     private Map<String, ActionParam> actionParamMap; // Map< param.name , param obj >
     @JsonIgnore
     private String name;
+    /* 要导出的字段 */
+    List<String> exportFieldKeys;
 
-    public ExcelExportSimpleButtonAction(String actionName, String schemaId, List<QueryCondition> queryConditionList) {
+    public ExcelExportSimpleButtonAction(String actionName, String schemaId, List<QueryCondition> queryConditionList, List<String> excelFields) {
         Map<String, ActionParam> actionParamMap = new HashMap<String, ActionParam>();
         setName(actionName);
         // 以下是excelSimpleAction必须的一些param。
@@ -50,6 +52,7 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
         queryConditionsParam.setValue(queryConditionList);
         actionParamMap.put("queryConditions", queryConditionsParam);
         setActionParamMap(actionParamMap);
+        this.exportFieldKeys = excelFields;
     }
 
     /**
@@ -76,6 +79,10 @@ public class ExcelExportSimpleButtonAction implements Action<File> {
             List<Map<String, Object>> data = result.getContent();
             // 通过XML Schema的view.grid定义，获取各个列的相关定义
             Map<String, Field> fieldsDefineMap = GaeaExcelUtils.getFields(schemaId);
+            // 如果有指定导出的列，获取和默认的导出列的交集
+            if (CollectionUtils.isNotEmpty(this.exportFieldKeys)) {
+                fieldsDefineMap = GaeaExcelUtils.getJoinFields(fieldsDefineMap, this.exportFieldKeys);
+            }
             /**
              * if <param name="withData" value="true" /> 没有 | value不能转成Boolean | value=true
              * 就查询data

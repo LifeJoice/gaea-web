@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.data.dataset.domain.ConditionSet;
-import org.gaea.data.dataset.domain.GaeaDataSet;
-import org.gaea.data.dataset.domain.GaeaDsResultConfig;
+import org.gaea.data.dataset.DsProcessor;
+import org.gaea.data.dataset.domain.*;
 import org.gaea.data.dataset.service.GaeaDataSetService;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.*;
+import org.gaea.framework.web.GaeaWebSystem;
 import org.gaea.framework.web.common.WebCommonDefinition;
 import org.gaea.config.SystemProperties;
 import org.gaea.framework.web.data.GaeaDefaultDsContext;
@@ -20,7 +20,6 @@ import org.gaea.framework.web.data.repository.SystemDataSetRepository;
 import org.gaea.framework.web.data.service.SystemDataSetService;
 import org.gaea.framework.web.data.util.DataSetConvertHelper;
 import org.gaea.framework.web.data.util.GaeaDataSetUtils;
-import org.gaea.framework.web.schema.GaeaSchemaCache;
 import org.gaea.framework.web.schema.domain.DataSet;
 import org.gaea.framework.web.schema.domain.PageResult;
 import org.gaea.framework.web.schema.domain.SchemaGridPage;
@@ -167,6 +166,7 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
                         gaeaDataSet.setApiDataSource(cacheDataSet.getApiDataSource());
                         gaeaDataSet.setOrderBy(cacheDataSet.getOrderBy());
                         gaeaDataSet.setGroupBy(cacheDataSet.getGroupBy());
+                        gaeaDataSet.setProcessor(cacheDataSet.getProcessor());
                     }
 
                     gaeaDataSetMap.put(gaeaDataSet.getId(), gaeaDataSet);
@@ -246,25 +246,28 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
      * @param resultConfig
      * @param schemaId
      * @param queryConditionDTO
-     * @return
+     * @return 存在两种可能：{@code List<DataItem>} 或者 {@code List<Map<String, Object>>}. 一种是Processor返回的；一种是NamedParameterJdbcTemplate返回的。总之都含义text和value两个字段。
      * @throws ValidationFailedException
      * @throws SysLogicalException
      * @throws SysInitException
      */
     @Override
-    public List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException {
+    public List getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException {
 
         GaeaDefaultDsContext defaultDsContext = new GaeaDefaultDsContext(GaeaWebSecuritySystem.getLoginUser().getLoginName(), String.valueOf(GaeaWebSecuritySystem.getLoginUser().getId()));
 
         // 获取数据集定义。可能从数据库读，也可能从缓存获取。
-        GaeaDataSet dataSetDef = SystemDataSetFactory.getDataSet(resultConfig.getDsId());
-        List<Map<String, Object>> results = null;
+        GaeaDataSet gaeaDataSet = SystemDataSetFactory.getDataSet(resultConfig.getDsId());
+        List results = null;
         // TODO 【重构】
         // 整合CommonViewQueryController和当前方法两种数据集查询方式。一个是通过SQL，一个更多是静态。
-        if (StringUtils.isEmpty(dataSetDef.getSql())) {
+        if (StringUtils.isEmpty(gaeaDataSet.getSql()) && gaeaDataSet.getProcessor() == null) {
+                /* 没有sql，没有自定义processor处理类，纯静态数据 */
             results = gaeaDataSetService.getCommonResults(resultConfig);
         } else {
-            boolean isDsTranslate = true;
+            /* sql获取数据集 */
+            if (StringUtils.isNotEmpty(gaeaDataSet.getSql())) {
+                boolean isDsTranslate = true;
 //            // 如果没有schemaId，也就没有字段定义了，转换也没意义了
 //            if (StringUtils.isEmpty(schemaId)) {
 //                isDsTranslate = false;
@@ -278,8 +281,25 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
 //                    throw new ValidationFailedException("转换查询条件失败！");
 //                }
 //            }
-            // 默认需要对结果的每个字段做数据集转换
-            results = commonViewQueryService.queryByConditions(schemaId, resultConfig.getDsId(), defaultDsContext, queryConditionDTO, isDsTranslate);
+                // 默认需要对结果的每个字段做数据集转换
+                results = commonViewQueryService.queryByConditions(schemaId, resultConfig.getDsId(), defaultDsContext, queryConditionDTO, isDsTranslate);
+            }
+            /* 自定义数据处理器processor处理数据 */
+            if (gaeaDataSet.getProcessor() != null) {
+                /* 自定义处理类 */
+                Processor processorDef = gaeaDataSet.getProcessor();
+                if (StringUtils.isNotEmpty(processorDef.getBeanRef())) {
+                    // 自定义处理类，需要是一个spring bean。并且实现DsProcessor接口
+                    Object dsProcessorBean = GaeaWebSystem.getBean(processorDef.getBeanRef());
+                    if (dsProcessorBean != null && dsProcessorBean instanceof DsProcessor) {
+                        DsProcessor processor = (DsProcessor) dsProcessorBean;
+                        // 把定义参数给处理类
+                        processor.setParams(processorDef.getParams());
+                        // 执行处理，获取结果
+                        results = processor.dataProcess(results, null);
+                    }
+                }
+            }
         }
         return results;
     }

@@ -613,6 +613,55 @@ define([
                     throw "id为空，无法进行元素的唯一性检查！";
                 }
                 return document.querySelectorAll("#" + id).length == 1;
+            },
+            /**
+             * 创建一个可以提交的form。但不会立刻提交。
+             *
+             * @param {object} opts
+             * @param {string|jQuery} opts.target       创建的这个form，最终会append到的地方
+             * @param {string} opts.action              form的action
+             * @param {object} opts.params              form中要一并提交的表单值。以对象的key：value存在。key即为name。
+             * @returns {jQuery}                        返回创建的form的jQuery对象
+             */
+            createSubmitForm: function (opts) {
+
+                var $form = $('<form method="post"></form>');
+                if (gaeaValid.isNull(opts.action)) {
+                    throw "无法构建没有action的form用于提交。";
+                }
+                $form.attr("action", opts.action);
+                if (_.isObject(opts.params)) {
+                    $.each(opts.params, function (key, val) {
+                        var $input = $('<input type="hidden">');
+                        $input.attr("name", key);
+                        $input.attr("value", val);
+                        $form.append($input);
+                    });
+                }
+                var $target = gaeaValid.isNull(opts.target) ? $("body") : $(opts.target);
+                $target.append($form);
+                return $form;
+            },
+            /**
+             * 给某个form添加一些属性值，方便一并提交。
+             * 属性值以hidden的input存在。
+             * @param {object} opts
+             * @param {string|jQuery} opts.target       创建的这个form，最终会append到的地方
+             * @param {object} opts.params              form中要一并提交的表单值。以对象的key：value存在。key即为name。
+             */
+            setFormField: function (opts) {
+                var $target = $(opts.target);
+                if ($target.length < 1) {
+                    console.debug("找不到对应的form，无法给form添加字段值。target: " + opts.target);
+                }
+                if (_.isObject(opts.params)) {
+                    $.each(opts.params, function (key, val) {
+                        var $input = $('<input type="hidden">');
+                        $input.attr("name", key);
+                        $input.attr("value", val);
+                        $target.append($input);
+                    });
+                }
             }
         };
 

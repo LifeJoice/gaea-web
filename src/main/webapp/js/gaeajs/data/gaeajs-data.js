@@ -513,13 +513,15 @@ define([
                                 var val = gaeaContext.getValue(condValue.value);
                                 queryValues.push({
                                     type: condValue.type,
-                                    value: val
+                                    value: val,
+                                    name: condValue.name
                                 });
                             }
                         } else if (gaeaString.equalsIgnoreCase(condValue.type, "static")) {
                             queryValues.push({
                                 type: condValue.type,
-                                value: condValue.value
+                                value: condValue.value,
+                                name: condValue.name
                             });
                         }
                     });

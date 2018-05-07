@@ -89,6 +89,28 @@ public class GaeaExcelUtils {
     }
 
     /**
+     * 获取两个集合相交的Field。其中一个集合是完整的。另一个List，是只有key的list。
+     *
+     * @param map1
+     * @param fieldList2
+     * @return
+     * @throws ValidationFailedException
+     */
+    public static Map<String, Field> getJoinFields(Map<String, Field> map1, List<String> fieldList2) throws ValidationFailedException {
+        if (CollectionUtils.isEmpty(fieldList2) || MapUtils.isEmpty(map1)) {
+            return null;
+        }
+        Map<String, Field> resultMap = null;
+        resultMap = new HashMap<String, Field>();
+        for (String key : fieldList2) {
+            if (map1.get(key) != null) {
+                resultMap.put(key, map1.get(key));
+            }
+        }
+        return resultMap;
+    }
+
+    /**
      * 根据fieldMap，也就是Excel字段定义，抽取转换成SchemaColumn的列定义。因为原来的数据查询等，都是以SchemaColumn，也就是XML SCHEMA的gird.column定义进行数据处理的。
      * 等于SchemaColumn是标准的数据列定义。
      *

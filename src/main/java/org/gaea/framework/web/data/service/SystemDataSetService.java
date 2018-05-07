@@ -2,19 +2,14 @@ package org.gaea.framework.web.data.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.gaea.data.dataset.domain.ConditionSet;
-import org.gaea.data.dataset.domain.GaeaDataSet;
 import org.gaea.data.dataset.domain.GaeaDsResultConfig;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
 import org.gaea.exception.*;
 import org.gaea.framework.web.schema.domain.DataSet;
-import org.gaea.framework.web.schema.domain.view.SchemaColumn;
-import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by iverson on 2016-12-10 15:21:13.
@@ -29,7 +24,7 @@ public interface SystemDataSetService {
 
     DataSet queryDataAndTotalElement(DataSet ds, String strPageSize, String loginName, LinkedHashMap<ConditionSet, DataSetCommonQueryConditionDTO> conditionSetMap) throws InvalidDataException, SystemConfigException, ValidationFailedException;
 
-    List<Map<String, Object>> getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException;
+    List getData(GaeaDsResultConfig resultConfig, String schemaId, DataSetCommonQueryConditionDTO queryConditionDTO) throws ValidationFailedException, SysLogicalException, SysInitException, SystemConfigException;
 
     /**
      * 对数据库查出来的数据结果进行处理。不能直接把数据库字段名返回到前端，而是使用别名。<p/>

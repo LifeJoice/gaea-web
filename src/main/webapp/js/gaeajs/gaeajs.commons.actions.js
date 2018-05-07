@@ -129,7 +129,8 @@ define([
                 // TODO 现在只是暂时把crud-dialog未定义action的转到这个方法来。后面需要重构到一个更合适的入口。
                 // 先借用了update action的入口
                 actions.crudDialog.bindUpdateTrigger(opts);
-            } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL)) {
+            } else if (gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL) ||
+                gaeaString.equalsIgnoreCase(buttonDef.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL_WITH_WIZARD)) {
                 actions.excel.bindExportTrigger(opts);
             }
             /**
@@ -252,31 +253,70 @@ define([
                 var queryConditions = gaeaGrid.query.getQueryConditions({
                     id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
                 });
-                // 构建一个临时的form，来用于提交。
-                var submitFormHtml = '' +
-                    '<form action="<%= ACTION %>" method="post">' +
-                    '<input type="hidden" name="actionName" value="<%= ACTION_NAME %>">' +
-                    '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
-                    '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
-                    '<input type="hidden" name="filters" value="">' +
-                    '</form>';
-                var formHtmlTemplate = _.template(submitFormHtml);
-                var $form = $(formHtmlTemplate({
-                    ACTION: SYS_URL.ACTION.DO_SIMPLE_ACTION,
-                    ACTION_NAME: data.actionName,
-                    SCHEMA_ID: data.schemaId,
-                    BUTTON_ID: button.id
-                }));
-                // 通过jQuery注入值，给json双引号等转义
-                $form.children("[name='filters']").val(JSON.stringify(queryConditions));
-                // create form
-                // 必须append到body中，否则报错：Form submission canceled because the form is not connected
-                // 原因：According to the HTML standards, if the form is not associated browsing context(document), form submission will be aborted.
-                $("#" + button.id).parents("body:first").append($form);
-                // 提交form
-                $form.submit();
-                // remove form
-                $form.remove();
+                //// 构建一个临时的form，来用于提交。
+                //var submitFormHtml = '' +
+                //    '<form action="<%= ACTION %>" method="post">' +
+                //    '<input type="hidden" name="actionName" value="<%= ACTION_NAME %>">' +
+                //    '<input type="hidden" name="schemaId" value="<%= SCHEMA_ID %>">' +
+                //    '<input type="hidden" name="buttonId" value="<%= BUTTON_ID %>">' +
+                //    '<input type="hidden" name="filters" value="">' +
+                //    '</form>';
+                //var formHtmlTemplate = _.template(submitFormHtml);
+                //var $form = $(formHtmlTemplate({
+                //    ACTION: SYS_URL.ACTION.DO_SIMPLE_ACTION,
+                //    ACTION_NAME: data.actionName,
+                //    SCHEMA_ID: data.schemaId,
+                //    BUTTON_ID: button.id
+                //}));
+                //// 通过jQuery注入值，给json双引号等转义
+                //$form.children("[name='filters']").val(JSON.stringify(queryConditions));
+                //// create form
+                //// 必须append到body中，否则报错：Form submission canceled because the form is not connected
+                //// 原因：According to the HTML standards, if the form is not associated browsing context(document), form submission will be aborted.
+                //$("#" + button.id).parents("body:first").append($form);
+                //// 提交form
+                //$form.submit();
+                //// remove form
+                //$form.remove();
+                if (gaeaString.equalsIgnoreCase(button.action, GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL_WITH_WIZARD)) {
+                    /**
+                     * 带向导的导出功能
+                     * 可以提供选择，要导出哪些列之类的。然后再导出。
+                     * ----------------------------------------------------- */
+                    var gaeaDialog = require("gaeajs-ui-dialog");
+
+                    gaeaDialog.init({
+                        id: "gaea-excel-export",
+                        contentUrl: "/js/gaeajs/ui/template/gaea_excel_export.html",
+                        submitUrl: SYS_URL.ACTION.DO_SIMPLE_ACTION,
+                        submitType: GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT,
+                        extraSubmitData: {
+                            actionName: GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL, // 先写死吧，不然后台也得兼容
+                            schemaId: data.schemaId,
+                            buttonId: button.id,
+                            filters: JSON.stringify(queryConditions)
+                        }
+                    });
+                } else {
+                    /**
+                     * 直接按默认导出功能
+                     * ----------------------------------------------------- */
+                    // 创建临时form
+                    var $form = gaeaUtils.dom.createSubmitForm({
+                        target: $("#" + button.id).parents("body:first"), // 找最近的一个body里面创建临时form
+                        action: SYS_URL.ACTION.DO_SIMPLE_ACTION,
+                        params: {
+                            actionName: data.actionName,
+                            schemaId: data.schemaId,
+                            buttonId: button.id,
+                            filters: JSON.stringify(queryConditions)
+                        }
+                    });
+                    // 提交form
+                    $form.submit();
+                    // 移除form
+                    $form.remove();
+                }
             } else {
                 /**
                  * 走ajax提交路线。

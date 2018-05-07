@@ -122,13 +122,16 @@ define([
          * @returns jqXHR 同步对象
          */
         multiSelect.initSelectableList = function (options) {
+            var dfd = $.Deferred();// JQuery同步对象
             var id = options.id;// multi-select的div id
             var dataConfig = options.dataConfig;
-            if (gaeaValid.isNull(dataConfig.selectable)) {
-                throw "gaea-data selectable配置项不允许为空！";
+            if (gaeaValid.isNull(dataConfig.selectable) || _.keys(dataConfig.selectable).length == 0) {
+                dfd.resolve();
+                return dfd;
+                //throw "gaea-data selectable配置项不允许为空！";
             }
             dataConfig.selectable.isAsync = true;// 异步调用。因为不需要KO binding，异步影响不大。
-            return gaeaData.dataSet.getData({
+            var getDataJqXHR = gaeaData.dataSet.getData({
                 submitData: {
                     dsId: dataConfig.selectable.dataset,
                     condition: dataConfig.selectable.condition
@@ -145,6 +148,11 @@ define([
                     cache[id].all = gaeaCommonUtils.array.combine(cache[id].selectable, cache[id].selected);
                 }
             });
+            // 处理完ajax数据和初始化，表示方法结束
+            getDataJqXHR.done(function () {
+                dfd.resolve();
+            });
+            return dfd.promise();
         };
 
         /**
@@ -157,14 +165,17 @@ define([
          *              gaeaData ajax返回的data放在这个属性中
          */
         multiSelect.initSelectedList = function (options) {
+            var dfd = $.Deferred();// JQuery同步对象
             var id = options.id;// multi-select的div id
             var dataConfig = options.dataConfig;
-            if (gaeaValid.isNull(dataConfig.selected)) {
-                throw "gaea-data selected配置项不允许为空！";
+            if (gaeaValid.isNull(dataConfig.selected) || _.keys(dataConfig.selected).length == 0) {
+                dfd.resolve();
+                //throw "gaea-data selected配置项不允许为空！";
+                return dfd;
             }
             var name = dataConfig.name;
             dataConfig.selected.isAsync = true;// 异步调用。因为不需要KO binding，异步影响不大。
-            return gaeaData.dataSet.getData({
+            var getDataJqXHR = gaeaData.dataSet.getData({
                 submitData: {
                     dsId: dataConfig.selected.dataset,
                     condition: dataConfig.selected.condition
@@ -172,6 +183,7 @@ define([
                 isAsync: dataConfig.selected.isAsync,
                 success: function (data) {
                     if (gaeaValid.isNull(data)) {
+                        dfd.resolve();
                         return;
                     }
                     // 初始化可选框里的选项
@@ -204,6 +216,11 @@ define([
                     cache[id].all = gaeaCommonUtils.array.combine(cache[id].selectable, cache[id].selected);
                 }
             });
+            // 处理完ajax数据和初始化，表示方法结束
+            getDataJqXHR.done(function () {
+                dfd.resolve();
+            });
+            return dfd.promise();
         };
         /**
          * 初始化列表框和数据.尝试可选和已选都用本方法初始化.

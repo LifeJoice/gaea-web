@@ -62,7 +62,7 @@ public class GaeaDataSetUtils {
         GaeaDataSet cacheDataSet = SystemDataSetFactory.getDataSet(origDataSetEntity.getName());
         Where where = new Where();
         // dataFormat不覆盖。数据库没有这个定义！
-        BeanUtils.copyProperties(origDataSetEntity, gaeaDataSet, "dsAuthorities", "orderBy", "groupBy");
+        BeanUtils.copyProperties(origDataSetEntity, gaeaDataSet, "dsAuthorities", "orderBy", "groupBy", "processor");
         // 数据库的name才是缓存里的id。TODO 后面得重构。GaeaDataSet也有name。
         gaeaDataSet.setId(origDataSetEntity.getName());
         // 转换数据集的静态数据StaticResults为List

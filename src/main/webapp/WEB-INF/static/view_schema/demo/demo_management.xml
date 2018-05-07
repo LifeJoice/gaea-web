@@ -76,6 +76,9 @@
             <button id="btnUpload" name="btnUpload" html-value="测试上传文件" link-view-id="uploaderDialog"/>
             <button id="btnExcelExport2" name="btnExcelExport2" html-value="导出当前页面数据2" action="export-excel"
                     submit-type="formSubmit"/>
+            <button id="btnExcelExport3" name="btnExcelExport3" html-value="带向导导出当前页面数据"
+                    action="export-excel-with-wizard"
+                    submit-type="formSubmit"/>
             <button id="submitToSomeWhere" name="submitToSomeWhere" html-value="提交到某个地方"
                     submit-url="/gaea/demo/submitAction">
                 <button-action method="submit">

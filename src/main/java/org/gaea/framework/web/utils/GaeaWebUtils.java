@@ -1,9 +1,11 @@
 package org.gaea.framework.web.utils;
 
+import org.gaea.util.ValidationUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 
@@ -45,5 +47,27 @@ public class GaeaWebUtils {
                 logger.error("输入输出流关闭失败！", e);
             }
         }
+    }
+
+    /**
+     * 看一个请求是否要求返回json
+     *
+     * @param request
+     * @return
+     */
+    public static boolean isJsonRequest(HttpServletRequest request) {
+        /* 获取请求的头，用以判断是否JSON请求 */
+        Boolean isJson = false, acceptJson = false, xReqJson = false, isMultiPart = false;
+        String requestHeadType = request.getHeader("accept");
+        String xRequestedWith = request.getHeader("X-Requested-With");
+        String contentType = request.getContentType();
+            /* 判断是否JSON请求 */
+        if (!ValidationUtils.isBlank(requestHeadType)) {
+            acceptJson = requestHeadType.indexOf("application/json") >= 0;
+        }
+        if (!ValidationUtils.isBlank(xRequestedWith)) {
+            xReqJson = xRequestedWith.indexOf("XMLHttpRequest") >= 0;
+        }
+        return acceptJson || xReqJson;
     }
 }

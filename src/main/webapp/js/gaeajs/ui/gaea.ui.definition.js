@@ -149,7 +149,8 @@ define(function () {
             PSEUDO_DELETE_SELECTED: "pseudoDeleteSelected",// 伪删除选择的行
             UPDATE: "update"// 新增操作，跟服务端配置对应
         },
-        EXPORT_EXCEL: "export-excel",
+        EXPORT_EXCEL: "export-excel", // 通用导出的命令
+        EXPORT_EXCEL_WITH_WIZARD: "export-excel-with-wizard", // 带导出向导的通用导出
         SUBMIT_TYPE: { // 和button的定义相关
             AJAX: "ajax",
             FORM_SUBMIT: "formSubmit"

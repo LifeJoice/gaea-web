@@ -96,20 +96,22 @@ public class CommonActionsController {
      * @param buttonId
      * @param actionName
      * @param queryConditionList
+     * @param excelFields           要导出的指定字段
      * @param request
      * @param response
      * @throws ValidationFailedException
+     * @throws InvalidDataException
      */
     @RequestMapping(value = "/doSimpleAction")
     public void doSimpleAction(String schemaId, String buttonId, String actionName, @RequestBean(value = "filters", dataType = RequestBeanDataType.JSON) List<QueryCondition> queryConditionList,
-                               HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, InvalidDataException {
+                               @RequestBean("excelFields") List<String> excelFields, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, InvalidDataException {
         if (StringUtils.isEmpty(schemaId)) {
             throw new ValidationFailedException("获取不到Schema id。无法进行导出操作。");
         }
         if (StringUtils.isEmpty(actionName)) {
             throw new ValidationFailedException("缺少操作名（actionName）,无法执行doSimpleAction操作。");
         }
-        ExcelExportSimpleButtonAction excelSimpleAction = new ExcelExportSimpleButtonAction(actionName, schemaId, queryConditionList);
+        ExcelExportSimpleButtonAction excelSimpleAction = new ExcelExportSimpleButtonAction(actionName, schemaId, queryConditionList, excelFields);
         // 执行action定义的方法
         actionsService.doSimpleAction(excelSimpleAction, response, request);
 
