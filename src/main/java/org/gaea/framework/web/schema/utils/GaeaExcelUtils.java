@@ -91,20 +91,24 @@ public class GaeaExcelUtils {
     /**
      * 获取两个集合相交的Field。其中一个集合是完整的。另一个List，是只有key的list。
      *
-     * @param map1
-     * @param fieldList2
+     * @param linkFieldsMap          这是一个有序的map。而返回的map的顺序，也保持和这个一样。
+     * @param fieldsKeyList
      * @return
      * @throws ValidationFailedException
      */
-    public static Map<String, Field> getJoinFields(Map<String, Field> map1, List<String> fieldList2) throws ValidationFailedException {
-        if (CollectionUtils.isEmpty(fieldList2) || MapUtils.isEmpty(map1)) {
+    public static LinkedCaseInsensitiveMap<Field> getJoinFields(Map<String, Field> linkFieldsMap, List<String> fieldsKeyList) throws ValidationFailedException {
+        if (CollectionUtils.isEmpty(fieldsKeyList) || MapUtils.isEmpty(linkFieldsMap)) {
             return null;
         }
-        Map<String, Field> resultMap = null;
-        resultMap = new HashMap<String, Field>();
-        for (String key : fieldList2) {
-            if (map1.get(key) != null) {
-                resultMap.put(key, map1.get(key));
+        LinkedCaseInsensitiveMap<Field> resultMap = null;
+        resultMap = new LinkedCaseInsensitiveMap<Field>();
+        // 遍历有序的map，这样返回才能根据有序map的顺序返回
+        for (String linkKey : linkFieldsMap.keySet()) {
+            for (String key2 : fieldsKeyList) {
+                if (linkKey.equalsIgnoreCase(key2)) {
+                    resultMap.put(key2, linkFieldsMap.get(key2));
+                    break;
+                }
             }
         }
         return resultMap;
