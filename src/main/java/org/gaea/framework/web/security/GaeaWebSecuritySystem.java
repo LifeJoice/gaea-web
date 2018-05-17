@@ -16,12 +16,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 负责处理web应用的所有安全相关的最通用的功能。
@@ -37,12 +41,17 @@ public class GaeaWebSecuritySystem {
      * @return
      */
     public static String getUserName(HttpServletRequest request) {
-        SecurityContextImpl securityContextImpl = (SecurityContextImpl) request.getSession().getAttribute("SPRING_SECURITY_CONTEXT");
-        if (securityContextImpl == null || securityContextImpl.getAuthentication() == null) {
-            return null;
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        if (securityContext == null) {
+            throw new LoginFailedException("获取不到SecurityContext，无法获取用户名，请检查！");
         }
+//        SecurityContextImpl securityContextImpl = (SecurityContextImpl) request.getSession().getAttribute("SPRING_SECURITY_CONTEXT");
+//        if (securityContextImpl == null || securityContextImpl.getAuthentication() == null) {
+//            return null;
+//        }
         //登录名
-        String loginName = securityContextImpl.getAuthentication().getName();
+//        String loginName = securityContextImpl.getAuthentication().getName();
+        String loginName = securityContext.getAuthentication().getName();
         return loginName;
     }
 
@@ -99,5 +108,20 @@ public class GaeaWebSecuritySystem {
         if (auth != null) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
+    }
+
+    /**
+     * 获取用户对应的角色列表
+     *
+     * @return
+     */
+    public static List<String> getAuthorities() {
+        List<String> result = new ArrayList<String>();
+        //获得当前用户所拥有的权限
+        List<GrantedAuthority> authorities = (List<GrantedAuthority>) SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        for (GrantedAuthority grantedAuthority : authorities) {
+            result.add(grantedAuthority.getAuthority());
+        }
+        return result;
     }
 }

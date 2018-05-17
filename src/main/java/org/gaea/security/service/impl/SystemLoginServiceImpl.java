@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.event.AuthorizedEvent;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,18 @@ public class SystemLoginServiceImpl implements SystemLoginService {
     private final Logger logger = LoggerFactory.getLogger(SystemLoginServiceImpl.class);
     @Autowired
     private SystemUsersService systemUsersService;
+
+
+    /**
+     * 处理登录的事件，基于Spring Security的登录事件。
+     * @param authenticationSuccessEvent
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public void resolveLoginEvent(AuthenticationSuccessEvent authenticationSuccessEvent) {
+        User user = (User) authenticationSuccessEvent.getAuthentication().getPrincipal();
+        resolveLoginEvent(user);
+    }
 
     /**
      * 处理登录的事件，基于Spring Security的登录事件。
@@ -35,6 +48,15 @@ public class SystemLoginServiceImpl implements SystemLoginService {
          */
 //        AuthorizedEvent authorizedEvent = (AuthorizedEvent) eventObj;
         User user = (User) authorizedEvent.getAuthentication().getPrincipal();
+        resolveLoginEvent(user);
+    }
+
+    /**
+     * 处理和登录成功后的相关逻辑。例如：缓存已登录用户的账号、角色等
+     *
+     * @param user
+     */
+    private void resolveLoginEvent(User user) {
         String username = user.getUsername();
         org.gaea.security.domain.User userDomain = systemUsersService.findByLoginName(username);
 

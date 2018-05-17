@@ -1,14 +1,15 @@
 package org.gaea.security.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.gaea.exception.ProcessFailedException;
-import org.gaea.exception.ValidationFailedException;
+import org.gaea.exception.*;
 import org.gaea.framework.web.bind.annotation.RequestBean;
 import org.gaea.framework.web.common.GaeaHttpStatus;
 import org.gaea.framework.web.common.ResponseJsonMessage;
 import org.gaea.framework.web.common.WebCommonDefinition;
+import org.gaea.framework.web.security.GaeaWebSecuritySystem;
 import org.gaea.security.domain.Menu;
 import org.gaea.security.dto.MenuDTO;
+import org.gaea.security.jo.UserJO;
 import org.gaea.security.service.SystemMenusService;
 import org.gaea.util.GaeaJacksonUtils;
 import org.slf4j.Logger;
@@ -111,23 +112,25 @@ public class SystemMenusController {
      */
     @RequestMapping("/find-all")
     @ResponseBody
-    public List<MenuDTO> findAll(HttpServletRequest request, HttpServletResponse response) {
-        Set<String> authSet = new HashSet<String>();
-        SecurityContextImpl securityContextImpl = (SecurityContextImpl) request.getSession().getAttribute("SPRING_SECURITY_CONTEXT");
-        if (securityContextImpl == null || securityContextImpl.getAuthentication() == null) {
-            return null;
+    public List<MenuDTO> findAll(HttpServletRequest request, HttpServletResponse response) throws SysInitException, SystemConfigException, ValidationFailedException {
+//        Set<String> authSet = new HashSet<String>();
+        UserJO userJO = GaeaWebSecuritySystem.getLoginUser();
+//        SecurityContextImpl securityContextImpl = (SecurityContextImpl) request.getSession().getAttribute("SPRING_SECURITY_CONTEXT");
+        if (userJO == null) {
+            throw new LoginFailedException("获取不到用户登录信息。无法执行接口。");
+//            return null;
         }
         //登录名
-        String loginName = securityContextImpl.getAuthentication().getName();
+        String loginName = userJO.getName();
         //获得当前用户所拥有的权限
-        List<GrantedAuthority> authorities = (List<GrantedAuthority>) securityContextImpl.getAuthentication().getAuthorities();
-        for (GrantedAuthority grantedAuthority : authorities) {
-            authSet.add(grantedAuthority.getAuthority());
-        }
-        System.out.println("Username:" + loginName);
+//        List<GrantedAuthority> authorities = (List<GrantedAuthority>) securityContextImpl.getAuthentication().getAuthorities();
+//        for (GrantedAuthority grantedAuthority : authorities) {
+//            authSet.add(grantedAuthority.getAuthority());
+//        }
+        logger.trace(String.format("获取用户 %s 的所有menu.", loginName));
         List<MenuDTO> menus = null;
         if (StringUtils.isNotEmpty(loginName)) {
-            menus = systemMenusService.findAll(authSet);
+            menus = systemMenusService.findAll(new HashSet<String>(GaeaWebSecuritySystem.getAuthorities()));
         } else {
             logger.debug("获取不到用户的登录名。可能是Spring Security的配置问题。");
         }

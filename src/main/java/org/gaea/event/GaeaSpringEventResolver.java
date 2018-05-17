@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.security.access.event.AuthorizedEvent;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,6 +41,12 @@ public class GaeaSpringEventResolver implements ApplicationListener<ApplicationE
              */
             AuthorizedEvent authorizedEvent = (AuthorizedEvent) eventObj;
             systemLoginService.resolveLoginEvent(authorizedEvent);
+        } else if (eventObj instanceof AuthenticationSuccessEvent) {
+            /**
+             * 登录完成触发事件
+             */
+            AuthenticationSuccessEvent authenticationSuccessEvent = (AuthenticationSuccessEvent) eventObj;
+            systemLoginService.resolveLoginEvent(authenticationSuccessEvent);
         }
     }
 

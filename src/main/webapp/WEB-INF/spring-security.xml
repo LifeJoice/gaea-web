@@ -6,6 +6,7 @@
 	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
 
     <!--<http use-expressions="true">-->
+    <!--  create-session="stateless"参数如果加上，会导致form认证模式失效。 -->
     <http auto-config="false" use-expressions="true" entry-point-ref="authenticationProcessingFilterEntryPoint">
         <!--<headers disabled="true"/>-->
         <!--<csrf disabled="true"/>-->
@@ -29,6 +30,11 @@
 实现用户、角色、权限、资源的数据库管理。  -->
         <custom-filter ref="gaea-filter" before="FILTER_SECURITY_INTERCEPTOR"/>
         <csrf disabled="true"/>
+        <!--                       HTTP base                       -->
+        <!-- 和基础form表单认证模式共存.  由于没有create-session="stateless"，所以其实接口调用一次认证过后，就会有session，后面的调用就不需要接口了。 -->
+        <http-basic/>
+        <!--                       HTTP base end                   -->
+
         <!-- （自定义）对于验证拒绝的处理器 -->
         <access-denied-handler ref="gaeaAccessDeniedHandler"/>
     </http>
