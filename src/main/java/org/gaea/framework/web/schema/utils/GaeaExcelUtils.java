@@ -10,7 +10,11 @@ import org.gaea.framework.web.schema.domain.GaeaXmlSchema;
 import org.gaea.framework.web.schema.domain.view.SchemaColumn;
 import org.gaea.framework.web.schema.domain.view.SchemaGrid;
 import org.gaea.framework.web.schema.view.jo.SchemaColumnJO;
+import org.gaea.poi.domain.Block;
+import org.gaea.poi.domain.ExcelTemplate;
 import org.gaea.poi.domain.Field;
+import org.gaea.poi.domain.Sheet;
+import org.gaea.poi.util.GaeaPoiUtils;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,21 +101,22 @@ public class GaeaExcelUtils {
      * @throws ValidationFailedException
      */
     public static LinkedCaseInsensitiveMap<Field> getJoinFields(Map<String, Field> linkFieldsMap, List<String> fieldsKeyList) throws ValidationFailedException {
-        if (CollectionUtils.isEmpty(fieldsKeyList) || MapUtils.isEmpty(linkFieldsMap)) {
-            return null;
-        }
-        LinkedCaseInsensitiveMap<Field> resultMap = null;
-        resultMap = new LinkedCaseInsensitiveMap<Field>();
-        // 遍历有序的map，这样返回才能根据有序map的顺序返回
-        for (String linkKey : linkFieldsMap.keySet()) {
-            for (String key2 : fieldsKeyList) {
-                if (linkKey.equalsIgnoreCase(key2)) {
-                    resultMap.put(key2, linkFieldsMap.get(key2));
-                    break;
-                }
-            }
-        }
-        return resultMap;
+        return GaeaPoiUtils.getJoinFields(linkFieldsMap, fieldsKeyList);
+//        if (CollectionUtils.isEmpty(fieldsKeyList) || MapUtils.isEmpty(linkFieldsMap)) {
+//            return null;
+//        }
+//        LinkedCaseInsensitiveMap<Field> resultMap = null;
+//        resultMap = new LinkedCaseInsensitiveMap<Field>();
+//        // 遍历有序的map，这样返回才能根据有序map的顺序返回
+//        for (String linkKey : linkFieldsMap.keySet()) {
+//            for (String key2 : fieldsKeyList) {
+//                if (linkKey.equalsIgnoreCase(key2)) {
+//                    resultMap.put(key2, linkFieldsMap.get(key2));
+//                    break;
+//                }
+//            }
+//        }
+//        return resultMap;
     }
 
     /**

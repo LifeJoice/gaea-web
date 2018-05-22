@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ public class ExcelExportButtonAction implements Action<File> {
     private Map<String, ActionParam> actionParamMap; // Map< param.name , param obj >
     @JsonIgnore
     private String name;
+    @JsonIgnore
+    private List<String> excelFields;
 
     @Override
     public String getMethod() {
@@ -66,6 +69,17 @@ public class ExcelExportButtonAction implements Action<File> {
             actionParamMap = new HashMap<String, ActionParam>();
         }
         return actionParamMap;
+    }
+
+    public List<String> getExcelFields() {
+        if (excelFields == null) {
+            excelFields = new ArrayList<String>();
+        }
+        return excelFields;
+    }
+
+    public void setExcelFields(List<String> excelFields) {
+        this.excelFields = excelFields;
     }
 
     @Override
@@ -103,7 +117,7 @@ public class ExcelExportButtonAction implements Action<File> {
                     throw new ProcessFailedException("数据为空，无法执行导出操作。");
                 }
             }
-            file = excelExport.export(excelTemplateParam.getValue(), data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR));
+            file = excelExport.export(excelTemplateParam.getValue(), data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR), this.excelFields);
         } catch (SysLogicalException e) {
             logger.debug(e.getMessage(), e);
             throw new ValidationFailedException("系统逻辑错误！请联系管理员处理。");

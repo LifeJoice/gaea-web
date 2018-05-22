@@ -378,11 +378,11 @@ public class GaeaSchemaUtils {
                 // 复制button action
                 BeanUtils.copyProperties(action, actionJO, "actionParamMap");
                 // 如果不是ExcelExportButtonAction
-                if (!(action instanceof ExcelExportButtonAction)) {
+//                if (!(action instanceof ExcelExportButtonAction)) {
                     if (MapUtils.isNotEmpty(action.getActionParamMap())) {
-                        actionJO.setParams(new ArrayList<ActionParam>(action.getActionParamMap().values()));
+                        actionJO.setParams(action.getActionParamMap());
                     }
-                }
+//                }
                 // 添加button action
                 buttonJO.getActions().add(actionJO);
             }

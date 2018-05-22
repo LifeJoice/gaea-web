@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * copy from ButtonAction
@@ -18,7 +19,7 @@ public class ButtonActionJO {
     /**
      * 这个就是（ExcelExportButtonAction等的）actionParamMap; // Map< param.name , param obj >
      */
-    private List<ActionParam> params;
+    private Map<String, ActionParam> params;
     @JsonIgnore
     private String name;
 
@@ -38,11 +39,11 @@ public class ButtonActionJO {
         this.name = name;
     }
 
-    public List<ActionParam> getParams() {
+    public Map<String, ActionParam> getParams() {
         return params;
     }
 
-    public void setParams(List<ActionParam> params) {
+    public void setParams(Map<String, ActionParam> params) {
         this.params = params;
     }
 }

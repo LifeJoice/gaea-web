@@ -106,6 +106,23 @@
                         <param name="dataSetId" value="DS_EXCEL_EXPORT_DEMO"/>
                     </button-action>
                 </button>
+                <!-- 按excel模板带向导的导出 -->
+                <button id="btnExportByTemplate2" name="btnExportByTemplate2" html-value="按模板导出(向导)"
+                        submit-type="formSubmit">
+                    <!--
+                    一个action，其实就是一个method。method是系统实现的。其实就是对应某个类的方法。
+                    当前不支持调用spring bean的method。以后其实可以考虑扩展。
+                    包括使用Spring的bean作为param。
+                    param当前是只支持静态的值。但以后可以考虑动态的值。包括如果扩展一个type，可以支持list类型等。
+                    -->
+                    <button-action method="excelExportByTemplate">
+                        <!--name，用于代码（ActionsProcessor）中获取。就name是代码写死的。-->
+                        <param name="excelTemplateId" value="EXCEL_EXPORT_DEMO"/>
+                        <param name="dataSetId" value="DS_EXCEL_EXPORT_DEMO"/>
+                        <!-- 带有以下参数，表示可以弹出导出列选择框 -->
+                        <param name="withWizard" value="true"/>
+                    </button-action>
+                </button>
                 <button id="btnExportJustTemplate" name="btnExportJustTemplate" html-value="只导出模板"
                         submit-type="formSubmit">
                     <button-action method="excelExportByTemplate">

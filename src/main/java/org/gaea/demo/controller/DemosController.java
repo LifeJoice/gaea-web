@@ -508,7 +508,7 @@ public class DemosController {
             fieldsMap.put("level", field);
             // test end
 //            excelExport.export("EXCEL_EXPORT_DEMO",result.getContent()); // 利用模板导出
-            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR)); // 利用模板导出
+            excelExport.export("EXCEL_EXPORT_DEMO", data, SystemProperties.get(WebCommonDefinition.PROP_KEY_EXCEL_BASE_DIR), null); // 利用模板导出
 //            excelExport.export(result.getContent(),"Iverson测试excel导出",fieldsMap,null); // 一般性导出(可以用于通用导出)
 //            return result;
         } catch (SysLogicalException e) {

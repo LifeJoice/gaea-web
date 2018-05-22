@@ -208,24 +208,56 @@ define([
                     if (gaeaValid.isNull(action)) {
                         return;
                     }
-                    /**
-                     * 执行submit action。（action.method=submit）
-                     */
-                    if (gaeaString.equalsIgnoreCase(methodName, GAEA_UI_DEFINE.ACTION.METHOD.SUBMIT)) {
-                        if (gaeaValid.isNull(button.submitUrl)) {
-                            throw "action.method=submit, submitUrl定义不允许为空！";
-                        }
-                        opts.submitUrl = button.submitUrl;
 
-                        extraData = _private.action.submit.getParamsData({
-                            id: "gaea-grid-ct", // AI.TODO 暂时写死。都是从列表页的grid获取数据。后面得思考一下，action和组件间交互获取数据的问题。
-                            action: action
+                    if (gaeaValid.isNotNullMultiple(action.params, ["withWizard", "value"]) &&
+                        gaeaString.equalsIgnoreCase(methodName, GAEA_UI_DEFINE.ACTION.METHOD.EXCEL_EXPORT_BY_TEMPLATE)) {
+                        /**
+                         * 带向导的导出功能
+                         * 可以提供选择，要导出哪些列之类的。然后再导出。
+                         * ------------------------------------------------------------------------------------ */
+                        var gaeaGrid = require("gaeajs-ui-grid");
+                        // 获取当前已生效的查询条件
+                        var queryConditions = gaeaGrid.query.getQueryConditions({
+                            id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
                         });
-                    }
+                        var gaeaDialog = require("gaeajs-ui-dialog");
 
-                    // 整合extra data（一般来自param定义），执行action
-                    opts.data = _.extend(data, extraData);
-                    _private.submit(opts);
+                        /**
+                         * 弹出框的可选字段，来自于html的数据集配置
+                         */
+                        gaeaDialog.init({
+                            id: button.id + "export-wizard-dialog",
+                            contentUrl: "/js/gaeajs/ui/template/gaea_excel_template_export.html",
+                            submitUrl: SYS_URL.ACTION.DO_ACTION,
+                            submitType: GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT,
+                            extraSubmitData: {
+                                //actionName: GAEA_UI_DEFINE.ACTION.EXPORT_EXCEL, // 先写死吧，不然后台也得兼容
+                                method: methodName,
+                                schemaId: data.schemaId,
+                                buttonId: button.id,
+                                filters: JSON.stringify(queryConditions)
+                            }
+                        });
+                    } else {
+                        /**
+                         * 执行submit action。（action.method=submit）
+                         */
+                        if (gaeaString.equalsIgnoreCase(methodName, GAEA_UI_DEFINE.ACTION.METHOD.SUBMIT)) {
+                            if (gaeaValid.isNull(button.submitUrl)) {
+                                throw "action.method=submit, submitUrl定义不允许为空！";
+                            }
+                            opts.submitUrl = button.submitUrl;
+
+                            extraData = _private.action.submit.getParamsData({
+                                id: "gaea-grid-ct", // AI.TODO 暂时写死。都是从列表页的grid获取数据。后面得思考一下，action和组件间交互获取数据的问题。
+                                action: action
+                            });
+                        }
+
+                        // 整合extra data（一般来自param定义），执行action
+                        opts.data = _.extend(data, extraData);
+                        _private.submit(opts);
+                    }
                 });
             }
         };
@@ -285,6 +317,9 @@ define([
                      * ----------------------------------------------------- */
                     var gaeaDialog = require("gaeajs-ui-dialog");
 
+                    /**
+                     * 弹出框的可选字段，来自于html的数据集配置
+                     */
                     gaeaDialog.init({
                         id: "gaea-excel-export",
                         contentUrl: "/js/gaeajs/ui/template/gaea_excel_export.html",
@@ -717,11 +752,11 @@ define([
                          * 一般，param只给出name，我们需要动态从页面获取值（例如从grid）。当然，也可能param配置了固定的value。
                          */
                         var params = action.params;
-                        if (_.isArray(params)) {
+                        if (_.isObject(params)) {
 
                             var fields = new Array();
                             // 遍历params
-                            $.each(params, function (j, jObj) {
+                            $.each(_.values(params), function (j, jObj) {
                                 // 这个是用于查询特定字段的数据用
                                 var field = {};
                                 var actionParam = this;

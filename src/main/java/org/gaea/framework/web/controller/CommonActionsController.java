@@ -69,7 +69,7 @@ public class CommonActionsController {
      */
     @RequestMapping(value = "/doAction")
     public void doAction(String method, String schemaId, String buttonId, String actionName, @RequestBean(value = "filters", dataType = RequestBeanDataType.JSON) List<QueryCondition> queryConditionList,
-                         HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysInitException, ProcessFailedException {
+                         @RequestBean("excelFields") List<String> excelFields, HttpServletRequest request, HttpServletResponse response) throws ValidationFailedException, SysInitException, ProcessFailedException {
         if (StringUtils.isEmpty(schemaId)) {
             throw new ValidationFailedException("获取不到Schema id。无法进行导出操作。");
         }
@@ -84,7 +84,7 @@ public class CommonActionsController {
         if (button != null && CollectionUtils.isNotEmpty(button.getActions())) {
             for (Object objAction : button.getActions()) {
                 Action action = (Action) objAction;
-                actionsService.doAction(action, response, request, queryConditionList, schemaId);
+                actionsService.doAction(action, response, request, queryConditionList, schemaId, excelFields);
             }
         }
     }

@@ -156,7 +156,8 @@ define(function () {
             FORM_SUBMIT: "formSubmit"
         },
         METHOD: {
-            SUBMIT: "SUBMIT"
+            SUBMIT: "SUBMIT",
+            EXCEL_EXPORT_BY_TEMPLATE: "excelExportByTemplate"
         },
         CRUD_GRID: {
             EXCEL_IMPORT: "crudGridExcelImport",

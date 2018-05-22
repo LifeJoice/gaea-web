@@ -319,6 +319,7 @@ define([
                     //    $button.on("click", thisButton.onClick);
                     //}
 
+                    // AI.TODO 【bug】如果button.submitUrl非空，则下面的initSubmit会覆盖gaeaActions.init里面的事件
                     // 最后初始化submitUrl
                     if (gaeaString.equalsIgnoreCase(GAEA_UI_DEFINE.UI.COMPONENT.BUTTON.DEFAULT, thisButton.componentName)) {
                         // 普通按钮
@@ -472,6 +473,7 @@ define([
                             //    isBindOnClick: true // 是否绑定onclick
                             //});
 
+                            // AI.TODO 【bug】如果button.submitUrl非空，则下面的initSubmit会覆盖gaeaActions.init里面的事件
                         gaeaActions.init({
                             button: button,
                             dialog: refObj

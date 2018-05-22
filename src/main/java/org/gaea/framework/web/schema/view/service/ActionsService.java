@@ -7,7 +7,6 @@ import org.gaea.exception.ProcessFailedException;
 import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.Action;
 import org.gaea.framework.web.schema.SchemaActionDefinition;
-import org.gaea.framework.web.schema.view.action.ActionParam;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
 import org.gaea.framework.web.schema.view.action.ExcelExportSimpleButtonAction;
 import org.gaea.framework.web.security.GaeaWebSecuritySystem;
@@ -40,9 +39,10 @@ public class ActionsService {
      * @param request  获取用户登录信息
      * @param queryConditions    页面快捷查询区的条件。用于过滤数据。
      * @param schemaId
+     * @param excelFields
      * @throws ValidationFailedException
      */
-    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request, List<QueryCondition> queryConditions, String schemaId) throws ValidationFailedException, ProcessFailedException {
+    public void doAction(Action action, HttpServletResponse response, HttpServletRequest request, List<QueryCondition> queryConditions, String schemaId, List<String> excelFields) throws ValidationFailedException, ProcessFailedException {
         if (action == null) {
             logger.warn("传入参数是一个空action。无法执行！");
             return;
@@ -55,6 +55,7 @@ public class ActionsService {
             String loginName = GaeaWebSecuritySystem.getUserName(request);
             // 默认写死了excel操作
             ExcelExportButtonAction excelExportAction = (ExcelExportButtonAction) action;
+            excelExportAction.setExcelFields(excelFields);
             // 执行action逻辑
             File file = excelExportAction.doAction(loginName, schemaId, queryConditions);
             // 回写文件
