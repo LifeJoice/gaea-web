@@ -89,6 +89,9 @@ public class GaeaWebSecuritySystem {
          */
         String realKey = SystemUsersServiceImpl.getUserCacheKey(loginName);
         UserJO userJO = gaeaCacheOperator.get(realKey, UserJO.class);
+        if (userJO == null) {
+            throw new LoginFailedException("Gaea（非Spring）缓存的登录信息过期。获取不到用户信息。");
+        }
         return userJO;
     }
 
