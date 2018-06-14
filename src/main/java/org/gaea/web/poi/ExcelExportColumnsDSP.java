@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gaea.data.dataset.DsProcessor;
 import org.gaea.data.dataset.domain.DataItem;
 import org.gaea.exception.SysInitException;
+import org.gaea.exception.ValidationFailedException;
 import org.gaea.framework.web.schema.SystemCacheFactory;
 import org.gaea.framework.web.schema.utils.GaeaExcelUtils;
 import org.gaea.poi.domain.ExcelTemplate;
@@ -41,7 +42,7 @@ public class ExcelExportColumnsDSP implements DsProcessor {
     private Map<String, Object> params;
 
     @Override
-    public List<DataItem> dataProcess(List<Map<String, Object>> origData, Map contextParams) {
+    public List<DataItem> dataProcess(List<Map<String, Object>> origData, Map contextParams) throws ValidationFailedException {
         List<DataItem> result = new ArrayList<DataItem>();
 
         try {
@@ -80,7 +81,7 @@ public class ExcelExportColumnsDSP implements DsProcessor {
      * @return
      * @throws SysInitException
      */
-    private Map<String, Field> getFields() throws SysInitException {
+    private Map<String, Field> getFields() throws SysInitException, ValidationFailedException {
         Map<String, Field> result = null;
         if (MapUtils.isNotEmpty(this.params)) {
             if (StringUtils.isNotEmpty((CharSequence) this.params.get("schemaId"))) {
@@ -98,6 +99,8 @@ public class ExcelExportColumnsDSP implements DsProcessor {
                 if (CollectionUtils.isNotEmpty(excelTemplate.getExcelSheetList()) && CollectionUtils.isNotEmpty(excelTemplate.getExcelSheetList().get(0).getBlockList())) {
                     result = excelTemplate.getExcelSheetList().get(0).getBlockList().get(0).getFieldMap();
                 }
+            } else {
+                throw new ValidationFailedException("缺少schemaId或excelTemplateId配置项。请检查相关的数据集 or XML按钮的参数配置。");
             }
         }
         return result;

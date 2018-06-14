@@ -8,6 +8,7 @@ import org.gaea.data.dataset.DsProcessor;
 import org.gaea.data.dataset.domain.*;
 import org.gaea.data.dataset.service.GaeaDataSetService;
 import org.gaea.data.domain.DataSetCommonQueryConditionDTO;
+import org.gaea.data.domain.QueryValue;
 import org.gaea.data.system.SystemDataSetFactory;
 import org.gaea.exception.*;
 import org.gaea.framework.web.GaeaWebSystem;
@@ -295,6 +296,12 @@ public class SystemDataSetServiceImpl implements SystemDataSetService {
                         DsProcessor processor = (DsProcessor) dsProcessorBean;
                         // 把定义参数给处理类
                         processor.setParams(processorDef.getParams());
+                        // 如果有页面的param（一般是某按钮专属param)，覆盖（processDef的param是xml过来的，是唯一的）
+                        if (queryConditionDTO != null) {
+                            for (QueryValue queryValue : queryConditionDTO.getValues()) {
+                                processor.getParams().put(queryValue.getName(), queryValue.getValue());
+                            }
+                        }
                         // 执行处理，获取结果
                         results = processor.dataProcess(results, null);
                     }

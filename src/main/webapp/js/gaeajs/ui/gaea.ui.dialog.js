@@ -157,6 +157,7 @@ define([
              * @param {boolean} opts.initHtml                       是否需要初始化弹出框的相关html（例如div、form等）。不包括弹出框内容。
              * @param {string} [opts.component]                     子组件名。有才提供，没有可以为空。value= data_filter_dialog|
              * @param {object} opts.buttons                         按钮。有两种可能：服务端定义，或者其他组件（例如uploader）已经初始化好的
+             * @param {function} opts.callback.afterLoadContent     这个是在加载完内容页、但还没有触发内容页的gaea组件初始化之前
              */
             init: function (opts) {
                 // init

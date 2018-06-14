@@ -32,7 +32,8 @@ define([
              * @param {string} options.data
              * @param {string} options.initComponentData                初始化组件的数据，例如：子表的关联，新增不需要初始化，编辑就需要。
              * @param {object} options.callback
-             * @param {string} options.callback.afterBinding 绑定后的回调
+             * @param {function} options.callback.afterBinding          这个是在内容页的gaea组件初始化完成后，绑定后的回调
+             * @param {function} options.callback.afterLoadContent      这个是在加载完内容页、但还没有触发内容页的gaea组件初始化之前
              * @param callback 回调方法
              */
             loadContent: function (options, callback) {
@@ -47,6 +48,10 @@ define([
                     containerId: options.containerId,
                     contentUrl: options.contentUrl
                 })).done(function () {
+                    // 触发内容加载好的回调。这时候还未初始化gaea组件
+                    if (gaeaValid.isNotNull(options.callback) && _.isFunction(options.callback.afterLoadContent)) {
+                        options.callback.afterLoadContent();
+                    }
                     // 初始化内容里面的UI
                     // 诸如下拉框、Grid等，还有加载对应的数据、填充数据等
                     $.when(public.initGaeaUI(options, callback)).done(function () {
@@ -135,6 +140,7 @@ define([
                 //    containerId: options.id
                 //});
                 // 最后回调的定义
+                // TODO 这应该是个bug。一方面没有实现异步的dfd对象同步。另外这个貌似是个对象，不再是一个function了
                 if (_.isFunction(callback)) {
                     callback();
                 }

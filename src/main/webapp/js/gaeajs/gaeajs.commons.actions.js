@@ -221,12 +221,13 @@ define([
                             id: GAEA_UI_DEFINE.UI.GRID.GAEA_GRID_DEFAULT_ID
                         });
                         var gaeaDialog = require("gaeajs-ui-dialog");
+                        var dialogId = button.id + "export-wizard-dialog";
 
                         /**
                          * 弹出框的可选字段，来自于html的数据集配置
                          */
                         gaeaDialog.init({
-                            id: button.id + "export-wizard-dialog",
+                            id: dialogId,
                             contentUrl: "/js/gaeajs/ui/template/gaea_excel_template_export.html",
                             submitUrl: SYS_URL.ACTION.DO_ACTION,
                             submitType: GAEA_UI_DEFINE.ACTION.SUBMIT_TYPE.FORM_SUBMIT,
@@ -236,6 +237,25 @@ define([
                                 schemaId: data.schemaId,
                                 buttonId: button.id,
                                 filters: JSON.stringify(queryConditions)
+                            },
+                            callback: {
+                                /* 内容加载完成后，基于按模板导出组件需要，修改对应数据集的请求，加入模板名称的条件 */
+                                afterLoadContent: function () {
+                                    var $dialog = $("#" + dialogId);
+                                    var $multiSelect = $dialog.find(".gaea-multi-select");
+                                    var dataStr = $multiSelect.data("gaea-data");
+                                    var dataConfig = gaeaString.parseJSON(dataStr);
+                                    dataConfig.selectable.condition = {
+                                        id: "anyway",
+                                        values: [{
+                                            name: action.params.excelTemplateId.name,
+                                            value: action.params.excelTemplateId.value,
+                                            type: "static"
+                                        }]
+                                    };
+                                    $multiSelect.attr("data-gaea-data", JSON5.stringify(dataConfig));
+                                    $multiSelect.data("gaea-data", dataConfig); // 保持一致性
+                                }
                             }
                         });
                     } else {
