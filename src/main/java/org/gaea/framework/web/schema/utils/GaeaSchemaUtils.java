@@ -18,6 +18,7 @@ import org.gaea.framework.web.schema.domain.SchemaViews;
 import org.gaea.framework.web.schema.domain.view.*;
 import org.gaea.framework.web.schema.view.action.ActionParam;
 import org.gaea.framework.web.schema.view.action.ExcelExportButtonAction;
+import org.gaea.framework.web.schema.view.action.SimpleButtonAction;
 import org.gaea.framework.web.schema.view.jo.*;
 import org.gaea.util.BeanUtils;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -373,7 +375,16 @@ public class GaeaSchemaUtils {
                 if (objAction == null) {
                     continue;
                 }
-                Action action = (Action) objAction;
+                Action action = null;
+
+                if (objAction instanceof Action) {
+                    action = (Action) objAction;
+                } else {
+                    // 如果从Redis中读出来，可能被转为map对象了
+                    SimpleButtonAction simpleButtonAction = objectMapper.convertValue((Map) objAction, SimpleButtonAction.class);
+                    simpleButtonAction.setActionParamMap(convertActionParams((Map) ((Map) objAction).get("actionParamMap")));
+                    action = simpleButtonAction;
+                }
                 ButtonActionJO actionJO = new ButtonActionJO();
                 // 复制button action
                 BeanUtils.copyProperties(action, actionJO, "actionParamMap");
@@ -388,6 +399,24 @@ public class GaeaSchemaUtils {
             }
         }
         return buttonJO;
+    }
+
+    /**
+     * 转换{@code <button>}的{@code <param>}。因为从redis读出来的json再转换成对象，需要二步判断。
+     *
+     * @param actionParamMap
+     * @return
+     */
+    private static Map<String, ActionParam> convertActionParams(Map actionParamMap) {
+        if (actionParamMap == null) {
+            return null;
+        }
+        LinkedHashMap<String, ActionParam> results = new LinkedHashMap<String, ActionParam>();
+        for (Object key : actionParamMap.keySet()) {
+            ActionParam actionParam = objectMapper.convertValue(actionParamMap.get(key), ActionParam.class);
+            results.put((String) key, actionParam);
+        }
+        return results;
     }
 
     /**
